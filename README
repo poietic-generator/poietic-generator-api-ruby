@@ -1,0 +1,7 @@
+
+= Generateur Poietique v2
+
+== Requirements 
+
+ gem install sinatra
+ gem install shotgun
