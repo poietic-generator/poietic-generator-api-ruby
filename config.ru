@@ -1,2 +1,3 @@
-require 'genp'
-run GenP
+require 'app'
+
+run PoieticGen::Api
