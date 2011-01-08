@@ -32,6 +32,12 @@ body {
     padding-bottom: 1em;
 }
 
+#header h1 {
+    text-shadow: 0.1em 0em 0.1em red,
+	-0.1em 0em 0.1em green   ;
+	0em 0.2em 0.1em blue   ;
+}
+
 #content {
     border: 0px solid none;
     margin: 0px;
@@ -41,6 +47,7 @@ body {
 }
 
 #footer {
+    clear: both;
     text-align: center;
     font-size: 90%;
     font-weight: bold;
@@ -63,25 +70,42 @@ body {
 
 .generator-session-drawzone {
     display: block;
-    width: 50%;
-    height: 50%;
-    border: 1px solid red;
+    background: #222;
+    float: left;
+    width: 512px;
+    height: 512px;
+    /* border: 1px solid red; */
+
+    -moz-box-shadow: inset 0em 0em 1em black;
+    -webkitbox-shadow: inset 0em 0em 1em black;
+    box-shadow: inset 0em 0em 1em black;
 }
 
 .generator-session-global {
     display: block;
+    background: #222;
     float: right;
-    width: 25%;
-    height: 25%;
-    border: 1px solid red;
+    width: 256px;
+    height: 256px;
+    /* border: 1px solid red; */
+
+    -moz-box-shadow: inset 0em 0em 1em black;
+    -webkitbox-shadow: inset 0em 0em 1em black;
+    box-shadow: inset 0em 0em 1em black;
 }
 
 .generator-session-colors {
     display: block;
+    background: #222;
     float: right;
-    width: 25%;
-    height: 25%;
-    border: 1px solid red;
+    margin-top: 56px;
+    width: 256px;
+    height: 200px;
+    /* border: 1px solid red; */
+
+    -moz-box-shadow: inset 0em 0em 1em black;
+    -webkitbox-shadow: inset 0em 0em 1em black;
+    box-shadow: inset 0em 0em 1em black;
 }
 
 #footer a {
