@@ -2,6 +2,16 @@
 <html>
     <head>
 	<%= erb :html_header %>
+	<script type="text/javascript">
+	    var session = null;
+	    window.onload = function() {
+		session = new Session();
+		drawzone = new DrawZone(session, 'generator-session-drawzone');
+		globalzone = new GlobalZone(session, 'generator-session-global');
+		colorzone = new ColorZone(session, 'generator-session-colors');
+		// create session with 
+	    }
+	</script>
     </head>
     <body>
 	<%= erb :header %>
