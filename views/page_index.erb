@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html>
     <head>
-	<%= erb :html_header %>
+	<%= erb :common_html_header %>
     </head>
     <body>
-	<%= erb :header %>
+	<%= erb :common_header %>
 
 	<form action="/session/join" method="get" class="generator-index">
 	    <img src="poietic-generator.net.gif" /><br />
 	    <input type="submit" value="Participate !" />
 	</form>
 	
-	<%= erb :footer %>
+	<%= erb :common_footer %>
     </body>
 </html>
