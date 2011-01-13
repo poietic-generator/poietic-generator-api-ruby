@@ -3,15 +3,13 @@
 	width: 100%;
     margin: 0px;
 
-    -moz-border-radius: none;
-    -webkit-border-radius: none;
-    border-radius: none;
+    -moz-border-radius: 0px 0px 0px;
+    -webkit-border-radius: 0px 0px 0px;
+    border-radius: 0px 0px 0px;
     
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
     box-shadow: none;
-
-    font-family: "Raleway Thin";
 }
 
 #header { display: none; }
