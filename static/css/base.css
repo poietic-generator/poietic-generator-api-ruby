@@ -6,7 +6,12 @@
 }
 
 body {
-    background: #888899;
+	left: 0px;
+	top: 0px:
+	right: 0px;
+	padding: 0px;
+	margin: 0px;
+    background: #c0c0c0;
 }
 
 #page {
@@ -21,6 +26,8 @@ body {
     border-radius: 1em 1em 1em 1em;
     
     -moz-box-shadow: 0em 0em 0.6em #f50;
+    -webkit-box-shadow: 0em 0em 0.6em #f50;
+    box-shadow: 0em 0em 0.6em #f50;
 
     font-family: "Raleway Thin";
 }
