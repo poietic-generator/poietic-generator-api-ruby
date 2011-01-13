@@ -2,7 +2,7 @@
     font-family: 'Raleway Thin';
     src: url('/fonts/raleway/raleway_thin.eot');
     src: local('☺'),
-	url('/fonts/raleway/raleway_thin.otf') format('opentype');
+		url('/fonts/raleway/raleway_thin.otf') format('opentype');
 }
 
 body {
@@ -34,8 +34,8 @@ body {
 
 #header h1 {
     text-shadow: 0.1em 0em 0.1em red,
-	-0.1em 0em 0.1em green   ;
-	0em 0.2em 0.1em blue   ;
+		-0.1em 0em 0.1em green ;
+		0em 0.2em 0.1em blue ;
 }
 
 #content {
@@ -68,59 +68,6 @@ body {
     border: 1em solid white;
 }
 
-.generator-session-drawzone {
-    display: block;
-    background: #222;
-    float: left;
-    width: 512px;
-    height: 512px;
-    /* border: 1px solid red; */
-
-    -moz-box-shadow: inset 0em 0em 1em black;
-    -webkitbox-shadow: inset 0em 0em 1em black;
-    box-shadow: inset 0em 0em 1em black;
-}
-
-.generator-session-global {
-    display: block;
-    background: #222;
-    float: right;
-    width: 256px;
-    height: 256px;
-    /* border: 1px solid red; */
-
-    -moz-box-shadow: inset 0em 0em 1em black;
-    -webkitbox-shadow: inset 0em 0em 1em black;
-    box-shadow: inset 0em 0em 1em black;
-}
-
-.generator-session-colors {
-    display: block;
-    background: #222;
-    float: right;
-    margin-top: 28px;
-    width: 256px;
-    height: 100px;
-    /* border: 1px solid red; */
-
-    -moz-box-shadow: inset 0em 0em 1em black;
-    -webkitbox-shadow: inset 0em 0em 1em black;
-    box-shadow: inset 0em 0em 1em black;
-}
-
-.generator-session-brushes {
-    display: block;
-    background: #222;
-    float: right;
-    margin-top: 28px;
-    width: 256px;
-    height: 100px;
-    /* border: 1px solid red; */
-
-    -moz-box-shadow: inset 0em 0em 1em black;
-    -webkitbox-shadow: inset 0em 0em 1em black;
-    box-shadow: inset 0em 0em 1em black;
-}
 
 #footer a {
     color: #0aa;

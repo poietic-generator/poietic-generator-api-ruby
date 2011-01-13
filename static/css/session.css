@@ -1,74 +1,45 @@
-@font-face {
-    font-family: 'Raleway Thin';
-    src: url('/fonts/raleway/raleway_thin.eot');
-    src: local('☺'),
-	url('/fonts/raleway/raleway_thin.otf') format('opentype');
-}
-
-body {
-    background: #888899;
-}
 
 #page {
-    color: white;
-    background: black;
-    width: 80%;
-    margin-left: 10%;
-    margin-right: 10%;
+	width: 100%;
+    margin: 0px;
 
-    -moz-border-radius: 1em 1em 1em 1em;
-    -webkit-border-radius: 1em 1em 1em 1em;
-    border-radius: 1em 1em 1em 1em;
+    -moz-border-radius: none;
+    -webkit-border-radius: none;
+    border-radius: none;
     
-    -moz-box-shadow: 0em 0em 0.6em #f50;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
 
     font-family: "Raleway Thin";
 }
 
-#header {
-    margin-top: 1em;
-    text-align: center;
-    padding-top: 1em;
-    padding-bottom: 1em;
-}
+#header { display: none; }
 
-#header h1 {
-    text-shadow: 0.1em 0em 0.1em red,
-	-0.1em 0em 0.1em green   ;
-	0em 0.2em 0.1em blue   ;
-}
+#header h1 { display: none; }
 
 #content {
-    border: 0px solid none;
+	display: block;
+    border: none;
     margin: 0px;
-    margin-left: auto;
-    margin-right: auto;
     padding: 1em;
 }
 
-#footer {
-    clear: both;
-    text-align: center;
-    font-size: 90%;
-    font-weight: bold;
-    padding-top: 1em;
-    padding-bottom: 1em;
-    margin-bottom: 1em;
-}
+#footer { display: none; }
 
-.generator-index {
+.index {
     display: block;
     text-align: center;
     border: 1px;
     margin: 1em;
 }
 
-.generator-index img {
+.index img {
     margin: 1em;
     border: 1em solid white;
 }
 
-.generator-session-drawzone {
+.session-drawzone {
     display: block;
     background: #222;
     float: left;
@@ -81,7 +52,7 @@ body {
     box-shadow: inset 0em 0em 1em black;
 }
 
-.generator-session-global {
+.session-global {
     display: block;
     background: #222;
     float: right;
@@ -94,7 +65,7 @@ body {
     box-shadow: inset 0em 0em 1em black;
 }
 
-.generator-session-colors {
+.session-colors {
     display: block;
     background: #222;
     float: right;
@@ -108,7 +79,7 @@ body {
     box-shadow: inset 0em 0em 1em black;
 }
 
-.generator-session-brushes {
+.session-brushes {
     display: block;
     background: #222;
     float: right;
@@ -120,6 +91,10 @@ body {
     -moz-box-shadow: inset 0em 0em 1em black;
     -webkitbox-shadow: inset 0em 0em 1em black;
     box-shadow: inset 0em 0em 1em black;
+}
+
+.session-spacer {
+	clear: both;
 }
 
 #footer a {
