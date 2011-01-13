@@ -98,9 +98,23 @@ body {
     display: block;
     background: #222;
     float: right;
-    margin-top: 56px;
+    margin-top: 28px;
     width: 256px;
-    height: 200px;
+    height: 100px;
+    /* border: 1px solid red; */
+
+    -moz-box-shadow: inset 0em 0em 1em black;
+    -webkitbox-shadow: inset 0em 0em 1em black;
+    box-shadow: inset 0em 0em 1em black;
+}
+
+.generator-session-brushes {
+    display: block;
+    background: #222;
+    float: right;
+    margin-top: 28px;
+    width: 256px;
+    height: 100px;
     /* border: 1px solid red; */
 
     -moz-box-shadow: inset 0em 0em 1em black;
