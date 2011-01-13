@@ -1,20 +1,8 @@
-<!DOCTYPE html>
-<html>
-    <head>
-	<%= erb :html_header %>
-	<script type="text/javascript">
-	    var session = null;
-	    window.onload = function() {
-		session = new Session();
-		drawzone = new DrawZone(session, 'generator-session-drawzone');
-		globalzone = new GlobalZone(session, 'generator-session-global');
-		colorzone = new ColorZone(session, 'generator-session-colors');
-		// create session with 
-	    }
-	</script>
-    </head>
-    <body>
-	<%= erb :header %>
+<%= 
+	#return @page.inspect
+	@page.css << "/css/session.css"
+	erb :common_header 
+%>
 
 	<!-- la zone de dessin -->
 	<div class="generator-session-drawzone">
@@ -33,6 +21,4 @@
 		brush zone
 	</div>
 	
-	<%= erb :footer %>
-    </body>
-</html>
+	<%= erb :common_footer %>
