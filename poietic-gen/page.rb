@@ -18,5 +18,13 @@ module PoieticGen
 			end
 			return res
 		end
+
+		def render_js
+			res = ""
+			js.each do |js_file|
+				res << "<script type=\"text/javascript\" src=\"#{js_file}\"></script>"
+			end
+			return res
+		end
 	end
 end
