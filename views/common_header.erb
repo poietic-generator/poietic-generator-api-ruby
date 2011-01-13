@@ -1,19 +1,34 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<meta name="app-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+		<meta name="apple-touch-fullscreen" content="YES" />
+		<meta name="viewport" content="width=320;initial-scale=0.6666;;minimum-scale=0.6666; maximun-scale=1.0;"/>
+
 		<%= 
 			@page.css.insert 0, "/css/base.css" 
 			@page.render_css 
 		%>
+		<%=
+			@page.js.insert 0, "/js/jquery.js"
+			@page.render_js
+		%>
+
 		<script type="text/javascript">
 			var session = null;
-			window.onload = function() {
+			// instead of windows.onload 
+			$(document).ready( function() {
+				// hide iphone/ipad URL bar
+				setTimeout(function() { window.scrollTo(0, 1) }, 100);
+
+				// initialize zones
 				session = new Session();
-				drawzone = new DrawZone(session, 'generator-session-drawzone');
-				globalzone = new GlobalZone(session, 'generator-session-global');
-				colorzone = new ColorZone(session, 'generator-session-colors');
+				drawzone = new DrawZone(session, 'session-drawzone');
+				globalzone = new GlobalZone(session, 'session-global');
+				colorzone = new ColorZone(session, 'session-colors');
 				// create session with 
-			}
+			} );
 		</script>
 	</head>
 	<body>
