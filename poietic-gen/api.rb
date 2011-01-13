@@ -1,6 +1,7 @@
 
 require 'sinatra'
 
+require 'poietic-gen/page'
 require 'poietic-gen/session'
 
 # FIXME:
@@ -19,18 +20,36 @@ module PoieticGen
 		mime_type :otf, "application/octet-stream"
 		mime_type :woff, "application/octet-stream"
 
+		#
+		#
+		#
 		get '/' do 
-			erb :index
+			@page = Page.new "Indew"
+			erb :page_index
 			#"Hello world"
 		end
 
+		#
+		#
+		#
+		get '/session' do
+			@page = Page.new "Session"
+			erb :page_session
+		end
+
+		#
+		#
+		#
 		get '/session/join' do
 			# creer une session
 			# on attribue un id 'participant' au client
 
-			erb :session
+			redirect '/session'
 		end
 
+		#
+		#
+		#
 		get '/session/leave' do
 			redirect '/'
 		end
@@ -57,14 +76,15 @@ module PoieticGen
 		# Send message to the chat
 		#
 		put '/session/:idx/chat' do
+			#
 		end
 
 		# 
 		# Get latest messages from chat
 		#
 		get '/session/:idx/chat' do 
+			#
 		end
-
 
 	end
 end
