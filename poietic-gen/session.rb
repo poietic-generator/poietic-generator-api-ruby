@@ -5,7 +5,7 @@ require 'poietic-gen/palette'
 module PoieticGen
 
 	class Zone <
-		Struct :index, :position, :vector, :user
+		Struct.new :index, :position, :vector, :user
 
 		def initialize index, position, vector
 			@index = index
