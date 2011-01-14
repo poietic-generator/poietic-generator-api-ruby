@@ -10,21 +10,25 @@
 %>
 
 <!-- la zone de dessin -->
-<div class="session-drawzone">
+<canvas id="session-drawzone">
 	draw zone
-</div>
+</canvas>
 <!-- la vue globale -->
-<div class="session-global" >
+<div id="session-global" >
 	global zone
 </div>
 <!-- la zone de selection de couleurs -->
-<div class="session-colors" >
+<div id="session-color" >
 	color zone
 </div>
 
-<div class="session-brushes" >
+<div id="session-brush" >
 	brush zone
 </div>
 
-<div class="session-spacer"></div>
+<div class="spacer"></div>
+<div id="session-chat" >
+	chat zone
+</div>
+
 <%= erb :common_footer %>

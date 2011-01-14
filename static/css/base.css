@@ -83,3 +83,5 @@ body {
 #footer a:visited {
     color: #088;
 }
+
+.spacer { clear: both; width:0px; height: 0px; }

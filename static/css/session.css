@@ -37,7 +37,7 @@
     border: 1em solid white;
 }
 
-.session-drawzone {
+#session-drawzone {
     display: block;
     background: #222;
     float: left;
@@ -50,7 +50,7 @@
     box-shadow: inset 0em 0em 1em black;
 }
 
-.session-global {
+#session-global {
     display: block;
     background: #222;
     float: right;
@@ -63,7 +63,7 @@
     box-shadow: inset 0em 0em 1em black;
 }
 
-.session-colors {
+#session-color {
     display: block;
     background: #222;
     float: right;
@@ -77,7 +77,7 @@
     box-shadow: inset 0em 0em 1em black;
 }
 
-.session-brushes {
+#session-brush {
     display: block;
     background: #222;
     float: right;
@@ -91,8 +91,17 @@
     box-shadow: inset 0em 0em 1em black;
 }
 
-.session-spacer {
-	clear: both;
+#session-chat {
+    display: block;
+    background: #222;
+    margin-top: 2%;
+    width: 100%;
+    height: 20%;
+    /* border: 1px solid red; */
+
+    -moz-box-shadow: inset 0em 0em 1em black;
+    -webkitbox-shadow: inset 0em 0em 1em black;
+    box-shadow: inset 0em 0em 1em black;
 }
 
 #footer a {
