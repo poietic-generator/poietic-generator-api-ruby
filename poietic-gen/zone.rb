@@ -9,8 +9,6 @@ module PoieticGen
 			@position = position
 			@vector = vector
 			@user = nil
-			@zone_width = 32
-			@zone_height = 32
 		end
 
 		def next_index
