@@ -32,19 +32,17 @@ module PoieticGen
 		#
 		#
 		#
-		get '/session' do
+		get '/session/draw' do
 			@page = Page.new "Session"
-			erb :page_session
+			erb :page_draw
 		end
 
 		#
-		#
-		#
+		# creer une session
+		# on attribue un id 'participant' au client
 		get '/session/join' do
-			# creer une session
-			# on attribue un id 'participant' au client
 
-			redirect '/session'
+			redirect '/session/draw'
 		end
 
 		#
@@ -52,6 +50,13 @@ module PoieticGen
 		#
 		get '/session/leave' do
 			redirect '/'
+		end
+
+		#
+		# display global activity on this session
+		#
+		get '/session/view' do
+			erb :page_view
 		end
 
 
