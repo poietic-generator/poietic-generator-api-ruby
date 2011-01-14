@@ -11,6 +11,10 @@ require 'poietic-gen/session'
 module PoieticGen
 
 	class Api < Sinatra::Base
+		configuration do
+			@gen_session = Session.new
+		end
+
 		set :static, true
 		set :public, File.expand_path( File.dirname(__FILE__) + '/../static' )
 		set :views, File.expand_path( File.dirname(__FILE__) + '/../views' )
