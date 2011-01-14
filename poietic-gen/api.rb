@@ -26,7 +26,6 @@ module PoieticGen
 		get '/' do 
 			@page = Page.new "Indew"
 			erb :page_index
-			#"Hello world"
 		end
 
 		#
@@ -56,6 +55,7 @@ module PoieticGen
 		# display global activity on this session
 		#
 		get '/session/view' do
+			@page = Page.new "Indew"
 			erb :page_view
 		end
 
