@@ -1,8 +1,13 @@
-<%= erb :common_header %>
+<%= 
+	@page.css << "/css/page.index.css"
 
-<form action="/session/join" method="get" class="generator-index">
+	erb :common_header 
+%>
+
+<div id="index-menu">
 	<img src="poietic-generator.net.gif" /><br />
-	<input type="submit" value="Participate !" />
-</form>
+	<a href="/session/join">Participate</a> or 
+	<a href="/session/join">View only</a>
+</div>
 
 <%= erb :common_footer %>
