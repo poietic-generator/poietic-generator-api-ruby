@@ -1,8 +1,7 @@
 
-
 module PoieticGen
 	class Zone <
-		Struct.new :index, :position, :vector, :user
+		Struct :index, :position, :vector, :user
 
 		def initialize index, position, vector
 			@index = index
@@ -27,10 +26,9 @@ module PoieticGen
 		end
 
 		def self.create_next zone
-			return self.new zone.next_index, 
-				zone.next_position, 
-				zone.next_vector
+			return self.new zone.next_index, zone.next_position, zone.next_vector
 		end
 
 	end
+	ZONE_INIT = Zone.new 0, [0,0], [1,0]
 end

@@ -3,7 +3,7 @@ require 'poietic-gen/palette'
 
 
 module PoieticGen
-	ZONE_INIT = Zone.new 0, [0,0], [1,0]
+
 
 	#
 	# manage a pool of users
@@ -13,13 +13,13 @@ module PoieticGen
 			@id = "xyz" # FIXME: must be a 8-char random string
 
 			@palette = Palette.new
+			@width = 32
+			@height = 32
 
 			@users = []
 			@users_upcount = 0
 
 			@zones = [ ZONE_INIT ]
-			@zone_width = 32
-			@zone_height = 32
 		end
 
 
