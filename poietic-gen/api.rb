@@ -1,6 +1,7 @@
 
 require 'sinatra'
 
+require 'poietic-gen/page'
 require 'poietic-gen/session'
 
 # FIXME:
@@ -10,6 +11,10 @@ require 'poietic-gen/session'
 module PoieticGen
 
 	class Api < Sinatra::Base
+		configuration do
+			@gen_session = Session.new
+		end
+
 		set :static, true
 		set :public, File.expand_path( File.dirname(__FILE__) + '/../static' )
 		set :views, File.expand_path( File.dirname(__FILE__) + '/../views' )
@@ -19,20 +24,43 @@ module PoieticGen
 		mime_type :otf, "application/octet-stream"
 		mime_type :woff, "application/octet-stream"
 
+		#
+		#
+		#
 		get '/' do 
-			erb :index
-			#"Hello world"
+			@page = Page.new "Indew"
+			erb :page_index
 		end
 
+		#
+		#
+		#
+		get '/session/draw' do
+			@page = Page.new "Session"
+			erb :page_draw
+		end
+
+		#
+		# creer une session
+		# on attribue un id 'participant' au client
 		get '/session/join' do
-			# creer une session
-			# on attribue un id 'participant' au client
 
-			erb :session
+			redirect '/session/draw'
 		end
 
+		#
+		#
+		#
 		get '/session/leave' do
 			redirect '/'
+		end
+
+		#
+		# display global activity on this session
+		#
+		get '/session/view' do
+			@page = Page.new "Indew"
+			erb :page_view
 		end
 
 
@@ -57,14 +85,15 @@ module PoieticGen
 		# Send message to the chat
 		#
 		put '/session/:idx/chat' do
+			#
 		end
 
 		# 
 		# Get latest messages from chat
 		#
 		get '/session/:idx/chat' do 
+			#
 		end
-
 
 	end
 end
