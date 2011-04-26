@@ -1,5 +1,6 @@
 
 require 'sinatra'
+require 'sinatra/base'
 
 require 'poietic-gen/page'
 require 'poietic-gen/session'
@@ -11,9 +12,9 @@ require 'poietic-gen/session'
 module PoieticGen
 
 	class Api < Sinatra::Base
-		configuration do
-			@gen_session = Session.new
-		end
+		@gen_session = Session.new
+
+		enable :sessions
 
 		set :static, true
 		set :public, File.expand_path( File.dirname(__FILE__) + '/../static' )
@@ -23,6 +24,10 @@ module PoieticGen
 		mime_type :eot, "application/octet-stream"
 		mime_type :otf, "application/octet-stream"
 		mime_type :woff, "application/octet-stream"
+
+		before '/session/*' do
+			# authenticate
+		end
 
 		#
 		#
