@@ -5,6 +5,8 @@ require 'poietic-gen/palette'
 module PoieticGen
 
 
+	ZONE_INIT = []
+
 	#
 	# manage a pool of users
 	#
