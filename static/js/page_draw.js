@@ -7,12 +7,15 @@ $(document).ready( function() {
     setTimeout(function() { window.scrollTo(0, 1) }, 100);
 
     // initialize zoness
-    session = new Session(function() {
-	drawzone = new DrawZone(session, 'session-drawzone');
-	globalzone = new GlobalZone(session, 'session-global');
-	colorzone = new ColorZone(session, 'session-colors');
-	// create session with 
-    } );
+    session = new Session(
+	Session.TYPE_DRAW,
+	function() {
+	    alert('session callback');
+	    drawzone = new DrawZone(session, 'session-drawzone');
+	    globalzone = new GlobalZone(session, 'session-global');
+	    colorzone = new ColorZone(session, 'session-colors');
+	    // create session with 
+	} );
 
     /*
     setInterval( function() {
