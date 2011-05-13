@@ -10,16 +10,19 @@ module PoieticGen
 	#
 	# manage a pool of users
 	#
-	class Session
+	class Manager
 		def initialize
-			@id = "xyz" # FIXME: must be a 8-char random string
+			# a 16-char long random string
+			@id = (0...16).map{ ('a'..'z').to_a[rand(26)] }.join
 
 			@palette = Palette.new
 			@width = 32
 			@height = 32
 
 			@users = []
-			@users_upcount = 0
+
+			# total count of users seen
+			@users_seen = 0
 
 			@zones = [ ZONE_INIT ]
 		end
@@ -29,9 +32,11 @@ module PoieticGen
 		# generates an unpredictible user id based on session id & user counter
 		#
 		def join
-			user_id = @id + @users_upcount
-			@users_upcount += 1
+			user_id = @id + @users_seen
+			@users_seen += 1
 			zone = self.zone_alloc user_id
+
+			return user_id
 		end
 
 		def leave user_id
