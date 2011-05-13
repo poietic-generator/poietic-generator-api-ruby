@@ -1,9 +1,12 @@
 
-require 'sinatra'
+#require 'sinatra'
 require 'sinatra/base'
+#require 'datamapper'
 
 require 'poietic-gen/page'
-require 'poietic-gen/session'
+require 'poietic-gen/manager'
+
+require 'pp'
 
 # FIXME:
 # lancer un timer qui nettoie les participants déconnectés
@@ -12,7 +15,6 @@ require 'poietic-gen/session'
 module PoieticGen
 
 	class Api < Sinatra::Base
-		@gen_session = Session.new
 
 		enable :sessions
 
@@ -25,78 +27,85 @@ module PoieticGen
 		mime_type :otf, "application/octet-stream"
 		mime_type :woff, "application/octet-stream"
 
-		before '/session/*' do
-			# authenticate
-		end
+		# DataMapper.setup(:default, "sqlite3::memory:")
+		
+		@manager = Manager.new
 
 		#
 		#
 		#
 		get '/' do 
-			@page = Page.new "Indew"
+			@page = Page.new "Index"
 			erb :page_index
 		end
 
 		#
 		#
 		#
-		get '/session/draw' do
+		get '/page/draw' do
 			@page = Page.new "Session"
 			erb :page_draw
 		end
 
 		#
-		# creer une session
-		# on attribue un id 'participant' au client
-		get '/session/join' do
-
-			redirect '/session/draw'
-		end
-
-		#
-		#
-		#
-		get '/session/leave' do
-			redirect '/'
-		end
-
-		#
 		# display global activity on this session
 		#
-		get '/session/view' do
-			@page = Page.new "Indew"
+		get '/page/view' do 
+			@page = Page.new "View"
 			erb :page_view
 		end
 
 
-		# 
-		# Update connection to current session
 		#
-		get '/session/update' do
-			# le participant <user-id> doit renouveller son bail avant 300
-			# secondes sinon on le considere déconnecté
+		# notify server about the intention of joining the session
+		#
+		get '/api/session/join' do
+			@manager ||= Manager.new
+			pp @manager
+			session['userid'] = @manager.join
+
+			# return JSON for userid
+			session['userid']
+		end
+
+		#
+		#
+		#
+		get '/api/session/leave' do
+			# return JSON for confirmation
+			# then redirect to '/'
 		end
 
 		# 
-		# Join session and get local <user-id>
+		# Get latest patches from server
+		# (update current lease)
 		#
-		get '/session/:idx/join' do 
-			# joindre une session
-			# rediriger vers la session
+		# clients having not renewed their lease before 300
+		# seconds are considered disconnected
+		#
+		get '/api/drawing/update' do
+		end
+
+		#
+		# Post client's latest patches
+		# (update current lease)
+		#
+		post '/api/drawing/post' do
+
 		end
 
 
 		# 
 		# Send message to the chat
 		#
-		put '/session/:idx/chat' do
+		put '/api/chat/post' do
 			#
 		end
 
 		# 
 		# Get latest messages from chat
 		#
-		get '/session/:idx/chat' do 
+		get '/api/chat/list' do 
 			#
 		end
 
