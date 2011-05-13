@@ -32,12 +32,13 @@ module PoieticGen
 		# generates an unpredictible user id based on session id & user counter
 		#
 		def join
-			user_id = @id + @users_seen
+			user_id = File.join @id, @users_seen.to_s
 			@users_seen += 1
-			zone = self.zone_alloc user_id
+			#zone = self.zone_alloc user_id
 
 			return user_id
 		end
+
 
 		def leave user_id
 			zone_idx = @users[user_id].zone
