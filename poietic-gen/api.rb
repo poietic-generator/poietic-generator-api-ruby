@@ -1,11 +1,12 @@
 
-#require 'sinatra'
 require 'sinatra/base'
+require "sinatra/reloader"
 #require 'datamapper'
 
 require 'poietic-gen/page'
 require 'poietic-gen/manager'
 
+require 'json'
 require 'pp'
 
 # FIXME:
@@ -14,9 +15,11 @@ require 'pp'
 
 module PoieticGen
 
+
 	class Api < Sinatra::Base
 
 		enable :sessions
+		disable :run
 
 		set :static, true
 		set :public, File.expand_path( File.dirname(__FILE__) + '/../static' )
@@ -29,7 +32,14 @@ module PoieticGen
 
 		# DataMapper.setup(:default, "sqlite3::memory:")
 		
-		@manager = Manager.new
+		configure do
+			set :manager, Manager.new
+		end
+
+		configure :development do |c|
+			register Sinatra::Reloader
+		end
+
 
 		#
 		#
@@ -60,20 +70,21 @@ module PoieticGen
 		# notify server about the intention of joining the session
 		#
 		get '/api/session/join' do
-			@manager ||= Manager.new
-			pp @manager
-			session['userid'] = @manager.join
+			pp self
+			session['user_id'] = settings.manager.join
 
 			# return JSON for userid
-			session['userid']
+
+			JSON.generate({ :user_id => session['user_id'] })
 		end
 
 		#
-		#
+		# notify server about the intention of leaving the session
+		# return null user_id for confirmation
 		#
 		get '/api/session/leave' do
-			# return JSON for confirmation
-			# then redirect to '/'
+			session['user_id'] = nil
+			JSON.generate({ :user_id => session['user_id'] })
 		end
 
 		# 
