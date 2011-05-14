@@ -8,9 +8,9 @@ $(document).ready( function() {
 
     // initialize zoness
     session = new Session(
-	Session.TYPE_DRAW,
+	SESSION_TYPE_DRAW,
 	function() {
-	    alert('session callback');
+	    console.log('session callback');
 	    drawzone = new DrawZone(session, 'session-drawzone');
 	    globalzone = new GlobalZone(session, 'session-global');
 	    colorzone = new ColorZone(session, 'session-colors');
