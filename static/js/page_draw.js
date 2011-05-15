@@ -10,10 +10,10 @@ $(document).ready( function() {
     session = new Session(
 	SESSION_TYPE_DRAW,
 	function() {
-	    console.log('session callback');
-	    drawzone = new DrawZone(session, 'session-drawzone');
-	    globalzone = new GlobalZone(session, 'session-global');
-	    colorzone = new ColorZone(session, 'session-colors');
+	    console.log('session/join callback()');
+	    var drawing = new Drawing(session, 'session-drawing');
+	    var globalzone = new GlobalZone(session, 'session-global');
+	    var colorzone = new ColorZone(session, 'session-colors');
 	    // create session with 
 	} );
 

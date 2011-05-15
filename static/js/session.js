@@ -5,23 +5,29 @@ const SESSION_TYPE_DRAW = "draw";
 const SESSION_TYPE_VIEW = "view";
 
 function Session( session_type, callback ) {
-	this.brush = null;
 
-	var session_id = null;
+	this.brush = null;
 	this.user_id = null;
+	this.zone_width = null;
+	this.zone_height = null;
 
 	// get session info from 
 	$.ajax({
 	    // FIXME: request with previous user_id
 	    url: SESSION_URL_JOIN + "?type=" + session_type,
-	    ataType: "json",
+	    dataType: "json",
 	    type: 'GET',
 	    context: this,
-	    success: function( user_id ){
-		this.user_id = user_id;
+	    success: function( response ){
+		console.log('session/join response : ' + JSON.stringify(response) );
+
+		this.user_id = response.user_id;
+		this.username = response.username;
+		this.zone_width = response.zone_width;
+		this.zone_height = response.zone_height;
 
 		// FIXME: set cookie with user_id for next time
-		console.log('got user id : ' + this.user_id );
+		// FIXME: set username with username for next time
 
 		callback( this );
 	    }
