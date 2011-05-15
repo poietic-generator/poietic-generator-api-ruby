@@ -5,6 +5,7 @@ require "sinatra/reloader"
 
 require 'poietic-gen/page'
 require 'poietic-gen/manager'
+require 'poietic-gen/patch'
 
 require 'json'
 require 'pp'
@@ -74,8 +75,11 @@ module PoieticGen
 			session['user_id'] = settings.manager.join
 
 			# return JSON for userid
-
-			JSON.generate({ :user_id => session['user_id'] })
+			# FIXME: drawing_width & drawing_height MUST depend on the configuration
+			JSON.generate({ :user_id => session['user_id'],
+		   					:zone_width => 20,
+							:zone_height => 20
+			})
 		end
 
 		#
@@ -94,7 +98,8 @@ module PoieticGen
 		# clients having not renewed their lease before 300
 		# seconds are considered disconnected
 		#
-		get '/api/drawing/update' do
+		get '/api/drawing/list' do
+			JSON.generate({ :patch_list => [] })
 		end
 
 		#
