@@ -6,5 +6,6 @@ gem "shotgun"
 gem "haml"
 gem "json"
 gem "datamapper"
+gem "dm-sqlite-adapter"
 
 
