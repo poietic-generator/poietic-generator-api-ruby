@@ -51,6 +51,7 @@ GEM
       data_objects (= 0.10.5)
     fastercsv (1.5.4)
     haml (3.1.1)
+    inifile (0.3.0)
     json (1.4.6)
     monkey-lib (0.5.4)
       backports
@@ -81,6 +82,7 @@ DEPENDENCIES
   datamapper
   dm-sqlite-adapter
   haml
+  inifile (~> 0.3)
   json
   shotgun
   sinatra
