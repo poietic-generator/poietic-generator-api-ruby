@@ -4,6 +4,14 @@ const SESSION_URL_LEAVE = "/api/session/leave";
 const SESSION_TYPE_DRAW = "draw";
 const SESSION_TYPE_VIEW = "view";
 
+if (!("console" in window) || !("firebug" in console)) {
+    var names = ["log", "debug", "info", "warn", "error", "assert", "dir", "dirxml", "group", "groupEnd", "time", "timeEnd", "count", "trace", "profile", "profileEnd"];
+    window.console = {};
+    for (var i = 0, len = names.length; i < len; ++i) {
+	window.console[names[i]] = function(){};
+    }
+}
+
 function Session( session_type, callback ) {
 
 	this.brush = null;
