@@ -2,7 +2,7 @@
 const DRAWING_REFRESH = 5000;
 const DRAWING_URL_LIST = "/api/drawing/list";
 
-function Drawing( session_obj, dom_id ){
+function Drawing( session_obj, canvas_id ){
 
     this.load_remote = function(){
 		$.ajax({
@@ -21,11 +21,11 @@ function Drawing( session_obj, dom_id ){
     }
 
     /*
-     * compute dom_obj size (square) depending on screen size
+     * compute canvas_obj size (square) depending on screen size
      */
     this.update_grid = function() {
 	var ctx = this.context;
-	var canvas = this.dom_obj;
+	var canvas = this.canvas_obj;
 
 	ctx.fillStyle = '#000';
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -45,7 +45,7 @@ function Drawing( session_obj, dom_id ){
     }
 
     this.update_size = function() {
-	var canvas = this.dom_obj;
+	var canvas = this.canvas_obj;
 	var win = { 
 	    w: $(window).width(),
 	    h : $(window).height()
@@ -69,12 +69,15 @@ function Drawing( session_obj, dom_id ){
     this.session_obj = session_obj;
     this.zone_width = this.session_obj.zone_width;
     this.zone_height = this.session_obj.zone_height;
-    this.dom_id = dom_id;
-    this.dom_obj = document.getElementById(dom_id);
+    this.canvas_id = canvas_id;
+    this.canvas_obj = document.getElementById(canvas_id);
     this.timer = window.setInterval( this.load_remote, DRAWING_REFRESH );
-    this.context = this.dom_obj.getContext('2d');
+    this.context = this.canvas_obj.getContext('2d');
+    $(this.canvas_obj).click( function( event_obj ) {
+	console.log("clicked" + event_obj);
+    });
 
     this.update_size();
-    console.log("drawing_id = " + this.dom_id);
+    console.log("drawing_id = " + this.canvas_id);
 }
 
