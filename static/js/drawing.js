@@ -23,7 +23,7 @@ function Drawing( session_obj, canvas_id ){
     /*
      * compute canvas_obj size (square) depending on screen size
      */
-    this.update_grid = function() {
+    this.draw_grid = function() {
 	var ctx = this.context;
 	var canvas = this.canvas_obj;
 
@@ -63,27 +63,63 @@ function Drawing( session_obj, canvas_id ){
 	canvas.style.left = Math.floor((win.w - canvas.width) / 2) + 'px';
 
 	console.log("window.width = " + [ $(window).width(), $(window).height() ] );
-	this.update_grid();
+
+	self.col_width = canvas.width / self.zone_width;
+	self.line_height = canvas.height / self.zone_height;
+
+	this.draw_grid();
     };
 
 
     this.mouseup = function( event_obj ) {
-	this_drawing.draw_enable = false;
+	self.draw_enable = false;
 
     };
 
     this.mousedown = function( event_obj ) {
-	this_drawing.draw_enable = true;
+	self.draw_enable = true;
 
+
+	self.mousemove( event_obj );
     };
 
     this.mousemove = function( event_obj ) {
-	var ctx = this_drawing.context;
-	if (this_drawing.draw_enable) {
-	    ctx.strokeStyle = '#f00';
-	    ctx.strokeRect( event_obj.mouseX - 5, event_obj.mouseY - 5, 10, 10 );
+	var ctx = self.context;
+	var canvas = self.canvas_obj;
+	if (self.draw_enable) {
+		var zonecoord = {
+			x : Math.floor(event_obj.mouseX / self.col_width ) ,
+			y : Math.floor(event_obj.mouseY / self.line_height )
+		};
+
+		console.log( "zonecoord : %s %s", zonecoord.x, zonecoord.y );
+		self.draw( zonecoord );
+
+		ctx.strokeStyle = '#0f0';
+		ctx.strokeRect( event_obj.mouseX - 1, event_obj.mouseY - 1, 3, 3 );
 	}
     };
+
+    this.draw = function( pos ) {
+	var ctx = self.context;
+	var xmin = pos.x * self.col_width;
+	var ymin = pos.y * self.line_height;
+
+	ctx.fillStyle = '#f00';
+	ctx.fillRect( xmin, ymin, self.col_width, self.line_height );
+    };
+
+    var canvas_event = function( event_obj ) {
+	var canvas = self.canvas_obj;
+
+	event_obj.mouseX = event_obj.pageX - canvas.offsetLeft;
+	event_obj.mouseY = event_obj.pageY - canvas.offsetTop;
+
+	var func = self[event_obj.type];
+	if (func) { func( event_obj ); }
+	//console.log("clicked at %s,%s", mouseX, mouseY );
+    };
+
 
     this.draw_enable = false;
     this.session_obj = session_obj;
@@ -91,21 +127,14 @@ function Drawing( session_obj, canvas_id ){
     this.zone_height = this.session_obj.zone_height;
     this.canvas_id = canvas_id;
     this.canvas_obj = document.getElementById(canvas_id);
+
+    this.col_width = 1;
+    this.line_height = 1;
+
     this.timer = window.setInterval( this.load_remote, DRAWING_REFRESH );
     this.context = this.canvas_obj.getContext('2d');
 
-    var this_drawing = this;
-
-    var canvas_event = function( event_obj ) {
-	var canvas = this_drawing.canvas_obj;
-
-	event_obj.mouseX = event_obj.pageX - canvas.offsetLeft;
-	event_obj.mouseY = event_obj.pageY - canvas.offsetTop;
-
-	var func = this_drawing[event_obj.type];
-	if (func) { func( event_obj ); }
-	//console.log("clicked at %s,%s", mouseX, mouseY );
-    };
+    var self = this;
 
     this.canvas_obj.addEventListener('mousedown', canvas_event, false);
     this.canvas_obj.addEventListener('mouseup', canvas_event, false);
