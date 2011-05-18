@@ -3,6 +3,7 @@ require 'sinatra/base'
 require "sinatra/reloader"
 #require 'datamapper'
 
+require 'poietic-gen/config'
 require 'poietic-gen/page'
 require 'poietic-gen/manager'
 require 'poietic-gen/patch'
@@ -34,7 +35,11 @@ module PoieticGen
 		# DataMapper.setup(:default, "sqlite3::memory:")
 		
 		configure do
-			set :manager, Manager.new
+
+			config = PoeticGen::ServerConfig.new PoeticGen::ServerConfig::DEFAULT_CONFIG_PATH
+
+			set :config, config
+			set :manager, Manager.new(config)
 		end
 
 		configure :development do |c|

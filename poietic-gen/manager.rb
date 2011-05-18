@@ -11,7 +11,8 @@ module PoieticGen
 	# manage a pool of users
 	#
 	class Manager
-		def initialize
+		def initialize config
+			@config = config
 			# a 16-char long random string
 			@id = (0...16).map{ ('a'..'z').to_a[rand(26)] }.join
 
