@@ -1,10 +1,10 @@
 
 const DRAWING_REFRESH = 5000;
 const DRAWING_COLOR_GRID = '#444';
-const DRAWING_COLOR_GRID_BOUDARIES = '#844';
+const DRAWING_COLOR_GRID_BOUDARIES = '#888';
 const DRAWING_URL_LIST = "/api/drawing/list";
 
-function Drawing( session_obj, canvas_id ){
+function Drawing( session, canvas_id ){
     var self = this;
 
     this.pull_patches = function(){
@@ -24,60 +24,82 @@ function Drawing( session_obj, canvas_id ){
     }
 
     /*
-     * compute canvas_obj size (square) depending on screen size
+     * compute real_canvas size (square) depending on screen size
      */
-    this.draw_grid = function() {
-	var ctx = self.context;
-	var canvas = self.canvas_obj;
+    this.create_grid = function() {
+	var ctx;
+	var canvas;
+	
+	self.grid_canvas = document.createElement('canvas');
+	self.grid_canvas.width = self.real_canvas.width;
+	self.grid_canvas.height = self.real_canvas.height;
+	canvas = self.grid_canvas;
+	ctx = canvas.getContext("2d");
 
-	ctx.fillStyle = '#000';
-	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	for (var w=0; w <= (2 * this.zone_width); w++){
-	    ctx.moveTo(w * self.zone_px_width, 0);
-	    ctx.lineTo(w * self.zone_px_width, canvas.height);
+	    var column = Math.floor( w * self.zone_px_width );
+	    ctx.moveTo(column, 0);
+	    ctx.lineTo(column, canvas.height);
 	}
 	for (var h=0; h <= (2 * this.zone_height); h++){
-	    ctx.moveTo(0, h * self.zone_px_height);
-	    ctx.lineTo(canvas.width, h * self.zone_px_height);
+	    var line = Math.floor(h * self.zone_px_height);
+	    ctx.moveTo(0, line);
+	    ctx.lineTo(canvas.width, line);
 	}
+	ctx.lineWidth = 1;
 	ctx.strokeStyle = DRAWING_COLOR_GRID;
 	ctx.stroke();
 
 	ctx.beginPath();
-	boundaries = {
-	    x : self.zone_width * self.zone_px_width / 2,
-	    y : self.zone_height * self.zone_px_height / 2,
-	    w : self.zone_width * self.zone_px_width,
-	    h : self.zone_height * self.zone_px_height
+	var boundaries = {
+	    x : Math.floor( self.zone_width * self.zone_px_width / 2 ),
+	    y : Math.floor( self.zone_height * self.zone_px_height / 2 ),
+	    w : Math.floor( self.zone_width * self.zone_px_width ),
+	    h : Math.floor( self.zone_height * self.zone_px_height )
 	};
-	ctx.lineWidth = 5;
-	ctx.strokeRect( boundaries.x, boundaries.y, boundaries.w, boundaries.h );
+	ctx.lineWidth = 1;
 	ctx.strokeStyle = DRAWING_COLOR_GRID_BOUDARIES;
-	ctx.stroke();
+	ctx.strokeRect( boundaries.x, boundaries.y, boundaries.w, boundaries.h );
     };
 
+
+    this.draw_grid = function() {
+	// apply grid canvas on the real canvas
+	if ( self.grid_canvas == null ) {
+	    self.create_grid();
+	}
+	var ctx = self.context;
+	ctx.drawImage( self.grid_canvas, 0, 0);
+    }
+
     this.update_size = function() {
-	var canvas = this.canvas_obj;
+	var real_canvas = this.real_canvas;
 	var win = { 
 	    w: $(window).width(),
 	    h : $(window).height()
 	};
 
-	canvas.style.position = 'absolute';
+	real_canvas.style.position = 'absolute';
 	if (win.w > win.h) {
-	    canvas.width = win.h - 20;
-	    canvas.height = win.h - 20;
+	    real_canvas.width = win.h - 20;
+	    real_canvas.height = win.h - 20;
 	} else {
-	    canvas.width = win.w - 20;
-	    canvas.height = win.w - 20;
+	    real_canvas.width = win.w - 20;
+	    real_canvas.height = win.w - 20;
 	}
-	canvas.style.top = '10px';
-	canvas.style.left = Math.floor((win.w - canvas.width) / 2) + 'px';
+	real_canvas.style.top = '10px';
+	real_canvas.style.left = Math.floor((win.w - real_canvas.width) / 2) + 'px';
 
 	console.log("window.width = " + [ $(window).width(), $(window).height() ] );
 
-	self.zone_px_width = canvas.width / (self.zone_width * 2);
-	self.zone_px_height = canvas.height / (self.zone_height * 2);
+	self.zone_px_width = real_canvas.width / (self.zone_width * 2);
+	self.zone_px_height = real_canvas.height / (self.zone_height * 2);
+
+	self.grid_canvas = null;
+
+	var ctx = real_canvas.getContext("2d");
+	ctx.fillStyle = '#000';
+	ctx.fillRect(0, 0, real_canvas.width, real_canvas.height);
 
 	this.draw_grid();
     };
@@ -97,7 +119,7 @@ function Drawing( session_obj, canvas_id ){
 
     this.mousemove = function( event_obj ) {
 	var ctx = self.context;
-	var canvas = self.canvas_obj;
+	var canvas = self.real_canvas;
 	if (self.draw_enable) {
 		var zonecoord = {
 			x : Math.floor(event_obj.mouseX / self.zone_px_width ) ,
@@ -127,15 +149,19 @@ function Drawing( session_obj, canvas_id ){
 
     this.set_pixel = function( pos ) {
 	var ctx = self.context;
-	var xmin = pos.x * self.zone_px_width;
-	var ymin = pos.y * self.zone_px_height;
+	var rect = {
+	    x : Math.floor( pos.x * self.zone_px_width + 1),
+	    y : Math.floor( pos.y * self.zone_px_height + 1),
+	    w : Math.floor( self.zone_px_width - 2 ),
+	    h: Math.floor( self.zone_px_height - 2 )
+	};
 
 	ctx.fillStyle = '#f00';
-	ctx.fillRect( xmin, ymin, self.zone_px_width, self.zone_px_height );
+	ctx.fillRect( rect.x, rect.y, rect.w, rect.h );
     };
 
     var canvas_event = function( event_obj ) {
-	var canvas = self.canvas_obj;
+	var canvas = self.real_canvas;
 
 	event_obj.mouseX = event_obj.pageX - canvas.offsetLeft;
 	event_obj.mouseY = event_obj.pageY - canvas.offsetTop;
@@ -147,23 +173,26 @@ function Drawing( session_obj, canvas_id ){
 
 
     this.draw_enable = false;
-    this.session_obj = session_obj;
-    this.zone_width = this.session_obj.zone_width;
-    this.zone_height = this.session_obj.zone_height;
-    this.canvas_id = canvas_id;
-    this.canvas_obj = document.getElementById(canvas_id);
+    this.session = session;
+    this.zone_width = this.session.zone_width;
+    this.zone_height = this.session.zone_height;
+
+    this.real_canvas_id = canvas_id;
+    this.real_canvas = document.getElementById(canvas_id);
+
+    this.grid_canvas = null;
 
     // size of zone's big pixels
     this.zone_px_width = 1;
     this.zone_px_height = 1;
 
     this.timer = window.setInterval( this.pull_patches, DRAWING_REFRESH );
-    this.context = this.canvas_obj.getContext('2d');
+    this.context = this.real_canvas.getContext('2d');
 
 
-    this.canvas_obj.addEventListener('mousedown', canvas_event, false);
-    this.canvas_obj.addEventListener('mouseup', canvas_event, false);
-    this.canvas_obj.addEventListener('mousemove', canvas_event, false);
+    this.real_canvas.addEventListener('mousedown', canvas_event, false);
+    this.real_canvas.addEventListener('mouseup', canvas_event, false);
+    this.real_canvas.addEventListener('mousemove', canvas_event, false);
 
     this.update_size();
     console.log("drawing_id = " + this.canvas_id);
