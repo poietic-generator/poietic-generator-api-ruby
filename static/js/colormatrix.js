@@ -1,5 +1,6 @@
 
 // vim: set ts=4 sw=4 et:
+"use strict";
 
 function ColorMatrix( p_width, p_height ) {
     var matrix = [];
