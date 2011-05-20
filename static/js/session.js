@@ -1,4 +1,8 @@
 
+
+// vim: set ts=4 sw=4 et:
+"use strict";
+
 const SESSION_URL_JOIN = "/api/session/join";
 const SESSION_URL_LEAVE = "/api/session/leave";
 const SESSION_TYPE_DRAW = "draw";
@@ -16,8 +20,8 @@ function Session( session_type, callback ) {
 
 	this.brush = null;
 	this.user_id = null;
-	this.zone_width = null;
-	this.zone_height = null;
+	this.division_width = null;
+	this.division_height = null;
 
 	// get session info from 
 	$.ajax({
@@ -31,8 +35,8 @@ function Session( session_type, callback ) {
 
 		this.user_id = response.user_id;
 		this.username = response.username;
-		this.zone_width = response.zone_width;
-		this.zone_height = response.zone_height;
+		this.division_width = response.division_width;
+		this.division_height = response.division_height;
 
 		// FIXME: set cookie with user_id for next time
 		// FIXME: set username with username for next time
