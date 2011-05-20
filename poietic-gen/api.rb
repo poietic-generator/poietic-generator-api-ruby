@@ -104,7 +104,7 @@ module PoieticGen
 		# seconds are considered disconnected
 		#
 		get '/api/drawing/list' do
-			JSON.generate({ :patch_list => [] })
+			JSON.generate({ :patches => [] })
 		end
 
 		#
