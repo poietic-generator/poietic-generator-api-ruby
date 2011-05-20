@@ -134,9 +134,9 @@ function Drawing( session, canvas_id ){
 			&& ( zonecoord.y >= ( self.zone_height / 2) ) 
 			&& ( zonecoord.y < (( self.zone_height / 2 ) + self.zone_height ) ) )
 		  {
-		    self.set_pixel( zonecoord );
+		    self.pixel_set( zonecoord );
 		} else {
-		    self.get_pixel( zonecoord );
+		    self.pixel_get( zonecoord );
 		}
 
 		//ctx.strokeStyle = '#0f0';
@@ -144,10 +144,10 @@ function Drawing( session, canvas_id ){
 	}
     };
 
-    this.get_pixel = function( pos ) {
+    this.pixel_get = function( pos ) {
     }
 
-    this.set_pixel = function( pos ) {
+    this.pixel_set = function( pos ) {
 	var ctx = self.context;
 	var rect = {
 	    x : Math.floor( pos.x * self.zone_px_width + 1),
@@ -158,7 +158,25 @@ function Drawing( session, canvas_id ){
 
 	ctx.fillStyle = '#f00';
 	ctx.fillRect( rect.x, rect.y, rect.w, rect.h );
+
+	// add to patch structure
+	self.patch_create();
+	self.patch.append( pos );
     };
+
+    this.patch_create = function() {
+	    if ( self.patch == null ) {
+		    self.patch = new Patch();
+		    window.setTimeout( self.patch_enqueue, PATCH_LIFESPAN );
+	    }
+    }
+
+    // push the patch appart, in the send queue
+    this.patch_enqueue = function() {
+	    console.log( "patch enqueued !" );
+
+	    self.patch = null;
+    }
 
     var canvas_event = function( event_obj ) {
 	var canvas = self.real_canvas;
@@ -172,6 +190,7 @@ function Drawing( session, canvas_id ){
     };
 
 
+    this.patch = null;
     this.draw_enable = false;
     this.session = session;
     this.zone_width = this.session.zone_width;
