@@ -135,17 +135,23 @@ function Drawing( p_session, p_canvas_id ){
     this.update_paint = function() {
         // FIXME: use zone & repaint current 
         // FIXME: fix zone coordinate translation
-        /*
+        
         for (var x = 0 ; x < self.column_count ; x++ ){
             for (var y = 0; y < self.line_count ; y++ ) {
-                var pos = { 'x': x, 'y': y };
-                var color = zone.pixel_get( pos );
-                self.pixel_draw( pos, color );
+                var zone_pos = { 'x': x, 'y': y };
+                var color = _zone.pixel_get( zone_pos );
+                var local_pos = zone_to_local_position( zone_pos );
+                console.log("drawing/update_paint: bimbimbap %s %s", x, y);
+                self.pixel_draw( local_pos, color );
             }
         }
-        */
+        
     }
 
+
+    /**
+     *
+     */
     this.update_size = function() {
         var real_canvas = self.real_canvas;
         var win = { 
@@ -164,13 +170,13 @@ function Drawing( p_session, p_canvas_id ){
         real_canvas.style.top = '10px';
         real_canvas.style.left = Math.floor((win.w - real_canvas.width) / 2) + 'px';
 
-        console.log("window.width = " + [ $(window).width(), $(window).height() ] );
+        console.log("drawing/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
 
-        console.log("real_canvas.width = " + real_canvas.width);
+        console.log("drawing/update_size: real_canvas.width = " + real_canvas.width);
         self.column_size = real_canvas.width / (self.column_count + (self.border_column_count * 2));
         self.line_size = real_canvas.height / (self.line_count + (self.border_line_count * 2));
 
-        console.log("column_size = " + self.column_size);
+        console.log("drawing/update_size: column_size = " + self.column_size);
 
         self.grid_canvas = null;
 
@@ -216,19 +222,22 @@ function Drawing( p_session, p_canvas_id ){
 
             // FIXME: detect target zone
             // target_zone = local_to_target_ f( zone_pos )
-            var bound = zone.is_bound( zone_pos );
+            var bound = _zone.is_bound( zone_pos );
             console.log( "zone bound : %s", bound );
 
             if ( bound ) {
                 self.pixel_set( local_pos, _color );
             } else {
-                //FIXME: _color = zone.pixel_get( zone_pos );
+                //FIXME: _color = _zone.pixel_get( zone_pos );
             }
 
         }
     };
 
-    // change pixel at given position, on canvas only
+
+    /**
+     * change pixel at given position, on canvas only
+     */
     this.pixel_draw = function( local_pos, color ) {
         var ctx = self.context;
         console.log("drawing/pixel_draw local_pos = %s", JSON.stringify(local_pos) );
@@ -253,12 +262,12 @@ function Drawing( p_session, p_canvas_id ){
 
         zone_pos = local_to_zone_position( local_pos );
         console.log( "session/pixel_set: zone_pos = %s", zone_pos );
-        zone.pixel_set( zone_pos, color );
-        self.pixel_draw( local_pos, color );
-
+        // record to zone
+        _zone.pixel_set( zone_pos, color );
         // add to patch structure
-        //self.patch_create();
-        //self.patch.append( pos );
+        _zone.patch_record( zone_pos, color );
+        // draw localy
+        self.pixel_draw( local_pos, color );
     };
 
     /**
@@ -298,7 +307,7 @@ function Drawing( p_session, p_canvas_id ){
 
     this.to_s = function() { JSON.stringify(this); };
 
-    var zone = new Zone( p_session.zone_column_count, p_session.zone_line_count );
+    var _zone = new Zone( p_session.zone_column_count, p_session.zone_line_count );
     var _color = '#f00';
 
     this.patch = null;
@@ -308,8 +317,8 @@ function Drawing( p_session, p_canvas_id ){
     this.session = p_session;
     this.column_count = p_session.zone_column_count;
     this.line_count = p_session.zone_line_count;
-    this.border_column_count = p_session.zone_column_count / 2;
-    this.border_line_count = p_session.zone_column_count / 2;
+    this.border_column_count = p_session.zone_column_count / 4;
+    this.border_line_count = p_session.zone_column_count / 4;
 
     this.real_canvas = document.getElementById( p_canvas_id );
 
@@ -319,7 +328,7 @@ function Drawing( p_session, p_canvas_id ){
     this.column_size = 1;
     this.line_size = 1;
 
-    this.timer = window.setInterval( this.pull_patches, DRAWING_REFRESH );
+    //this.timer = window.setInterval( this.pull_patches, DRAWING_REFRESH );
     this.context = this.real_canvas.getContext('2d');
 
     // plug some event handlers
