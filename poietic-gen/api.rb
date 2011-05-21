@@ -82,8 +82,8 @@ module PoieticGen
 			# return JSON for userid
 			# FIXME: drawing_width & drawing_height MUST depend on the configuration
 			JSON.generate({ :user_id => session['user_id'],
-		   					:zone_width => 20,
-							:zone_height => 20
+		   					:zone_column_count => 20,
+							:zone_line_count => 20
 			})
 		end
 
