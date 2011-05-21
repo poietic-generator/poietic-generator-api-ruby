@@ -3,7 +3,8 @@
 
 	@page.js << "/js/session.js"
 	@page.js << "/js/patch.js"
-	@page.js << "/js/colormatrix.js"
+	@page.js << "/js/zone.js"
+	@page.js << "/js/console.js"
 	@page.js << "/js/drawing.js"
 	@page.js << "/js/colorzone.js"
 	@page.js << "/js/brushzone.js"
@@ -13,17 +14,13 @@
 %>
 
 <!-- la zone de dessin -->
-<canvas id="session-drawing">
-	draw zone
-</canvas>
+<canvas id="session-drawing"></canvas>
 <!-- la vue globale -->
 <div id="session-global" >
 	global zone
 </div>
 <!-- la zone de selection de couleurs -->
-<div id="session-color" >
-	color zone
-</div>
+<canvas id="session-color"></canvas>
 
 <div id="session-brush" >
 	brush zone
