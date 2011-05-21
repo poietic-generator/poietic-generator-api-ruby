@@ -8,20 +8,15 @@ const SESSION_URL_LEAVE = "/api/session/leave";
 const SESSION_TYPE_DRAW = "draw";
 const SESSION_TYPE_VIEW = "view";
 
-if (!("console" in window) || !("firebug" in console)) {
-    var names = ["log", "debug", "info", "warn", "error", "assert", "dir", "dirxml", "group", "groupEnd", "time", "timeEnd", "count", "trace", "profile", "profileEnd"];
-    window.console = {};
-    for (var i = 0, len = names.length; i < len; ++i) {
-	window.console[names[i]] = function(){};
-    }
-}
 
 function Session( session_type, callback ) {
 
+    var self = this;
+
 	this.brush = null;
 	this.user_id = null;
-	this.division_width = null;
-	this.division_height = null;
+	this.zone_column_count = null;
+	this.zone_line_count = null;
 
 	// get session info from 
 	$.ajax({
@@ -29,21 +24,25 @@ function Session( session_type, callback ) {
 	    url: SESSION_URL_JOIN + "?type=" + session_type,
 	    dataType: "json",
 	    type: 'GET',
-	    context: this,
+	    context: self,
 	    success: function( response ){
 		console.log('session/join response : ' + JSON.stringify(response) );
 
 		this.user_id = response.user_id;
 		this.username = response.username;
-		this.division_width = response.division_width;
-		this.division_height = response.division_height;
+		this.zone_column_count = response.zone_column_count;
+		this.zone_line_count = response.zone_line_count;
+
+		console.log('session/join response mod : ' + JSON.stringify(this) );
 
 		// FIXME: set cookie with user_id for next time
 		// FIXME: set username with username for next time
 
-		callback( this );
+		callback( self );
 	    }
 	});
+
+    this.to_s = function() { JSON.stringify(self); };
 }
 
 
