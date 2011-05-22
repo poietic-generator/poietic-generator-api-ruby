@@ -1,5 +1,6 @@
 
 require 'poietic-gen/palette'
+require 'poietic-gen/database'
 
 
 module PoieticGen
@@ -14,7 +15,7 @@ module PoieticGen
 		def initialize config
 			@config = config
 			# a 16-char long random string
-			@id = (0...16).map{ ('a'..'z').to_a[rand(26)] }.join
+			@session_id = (0...16).map{ ('a'..'z').to_a[rand(26)] }.join
 
 			@palette = Palette.new
 			@width = 32
@@ -32,12 +33,48 @@ module PoieticGen
 		#
 		# generates an unpredictible user id based on session id & user counter
 		#
-		def join
-			user_id = File.join @id, @users_seen.to_s
-			@users_seen += 1
-			#zone = self.zone_alloc user_id
+		def join req_user_id, req_session, req_user_name
 
-			return user_id
+			# FIXME: prevent session from being stolen...
+			STDERR.puts "requesting id=%s, session=%s, name=%s" \
+				% [ req_user_id, req_session, req_user_name ]
+
+			user = nil
+			now = DateTime.now
+			param_request = {
+			   	:id => req_user_id,
+				:session => @session_id 
+			}
+			param_create = { 
+				:session => @session_id,
+				:name => ( req_user_name || 'anonymous' ),
+				:created_at => now,
+				:expires_at => (now + Rational(User::MAX_IDLE, 60 * 60 * 24 ))
+			}
+
+			if req_session != @session_id then
+				STDERR.puts "User is requesting a different session"
+				# create new
+				user = User.create param_create
+			else
+				STDERR.puts "User is in session"
+				user = User.first_or_create param_request, param_create
+
+				if ( (now - user.expires_at) > 0  ) then
+					STDERR.puts "User session expired"
+					# create new if session expired
+					user = User.create param_create
+				end
+			end
+
+			# update expiration time
+			user.expires_at = (now + Rational(User::MAX_IDLE, 60 * 60 * 24 )) 
+			user.save
+
+			# FIXME: allocate zone  (or reallocate zone)
+			# FIXME: send matrix status of user zone
+
+			return user
 		end
 
 
