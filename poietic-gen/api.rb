@@ -77,7 +77,11 @@ module PoieticGen
 		#
 		get '/api/session/join' do
 			pp self
-			session['user_id'] = settings.manager.join
+			session['user_id'] = settings.manager.join 
+			# FIXME: test request user_id
+			# FIXME: test request username
+			# FIXME: validate session
+			# FIXME: return same user_id if session is still valid
 
 			# return JSON for userid
 			# FIXME: drawing_width & drawing_height MUST depend on the configuration
