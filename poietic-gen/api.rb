@@ -1,8 +1,7 @@
 
 require 'sinatra/base'
-require "sinatra/reloader"
-#require 'datamapper'
 
+require 'poietic-gen/database'
 require 'poietic-gen/config'
 require 'poietic-gen/page'
 require 'poietic-gen/manager'
@@ -23,6 +22,9 @@ module PoieticGen
 		enable :sessions
 		disable :run
 
+		set :environment, :development
+		#set :environment, :production
+		
 		set :static, true
 		set :public, File.expand_path( File.dirname(__FILE__) + '/../static' )
 		set :views, File.expand_path( File.dirname(__FILE__) + '/../views' )
@@ -32,19 +34,39 @@ module PoieticGen
 		mime_type :otf, "application/octet-stream"
 		mime_type :woff, "application/octet-stream"
 
-		# DataMapper.setup(:default, "sqlite3::memory:")
 		
+		configure :development do |c|
+			require "sinatra/reloader"
+			register Sinatra::Reloader
+		end
+
 		configure do
 
 			config = PoeticGen::ServerConfig.new PoeticGen::ServerConfig::DEFAULT_CONFIG_PATH
 
 			set :config, config
 			set :manager, Manager.new(config)
+
+			#DataMapper.setup(:default, "sqlite3::memory:")
+			#DataMapper.setup(:default, "sqlite3::memory:")
+			DataMapper.setup(:default, "sqlite3://#{Dir.pwd}/poietic-gen.sqlite3")
+
+			# raise exception on save failure (globally across all models)
+			DataMapper::Model.raise_on_save_failure = true
+
+			# FIXME: make database configurable
+=begin
+			DataMapper.setup(:default, {
+				:adapter  => 'mysql',
+				:host     => 'localhost',
+				:username => 'root' ,
+				:password => '',
+				:database => 'sinatra_development'})  
+=end
+			DataMapper.auto_upgrade!
 		end
 
-		configure :development do |c|
-			register Sinatra::Reloader
-		end
+
 
 
 		#
@@ -76,8 +98,11 @@ module PoieticGen
 		# notify server about the intention of joining the session
 		#
 		get '/api/session/join' do
-			pp self
-			session['user_id'] = settings.manager.join 
+			user = settings.manager.join params['user_id'], 
+				params['user_session'],
+				params['user_name']
+
+			pp user
 			# FIXME: test request user_id
 			# FIXME: test request username
 			# FIXME: validate session
@@ -85,7 +110,9 @@ module PoieticGen
 
 			# return JSON for userid
 			# FIXME: drawing_width & drawing_height MUST depend on the configuration
-			JSON.generate({ :user_id => session['user_id'],
+			JSON.generate({ :user_id => user.id,
+						 	:user_session => user.session,
+						  	:user_name => user.name,
 		   					:zone_column_count => 20,
 							:zone_line_count => 20
 			})
