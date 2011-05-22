@@ -27,7 +27,7 @@ function Drawing( p_session, p_canvas_id ){
             context: self,
             success: function( response ){
                 // FIXME: set cookie with user_id for next time
-                console.log('drawing/list response : ' + JSON.stringify(response) );
+                console.log('drawing/list response : ' + response.to_json );
 
                 callback( self );
             }
@@ -105,7 +105,7 @@ function Drawing( p_session, p_canvas_id ){
             canvas = self.grid_canvas;
             grid_ctx = canvas.getContext("2d");
 
-            console.log("drawing/draw_grid: before lines");
+            //console.log("drawing/draw_grid: before lines");
 
             var w_max = self.column_count + (2 * self.border_column_count);
             for (var w=0; w <= w_max; w++){
@@ -152,7 +152,7 @@ function Drawing( p_session, p_canvas_id ){
                 var zone_pos = { 'x': x, 'y': y };
                 var color = _zone.pixel_get( zone_pos );
                 var local_pos = zone_to_local_position( zone_pos );
-                console.log("drawing/update_paint: bimbimbap %s %s", x, y);
+                // console.log("drawing/update_paint: zone_pos =", zone_pos.to_json() );
                 self.pixel_draw( local_pos, color );
             }
         }
@@ -181,13 +181,13 @@ function Drawing( p_session, p_canvas_id ){
         real_canvas.style.top = '10px';
         real_canvas.style.left = Math.floor((win.w - real_canvas.width) / 2) + 'px';
 
-        console.log("drawing/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
+        // console.log("drawing/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
 
-        console.log("drawing/update_size: real_canvas.width = " + real_canvas.width);
+        // console.log("drawing/update_size: real_canvas.width = " + real_canvas.width);
         self.column_size = real_canvas.width / (self.column_count + (self.border_column_count * 2));
         self.line_size = real_canvas.height / (self.line_count + (self.border_line_count * 2));
 
-        console.log("drawing/update_size: column_size = " + self.column_size);
+        // console.log("drawing/update_size: column_size = " + self.column_size);
 
         self.grid_canvas = null;
 
@@ -228,14 +228,14 @@ function Drawing( p_session, p_canvas_id ){
             var canvas_pos = { x: event_obj.mouseX, y: event_obj.mouseY };
             var local_pos = canvas_to_local_position( canvas_pos );
             var zone_pos = local_to_zone_position( local_pos );
-            console.log( "canvas pos : %s", JSON.stringify( canvas_pos ) );
-            console.log( "local pos : %s", JSON.stringify( local_pos ) );
-            console.log( "zone pos : %s", JSON.stringify( zone_pos ) );
+            //console.log( "drawing/mousemove: canvas pos : %s", canvas_pos.to_json() );
+            //console.log( "drawing/mousemove:local pos : %s", local_pos.to_json() );
+            //console.log( "drawing/mousemove:zone pos : %s", zone_pos.to_json() );
 
             // FIXME: detect target zone
             // target_zone = local_to_target_ f( zone_pos )
             var bound = _zone.is_bound( zone_pos );
-            console.log( "zone bound : %s", bound );
+            // console.log( "drawing/mousemove: zone.is_bound = ", bound );
 
             if ( bound ) {
                 self.pixel_set( local_pos, _color );
@@ -252,7 +252,7 @@ function Drawing( p_session, p_canvas_id ){
      */
     this.pixel_draw = function( local_pos, color ) {
         var ctx = self.context;
-        console.log("drawing/pixel_draw local_pos = %s", JSON.stringify(local_pos) );
+        //console.log("drawing/pixel_draw local_pos = %s", local_pos.to_json() );
         var canvas_pos = local_to_canvas_position( local_pos );
         var rect = {
             x : canvas_pos.x + (0.1 * self.column_size),
@@ -260,7 +260,7 @@ function Drawing( p_session, p_canvas_id ){
             w : self.column_size - ( 0.2 * self.column_size ),
             h : self.line_size - ( 0.2 * self.column_size )
         };
-        console.log("drawing/pixel_draw rect = %s", JSON.stringify(rect) );
+        //console.log("drawing/pixel_draw rect = %s", rect.to_json() );
 
         ctx.fillStyle = ZONE_BACKGROUND_COLOR;
         ctx.fillRect( rect.x, rect.y, rect.w, rect.h );
@@ -277,7 +277,7 @@ function Drawing( p_session, p_canvas_id ){
         var zone_pos;
 
         zone_pos = local_to_zone_position( local_pos );
-        console.log( "session/pixel_set: zone_pos = %s", zone_pos );
+        //console.log( "drawing/pixel_set: zone_pos = %s", zone_pos.to_json() );
         // record to zone
         _zone.pixel_set( zone_pos, color );
         // add to patch structure
@@ -358,6 +358,6 @@ function Drawing( p_session, p_canvas_id ){
 
     this.update_size();
     this.update_paint();
-    console.log("drawing_id = " + p_canvas_id);
+    // console.log("drawing_id = " + p_canvas_id);
 }
 
