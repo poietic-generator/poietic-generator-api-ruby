@@ -172,13 +172,13 @@ function Drawing( p_session, p_canvas_id ){
 
         real_canvas.style.position = 'absolute';
         if (win.w > win.h) {
-            real_canvas.width = win.h - 20;
-            real_canvas.height = win.h - 20;
+            real_canvas.width = win.h - 2;
+            real_canvas.height = win.h - 2;
         } else {
-            real_canvas.width = win.w - 20;
-            real_canvas.height = win.w - 20;
+            real_canvas.width = win.w - 2;
+            real_canvas.height = win.w - 2;
         }
-        real_canvas.style.top = '10px';
+        real_canvas.style.top = '1px';
         real_canvas.style.left = Math.floor((win.w - real_canvas.width) / 2) + 'px';
 
         // console.log("drawing/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
