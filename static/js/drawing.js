@@ -15,6 +15,9 @@ const POSITION_TYPE_ZONE = 0;
 function Drawing( p_session, p_canvas_id ){
     var self = this;
 
+    /**
+     *
+     */
     this.pull_patches = function(){
         $.ajax({
             // FIXME: request with previous user_id
@@ -31,6 +34,7 @@ function Drawing( p_session, p_canvas_id ){
         });
     }
 
+
     /** 
      * Convert local grid to canvas position
      */
@@ -40,6 +44,7 @@ function Drawing( p_session, p_canvas_id ){
             y: Math.floor( local_position.y * self.line_size )
         };
     }
+
 
     /**
      * Convert canvas to local position
@@ -51,6 +56,7 @@ function Drawing( p_session, p_canvas_id ){
         };
     }
 
+
     /** 
      * Convert local grid to zone position
      */
@@ -60,6 +66,7 @@ function Drawing( p_session, p_canvas_id ){
             y: local_position.y - self.border_line_count 
         };
     }
+
 
     /** 
      * Convert zone to local grid position
@@ -71,6 +78,7 @@ function Drawing( p_session, p_canvas_id ){
         };
     }
 
+
     /**
      * Get relative zone position
      */
@@ -78,6 +86,7 @@ function Drawing( p_session, p_canvas_id ){
         // FIXME: implement relative zone position
         return { x: 0, y: 0 };
     }
+
 
     /*
      * draw zone grid
@@ -132,6 +141,10 @@ function Drawing( p_session, p_canvas_id ){
         ctx.drawImage( self.grid_canvas, 0, 0);
     }
 
+
+    /**
+     * Repaint zone drawing
+     */
     this.update_paint = function() {
         
         for (var x = 0 ; x < self.column_count ; x++ ){
@@ -193,6 +206,7 @@ function Drawing( p_session, p_canvas_id ){
         self.move.enable = false;
     };
 
+
     /** 
      * Handle mouse event
      */
@@ -241,16 +255,20 @@ function Drawing( p_session, p_canvas_id ){
         console.log("drawing/pixel_draw local_pos = %s", JSON.stringify(local_pos) );
         var canvas_pos = local_to_canvas_position( local_pos );
         var rect = {
-            x : canvas_pos.x + 1,
-            y : canvas_pos.y + 1,
-            w : self.column_size - 2,
-            h : self.line_size - 2
+            x : canvas_pos.x + (0.1 * self.column_size),
+            y : canvas_pos.y + (0.1 * self.column_size),
+            w : self.column_size - ( 0.2 * self.column_size ),
+            h : self.line_size - ( 0.2 * self.column_size )
         };
         console.log("drawing/pixel_draw rect = %s", JSON.stringify(rect) );
+
+        ctx.fillStyle = ZONE_BACKGROUND_COLOR;
+        ctx.fillRect( rect.x, rect.y, rect.w, rect.h );
 
         ctx.fillStyle = color;
         ctx.fillRect( rect.x, rect.y, rect.w, rect.h );
     }
+
 
     /*
      * Set pixel at given position to given color
