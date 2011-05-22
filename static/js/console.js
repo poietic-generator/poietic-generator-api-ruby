@@ -9,3 +9,6 @@ if (!("console" in window) || !("firebug" in console)) {
 	window.console[names[i]] = function(){};
     }
 }
+
+Object.prototype.to_json = function() { return JSON.stringify( this ); }
+
