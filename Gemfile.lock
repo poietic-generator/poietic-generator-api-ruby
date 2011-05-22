@@ -27,6 +27,9 @@ GEM
       dm-core (~> 1.1.0)
     dm-migrations (1.1.0)
       dm-core (~> 1.1.0)
+    dm-mysql-adapter (1.1.0)
+      dm-do-adapter (~> 1.1.0)
+      do_mysql (~> 0.10.2)
     dm-serializer (1.1.0)
       dm-core (~> 1.1.0)
       fastercsv (~> 1.5.4)
@@ -47,6 +50,8 @@ GEM
       uuidtools (~> 2.1.2)
     dm-validations (1.1.0)
       dm-core (~> 1.1.0)
+    do_mysql (0.10.5)
+      data_objects (= 0.10.5)
     do_sqlite3 (0.10.5)
       data_objects (= 0.10.5)
     fastercsv (1.5.4)
@@ -80,7 +85,10 @@ PLATFORMS
 
 DEPENDENCIES
   datamapper
+  dm-migrations
+  dm-mysql-adapter
   dm-sqlite-adapter
+  dm-transactions
   haml
   inifile (~> 0.3)
   json
