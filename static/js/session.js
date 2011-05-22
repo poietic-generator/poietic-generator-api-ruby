@@ -23,14 +23,18 @@ function Session( session_type, callback ) {
      */
     var initialize = function() {
         var user_id = $.cookie('user_id');
-        var username = $.cookie('username');
+        var user_name = $.cookie('user_name');
+        var user_session = $.cookie('user_session');
 
         var session_url = SESSION_URL_JOIN + "?type=" + session_type;
         if ( user_id != null ) {
             session_url += "&user_id="+user_id;
         }
-        if ( username != null ) {
-            session_url += "&username="+username;
+        if ( user_session != null ) {
+            session_url += "&user_session="+user_session;
+        }
+        if ( user_name != null ) {
+            session_url += "&user_name="+user_name;
         }
 
         // get session info from 
@@ -44,16 +48,18 @@ function Session( session_type, callback ) {
                 console.log('session/join response : ' + JSON.stringify(response) );
 
                 this.user_id = response.user_id;
-                this.username = response.username;
+                this.user_name = response.user_name;
+                this.user_session = response.user_session;
                 this.zone_column_count = response.zone_column_count;
                 this.zone_line_count = response.zone_line_count;
 
                 $.cookie( 'user_id', this.user_id );
-                $.cookie( 'username', this.username );
+                $.cookie( 'user_name', this.user_name );
+                $.cookie( 'user_session', this.user_session );
                 console.log('session/join response mod : ' + JSON.stringify(this) );
 
                 // FIXME: set cookie with user_id for next time
-                // FIXME: set username with username for next time
+                // FIXME: set user_name with user_name for next time
 
                 callback( self );
             }
