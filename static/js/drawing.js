@@ -133,8 +133,6 @@ function Drawing( p_session, p_canvas_id ){
     }
 
     this.update_paint = function() {
-        // FIXME: use zone & repaint current 
-        // FIXME: fix zone coordinate translation
         
         for (var x = 0 ; x < self.column_count ; x++ ){
             for (var y = 0; y < self.line_count ; y++ ) {
