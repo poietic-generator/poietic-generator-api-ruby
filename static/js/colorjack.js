@@ -399,8 +399,9 @@ Color.HSV_HEX = function (o) {
 
 /* DEMO CODE */
 
-var swatch = document.getElementById("testSwatch");
+// var swatch = document.getElementById("testSwatch");
 
+/*
 window.onload = function() {
     var picker = new Color.Picker({
 	callback: function(hex) {
@@ -410,3 +411,4 @@ window.onload = function() {
     picker.el.style.top = (swatch.offsetTop) + "px";
     picker.el.style.left = (swatch.offsetLeft - 240) + "px";
 };
+*/

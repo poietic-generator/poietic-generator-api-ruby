@@ -310,6 +310,15 @@ function Drawing( p_session, p_canvas_id ){
         self.patch = null;
     }
 
+
+    /** 
+      * Change color
+      */
+
+    this.color_set = function( hexcolor ) {
+        _color = hexcolor;
+    }
+
     var canvas_event = function( event_obj ) {
         var canvas = self.real_canvas;
 
