@@ -27,7 +27,7 @@ function Drawing( p_session, p_canvas_id ){
             context: self,
             success: function( response ){
                 // FIXME: set cookie with user_id for next time
-                console.log('drawing/list response : ' + response.to_json );
+                console.log('drawing/list response : ' + response.to_json() );
 
                 callback( self );
             }
@@ -295,21 +295,6 @@ function Drawing( p_session, p_canvas_id ){
     }
 
 
-    this.patch_create = function() {
-        if ( self.patch == null ) {
-            self.patch = new Patch();
-            window.setTimeout( self.patch_enqueue, PATCH_LIFESPAN );
-        }
-    }
-
-    // push the patch appart, in the send queue
-    this.patch_enqueue = function() {
-        // FIXME: enqueue patch
-        console.log( "patch enqueued !" );
-
-        self.patch = null;
-    }
-
 
     /** 
       * Change color
@@ -317,6 +302,8 @@ function Drawing( p_session, p_canvas_id ){
 
     this.color_set = function( hexcolor ) {
         _color = hexcolor;
+        // FIXME: 
+        _zone.patch_enqueue();
     }
 
     var canvas_event = function( event_obj ) {
@@ -353,7 +340,9 @@ function Drawing( p_session, p_canvas_id ){
     this.column_size = 1;
     this.line_size = 1;
 
-    //this.timer = window.setInterval( this.pull_patches, DRAWING_REFRESH );
+    var _pull_timer = window.setInterval( this.pull_patches, DRAWING_REFRESH );
+    var _patch_timer = window.setInterval( _zone.patch_enqueue, PATCH_LIFESPAN );
+
     this.context = this.real_canvas.getContext('2d');
 
     // plug some event handlers
