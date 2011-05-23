@@ -8,11 +8,13 @@
 
 		<%= 
 			@page.css.insert 0, "/css/base.css" 
+			@page.css.insert 0, "/css/colorjack.css" 
 			@page.render_css 
 		%>
 		<%=
 			@page.js.insert 0, "/js/jquery.js"
 			@page.js.insert 1, "/js/jquery.cookie.js"
+			@page.js.insert 1, "/js/colorjack.js"
 			@page.render_js
 		%>
 
