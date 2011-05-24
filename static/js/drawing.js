@@ -221,11 +221,15 @@ function Drawing( p_session, p_canvas_id ){
         self.draw_grid();
     };
 
-
     /** 
      * Handle mouse event
      */
-    this.mouseup = function( event_obj ) {
+    this.mouseup = function( event_obj ) { self.pencil_up( event_obj ); }
+    this.touchup = function( event_obj ) { 
+        self.pencil_up( event_obj ); 
+    }
+
+    this.pencil_up = function( event_obj ) {
         self.move.enable = false;
     };
 
@@ -233,7 +237,10 @@ function Drawing( p_session, p_canvas_id ){
     /** 
      * Handle mouse event
      */
-    this.mousedown = function( event_obj ) {
+    this.mousedown = function( event_obj ) { self.pencil_down( event_obj ); }
+    this.touchdown = function( event_obj ) { self.pencil_down( event_obj ); }
+
+    this.pencil_down = function( event_obj ) {
         self.move.enable = true;
         self.mousemove( event_obj );
     };
@@ -243,7 +250,13 @@ function Drawing( p_session, p_canvas_id ){
     /** 
      * Handle mouse event
      */
-    this.mousemove = function( event_obj ) {
+    this.mousemove = function( event_obj ) { self.pencil_move( event_obj ); }
+    this.touchmove = function( event_obj ) { 
+        self.pencil_move( event_obj ); 
+        event_obj.preventDefault();
+    }
+
+    this.pencil_move = function( event_obj ) {
         var ctx = self.context;
         var canvas = self.real_canvas;
 
@@ -372,8 +385,14 @@ function Drawing( p_session, p_canvas_id ){
 
     // plug some event handlers
     this.real_canvas.addEventListener( 'mousedown', canvas_event, false );
+    this.real_canvas.addEventListener( 'touchstart', canvas_event, false );
+
     this.real_canvas.addEventListener( 'mouseup', canvas_event, false );
+    this.real_canvas.addEventListener( 'touchstop', canvas_event, false );
+
     this.real_canvas.addEventListener( 'mousemove', canvas_event, false );
+    this.real_canvas.addEventListener( 'touchmove', canvas_event, false );
+
     $(window).resize(function() {
         self.update_size();
         self.update_paint();
