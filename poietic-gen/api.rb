@@ -42,7 +42,7 @@ module PoieticGen
 
 		configure do
 
-			config = PoeticGen::ServerConfig.new PoeticGen::ServerConfig::DEFAULT_CONFIG_PATH
+			config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
 
 			set :config, config
 			set :manager, Manager.new(config)
