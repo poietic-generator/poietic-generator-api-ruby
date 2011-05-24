@@ -134,7 +134,7 @@ module PoieticGen
 		# clients having not renewed their lease before 300
 		# seconds are considered disconnected
 		#
-		get '/api/drawing/list' do
+		get '/api/drawing/update' do
 			JSON.generate({ :patches => [] })
 		end
 
@@ -143,7 +143,7 @@ module PoieticGen
 		# (update current lease)
 		#
 		post '/api/drawing/post' do
-
+			# FIXME: handle received patches
 		end
 
 
@@ -151,14 +151,14 @@ module PoieticGen
 		# Send message to the chat
 		#
 		put '/api/chat/post' do
-			#
+			# FIXME: handle received messages
 		end
 
 		# 
 		# Get latest messages from chat
 		#
-		get '/api/chat/list' do 
-			#
+		get '/api/chat/update' do 
+			# FIXME: send staging messages to clients
 		end
 
 	end

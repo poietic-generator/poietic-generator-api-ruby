@@ -84,7 +84,7 @@ function Zone( p_width, p_height ) {
                 changes: [ { x: pos.x, y: pos.y, stamp: 0 }  ]
             }
         } else {
-            if ( _current_patch.color == color) {
+            if ( _current_patch.color != color) {
                 self.patch_enqueue();
                 _current_patch = {
                     stamp: new Date(),
@@ -104,16 +104,29 @@ function Zone( p_width, p_height ) {
      * Push current patch to local patch queue
      */
     this.patch_enqueue = function() {
+        console.log("zone/patch_enqueue: enqueing current patch !");
+        // FIXME: verify that enqueued patches are not empty
         _local_patches.push(_current_patch);
         _current_patch = null;
     };
 
+    /**
+      * 
+      */
+    this.patches_get = function() {
+        var aggregate = {}
+        aggregate.patches = _local_patches;
+        // FIXME: compute relative time since last sync
+        return aggregate;
+    }
 
-    /*
-     * Utility function for debugging
-     */
-    this.to_s = function() { JSON.stringify(this); };
-
+    /**
+      * Request application for a set of patches to current zone
+      */
+    this.patches_put = function( p_aggregate ) {
+        // FIXME: call apply patch for each patches' relative time
+        _remote_patches = p_aggregate;
+    }
 
     // constructor
     self.matrix_initialize();
