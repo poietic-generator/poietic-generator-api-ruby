@@ -1,5 +1,6 @@
 source "http://rubygems.org"
 
+gem "rack", "~> 1.2"
 gem "sinatra", :require => "sinatra/base"
 gem "sinatra-reloader"
 gem "shotgun"

@@ -24,7 +24,7 @@ module PoieticGen
 
 		set :environment, :development
 		#set :environment, :production
-		
+
 		set :static, true
 		set :public, File.expand_path( File.dirname(__FILE__) + '/../static' )
 		set :views, File.expand_path( File.dirname(__FILE__) + '/../views' )
@@ -34,7 +34,7 @@ module PoieticGen
 		mime_type :otf, "application/octet-stream"
 		mime_type :woff, "application/octet-stream"
 
-		
+
 		configure :development do |c|
 			require "sinatra/reloader"
 			register Sinatra::Reloader
@@ -46,10 +46,12 @@ module PoieticGen
 
 			set :config, config
 			set :manager, Manager.new(config)
+      STDERR.puts "The database url is : '%s'" % config.database_cfg.get_url
+			DataMapper.setup(:default, config.database_cfg.get_hash)
 
 			#DataMapper.setup(:default, "sqlite3::memory:")
 			#DataMapper.setup(:default, "sqlite3::memory:")
-			DataMapper.setup(:default, "sqlite3://#{Dir.pwd}/poietic-gen.sqlite3")
+			#DataMapper.setup(:default, "sqlite3://#{Dir.pwd}/poietic-gen.sqlite3")
 
 			# raise exception on save failure (globally across all models)
 			DataMapper::Model.raise_on_save_failure = true
@@ -61,7 +63,7 @@ module PoieticGen
 				:host     => 'localhost',
 				:username => 'root' ,
 				:password => '',
-				:database => 'sinatra_development'})  
+				:database => 'sinatra_development'})
 =end
 			DataMapper.auto_upgrade!
 		end
@@ -72,7 +74,7 @@ module PoieticGen
 		#
 		#
 		#
-		get '/' do 
+		get '/' do
 			@page = Page.new "Index"
 			erb :page_index
 		end
@@ -88,7 +90,7 @@ module PoieticGen
 		#
 		# display global activity on this session
 		#
-		get '/page/view' do 
+		get '/page/view' do
 			@page = Page.new "View"
 			erb :page_view
 		end
@@ -98,7 +100,7 @@ module PoieticGen
 		# notify server about the intention of joining the session
 		#
 		get '/api/session/join' do
-			user = settings.manager.join params['user_id'], 
+			user = settings.manager.join params['user_id'],
 				params['user_session'],
 				params['user_name']
 
@@ -127,7 +129,7 @@ module PoieticGen
 			JSON.generate({ :user_id => session['user_id'] })
 		end
 
-		# 
+		#
 		# Get latest patches from server
 		# (update current lease)
 		#
@@ -147,17 +149,17 @@ module PoieticGen
 		end
 
 
-		# 
+		#
 		# Send message to the chat
 		#
 		put '/api/chat/post' do
 			# FIXME: handle received messages
 		end
 
-		# 
+		#
 		# Get latest messages from chat
 		#
-		get '/api/chat/update' do 
+		get '/api/chat/update' do
 			# FIXME: send staging messages to clients
 		end
 
@@ -167,4 +169,4 @@ end
 # un moyen d'envoyer un paquet de données
 #
 # recevoir le dernier paquet de données depuis la date X
-# 
+#

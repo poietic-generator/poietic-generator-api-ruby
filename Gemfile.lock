@@ -92,6 +92,7 @@ DEPENDENCIES
   haml
   inifile (~> 0.3)
   json
+  rack (~> 1.2)
   shotgun
   sinatra
   sinatra-reloader
