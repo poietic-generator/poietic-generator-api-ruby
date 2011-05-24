@@ -225,7 +225,9 @@ function Drawing( p_session, p_canvas_id ){
      * Handle mouse event
      */
     this.mouseup = function( event_obj ) { self.pencil_up( event_obj ); }
-    this.touchup = function( event_obj ) { 
+    this.touchstop = function( event_obj ) { 
+        event_obj.mouseX = event_obj.touches[0].pageX;
+        event_obj.mouseY = event_obj.touches[0].pageY;
         self.pencil_up( event_obj ); 
     }
 
@@ -238,7 +240,11 @@ function Drawing( p_session, p_canvas_id ){
      * Handle mouse event
      */
     this.mousedown = function( event_obj ) { self.pencil_down( event_obj ); }
-    this.touchdown = function( event_obj ) { self.pencil_down( event_obj ); }
+    this.touchstart = function( event_obj ) { 
+        event_obj.mouseX = event_obj.touches[0].pageX;
+        event_obj.mouseY = event_obj.touches[0].pageY;
+        self.pencil_down( event_obj ); 
+    }
 
     this.pencil_down = function( event_obj ) {
         self.move.enable = true;
@@ -252,6 +258,8 @@ function Drawing( p_session, p_canvas_id ){
      */
     this.mousemove = function( event_obj ) { self.pencil_move( event_obj ); }
     this.touchmove = function( event_obj ) { 
+        event_obj.mouseX = event_obj.touches[0].pageX;
+        event_obj.mouseY = event_obj.touches[0].pageY;
         self.pencil_move( event_obj ); 
         event_obj.preventDefault();
     }
