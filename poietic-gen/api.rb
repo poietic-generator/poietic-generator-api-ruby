@@ -46,25 +46,12 @@ module PoieticGen
 
 			set :config, config
 			set :manager, Manager.new(config)
-      STDERR.puts "The database url is : '%s'" % config.database_cfg.get_url
 			DataMapper.setup(:default, config.database_cfg.get_hash)
 
-			#DataMapper.setup(:default, "sqlite3::memory:")
-			#DataMapper.setup(:default, "sqlite3::memory:")
-			#DataMapper.setup(:default, "sqlite3://#{Dir.pwd}/poietic-gen.sqlite3")
 
 			# raise exception on save failure (globally across all models)
 			DataMapper::Model.raise_on_save_failure = true
 
-			# FIXME: make database configurable
-=begin
-			DataMapper.setup(:default, {
-				:adapter  => 'mysql',
-				:host     => 'localhost',
-				:username => 'root' ,
-				:password => '',
-				:database => 'sinatra_development'})
-=end
 			DataMapper.auto_upgrade!
 		end
 
@@ -100,24 +87,12 @@ module PoieticGen
 		# notify server about the intention of joining the session
 		#
 		get '/api/session/join' do
-			user = settings.manager.join params['user_id'],
+			json = settings.manager.join params['user_id'],
 				params['user_session'],
 				params['user_name']
 
-			pp user
-			# FIXME: test request user_id
-			# FIXME: test request username
-			# FIXME: validate session
-			# FIXME: return same user_id if session is still valid
-
-			# return JSON for userid
-			# FIXME: drawing_width & drawing_height MUST depend on the configuration
-			JSON.generate({ :user_id => user.id,
-						 	:user_session => user.session,
-						  	:user_name => user.name,
-		   					:zone_column_count => 20,
-							:zone_line_count => 20
-			})
+			pp json
+			return json
 		end
 
 		#

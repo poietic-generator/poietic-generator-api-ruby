@@ -61,6 +61,7 @@ module PoieticGen
       attr_reader :colors
       attr_reader :width
       attr_reader :height
+      # FIXME : fix width and height name
 
       def initialize hash
         raise MissingField, "Board.name" unless hash.include? "name"

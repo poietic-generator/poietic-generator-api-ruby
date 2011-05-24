@@ -18,8 +18,6 @@ module PoieticGen
 			@session_id = (0...16).map{ ('a'..'z').to_a[rand(26)] }.join
 
 			@palette = Palette.new
-			@width = 32
-			@height = 32
 
 			@users = []
 
@@ -43,9 +41,9 @@ module PoieticGen
 			now = DateTime.now
 			param_request = {
 			   	:id => req_user_id,
-				:session => @session_id 
+				:session => @session_id
 			}
-			param_create = { 
+			param_create = {
 				:session => @session_id,
 				:name => ( req_user_name || 'anonymous' ),
 				:created_at => now,
@@ -68,13 +66,24 @@ module PoieticGen
 			end
 
 			# update expiration time
-			user.expires_at = (now + Rational(User::MAX_IDLE, 60 * 60 * 24 )) 
+			user.expires_at = (now + Rational(User::MAX_IDLE, 60 * 60 * 24 ))
 			user.save
 
 			# FIXME: allocate zone  (or reallocate zone)
 			# FIXME: send matrix status of user zone
 
-			return user
+			# FIXME: test request user_id
+			# FIXME: test request username
+			# FIXME: validate session
+			# FIXME: return same user_id if session is still valid
+
+			# return JSON for userid
+			return JSON.generate({ :user_id => user.id,
+						 	:user_session => user.session,
+						  	:user_name => user.name,
+		   					:zone_column_count => @config.board_cfg.width,
+							:zone_line_count => @config.board_cfg.height
+			})
 		end
 
 
@@ -98,7 +107,7 @@ module PoieticGen
 			zone_result = nil
 
 			zones_free = @zones.select do |zone_item|
-				zone_item.user.nil? 
+				zone_item.user.nil?
 			end
 			if zones_free.empty? then
 				self.expand!
@@ -144,10 +153,10 @@ module PoieticGen
 		# post
 		#  * <user-id> changes
 		#
-		# returns 
+		# returns
 		#  * latest content since last update
 		def sync user_id
-			# 
+			#
 			#draw user
 
 			return
