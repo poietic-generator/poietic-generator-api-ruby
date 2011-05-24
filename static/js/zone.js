@@ -2,7 +2,7 @@
 // vim: set ts=4 sw=4 et:
 "use strict";
 
-const ZONE_BACKGROUND_COLOR = '#000';
+var ZONE_BACKGROUND_COLOR = '#000';
 
 function Zone( p_width, p_height ) {
     var self = this;

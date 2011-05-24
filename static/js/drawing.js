@@ -2,17 +2,17 @@
 // vim: set ts=4 sw=4 et:
 "use strict";
 
-const DRAWING_REFRESH = 5000;
-const DRAWING_PUSH_REFRESH = 5000;
-const DRAWING_GRID_COLOR = '#444';
-const DRAWING_GRID_WIDTH = 0.5;
-const DRAWING_BOUNDARIES_COLOR = '#888';
-const DRAWING_BOUNDARIES_WIDTH = 2;
-const DRAWING_URL_UPDATE = "/api/drawing/update";
-const DRAWING_URL_POST = "/api/drawing/post";
+var DRAWING_REFRESH = 5000;
+var DRAWING_PUSH_REFRESH = 5000;
+var DRAWING_GRID_COLOR = '#444';
+var DRAWING_GRID_WIDTH = 0.5;
+var DRAWING_BOUNDARIES_COLOR = '#888';
+var DRAWING_BOUNDARIES_WIDTH = 2;
+var DRAWING_URL_UPDATE = "/api/drawing/update";
+var DRAWING_URL_POST = "/api/drawing/post";
 
-const POSITION_TYPE_DRAWING = 0;
-const POSITION_TYPE_ZONE = 0;
+var POSITION_TYPE_DRAWING = 0;
+var POSITION_TYPE_ZONE = 0;
 
 function Drawing( p_session, p_canvas_id ){
     var self = this;
@@ -20,7 +20,7 @@ function Drawing( p_session, p_canvas_id ){
     /**
      *
      */
-    this.pull_patches = function(){
+    this.pull_patches = function( callback ){
         $.ajax({
             // FIXME: request with previous user_id
             url: DRAWING_URL_UPDATE,
@@ -29,9 +29,9 @@ function Drawing( p_session, p_canvas_id ){
             context: self,
             success: function( response ){
                 // FIXME: set cookie with user_id for next time
-                console.log('drawing/update response : ' + response.to_json() );
+                console.log('drawing/update response : ' + JSON.stringify( response ) );
 
-                callback( self );
+                if (callback){  callback( self ); }
             }
         });
     };
@@ -39,7 +39,7 @@ function Drawing( p_session, p_canvas_id ){
     /**
      *
      */
-    this.push_patches = function(){
+    this.push_patches = function( callback ){
         $.ajax({
             // FIXME: request with previous user_id
             url: DRAWING_URL_POST,
@@ -49,9 +49,9 @@ function Drawing( p_session, p_canvas_id ){
             context: self,
             success: function( response ){
                 // FIXME: set cookie with user_id for next time
-                console.log('drawing/post response : ' + response.to_json() );
+                console.log('drawing/post response : ' + JSON.stringify( response ) );
 
-                callback( self );
+                if (callback){  callback( self ); }
             }
         });
         // FIXME: send content only if aggregate is not empty 

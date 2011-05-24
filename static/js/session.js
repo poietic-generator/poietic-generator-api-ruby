@@ -3,10 +3,10 @@
 // vim: set ts=4 sw=4 et:
 "use strict";
 
-const SESSION_URL_JOIN = "/api/session/join";
-const SESSION_URL_LEAVE = "/api/session/leave";
-const SESSION_TYPE_DRAW = "draw";
-const SESSION_TYPE_VIEW = "view";
+var SESSION_URL_JOIN = "/api/session/join";
+var SESSION_URL_LEAVE = "/api/session/leave";
+var SESSION_TYPE_DRAW = "draw";
+var SESSION_TYPE_VIEW = "view";
 
 
 function Session( session_type, callback ) {

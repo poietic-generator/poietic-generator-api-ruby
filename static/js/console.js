@@ -10,5 +10,5 @@ if (!("console" in window) || !("firebug" in console)) {
     }
 }
 
-Object.prototype.to_json = function() { return JSON.stringify( this ); }
+// Object.prototype.to_json = function() { return JSON.stringify( this ); }
 
