@@ -3,11 +3,13 @@
 "use strict";
 
 const DRAWING_REFRESH = 5000;
+const DRAWING_PUSH_REFRESH = 5000;
 const DRAWING_GRID_COLOR = '#444';
 const DRAWING_GRID_WIDTH = 0.5;
 const DRAWING_BOUNDARIES_COLOR = '#888';
 const DRAWING_BOUNDARIES_WIDTH = 2;
-const DRAWING_URL_LIST = "/api/drawing/list";
+const DRAWING_URL_UPDATE = "/api/drawing/update";
+const DRAWING_URL_POST = "/api/drawing/post";
 
 const POSITION_TYPE_DRAWING = 0;
 const POSITION_TYPE_ZONE = 0;
@@ -21,18 +23,39 @@ function Drawing( p_session, p_canvas_id ){
     this.pull_patches = function(){
         $.ajax({
             // FIXME: request with previous user_id
-            url: DRAWING_URL_LIST,
+            url: DRAWING_URL_UPDATE,
             dataType: "json",
             type: 'GET',
             context: self,
             success: function( response ){
                 // FIXME: set cookie with user_id for next time
-                console.log('drawing/list response : ' + response.to_json() );
+                console.log('drawing/update response : ' + response.to_json() );
 
                 callback( self );
             }
         });
-    }
+    };
+
+    /**
+     *
+     */
+    this.push_patches = function(){
+        $.ajax({
+            // FIXME: request with previous user_id
+            url: DRAWING_URL_POST,
+            dataType: "json",
+            type: 'POST',
+            data: JSON.stringify( { patches: [] }),
+            context: self,
+            success: function( response ){
+                // FIXME: set cookie with user_id for next time
+                console.log('drawing/post response : ' + response.to_json() );
+
+                callback( self );
+            }
+        });
+        // FIXME: send content only if aggregate is not empty 
+    };
 
 
     /** 
@@ -303,6 +326,7 @@ function Drawing( p_session, p_canvas_id ){
     this.color_set = function( hexcolor ) {
         _color = hexcolor;
         // FIXME: 
+        console.log("drawing/color_set: requestion patch enqueue")
         _zone.patch_enqueue();
     }
 
@@ -341,7 +365,8 @@ function Drawing( p_session, p_canvas_id ){
     this.line_size = 1;
 
     var _pull_timer = window.setInterval( this.pull_patches, DRAWING_REFRESH );
-    var _patch_timer = window.setInterval( _zone.patch_enqueue, PATCH_LIFESPAN );
+    var _push_timer = window.setInterval( this.push_patches, DRAWING_PUSH_REFRESH );
+    var _enqueue_timer = window.setInterval( _zone.patch_enqueue, PATCH_LIFESPAN );
 
     this.context = this.real_canvas.getContext('2d');
 
