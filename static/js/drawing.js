@@ -14,6 +14,8 @@ var POSITION_TYPE_DRAWING = 0;
 var POSITION_TYPE_ZONE = 0;
 
 function Drawing( p_session, p_canvas_id ){
+    //var console = { log: function() {} };
+
     var self = this;
 
     /**
@@ -23,19 +25,19 @@ function Drawing( p_session, p_canvas_id ){
         var patches = JSON.stringify( _zone.patches_get() );
         console.log("drawing/patches_update: patches = %s", patches); 
         $.ajax({
-            // FIXME: request with previous user_id
             url: DRAWING_URL_UPDATE,
             dataType: "json",
             data: patches, 
             type: 'POST',
             context: self,
             success: function( response ){
-                // FIXME: set cookie with user_id for next time
                 console.log('drawing/update response : ' + JSON.stringify( response ) );
 
                 if (callback){  callback( self ); }
+
             }
         });
+
     };
 
 
@@ -156,7 +158,7 @@ function Drawing( p_session, p_canvas_id ){
                 var zone_pos = { 'x': x, 'y': y };
                 var color = _zone.pixel_get( zone_pos );
                 var local_pos = zone_to_local_position( zone_pos );
-                // console.log("drawing/update_paint: zone_pos =", zone_pos.to_json() );
+                //console.log("drawing/update_paint: zone_pos =", JSON.stringify( zone_pos ) );
                 self.pixel_draw( local_pos, color );
             }
         }
@@ -253,9 +255,9 @@ function Drawing( p_session, p_canvas_id ){
             var canvas_pos = { x: event_obj.mouseX, y: event_obj.mouseY };
             var local_pos = canvas_to_local_position( canvas_pos );
             var zone_pos = local_to_zone_position( local_pos );
-            //console.log( "drawing/mousemove: canvas pos : %s", canvas_pos.to_json() );
-            //console.log( "drawing/mousemove:local pos : %s", local_pos.to_json() );
-            //console.log( "drawing/mousemove:zone pos : %s", zone_pos.to_json() );
+            // console.log( "drawing/mousemove: canvas pos : %s", canvas_pos.to_json() );
+            // console.log( "drawing/mousemove:local pos : %s", local_pos.to_json() );
+            // console.log( "drawing/mousemove:zone pos : %s", zone_pos.to_json() );
 
             // FIXME: detect target zone
             // target_zone = local_to_target_ f( zone_pos )
@@ -332,18 +334,22 @@ function Drawing( p_session, p_canvas_id ){
         _zone.patch_enqueue();
     }
 
+
+    /** 
+      * Handle all types on canvas events and dispatch
+      */
     var canvas_event = function( event_obj ) {
         var canvas = self.real_canvas;
 
+        // FIXME verify the same formula is used with touchscreens
         event_obj.mouseX = event_obj.pageX - canvas.offsetLeft;
         event_obj.mouseY = event_obj.pageY - canvas.offsetTop;
 
         var func = self[event_obj.type];
         if (func) { func( event_obj ); }
-        // console.log("clicked at %s,%s", mouseX, mouseY );
+        // console.log("clicked at %s,%s", event_obj.mouseX, event_obj.mouseY );
     };
 
-    this.to_s = function() { JSON.stringify(this); };
 
     var _zone = new Zone( p_session.zone_column_count, p_session.zone_line_count );
     var _color = '#f00';
