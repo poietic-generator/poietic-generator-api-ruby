@@ -95,6 +95,7 @@ module PoieticGen
 			return json
 		end
 
+
 		#
 		# notify server about the intention of leaving the session
 		# return null user_id for confirmation
@@ -104,6 +105,7 @@ module PoieticGen
 			JSON.generate({ :user_id => session['user_id'] })
 		end
 
+
 		#
 		# Get latest patches from server
 		# (update current lease)
@@ -111,16 +113,8 @@ module PoieticGen
 		# clients having not renewed their lease before 300
 		# seconds are considered disconnected
 		#
-		get '/api/drawing/update' do
+		post '/api/drawing/update' do
 			JSON.generate({ :patches => [] })
-		end
-
-		#
-		# Post client's latest patches
-		# (update current lease)
-		#
-		post '/api/drawing/post' do
-			# FIXME: handle received patches
 		end
 
 
@@ -130,6 +124,7 @@ module PoieticGen
 		put '/api/chat/post' do
 			# FIXME: handle received messages
 		end
+
 
 		#
 		# Get latest messages from chat
