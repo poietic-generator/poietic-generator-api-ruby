@@ -1,6 +1,6 @@
 
 module PoieticGen
-	class Zone <
+	class Zone
 		Struct :index, :position, :vector, :user
 
 		def initialize index, position, vector
