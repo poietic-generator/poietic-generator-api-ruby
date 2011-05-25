@@ -87,10 +87,18 @@ module PoieticGen
 		end
 
 
-		def leave user_id
-			zone_idx = @users[user_id].zone
+		def leave req_user_id, req_session, req_user_name
+			# FIXME: send "leave event" to everyone
+			# zone_idx = @users[user_id].zone
 
-			self.zone_free zone_idx
+			param_request = {
+			   	:id => req_user_id,
+				:session => @session_id
+			}
+			user = User.first param_request
+			if user then
+				self.zone_free user.id
+			end
 		end
 
 		def zone_free zone_idx
