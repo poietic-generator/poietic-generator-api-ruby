@@ -9,7 +9,6 @@ var DRAWING_GRID_WIDTH = 0.5;
 var DRAWING_BOUNDARIES_COLOR = '#888';
 var DRAWING_BOUNDARIES_WIDTH = 2;
 var DRAWING_URL_UPDATE = "/api/drawing/update";
-var DRAWING_URL_POST = "/api/drawing/post";
 
 var POSITION_TYPE_DRAWING = 0;
 var POSITION_TYPE_ZONE = 0;
@@ -25,7 +24,8 @@ function Drawing( p_session, p_canvas_id ){
             // FIXME: request with previous user_id
             url: DRAWING_URL_UPDATE,
             dataType: "json",
-            type: 'GET',
+            data: JSON.stringify( { patches: [] }),
+            type: 'POST',
             context: self,
             success: function( response ){
                 // FIXME: set cookie with user_id for next time
@@ -34,27 +34,6 @@ function Drawing( p_session, p_canvas_id ){
                 if (callback){  callback( self ); }
             }
         });
-    };
-
-    /**
-     *
-     */
-    this.push_patches = function( callback ){
-        $.ajax({
-            // FIXME: request with previous user_id
-            url: DRAWING_URL_POST,
-            dataType: "json",
-            type: 'POST',
-            data: JSON.stringify( { patches: [] }),
-            context: self,
-            success: function( response ){
-                // FIXME: set cookie with user_id for next time
-                console.log('drawing/post response : ' + JSON.stringify( response ) );
-
-                if (callback){  callback( self ); }
-            }
-        });
-        // FIXME: send content only if aggregate is not empty 
     };
 
 
