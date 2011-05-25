@@ -6,7 +6,8 @@ require 'poietic-gen/database'
 module PoieticGen
 
 
-	ZONE_INIT = []
+	# FIXME: since could have the following format { ev: id, patch: id, chat: id }
+
 
 	#
 	# manage a pool of users
@@ -24,7 +25,8 @@ module PoieticGen
 			# total count of users seen
 			@users_seen = 0
 
-			@zones = [ ZONE_INIT ]
+			# FIXME put it in db
+			@event_queue = []
 		end
 
 
@@ -67,7 +69,10 @@ module PoieticGen
 
 			# update expiration time
 			user.expires_at = (now + Rational(User::MAX_IDLE, 60 * 60 * 24 ))
+
+			# FIXME: user.zone = @board.allocate
 			user.save
+
 
 			# FIXME: allocate zone  (or reallocate zone)
 			# FIXME: send matrix status of user zone
@@ -101,30 +106,6 @@ module PoieticGen
 			end
 		end
 
-		def zone_free zone_idx
-			zone = @zones[zone_idx]
-			zone.user = nil
-		end
-
-		#
-		# allocates a zone for a new user
-		# uses the minimal index zone if it exists
-		# or creates one if necessary
-		#
-		def zone_alloc user_id
-			zone_result = nil
-
-			zones_free = @zones.select do |zone_item|
-				zone_item.user.nil?
-			end
-			if zones_free.empty? then
-				self.expand!
-			end
-
-			zone = zones_free.first
-			zone.user = user_id
-			return zone
-		end
 
 		#
 		# expend map creating new allocatable zones
