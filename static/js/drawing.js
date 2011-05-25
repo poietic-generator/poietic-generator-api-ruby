@@ -8,7 +8,7 @@ var DRAWING_GRID_COLOR = '#444';
 var DRAWING_GRID_WIDTH = 0.5;
 var DRAWING_BOUNDARIES_COLOR = '#888';
 var DRAWING_BOUNDARIES_WIDTH = 2;
-var DRAWING_URL_UPDATE = "/api/drawing/update";
+var DRAWING_URL_UPDATE = "/api/session/update";
 
 var POSITION_TYPE_DRAWING = 0;
 var POSITION_TYPE_ZONE = 0;
