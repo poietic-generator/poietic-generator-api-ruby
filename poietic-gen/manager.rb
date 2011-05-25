@@ -18,11 +18,9 @@ module PoieticGen
 			# a 16-char long random string
 			@session_id = (0...16).map{ ('a'..'z').to_a[rand(26)] }.join
 
-			@palette = Palette.new
+			# @palette = Palette.new
 
-			@users = []
-
-			# total count of users seen
+			# total count of users seen (FIXME: get it from db)
 			@users_seen = 0
 
 			# FIXME put it in db
@@ -83,6 +81,8 @@ module PoieticGen
 			# FIXME: return same user_id if session is still valid
 
 			# return JSON for userid
+
+			# FIXME: send "leave event" to everyone
 			return JSON.generate({ :user_id => user.id,
 						 	:user_session => user.session,
 						  	:user_name => user.name,
