@@ -114,6 +114,10 @@ module PoieticGen
 		# seconds are considered disconnected
 		#
 		post '/api/drawing/update' do
+			# FIXME: verify session expiration..
+			# FIXME: update session liveness
+
+			pp JSON.parse(request.body.read) 
 			JSON.generate({ :patches => [] })
 		end
 
@@ -122,6 +126,9 @@ module PoieticGen
 		# Send message to the chat
 		#
 		put '/api/chat/post' do
+			# FIXME: verify session expiration..
+			# FIXME: update session liveness
+
 			# FIXME: handle received messages
 		end
 

@@ -15,13 +15,13 @@ function Zone( p_width, p_height ) {
     var _matrix = [];
 
     // patches to send
-    var _local_patches = [];
+    var _output_queue = [];
 
     // the patch we are working on
     var _current_patch = null;
 
     // patches to apply localy
-    var _remote_patches = [];
+    var _input_queue = [];
 
     // console.log("zone/initialize width = %s", this.width );
     // console.log("zone/initialize height = %s", this.height );
@@ -76,12 +76,13 @@ function Zone( p_width, p_height ) {
         var patch_update;
         var patch_enqueue;
 
+
         if ( _current_patch == null ) {
             // console.log("zone/patch_record: patch creation!");
             _current_patch = {
                 stamp: new Date(),
                 color: color,
-                changes: [ { x: pos.x, y: pos.y, stamp: 0 }  ]
+                changes: [ [ pos.x, pos.y, 0 ]  ]
             }
         } else {
             if ( _current_patch.color != color) {
@@ -89,14 +90,24 @@ function Zone( p_width, p_height ) {
                 _current_patch = {
                     stamp: new Date(),
                     color: color,
-                    changes: [ { x: pos.x, y: pos.y, stamp: 0 }  ]
+                    changes: [ [ pos.x, pos.y, 0 ]  ]
                 }
             } else {
                 // console.log("zone/patch_record: patch update!");
 
-                _current_patch.changes.push( { x: pos.x, y: pos.y, stamp: 0 });
+                // CONSTRAINT : we drop duplicate coordinates from a single patch if latest record it the same
+                var prev_record = null;
+                if ( _current_patch.changes.length > 0 ) {
+                    prev_record = _current_patch.changes[ _current_patch.changes.length - 1 ];
+                }
+                if ( ( prev_record != null ) && ( prev_record[0] == pos.x ) && ( prev_record[1] == pos.y ) ) {
+                    // drop
+                } else {
+                    _current_patch.changes.push( [ pos.x, pos.y, 0 ] );
+                }
             }
         }
+        // console.log( "zone/patch_record: _current_patch = %s", JSON.stringify( _current_patch ) );
     };
 
 
@@ -104,19 +115,28 @@ function Zone( p_width, p_height ) {
      * Push current patch to local patch queue
      */
     this.patch_enqueue = function() {
-        console.log("zone/patch_enqueue: enqueing current patch !");
-        // FIXME: verify that enqueued patches are not empty
-        _local_patches.push(_current_patch);
-        _current_patch = null;
+        console.log("zone/patch_enqueue:  !");
+        if ( _current_patch != null ) {
+            // FIXME: verify that enqueued patches are not empty
+            _output_queue.push(_current_patch);
+            _current_patch = null;
+            console.log("zone/patch_enqueue: output queue = %s", JSON.stringify( _output_queue ) );
+        }
     };
+
 
     /**
       * 
       */
     this.patches_get = function() {
-        var aggregate = {}
-        aggregate.patches = _local_patches;
-        // FIXME: compute relative time since last sync
+        var aggregate = {};
+        aggregate.patches = [];
+
+        while ( _output_queue.length > 0 ) {
+            // FIXME: compute relative time since last sync
+            aggregate.patches.push( _output_queue.shift() );
+        }
+        
         return aggregate;
     }
 
@@ -125,7 +145,8 @@ function Zone( p_width, p_height ) {
       */
     this.patches_put = function( p_aggregate ) {
         // FIXME: call apply patch for each patches' relative time
-        _remote_patches = p_aggregate;
+        // FIXME : append aggregate  instead of replacing
+        _input_queue = p_aggregate;
     }
 
     // constructor

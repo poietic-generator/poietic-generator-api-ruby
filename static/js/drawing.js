@@ -19,12 +19,14 @@ function Drawing( p_session, p_canvas_id ){
     /**
      *
      */
-    this.pull_patches = function( callback ){
+    this.patches_update = function( callback ){
+        var patches = JSON.stringify( _zone.patches_get() );
+        console.log("drawing/patches_update: patches = %s", patches); 
         $.ajax({
             // FIXME: request with previous user_id
             url: DRAWING_URL_UPDATE,
             dataType: "json",
-            data: JSON.stringify( { patches: [] }),
+            data: patches, 
             type: 'POST',
             context: self,
             success: function( response ){
@@ -364,8 +366,7 @@ function Drawing( p_session, p_canvas_id ){
     this.column_size = 1;
     this.line_size = 1;
 
-    var _pull_timer = window.setInterval( this.pull_patches, DRAWING_REFRESH );
-    var _push_timer = window.setInterval( this.push_patches, DRAWING_PUSH_REFRESH );
+    var _update_timer = window.setInterval( self.patches_update, DRAWING_REFRESH );
     var _enqueue_timer = window.setInterval( _zone.patch_enqueue, PATCH_LIFESPAN );
 
     this.context = this.real_canvas.getContext('2d');
