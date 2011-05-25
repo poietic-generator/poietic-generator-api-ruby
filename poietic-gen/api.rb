@@ -16,7 +16,6 @@ require 'pp'
 
 module PoieticGen
 
-
 	class Api < Sinatra::Base
 
 		enable :sessions
@@ -73,6 +72,7 @@ module PoieticGen
 			@page = Page.new "Session"
 			erb :page_draw
 		end
+
 
 		#
 		# display global activity on this session
