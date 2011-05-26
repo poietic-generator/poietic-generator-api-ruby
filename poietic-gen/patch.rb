@@ -3,12 +3,12 @@ require 'datamapper'
 
 module PoieticGen
 
-	class Patch
+	class Drawing
 		include DataMapper::Resource
 
 		property :id,	Serial
 		property :color, String
-		property :coordinates, String
+		property :changes, String
 		property :timestamp,	DateTime
 	end
 end
