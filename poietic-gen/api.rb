@@ -61,7 +61,7 @@ module PoieticGen
 
 			set :config, config
 			set :manager, Manager.new(config)
-			DataMapper.setup(:default, config.database_cfg.get_hash)
+			DataMapper.setup(:default, config.database.get_hash)
 
 
 			# raise exception on save failure (globally across all models)
