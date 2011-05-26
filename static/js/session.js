@@ -69,6 +69,10 @@ function Session( session_type, callback ) {
                 this.zone_column_count = response.zone_column_count;
                 this.zone_line_count = response.zone_line_count;
 
+                _current_event_id = response.event_id;
+                _current_drawing_id = response.drawing_id;
+                _current_chat_id = response.drawing_id;
+
                 $.cookie( 'user_id', this.user_id );
                 $.cookie( 'user_name', this.user_name );
                 $.cookie( 'user_session', this.user_session );
@@ -94,11 +98,13 @@ function Session( session_type, callback ) {
 
         // assign real values if objets are present
         if (_drawing) {
-            drawing_updates = JSON.stringify( _drawing.patches_get() );
+            drawing_updates = _drawing.patches_get();
         }
         if (_chat) {
-            chat_updates = JSON.stringify( _chat.patches_get() );
+            chat_updates = _chat.patches_get();
         }
+        console.log("drawing_updates = %s", drawing_updates);
+        console.log("chat_updates = %s", chat_updates);
 
         req = {
             drawing_since : _current_drawing_id,
@@ -118,6 +124,8 @@ function Session( session_type, callback ) {
             context: self,
             success: function( response ){
                 console.log('drawing/update response : ' + JSON.stringify( response ) );
+
+
             }
         });
 
