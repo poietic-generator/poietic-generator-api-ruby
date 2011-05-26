@@ -1,16 +1,19 @@
 
 require 'dm-core'
 
-class User
-	MAX_IDLE = 60
+module PoieticGen
 
-	include DataMapper::Resource
+	class User
+		MAX_IDLE = 60
 
-	property :id,	Serial
-	property :session,	String, :required => true
-	property :name,	String, :required => true
-	property :zone, Integer, :required => true
-	property :created_at,	DateTime, :required => true
-	property :expires_at, DateTime, :required => true
+		include DataMapper::Resource
+
+		property :id,	Serial
+		property :session,	String, :required => true
+		property :name,	String, :required => true
+		property :zone, Integer, :required => true
+		property :created_at,	DateTime, :required => true
+		property :expires_at, DateTime, :required => true
+	end
+
 end
-
