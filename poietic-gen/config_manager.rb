@@ -1,5 +1,5 @@
 
-require 'ini_fhile'
+require 'inifile'
 
 require 'poietic-gen/config_manager/config_server'
 require 'poietic-gen/config_manager/config_chat'
