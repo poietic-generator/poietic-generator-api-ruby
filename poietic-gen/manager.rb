@@ -2,6 +2,7 @@
 require 'poietic-gen/palette'
 require 'poietic-gen/database'
 
+require 'pp'
 
 module PoieticGen
 
@@ -15,6 +16,7 @@ module PoieticGen
 	class Manager
 		def initialize config
 			@config = config
+			pp config
 			# a 16-char long random string
 			@session_id = (0...16).map{ ('a'..'z').to_a[rand(26)] }.join
 
@@ -51,6 +53,7 @@ module PoieticGen
 			param_create = {
 				:session => @session_id,
 				:name => ( req_user_name || 'anonymous' ),
+				:zone => -1,
 				:created_at => now,
 				:expires_at => (now + Rational(User::MAX_IDLE, 60 * 60 * 24 ))
 			}
@@ -59,6 +62,8 @@ module PoieticGen
 				STDERR.puts "User is requesting a different session"
 				# create new
 				user = User.create param_create
+				# FIXME: allocate new zone
+
 			else
 				STDERR.puts "User is in session"
 				user = User.first_or_create param_request, param_create
@@ -67,17 +72,21 @@ module PoieticGen
 					STDERR.puts "User session expired"
 					# create new if session expired
 					user = User.create param_create
+					# FIXME: allocate new zone
 				end
 			end
 
 			# update expiration time
+			# FIXME: use configuration instead of constant
 			user.expires_at = (now + Rational(User::MAX_IDLE, 60 * 60 * 24 ))
 
 			# FIXME: user.zone = @board.allocate
+			if user.zone < 0 then 
+				STDERR.puts "no zone allocated !"
+			end
 			user.save
 
 
-			# FIXME: allocate zone  (or reallocate zone)
 			# FIXME: send matrix status of user zone
 
 			# FIXME: test request user_id
@@ -113,7 +122,7 @@ module PoieticGen
 
 
 		#
-		# expend map creating new allocatable zones
+		# if not expired, update lease
 		#
 		def update_lease req_user_id, req_session
 			now = DateTime.now
