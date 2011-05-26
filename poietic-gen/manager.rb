@@ -2,6 +2,7 @@
 require 'poietic-gen/palette'
 require 'poietic-gen/user'
 require 'poietic-gen/event'
+require 'poietic-gen/drawing'
 
 require 'pp'
 
@@ -96,19 +97,29 @@ module PoieticGen
 			# FIXME: return same user_id if session is still valid
 
 			# return JSON for userid
-			event = Event.create({ :type => 'join', :desc => JSON.generate({ :zone => user.zone }) })
+			event = Event.create({ 
+				:type => 'join', 
+				:desc => JSON.generate({ :zone => user.zone }),
+				:timestamp => DateTime.now
+			})
 			event.save
+
+			event_max = Drawing.first(:order => [ :id.desc ])
+			drawing_max = Drawing.first(:order => [ :id.desc ])
 
 			# FIXME: send "leave event" to everyone
 			# FIXME: send zone content to user
-			return JSON.generate({ :user_id => user.id,
+			return { :user_id => user.id,
 						 	:user_session => user.session,
 						  	:user_name => user.name,
 							:user_zone => user.zone,
 		   					:zone_column_count => @config.board.width,
 							:zone_line_count => @config.board.height,
-							:zone_content => []
-			})
+							:zone_content => [],
+							:event_id => event_max.id,
+							:drawing_id => 0,
+							:view_id => drawing_max.id
+			}
 		end
 
 
@@ -131,7 +142,9 @@ module PoieticGen
 		#
 		# if not expired, update lease
 		#
-		def update_lease session
+		# no result expected
+		#
+		def update_lease! session
 			now = DateTime.now
 			
 			# FIXME: use configuration instead of constant
@@ -162,8 +175,21 @@ module PoieticGen
 		#
 		def update_data session, data
 			#draw user
+			#FIXME: validate data input
+			
+			STDERR.puts "data:"
+			pp data
+			STDERR.puts "events:"
+			events = Event.all( :id.gt => data[:event] )
 
-			return
+			result = {
+				:event => [],
+				:drawing => [],
+				:chat => [],
+				:status => status
+			}
+
+			return result
 		end
 
 		#
