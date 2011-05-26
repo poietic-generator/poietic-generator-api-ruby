@@ -1,4 +1,6 @@
 
+require 'dm-core'
+
 class User
 	MAX_IDLE = 60
 
