@@ -1,11 +1,14 @@
 
 require 'dm-core'
 
-class Event
-	include DataMapper::Resource
+module PoieticGen
+	class Event
+		include DataMapper::Resource
 
-	property :id,	Serial
-	property :type,	String, :required => true
-	property :desc, String, :required => true
+		property :id,	Serial
+		property :type,	String, :required => true
+		property :desc, String, :required => true
+		property :timestamp,	DateTime
+	end
+
 end
-
