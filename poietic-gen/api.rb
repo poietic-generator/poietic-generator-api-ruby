@@ -2,7 +2,7 @@
 require 'sinatra/base'
 
 require 'poietic-gen/database'
-require 'poietic-gen/config'
+require 'poietic-gen/config_manager'
 require 'poietic-gen/page'
 require 'poietic-gen/manager'
 require 'poietic-gen/patch'
@@ -41,6 +41,10 @@ module PoieticGen
 
 
 		helpers do
+			#
+			# verify that session exist 
+			# FIXME: verify also that it is alive 
+			#
 			def validate_session! 
 				STDERR.puts session.inspect
 				unless session['user_id'] then
@@ -56,7 +60,6 @@ module PoieticGen
 		end
 
 		configure do
-
 			config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
 
 			set :config, config
@@ -71,8 +74,6 @@ module PoieticGen
 		end
 
 
-
-
 		#
 		#
 		#
@@ -82,6 +83,8 @@ module PoieticGen
 			@page = Page.new "Index"
 			erb :page_index
 		end
+
+
 
 		#
 		#
@@ -106,9 +109,6 @@ module PoieticGen
 		#
 		get '/api/session/join' do
 			json = settings.manager.join session, params
-		#	params['user_id'],
-		#		params['user_session'],
-		#		params['user_name']
 
 			pp json
 			return json
@@ -151,9 +151,8 @@ module PoieticGen
 		#
 		post '/api/session/update' do
 			begin
+			# verify session expiration..
 			validate_session!
-			# FIXME: verify session expiration..
-			# FIXME: update session liveness
 
 			# FIXME: extract patches information
 			# FIXME: extract chat information
@@ -165,7 +164,8 @@ module PoieticGen
 				status = [ STATUS_BAD_REQUEST, "Invalid content : JSON expected" ]
 			ensure
 				JSON.generate({ 
-					:patches => [] 
+					:drawing => [],
+					:chat => [],
 					:status => status
 				})
 			
