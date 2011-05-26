@@ -2,13 +2,10 @@
 // vim: set ts=4 sw=4 et:
 "use strict";
 
-var DRAWING_REFRESH = 5000;
-var DRAWING_PUSH_REFRESH = 5000;
 var DRAWING_GRID_COLOR = '#444';
 var DRAWING_GRID_WIDTH = 0.5;
 var DRAWING_BOUNDARIES_COLOR = '#888';
 var DRAWING_BOUNDARIES_WIDTH = 2;
-var DRAWING_URL_UPDATE = "/api/session/update";
 
 var POSITION_TYPE_DRAWING = 0;
 var POSITION_TYPE_ZONE = 0;
@@ -18,27 +15,14 @@ function Drawing( p_session, p_canvas_id ){
 
     var self = this;
 
-    /**
-     *
-     */
-    this.patches_update = function( callback ){
-        var patches = JSON.stringify( _zone.patches_get() );
-        console.log("drawing/patches_update: patches = %s", patches); 
-        $.ajax({
-            url: DRAWING_URL_UPDATE,
-            dataType: "json",
-            data: patches, 
-            type: 'POST',
-            context: self,
-            success: function( response ){
-                console.log('drawing/update response : ' + JSON.stringify( response ) );
-
-                if (callback){  callback( self ); }
-
-            }
-        });
-
-    };
+    var _enqueue_timer;
+    var _zone;
+    var _color;
+    var _pencil_move;
+    var _real_canvas;
+    var _grid_canvas;
+    var _column_size;
+    var _line_size;
 
 
     /** 
@@ -46,8 +30,8 @@ function Drawing( p_session, p_canvas_id ){
      */
     function local_to_canvas_position( local_position ) {
         return {
-            x: Math.floor( local_position.x * self.column_size ),
-            y: Math.floor( local_position.y * self.line_size )
+            x: Math.floor( local_position.x * _column_size ),
+            y: Math.floor( local_position.y * _line_size )
         };
     }
 
@@ -57,8 +41,8 @@ function Drawing( p_session, p_canvas_id ){
      */
     function canvas_to_local_position( canvas_position ){
         return {
-            x: Math.floor( canvas_position.x / self.column_size ),
-            y: Math.floor( canvas_position.y / self.line_size )
+            x: Math.floor( canvas_position.x / _column_size ),
+            y: Math.floor( canvas_position.y / _line_size )
         };
     }
 
@@ -106,8 +90,8 @@ function Drawing( p_session, p_canvas_id ){
         // create grid if none exist
         if ( self.grid_canvas == null ) {
             self.grid_canvas = document.createElement('canvas');
-            self.grid_canvas.width = self.real_canvas.width;
-            self.grid_canvas.height = self.real_canvas.height;
+            self.grid_canvas.width = _real_canvas.width;
+            self.grid_canvas.height = _real_canvas.height;
             canvas = self.grid_canvas;
             grid_ctx = canvas.getContext("2d");
 
@@ -137,8 +121,8 @@ function Drawing( p_session, p_canvas_id ){
                 y : self.border_line_count
             };
             var canvas_tl =  local_to_canvas_position( local_tl );
-            canvas_tl.w = Math.floor( self.column_count * self.column_size );
-            canvas_tl.h = Math.floor( self.line_count * self.line_size );
+            canvas_tl.w = Math.floor( self.column_count * _column_size );
+            canvas_tl.h = Math.floor( self.line_count * _line_size );
 
             grid_ctx.lineWidth = DRAWING_BOUNDARIES_WIDTH;
             grid_ctx.strokeStyle = DRAWING_BOUNDARIES_COLOR;
@@ -170,7 +154,7 @@ function Drawing( p_session, p_canvas_id ){
      *
      */
     this.update_size = function() {
-        var real_canvas = self.real_canvas;
+        var real_canvas = _real_canvas;
         var win = { 
             w: $(window).width(),
             h : $(window).height()
@@ -190,10 +174,10 @@ function Drawing( p_session, p_canvas_id ){
         // console.log("drawing/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
 
         // console.log("drawing/update_size: real_canvas.width = " + real_canvas.width);
-        self.column_size = real_canvas.width / (self.column_count + (self.border_column_count * 2));
-        self.line_size = real_canvas.height / (self.line_count + (self.border_line_count * 2));
+        _column_size = real_canvas.width / (self.column_count + (self.border_column_count * 2));
+        _line_size = real_canvas.height / (self.line_count + (self.border_line_count * 2));
 
-        // console.log("drawing/update_size: column_size = " + self.column_size);
+        // console.log("drawing/update_size: column_size = " + _column_size);
 
         self.grid_canvas = null;
 
@@ -215,7 +199,7 @@ function Drawing( p_session, p_canvas_id ){
     }
 
     this.pencil_up = function( event_obj ) {
-        self.move.enable = false;
+        _pencil_move.enable = false;
     };
 
 
@@ -230,7 +214,7 @@ function Drawing( p_session, p_canvas_id ){
     }
 
     this.pencil_down = function( event_obj ) {
-        self.move.enable = true;
+        _pencil_move.enable = true;
         self.mousemove( event_obj );
     };
 
@@ -249,9 +233,9 @@ function Drawing( p_session, p_canvas_id ){
 
     this.pencil_move = function( event_obj ) {
         var ctx = self.context;
-        var canvas = self.real_canvas;
+        var canvas = _real_canvas;
 
-        if (self.move.enable) {
+        if (_pencil_move.enable) {
             var canvas_pos = { x: event_obj.mouseX, y: event_obj.mouseY };
             var local_pos = canvas_to_local_position( canvas_pos );
             var zone_pos = local_to_zone_position( local_pos );
@@ -282,10 +266,10 @@ function Drawing( p_session, p_canvas_id ){
         //console.log("drawing/pixel_draw local_pos = %s", local_pos.to_json() );
         var canvas_pos = local_to_canvas_position( local_pos );
         var rect = {
-            x : canvas_pos.x + (0.1 * self.column_size),
-            y : canvas_pos.y + (0.1 * self.column_size),
-            w : self.column_size - ( 0.2 * self.column_size ),
-            h : self.line_size - ( 0.2 * self.column_size )
+            x : canvas_pos.x + (0.1 * _column_size),
+            y : canvas_pos.y + (0.1 * _column_size),
+            w : _column_size - ( 0.2 * _column_size ),
+            h : _line_size - ( 0.2 * _column_size )
         };
         //console.log("drawing/pixel_draw rect = %s", rect.to_json() );
 
@@ -339,7 +323,7 @@ function Drawing( p_session, p_canvas_id ){
       * Handle all types on canvas events and dispatch
       */
     var canvas_event = function( event_obj ) {
-        var canvas = self.real_canvas;
+        var canvas = _real_canvas;
 
         // FIXME verify the same formula is used with touchscreens
         event_obj.mouseX = event_obj.pageX - canvas.offsetLeft;
@@ -351,41 +335,40 @@ function Drawing( p_session, p_canvas_id ){
     };
 
 
-    var _zone = new Zone( p_session.zone_column_count, p_session.zone_line_count );
-    var _color = '#f00';
 
-    this.patch = null;
-    this.move = { 
+    _zone = new Zone( p_session.zone_column_count, p_session.zone_line_count );
+    _color = '#f00';
+
+    _pencil_move = { 
         enable : false
     }
+
     this.session = p_session;
     this.column_count = p_session.zone_column_count;
     this.line_count = p_session.zone_line_count;
     this.border_column_count = p_session.zone_column_count / 4;
     this.border_line_count = p_session.zone_column_count / 4;
 
-    this.real_canvas = document.getElementById( p_canvas_id );
+    _real_canvas = document.getElementById( p_canvas_id );
+    _grid_canvas = null;
 
-    this.grid_canvas = null;
-
-    // size of zone's big pixels
+    // size of editor's big pixels
     this.column_size = 1;
     this.line_size = 1;
 
-    var _update_timer = window.setInterval( self.patches_update, DRAWING_REFRESH );
-    var _enqueue_timer = window.setInterval( _zone.patch_enqueue, PATCH_LIFESPAN );
+    _enqueue_timer = window.setInterval( _zone.patch_enqueue, PATCH_LIFESPAN );
 
-    this.context = this.real_canvas.getContext('2d');
+    this.context = _real_canvas.getContext('2d');
 
     // plug some event handlers
-    this.real_canvas.addEventListener( 'mousedown', canvas_event, false );
-    this.real_canvas.addEventListener( 'touchstart', canvas_event, false );
+    _real_canvas.addEventListener( 'mousedown', canvas_event, false );
+    _real_canvas.addEventListener( 'touchstart', canvas_event, false );
 
-    this.real_canvas.addEventListener( 'mouseup', canvas_event, false );
-    this.real_canvas.addEventListener( 'touchstop', canvas_event, false );
+    _real_canvas.addEventListener( 'mouseup', canvas_event, false );
+    _real_canvas.addEventListener( 'touchstop', canvas_event, false );
 
-    this.real_canvas.addEventListener( 'mousemove', canvas_event, false );
-    this.real_canvas.addEventListener( 'touchmove', canvas_event, false );
+    _real_canvas.addEventListener( 'mousemove', canvas_event, false );
+    _real_canvas.addEventListener( 'touchmove', canvas_event, false );
 
     $(window).resize(function() {
         self.update_size();

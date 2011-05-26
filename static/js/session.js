@@ -5,6 +5,10 @@
 
 var SESSION_URL_JOIN = "/api/session/join";
 var SESSION_URL_LEAVE = "/api/session/leave";
+var SESSION_URL_UPDATE = "/api/session/update";
+
+var SESSION_UPDATE_INTERVAL = 5000;
+
 var SESSION_TYPE_DRAW = "draw";
 var SESSION_TYPE_VIEW = "view";
 
@@ -18,10 +22,22 @@ function Session( session_type, callback ) {
     this.zone_column_count = null;
     this.zone_line_count = null;
 
+    var _update_timer = null;
+
+    var _current_drawing_id = 0;
+    var _current_chat_id = 0;
+    var _current_event_id = 0;
+
+    var _drawing = null;
+    var _view = null;
+    var _chat = null;
+
+
     /**
      * Semi-Constructor
      */
-    var initialize = function() {
+    this.initialize = function() {
+
         var user_id = $.cookie('user_id');
         var user_name = $.cookie('user_name');
         var user_session = $.cookie('user_session');
@@ -66,10 +82,57 @@ function Session( session_type, callback ) {
         });
     }
 
-    this.to_s = function() { JSON.stringify(self); };
 
+    /**
+     *
+     */
+    this.update = function(){
 
-    initialize();
+        var drawing_updates = [];
+        var chat_updates = [];
+        var req ;
+
+        // assign real values if objets are present
+        if (_drawing) {
+            drawing_updates = JSON.stringify( _drawing.patches_get() );
+        }
+        if (_chat) {
+            chat_updates = JSON.stringify( _chat.patches_get() );
+        }
+
+        req = {
+            drawing_since : _current_drawing_id,
+            chat_since : _current_chat_id,
+            event_since : _current_event_id,
+
+            drawing : drawing_updates,
+            chat : chat_updates,
+        }
+
+        console.log("drawing/patches_update: req = %s", JSON.stringify( req ) ); 
+        $.ajax({
+            url: SESSION_URL_UPDATE,
+            dataType: "json",
+            data: JSON.stringify( req ),
+            type: 'POST',
+            context: self,
+            success: function( response ){
+                console.log('drawing/update response : ' + JSON.stringify( response ) );
+            }
+        });
+
+    };
+
+    this.register_drawing = function( p_drawing ){
+        _drawing = p_drawing;
+    }
+
+    this.register_view = function( p_view ) {
+        _view = p_view
+    }
+
+    this.initialize();
+    _update_timer = window.setInterval( self.update, SESSION_UPDATE_INTERVAL );
 }
 
 
