@@ -35,24 +35,24 @@ module PoieticGen
 		#
 		def join session, params
 
-			req_user_id = params[:user_id]
-			req_user_session = params[:user_session]
-			req_user_name = params[:user_name]
+			req_id = params[:user_id]
+			req_session = params[:user_session]
+			req_name = params[:user_name]
 
 
 			# FIXME: prevent session from being stolen...
 			STDERR.puts "requesting id=%s, session=%s, name=%s" \
-				% [ req_user_id, req_session, req_user_name ]
+				% [ req_id, req_session, req_name ]
 
 			user = nil
 			now = DateTime.now
 			param_request = {
-			   	:id => req_user_id,
+			   	:id => req_id,
 				:session => @session_id
 			}
 			param_create = {
 				:session => @session_id,
-				:name => ( req_user_name || 'anonymous' ),
+				:name => ( req_name || 'anonymous' ),
 				:zone => -1,
 				:created_at => now,
 				:expires_at => (now + Rational(User::MAX_IDLE, 60 * 60 * 24 ))
@@ -85,7 +85,7 @@ module PoieticGen
 				STDERR.puts "no zone allocated !"
 			end
 			user.save
-
+			session[:user] = user.id
 
 			# FIXME: send matrix status of user zone
 
@@ -97,22 +97,25 @@ module PoieticGen
 			# return JSON for userid
 
 			# FIXME: send "leave event" to everyone
+			# FIXME: send zone content to user
 			return JSON.generate({ :user_id => user.id,
 						 	:user_session => user.session,
 						  	:user_name => user.name,
+							:user_zone => user.zone,
 		   					:zone_column_count => @config.board.width,
-							:zone_line_count => @config.board.height
+							:zone_line_count => @config.board.height,
+							:zone_content => []
 			})
 		end
 
 
-		def leave req_user_id, req_session
+		def leave session
 			# FIXME: send "leave event" to everyone
 			# zone_idx = @users[user_id].zone
 
 			param_request = {
-			   	:id => req_user_id,
-				:session => req_session
+			   	:id => session[:user_id],
+				:session => session[:user_session]
 			}
 			user = User.first param_request
 			if user then
@@ -124,25 +127,30 @@ module PoieticGen
 		#
 		# if not expired, update lease
 		#
-		def update_lease req_user_id, req_session
+		def update_lease session
 			now = DateTime.now
+			
 			# FIXME: use configuration instead of constant
 			next_expires_at = (now + Rational(User::MAX_IDLE, 60 * 60 * 24 ))
 			param_request = {
-			   	:id => req_user_id,
-				:session => req_session
+			   	:id => session[PoieticGen::Api::SESSION_USER],
+				:session => @session_id
 			}
-			user = User.find param_request
+			user = User.first param_request
+			raise RuntimeError if user.nil?
 
 			if ( (now - user.expires_at) > 0  ) then
-				# FIXME: do something for expired leases...
+				# expired lease...
 				STDERR.puts "User session expired"
+				raise RuntimeError, "expired lease"
 			else
 				STDERR.puts "Updated lease for %s" % param_request
 				user.expires_at = next_expires_at
+				user.save
 			end
 		end
 
+		
 		# post
 		#  * <user-id> changes
 		#
