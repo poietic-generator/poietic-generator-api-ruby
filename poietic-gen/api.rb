@@ -57,7 +57,7 @@ module PoieticGen
 		configure :development do |c|
 			require "sinatra/reloader"
 			register Sinatra::Reloader
-			also_reload "poietic-gen/**/*.rb"
+			#also_reload "poietic-gen/**/*.rb"
 		end
 
 		configure do
