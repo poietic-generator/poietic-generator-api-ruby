@@ -1,7 +1,6 @@
 
 require 'sinatra/base'
 
-require 'poietic-gen/database'
 require 'poietic-gen/config_manager'
 require 'poietic-gen/page'
 require 'poietic-gen/manager'
