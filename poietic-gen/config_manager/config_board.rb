@@ -1,5 +1,5 @@
 
-module PoeticGen ; class ConfigManager
+module PoieticGen ; class ConfigManager
 
 	#
 	#

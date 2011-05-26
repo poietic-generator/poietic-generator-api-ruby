@@ -1,12 +1,6 @@
 
 require 'inifile'
 
-require 'poietic-gen/config_manager/config_server'
-require 'poietic-gen/config_manager/config_chat'
-require 'poietic-gen/config_manager/config_user'
-require 'poietic-gen/config_manager/config_board'
-require 'poietic-gen/config_manager/config_database'
-
 module PoieticGen
 
 	class ConfigManager
@@ -77,4 +71,9 @@ module PoieticGen
 
 end
 
+require 'poietic-gen/config_manager/config_server'
+require 'poietic-gen/config_manager/config_chat'
+require 'poietic-gen/config_manager/config_user'
+require 'poietic-gen/config_manager/config_board'
+require 'poietic-gen/config_manager/config_database'
 
