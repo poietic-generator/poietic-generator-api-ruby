@@ -18,6 +18,12 @@ module PoieticGen
 
 	class Api < Sinatra::Base
 
+		STATUS_INFORMATION = 1
+		STATUS_SUCCESS = 2
+		STATUS_REDIRECTION = 3
+		STATUS_SERVER_ERROR = 4
+		STATUS_BAD_REQUEST = 5
+
 		enable :sessions
 		disable :run
 
@@ -33,6 +39,15 @@ module PoieticGen
 		mime_type :otf, "application/octet-stream"
 		mime_type :woff, "application/octet-stream"
 
+
+		helpers do
+			def validate_session! 
+				STDERR.puts session.inspect
+				unless session['user_id'] then
+					throw :halt, [401, "Not authorized\n"]
+				end
+			end
+		end
 
 		configure :development do |c|
 			require "sinatra/reloader"
@@ -62,6 +77,8 @@ module PoieticGen
 		#
 		#
 		get '/' do
+			session["user_id"] ||= nil
+			session["user_session"] ||= nil
 			@page = Page.new "Index"
 			erb :page_index
 		end
@@ -102,8 +119,25 @@ module PoieticGen
 		# return null user_id for confirmation
 		#
 		get '/api/session/leave' do
-			session['user_id'] = nil
-			JSON.generate({ :user_id => session['user_id'] })
+			begin
+				validate_session!
+				status = STATUS_SUCCESS
+
+				session['user_id'] = nil
+				session['user_session'] = nil
+
+			rescue InvalidSession 
+				status = STATUS_REDIRECTION
+
+			rescue Exception
+				status = STATUS_SERVER_ERROR
+
+			ensure
+				JSON.generate({
+					:user_id => session['user_id'],
+					:status => status	
+				})
+			end
 		end
 
 
@@ -115,30 +149,26 @@ module PoieticGen
 		# seconds are considered disconnected
 		#
 		post '/api/session/update' do
+			begin
+			validate_session!
 			# FIXME: verify session expiration..
 			# FIXME: update session liveness
 
+			# FIXME: extract patches information
+			# FIXME: extract chat information
+			
 			pp JSON.parse(request.body.read) 
-			JSON.generate({ :patches => [] })
-		end
 
-
-		#
-		# Send message to the chat
-		#
-		put '/api/chat/post' do
-			# FIXME: verify session expiration..
-			# FIXME: update session liveness
-
-			# FIXME: handle received messages
-		end
-
-
-		#
-		# Get latest messages from chat
-		#
-		get '/api/chat/update' do
-			# FIXME: send staging messages to clients
+			rescue JSON::ParserError => e
+				# handle non-JSON parsing errors
+				status = [ STATUS_BAD_REQUEST, "Invalid content : JSON expected" ]
+			ensure
+				JSON.generate({ 
+					:patches => [] 
+					:status => status
+				})
+			
+			end
 		end
 
 	end
