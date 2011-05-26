@@ -113,7 +113,7 @@ module PoieticGen
 		# clients having not renewed their lease before 300
 		# seconds are considered disconnected
 		#
-		post '/api/drawing/update' do
+		post '/api/session/update' do
 			# FIXME: verify session expiration..
 			# FIXME: update session liveness
 
