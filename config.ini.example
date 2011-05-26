@@ -44,7 +44,7 @@ username = johndoe
 password = foobar
 
 ; database name
-database = poieticgen
+database = poieticgen.sqlite3
 
 
 [chat]
@@ -61,3 +61,4 @@ max_idle = 300
 
 ; number of seconds between keepalive messages (pull messages)
 keepalive = 5
+
