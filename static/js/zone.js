@@ -129,12 +129,11 @@ function Zone( p_width, p_height ) {
       * 
       */
     this.patches_get = function() {
-        var aggregate = {};
-        aggregate.patches = [];
+        var aggregate = [];
 
         while ( _output_queue.length > 0 ) {
             // FIXME: compute relative time since last sync
-            aggregate.patches.push( _output_queue.shift() );
+            aggregate.push( _output_queue.shift() );
         }
         
         return aggregate;
