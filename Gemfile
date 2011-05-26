@@ -11,5 +11,6 @@ gem "dm-migrations"
 gem "dm-transactions"
 gem "dm-sqlite-adapter"
 gem "dm-mysql-adapter"
+gem "dm-aggregates"
 gem "inifile", "~> 0.3"
 
