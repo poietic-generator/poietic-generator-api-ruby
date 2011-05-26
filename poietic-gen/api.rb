@@ -67,7 +67,6 @@ module PoieticGen
 			set :manager, (PoieticGen::Manager.new config)
 			DataMapper.setup(:default, config.database.get_hash)
 
-
 			# raise exception on save failure (globally across all models)
 			DataMapper::Model.raise_on_save_failure = true
 
@@ -108,14 +107,7 @@ module PoieticGen
 		# notify server about the intention of joining the session
 		#
 		get '/api/session/join' do
-			STDERR.puts "session:"
-			STDERR.puts session.inspect
-			STDERR.puts "--"
-
 			json = settings.manager.join session, params
-
-			STDERR.puts "session (after):"
-			STDERR.puts session.inspect
 
 			pp json
 			return json
@@ -128,13 +120,10 @@ module PoieticGen
 		#
 		get '/api/session/leave' do
 			begin
-				pp session
-				pp settings
-
 				validate_session! session
-				status = STATUS_SUCCESS
+				status = [ STATUS_SUCCESS ]
 
-				session[SESSION_USER] = nil
+				session[ SESSION_USER ] = nil
 
 			rescue InvalidSession 
 				status = [ STATUS_REDIRECTION ]
@@ -168,7 +157,8 @@ module PoieticGen
 
 			# FIXME: extract chat information
 			
-			pp JSON.parse(request.body.read) 
+			data = JSON.parse(request.body.read) 
+			settings.manager.update_data session, data
 
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors

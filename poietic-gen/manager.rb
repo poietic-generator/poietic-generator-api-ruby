@@ -155,13 +155,12 @@ module PoieticGen
 		end
 
 		
-		# post
-		#  * <user-id> changes
 		#
-		# returns
-		#  * latest content since last update
-		def sync user_id
-			#
+		# get latest updates from user
+		#
+		# return latest updates from everyone !
+		#
+		def update_data session, data
 			#draw user
 
 			return
