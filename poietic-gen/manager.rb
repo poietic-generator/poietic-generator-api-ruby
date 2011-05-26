@@ -1,6 +1,7 @@
 
 require 'poietic-gen/palette'
-require 'poietic-gen/database'
+require 'poietic-gen/user'
+require 'poietic-gen/event'
 
 require 'pp'
 
@@ -14,6 +15,7 @@ module PoieticGen
 	# manage a pool of users
 	#
 	class Manager
+
 		def initialize config
 			@config = config
 			pp config
@@ -26,7 +28,6 @@ module PoieticGen
 			@users_seen = 0
 
 			# FIXME put it in db
-			@event_queue = []
 		end
 
 
@@ -95,6 +96,8 @@ module PoieticGen
 			# FIXME: return same user_id if session is still valid
 
 			# return JSON for userid
+			event = Event.create({ :type => 'join', :desc => JSON.generate({ :zone => user.zone }) })
+			event.save
 
 			# FIXME: send "leave event" to everyone
 			# FIXME: send zone content to user
@@ -121,6 +124,7 @@ module PoieticGen
 			if user then
 				self.zone_free user.id
 			end
+
 		end
 
 
