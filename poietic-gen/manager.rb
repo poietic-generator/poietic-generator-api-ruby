@@ -31,7 +31,12 @@ module PoieticGen
 		#
 		# generates an unpredictible user id based on session id & user counter
 		#
-		def join req_user_id, req_session, req_user_name
+		def join session, params
+
+			req_user_id = params[:user_id]
+			req_user_session = params[:user_session]
+			req_user_name = params[:user_name]
+
 
 			# FIXME: prevent session from being stolen...
 			STDERR.puts "requesting id=%s, session=%s, name=%s" \
@@ -92,13 +97,13 @@ module PoieticGen
 		end
 
 
-		def leave req_user_id, req_session, req_user_name
+		def leave req_user_id, req_session
 			# FIXME: send "leave event" to everyone
 			# zone_idx = @users[user_id].zone
 
 			param_request = {
 			   	:id => req_user_id,
-				:session => @session_id
+				:session => req_session
 			}
 			user = User.first param_request
 			if user then
@@ -110,32 +115,22 @@ module PoieticGen
 		#
 		# expend map creating new allocatable zones
 		#
-		def world_expand
-			# choose a side (using a spiral growth)
-			# expand that side
-			zone_past = @zones.last
+		def update_lease req_user_id, req_session
+			now = DateTime.now
+			# FIXME: use configuration instead of constant
+			next_expires_at = (now + Rational(User::MAX_IDLE, 60 * 60 * 24 ))
+			param_request = {
+			   	:id => req_user_id,
+				:session => req_session
+			}
+			user = User.find param_request
 
-			zone_present = Zone.create_next zone_past
-			zone_future = Zone.create_next zone_past
-
-			# if the following collides, then keep the same vector
-			res = @zones.select do |zone_item|
-				( zone_item.position <=> zone_future ) == 0
-			end
-			unless res.empty? then
-				#collision with existing zone coordinates
-				zone_present.vector = zone_past.vector
-			end
-			@zones << zone_present
-		end
-
-		#
-		# reduce map removing unused zones from the border
-		#
-		def world_reduce
-			while true
-				zone = @zones.last
-				break if @zones.last
+			if ( (now - user.expires_at) > 0  ) then
+				# FIXME: do something for expired leases...
+				STDERR.puts "User session expired"
+			else
+				STDERR.puts "Updated lease for %s" % param_request
+				user.expires_at = next_expires_at
 			end
 		end
 

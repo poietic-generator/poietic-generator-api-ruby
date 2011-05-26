@@ -105,9 +105,10 @@ module PoieticGen
 		# notify server about the intention of joining the session
 		#
 		get '/api/session/join' do
-			json = settings.manager.join params['user_id'],
-				params['user_session'],
-				params['user_name']
+			json = settings.manager.join session, params
+		#	params['user_id'],
+		#		params['user_session'],
+		#		params['user_name']
 
 			pp json
 			return json
