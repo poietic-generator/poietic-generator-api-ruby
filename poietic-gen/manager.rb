@@ -86,8 +86,8 @@ module PoieticGen
 			return JSON.generate({ :user_id => user.id,
 						 	:user_session => user.session,
 						  	:user_name => user.name,
-		   					:zone_column_count => @config.board_cfg.width,
-							:zone_line_count => @config.board_cfg.height
+		   					:zone_column_count => @config.board.width,
+							:zone_line_count => @config.board.height
 			})
 		end
 

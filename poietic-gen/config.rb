@@ -5,11 +5,11 @@ require 'inifile'
 module PoieticGen
 
   class ConfigManager
-    attr_reader :server_cfg
-    attr_reader :chat_cfg
-    attr_reader :database_cfg
-    attr_reader :user_cfg
-    attr_reader :board_cfg
+    attr_reader :server
+    attr_reader :chat
+    attr_reader :database
+    attr_reader :user
+    attr_reader :board
 
     DEFAULT_CONFIG_PATH = File.expand_path( File.join File.dirname(__FILE__), "../config.ini" )
 
@@ -175,13 +175,13 @@ module PoieticGen
       raise MissingSection unless inif.has_section? "server"
       @server_config = ConfigServer.new inif["server"]
       raise MissingSection, "board" unless inif.has_section? "board"
-      @board_cfg = ConfigBoard.new inif["board"]
+      @board = ConfigBoard.new inif["board"]
       raise MissingSection, "database" unless inif.has_section? "database"
-      @database_cfg = ConfigDatabase.new inif["database"]
+      @database = ConfigDatabase.new inif["database"]
       raise MissingSection, "chat" unless inif.has_section? "chat"
-      @chat_cfg = ConfigChat.new inif["chat"]
+      @chat = ConfigChat.new inif["chat"]
       raise MissingSection, "user" unless inif.has_section? "user"
-      @user_cfg = ConfigUser.new inif["user"]
+      @user = ConfigUser.new inif["user"]
     end
 
   end
