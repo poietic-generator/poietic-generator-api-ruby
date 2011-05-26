@@ -1,0 +1,8 @@
+
+
+/**
+ * Global view
+ */
+function View() {
+
+}
