@@ -4,7 +4,6 @@ require 'sinatra/base'
 require 'poietic-gen/config_manager'
 require 'poietic-gen/page'
 require 'poietic-gen/manager'
-require 'poietic-gen/patch'
 
 require 'json'
 require 'pp'
@@ -107,10 +106,10 @@ module PoieticGen
 		# notify server about the intention of joining the session
 		#
 		get '/api/session/join' do
-			json = settings.manager.join session, params
+			result = settings.manager.join session, params
+			pp result
 
-			pp json
-			return json
+			return JSON.generate( result )
 		end
 
 
@@ -149,27 +148,25 @@ module PoieticGen
 		#
 		post '/api/session/update' do
 			begin
-			# verify session expiration..
-			validate_session! session
+				result = {}
+				# verify session expiration..
+				validate_session! session
 
-			# FIXME: extract patches information
-			settings.manager.update_lease session
+				# FIXME: extract patches information
+				settings.manager.update_lease! session
 
-			# FIXME: extract chat information
-			
-			data = JSON.parse(request.body.read) 
-			settings.manager.update_data session, data
+				# FIXME: extract chat information
+
+				data = JSON.parse(request.body.read) 
+				result = settings.manager.update_data session, data
 
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors
 				status = [ STATUS_BAD_REQUEST, "Invalid content : JSON expected" ]
 			ensure
-				JSON.generate({ 
-					:drawing => [],
-					:chat => [],
-					:status => status
-				})
-			
+				result[:status] = status
+				return JSON.generate( result )
+
 			end
 		end
 
