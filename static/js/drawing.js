@@ -177,7 +177,7 @@ function Drawing( p_session, p_canvas_id ){
             real_canvas.width = win.w - 2;
             real_canvas.height = win.w - 2;
         }
-        real_canvas.style.top = '1px';
+        real_canvas.style.top = '50px';
         real_canvas.style.left = Math.floor((win.w - real_canvas.width) / 2) + 'px';
 
         // console.log("drawing/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
