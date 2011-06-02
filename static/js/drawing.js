@@ -34,7 +34,7 @@ function Drawing( p_session, p_canvas_id ){
     }
 
 
-    /** 
+    /**
      * Convert local grid to canvas position
      */
     function local_to_canvas_position( local_position ) {
@@ -56,24 +56,24 @@ function Drawing( p_session, p_canvas_id ){
     }
 
 
-    /** 
+    /**
      * Convert local grid to zone position
      */
     function local_to_zone_position( local_position ){
-        return { 
-            x: local_position.x - self.border_column_count, 
-            y: local_position.y - self.border_line_count 
+        return {
+            x: local_position.x - self.border_column_count,
+            y: local_position.y - self.border_line_count
         };
     }
 
 
-    /** 
+    /**
      * Convert zone to local grid position
      */
     function zone_to_local_position( zone_position ) {
-        return { 
-            x: zone_position.x + self.border_column_count, 
-            y: zone_position.y + self.border_line_count 
+        return {
+            x: zone_position.x + self.border_column_count,
+            y: zone_position.y + self.border_line_count
         };
     }
 
@@ -136,7 +136,7 @@ function Drawing( p_session, p_canvas_id ){
             grid_ctx.lineWidth = DRAWING_BOUNDARIES_WIDTH;
             grid_ctx.strokeStyle = DRAWING_BOUNDARIES_COLOR;
             grid_ctx.strokeRect( canvas_tl.x, canvas_tl.y, canvas_tl.w, canvas_tl.h );
-        } 
+        }
         ctx.drawImage( self.grid_canvas, 0, 0);
     }
 
@@ -145,7 +145,7 @@ function Drawing( p_session, p_canvas_id ){
      * Repaint zone drawing
      */
     this.update_paint = function() {
-        
+
         for (var x = 0 ; x < self.column_count ; x++ ){
             for (var y = 0; y < self.line_count ; y++ ) {
                 var zone_pos = { 'x': x, 'y': y };
@@ -155,7 +155,7 @@ function Drawing( p_session, p_canvas_id ){
                 self.pixel_draw( local_pos, color );
             }
         }
-        
+
     }
 
 
@@ -164,7 +164,7 @@ function Drawing( p_session, p_canvas_id ){
      */
     this.update_size = function() {
         var real_canvas = _real_canvas;
-        var win = { 
+        var win = {
             w: $(window).width(),
             h : $(window).height()
         };
@@ -197,14 +197,15 @@ function Drawing( p_session, p_canvas_id ){
         self.draw_grid();
     };
 
-    /** 
+    /**
      * Handle mouse event
      */
     this.mouseup = function( event_obj ) { self.pencil_up( event_obj ); }
-    this.touchstop = function( event_obj ) { 
+    this.touchstop = function( event_obj ) {
         event_obj.mouseX = event_obj.touches[0].pageX;
         event_obj.mouseY = event_obj.touches[0].pageY;
-        self.pencil_up( event_obj ); 
+        self.pencil_up( event_obj );
+        event_obj.preventDefault();
     }
 
     this.pencil_up = function( event_obj ) {
@@ -212,14 +213,15 @@ function Drawing( p_session, p_canvas_id ){
     };
 
 
-    /** 
+    /**
      * Handle mouse event
      */
     this.mousedown = function( event_obj ) { self.pencil_down( event_obj ); }
-    this.touchstart = function( event_obj ) { 
+    this.touchstart = function( event_obj ) {
         event_obj.mouseX = event_obj.touches[0].pageX;
         event_obj.mouseY = event_obj.touches[0].pageY;
-        self.pencil_down( event_obj ); 
+        self.pencil_down( event_obj );
+        event_obj.preventDefault();
     }
 
     this.pencil_down = function( event_obj ) {
@@ -229,14 +231,14 @@ function Drawing( p_session, p_canvas_id ){
 
 
 
-    /** 
+    /**
      * Handle mouse event
      */
     this.mousemove = function( event_obj ) { self.pencil_move( event_obj ); }
-    this.touchmove = function( event_obj ) { 
+    this.touchmove = function( event_obj ) {
         event_obj.mouseX = event_obj.touches[0].pageX;
         event_obj.mouseY = event_obj.touches[0].pageY;
-        self.pencil_move( event_obj ); 
+        self.pencil_move( event_obj );
         event_obj.preventDefault();
     }
 
@@ -316,19 +318,19 @@ function Drawing( p_session, p_canvas_id ){
 
 
 
-    /** 
+    /**
       * Change color
       */
 
     this.color_set = function( hexcolor ) {
         _color = hexcolor;
-        // FIXME: 
+        // FIXME:
         console.log("drawing/color_set: requestion patch enqueue")
         _zone.patch_enqueue();
     }
 
 
-    /** 
+    /**
       * Handle all types on canvas events and dispatch
       */
     var canvas_event = function( event_obj ) {
@@ -349,7 +351,7 @@ function Drawing( p_session, p_canvas_id ){
     _zone = new Zone( p_session.zone_column_count, p_session.zone_line_count );
     _color = '#f00';
 
-    _pencil_move = { 
+    _pencil_move = {
         enable : false
     }
 
