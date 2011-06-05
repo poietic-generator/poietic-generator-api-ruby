@@ -3,6 +3,7 @@ require 'poietic-gen/palette'
 require 'poietic-gen/user'
 require 'poietic-gen/event'
 require 'poietic-gen/drawing'
+require 'poietic-gen/board'
 
 require 'pp'
 
@@ -27,6 +28,7 @@ module PoieticGen
 
 			# total count of users seen (FIXME: get it from db)
 			@users_seen = 0
+			@board = Board.new
 
 			# FIXME put it in db
 		end
@@ -64,7 +66,8 @@ module PoieticGen
 				STDERR.puts "User is requesting a different session"
 				# create new
 				user = User.create param_create
-				# FIXME: allocate new zone
+				# allocate new zone
+				user.zone = (@board.allocate user).index
 
 			else
 				STDERR.puts "User is in session"
@@ -74,7 +77,8 @@ module PoieticGen
 					STDERR.puts "User session expired"
 					# create new if session expired
 					user = User.create param_create
-					# FIXME: allocate new zone
+					# allocate new zone
+					user.zone = (@board.allocate user).index
 				end
 			end
 
@@ -82,10 +86,6 @@ module PoieticGen
 			# FIXME: use configuration instead of constant
 			user.expires_at = (now + Rational(User::MAX_IDLE, 60 * 60 * 24 ))
 
-			# FIXME: user.zone = @board.allocate
-			if user.zone < 0 then 
-				STDERR.puts "no zone allocated !"
-			end
 			user.save
 			session[:user] = user.id
 
