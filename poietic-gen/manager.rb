@@ -28,7 +28,7 @@ module PoieticGen
 
 			# total count of users seen (FIXME: get it from db)
 			@users_seen = 0
-			@board = Board.new
+			@board = Board.new config.board
 
 			# FIXME put it in db
 		end
@@ -51,7 +51,7 @@ module PoieticGen
 			user = nil
 			now = DateTime.now
 			param_request = {
-			   	:id => req_id,
+				:id => req_id,
 				:session => @session_id
 			}
 			param_create = {
@@ -87,7 +87,7 @@ module PoieticGen
 			user.expires_at = (now + Rational(User::MAX_IDLE, 60 * 60 * 24 ))
 
 			user.save
-			session[:user] = user.id
+			session[PoieticGen::Api::SESSION_USER] = user.id
 
 			# FIXME: send matrix status of user zone
 
@@ -110,15 +110,15 @@ module PoieticGen
 			# FIXME: send "leave event" to everyone
 			# FIXME: send zone content to user
 			return { :user_id => user.id,
-						 	:user_session => user.session,
-						  	:user_name => user.name,
-							:user_zone => user.zone,
-		   					:zone_column_count => @config.board.width,
-							:zone_line_count => @config.board.height,
-							:zone_content => [],
-							:event_id => event_max.id,
-							:drawing_id => 0,
-							:view_id => drawing_max.id
+				:user_session => user.session,
+				:user_name => user.name,
+				:user_zone => user.zone,
+				:zone_column_count => @config.board.width,
+				:zone_line_count => @config.board.height,
+				:zone_content => [],
+				:event_id => event_max.id,
+				:drawing_id => 0,
+				:view_id => drawing_max.id
 			}
 		end
 
@@ -128,8 +128,8 @@ module PoieticGen
 			# zone_idx = @users[user_id].zone
 
 			param_request = {
-			   	:id => session[:user_id],
-				:session => session[:user_session]
+				:id => session[PoieticGen::Api::SESSION_USER],
+				:session => session[PoieticGen::Api::SESSION_SESSION]
 			}
 			user = User.first param_request
 			if user then
@@ -146,11 +146,11 @@ module PoieticGen
 		#
 		def update_lease! session
 			now = DateTime.now
-			
+
 			# FIXME: use configuration instead of constant
 			next_expires_at = (now + Rational(User::MAX_IDLE, 60 * 60 * 24 ))
 			param_request = {
-			   	:id => session[PoieticGen::Api::SESSION_USER],
+				:id => session[PoieticGen::Api::SESSION_USER],
 				:session => @session_id
 			}
 			user = User.first param_request
@@ -167,24 +167,48 @@ module PoieticGen
 			end
 		end
 
-		
+
 		#
 		# get latest updates from user
 		#
 		# return latest updates from everyone !
 		#
 		def update_data session, data
-			#draw user
-			#FIXME: validate data input
-			
+			param_request = {
+				:id => session[PoieticGen::Api::SESSION_USER],
+				:session => @session_id
+			}
+			user = User.first param_request
+			zone = @board[user.zone]
+
+			#STDERR.puts "user:"
+			#pp user
+			#pp zone
+
 			STDERR.puts "data:"
 			pp data
+
+			# validate user input first
+			[ :drawing_since, :drawing, 
+				:event_since, :chat, :chat_since
+			].each do |sym|
+				raise ArgumentError, 
+					("The '%s' field is missing" % sym) unless data.include? sym.to_s
+			end
+
+			# apply drawing to zone
+			zone.apply data['drawing']
+
+			# FIXME: include new drawings (excepted from this user) in response
+			since_drawing = []
+
+
 			STDERR.puts "events:"
 			events = Event.all( :id.gt => data[:event] )
 
 			result = {
 				:event => [],
-				:drawing => [],
+				:drawing => since_drawing,
 				:chat => [],
 				:status => status
 			}
