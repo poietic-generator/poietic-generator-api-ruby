@@ -176,9 +176,13 @@ module PoieticGen
 				status = [ STATUS_BAD_REQUEST, "Invalid content : JSON expected" ]
 
 			rescue ArgumentError => e
-				# handle non-JSON parsing errors
-				STDERR.puts e.inspect
+				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_BAD_REQUEST, "Invalid content" ]
+
+			rescue Exception => e
+				# handle non-JSON parsing errors
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_SERVER_ERROR, "Server error" ]
 
 			ensure
 				result[:status] = status
