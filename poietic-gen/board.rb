@@ -83,11 +83,21 @@ module PoieticGen
 		#
 		#
 		#
-		def initialize
+		def initialize config
 			# map index => Zone object (or nil if unallocated)
 			@zones = {}
+			@config = config
+
+			# FIXME : maintain boundaries for the board
+			@boundary_left = 0
+			@boundary_right = 0
+			@boundary_top = 0
+			@boundary_bottom = 0
 		end
 
+		def [] index
+			return @zones[index]
+		end
 
 		#
 		# return index to position
@@ -142,7 +152,11 @@ module PoieticGen
 		def allocate user
 			next_index = _next_index()
 
-			zone = Zone.new self, next_index
+			zone = Zone.new next_index, 
+				(self.index_to_position next_index),
+				@config.width,
+				@config.height
+
 			zone.user = user
 
 			STDERR.puts "Allocation zone : ", zone.inspect
