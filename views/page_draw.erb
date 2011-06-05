@@ -1,6 +1,9 @@
-<%= 
-	@page.css << "/css/page_session.css"
+<%=
+	#@page.css << "/css/page_session.css"
+    @page.css << "/css/colorjack.css"
 
+    @page.js << "/js/jquery.cookie.js"
+    @page.js << "/js/colorjack.js"
 	@page.js << "/js/session.js"
 	@page.js << "/js/patch.js"
 	@page.js << "/js/zone.js"
@@ -9,25 +12,57 @@
 	@page.js << "/js/brushzone.js"
 	@page.js << "/js/page_draw.js"
 
-	erb :common_header 
+	erb :common_header
 %>
 
+
 <!-- la zone de dessin -->
-<canvas id="session-drawing"></canvas>
+<div id="session-zone" data-role="page">
+    <div data-role="header">
+        <div data-role="navbar">
+            <ul>
+                <li><a href="#session-zone" class="ui-btn-active">Zone de dessin</a></li>
+                <li><a href="#session-global">Dessin global</a></li>
+                <li><a href="#session-chat">Messages</a></li>
+            </ul>
+        </div>
+    </div>
+    <div data-role="content">
+        <div id="session-brush" >
+            <a href="#" data-role="button" data-inline="true" data-theme="c" data-icon="grid" data-iconpos="notext" id="brush">Afficher la palette</a>
+        </div>
+        <canvas id="session-drawing"></canvas>
+    </div>
+</div>
 <!-- la vue globale -->
-<div id="session-global" >
-	global zone
+<div id="session-global" data-role="page">
+    <div data-role="header">
+        <div data-role="navbar">
+            <ul>
+                <li><a href="#session-zone">Zone de dessin</a></li>
+                <li><a href="#session-global" class="ui-btn-active">Dessin global</a></li>
+                <li><a href="#session-chat">Messages</a></li>
+            </ul>
+        </div>
+    </div>
+    <div data-role="content">
+        global zone
+    </div>
 </div>
-<!-- la zone de selection de couleurs -->
-<canvas id="session-color"></canvas>
-
-<div id="session-brush" >
-	brush zone
-</div>
-
-<div class="spacer"></div>
-<div id="session-chat" >
-	chat zone
+<!-- la zone chat -->
+<div id="session-chat" data-role="page">
+    <div data-role="header">
+        <div data-role="navbar">
+            <ul>
+                <li><a href="#session-zone">Zone de dessin</a></li>
+                <li><a href="#session-global">Dessin global</a></li>
+                <li><a href="#session-chat" class="ui-btn-active">Messages</a></li>
+            </ul>
+        </div>
+    </div>
+    <div data-role="content">
+        chat zone
+    </div>
 </div>
 
 <%= erb :common_footer %>
