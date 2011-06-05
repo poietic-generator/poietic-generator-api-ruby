@@ -26,7 +26,7 @@ module PoieticGen
 		SESSION_SESSION = :name
 
 		enable :sessions
-		set :session_secret, "FIXME: this should be removed :)"
+		# set :session_secret, "FIXME: this should be removed :)"
 		#disable :run
 
 		#set :environment, :development
@@ -161,6 +161,7 @@ module PoieticGen
 				result = {}
 				# verify session expiration..
 				validate_session! session
+				status = [ STATUS_SUCCESS ]
 
 				# FIXME: extract patches information
 				settings.manager.update_lease! session

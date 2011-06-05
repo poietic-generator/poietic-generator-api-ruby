@@ -10,9 +10,6 @@ require 'pp'
 module PoieticGen
 
 
-	# FIXME: since could have the following format { ev: id, patch: id, chat: id }
-
-
 	#
 	# manage a pool of users
 	#
@@ -30,7 +27,7 @@ module PoieticGen
 			@users_seen = 0
 			@board = Board.new config.board
 
-			# FIXME put it in db
+			# FIXME : create session in database
 		end
 
 
@@ -59,7 +56,7 @@ module PoieticGen
 				:name => ( req_name || 'anonymous' ),
 				:zone => -1,
 				:created_at => now,
-				:expires_at => (now + Rational(User::MAX_IDLE, 60 * 60 * 24 ))
+				:expires_at => (now + Rational(@config.user.max_idle, 60 * 60 * 24 ))
 			}
 
 			if req_session != @session_id then
@@ -84,7 +81,7 @@ module PoieticGen
 
 			# update expiration time
 			# FIXME: use configuration instead of constant
-			user.expires_at = (now + Rational(User::MAX_IDLE, 60 * 60 * 24 ))
+			user.expires_at = (now + Rational(@config.user.max_idle, 60 * 60 * 24 ))
 
 			user.save
 			session[PoieticGen::Api::SESSION_USER] = user.id
@@ -148,13 +145,13 @@ module PoieticGen
 			now = DateTime.now
 
 			# FIXME: use configuration instead of constant
-			next_expires_at = (now + Rational(User::MAX_IDLE, 60 * 60 * 24 ))
+			next_expires_at = (now + Rational(@config.user.max_idle, 60 * 60 * 24 ))
 			param_request = {
 				:id => session[PoieticGen::Api::SESSION_USER],
 				:session => @session_id
 			}
 			user = User.first param_request
-			raise RuntimeError if user.nil?
+			raise RuntimeError, "No user found with session_id %s in DB" % @session_id if user.nil?
 
 			if ( (now - user.expires_at) > 0  ) then
 				# expired lease...
@@ -210,7 +207,6 @@ module PoieticGen
 				:event => [],
 				:drawing => since_drawing,
 				:chat => [],
-				:status => status
 			}
 
 			return result
