@@ -2,7 +2,7 @@
 require 'poietic-gen/palette'
 require 'poietic-gen/user'
 require 'poietic-gen/event'
-require 'poietic-gen/drawing'
+require 'poietic-gen/drawing_patch'
 require 'poietic-gen/board'
 
 require 'pp'
@@ -87,6 +87,7 @@ module PoieticGen
 			session[PoieticGen::Api::SESSION_USER] = user.id
 
 			# FIXME: send matrix status of user zone
+			zone = @board[user.zone]
 
 			# FIXME: test request user_id
 			# FIXME: test request username
@@ -101,8 +102,8 @@ module PoieticGen
 			})
 			event.save
 
-			event_max = Drawing.first(:order => [ :id.desc ])
-			drawing_max = Drawing.first(:order => [ :id.desc ])
+			event_max = Event.first(:order => [ :id.desc ])
+			drawing_max = DrawingPatch.first(:order => [ :id.desc ])
 
 			# FIXME: send "leave event" to everyone
 			# FIXME: send zone content to user
@@ -112,10 +113,10 @@ module PoieticGen
 				:user_zone => user.zone,
 				:zone_column_count => @config.board.width,
 				:zone_line_count => @config.board.height,
-				:zone_content => [],
-				:event_id => event_max.id,
+				:zone_content => zone.to_patches,
+				:event_id => (event_max.id || -1 ),
 				:drawing_id => 0,
-				:view_id => drawing_max.id
+				:view_id => (drawing_max.id || -1 )
 			}
 		end
 
