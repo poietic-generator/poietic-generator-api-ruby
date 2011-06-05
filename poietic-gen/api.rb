@@ -23,12 +23,14 @@ module PoieticGen
 		STATUS_BAD_REQUEST = 5
 
 		SESSION_USER = :user
+		SESSION_SESSION = :name
 
 		enable :sessions
+		set :session_secret, "FIXME: this should be removed :)"
 		#disable :run
 
-		set :environment, :development
-		#set :environment, :production
+		#set :environment, :development
+		set :environment, :production
 
 		set :static, true
 		set :public, File.expand_path( File.dirname(__FILE__) + '/../static' )
@@ -106,10 +108,16 @@ module PoieticGen
 		# notify server about the intention of joining the session
 		#
 		get '/api/session/join' do
-			result = settings.manager.join session, params
-			pp result
+			begin
+				result = {}
+				result = settings.manager.join session, params
+				pp result
+			rescue Exception => e
+				STDERR.puts e.inspect
 
-			return JSON.generate( result )
+			ensure
+				return JSON.generate( result )
+			end
 		end
 
 
@@ -122,12 +130,14 @@ module PoieticGen
 				validate_session! session
 				status = [ STATUS_SUCCESS ]
 
-				session[ SESSION_USER ] = nil
+				session[SESSION_USER] = nil
 
-			rescue InvalidSession 
+			rescue InvalidSession => e
+				STDERR.puts e.inspect
 				status = [ STATUS_REDIRECTION ]
 
-			rescue Exception
+			rescue Exception => e
+				STDERR.puts e.inspect
 				status = [ STATUS_SERVER_ERROR ]
 
 			ensure
@@ -162,7 +172,14 @@ module PoieticGen
 
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors
+				STDERR.puts e.inspect
 				status = [ STATUS_BAD_REQUEST, "Invalid content : JSON expected" ]
+
+			rescue ArgumentError => e
+				# handle non-JSON parsing errors
+				STDERR.puts e.inspect
+				status = [ STATUS_BAD_REQUEST, "Invalid content" ]
+
 			ensure
 				result[:status] = status
 				return JSON.generate( result )
