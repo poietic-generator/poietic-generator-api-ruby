@@ -4,7 +4,6 @@ require 'dm-core'
 module PoieticGen
 
 	class User
-		MAX_IDLE = 60
 
 		include DataMapper::Resource
 
