@@ -28,15 +28,57 @@ module PoieticGen
 			return if drawing.nil?
 
 			drawing.each do |patch|
+
+
 				color = patch['color']
 				changes = patch['changes']
-				# FIXME: add patch into database
+				timestamp = patch['stamp']
+
+				# add patch into database
+				param_create = {
+					:color => color,
+					:changes => JSON.generate(changes).to_s,
+					:timestamp => DateTime.parse(timestamp)
+				}
+				pp param_create
+				begin
+					patch = DrawingPatch.create param_create
+					patch.save
+				rescue DataMapper::SaveFailureError => e
+					puts e.resource.errors.inspect
+				end
+
 				
 				changes.each do |x,y,t_offset|
 					@data[x][y] = color
 				end
 			end
 			
+		end
+
+		#
+		# Return an array out of current zone state
+		#
+		def to_patches
+			result = []
+			patches = {}
+			@width.times do |w|
+				@height.times do |h|
+					color = @data[w][h]
+					next if color.nil?
+					patches[color] = [] unless patches.include? color
+					patches[color].push [w,h,0]
+				end
+			end
+			patches.each do |color, where|
+				patch = {
+					:color => color,
+					:changes => where,
+					:stamp => nil
+				}
+				result.push patch
+			end
+			return result
 		end
 	end
 end
