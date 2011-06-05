@@ -85,6 +85,7 @@ PLATFORMS
 
 DEPENDENCIES
   datamapper
+  dm-aggregates
   dm-migrations
   dm-mysql-adapter
   dm-sqlite-adapter
