@@ -125,7 +125,9 @@ function Session( session_type, callback ) {
             success: function( response ){
                 console.log('drawing/update response : ' + JSON.stringify( response ) );
 
-
+                // FIXME: do something with drawing updates
+                // FIXME: do something with event updates
+                // FIXME: do something with chat updates
             }
         });
 
