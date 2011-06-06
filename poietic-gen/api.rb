@@ -49,7 +49,8 @@ module PoieticGen
 			#
 			def validate_session! session
 				STDERR.puts "validate_session: %s" % session.inspect
-				unless session[SESSION_USER] then
+				unless session.include? SESSION_USER and
+					not session[SESSION_USER].nil? then
 					throw :halt, [401, "Not authorized\n"]
 				end
 			end
