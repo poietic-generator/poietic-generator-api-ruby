@@ -10,10 +10,9 @@ $(document).ready( function() {
         SESSION_TYPE_DRAW,
         function() {
             //console.log("page_draw/ready: session callback ok");
+	   
 	    var board = new Board( session, 'session-board');
-            var drawing = new Drawing(session, 'session-drawing');
-            // var globalzone = new GlobalZone(session, 'session-global');
-            // var colorzone = new ColorZone(session, 'session-colors');
+            var drawing = new Drawing(session, board, 'session-drawing');
 
             //console.log("page_draw/ready: prepicker");
             $("#brush").click(function(event){

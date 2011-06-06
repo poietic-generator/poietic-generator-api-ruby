@@ -10,13 +10,14 @@ var DRAWING_BOUNDARIES_WIDTH = 2;
 var POSITION_TYPE_DRAWING = 0;
 var POSITION_TYPE_ZONE = 0;
 
-function Drawing( p_session, p_canvas_id ){
+function Drawing( p_session, p_board, p_canvas_id ){
     //var console = { log: function() {} };
 
     var self = this;
 
     var _session;
     var _enqueue_timer;
+    var _board;
     var _zone;
     var _color;
     var _pencil_move;
@@ -39,7 +40,7 @@ function Drawing( p_session, p_canvas_id ){
     /**
      * Constructor
      */
-    this.initialize = function( p_session, p_canvas_id ) {
+    this.initialize = function( p_session, p_board, p_canvas_id ) {
         _zone = new Zone( p_session.zone_column_count, p_session.zone_line_count );
         _color = '#f00';
 
