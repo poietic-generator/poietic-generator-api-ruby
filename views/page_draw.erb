@@ -18,7 +18,7 @@
 
 <!-- la zone de dessin -->
 <div id="session-zone" data-role="page">
-    <div data-role="header">
+    <div data-role="header" data-id="head" data-position="fixed">
         <div data-role="navbar">
             <ul>
                 <li><a href="#session-zone" data-transition="slideup" class="ui-btn-active ui-state-persist">Zone de dessin</a></li>
@@ -28,15 +28,14 @@
         </div>
     </div>
     <div data-role="content">
-        <div id="session-brush" >
-            <a href="#" data-role="button" data-inline="true" data-theme="c" data-icon="grid" data-iconpos="notext" id="brush">Afficher la palette</a>
-        </div>
         <canvas id="session-drawing"></canvas>
+    </div>
+        </div>
     </div>
 </div>
 <!-- la vue globale -->
 <div id="session-global" data-role="page">
-    <div data-role="header">
+    <div data-role="header" data-id="head" data-position="fixed">
         <div data-role="navbar">
             <ul>
                 <li><a href="#session-zone" data-transition="slideup">Zone de dessin</a></li>
@@ -51,7 +50,7 @@
 </div>
 <!-- la zone chat -->
 <div id="session-chat" data-role="page">
-    <div data-role="header">
+    <div data-role="header" data-id="head" data-position="fixed">
         <div data-role="navbar">
             <ul>
                 <li><a href="#session-zone" data-transition="slideup">Zone de dessin</a></li>
