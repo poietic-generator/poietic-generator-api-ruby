@@ -7,7 +7,7 @@ var SESSION_URL_JOIN = "/api/session/join";
 var SESSION_URL_LEAVE = "/api/session/leave";
 var SESSION_URL_UPDATE = "/api/session/update";
 
-var SESSION_UPDATE_INTERVAL = 5000;
+var SESSION_UPDATE_INTERVAL = 10 * 1000 ;
 
 var SESSION_TYPE_DRAW = "draw";
 var SESSION_TYPE_VIEW = "view";
@@ -21,8 +21,6 @@ function Session( session_type, callback ) {
     this.user_id = null;
     this.zone_column_count = null;
     this.zone_line_count = null;
-
-    var _update_timer = null;
 
     var _current_drawing_id = 0;
     var _current_chat_id = 0;
@@ -81,9 +79,13 @@ function Session( session_type, callback ) {
                 // FIXME: set cookie with user_id for next time
                 // FIXME: set user_name with user_name for next time
 
+                window.setTimeout( self.update, SESSION_UPDATE_INTERVAL );
+                console.log("gotcha!");
+
                 callback( self );
             }
         });
+
     }
 
 
@@ -95,6 +97,12 @@ function Session( session_type, callback ) {
         var drawing_updates = [];
         var chat_updates = [];
         var req ;
+
+        // skip if no user id assigned
+        if (!self.user_id) {
+            window.setTimeout( self.update, SESSION_UPDATE_INTERVAL );
+            return null;
+        }
 
         // assign real values if objets are present
         if (_drawing) {
@@ -128,7 +136,11 @@ function Session( session_type, callback ) {
                 // FIXME: do something with drawing updates
                 // FIXME: do something with event updates
                 // FIXME: do something with chat updates
-            }
+                window.setTimeout( self.update, SESSION_UPDATE_INTERVAL );
+            },
+            error: function( response ) {
+               window.setTimeout( self.update, SESSION_UPDATE_INTERVAL * 2 );
+           }
         });
 
     };
@@ -142,7 +154,6 @@ function Session( session_type, callback ) {
     }
 
     this.initialize();
-    _update_timer = window.setInterval( self.update, SESSION_UPDATE_INTERVAL );
 }
 
 
