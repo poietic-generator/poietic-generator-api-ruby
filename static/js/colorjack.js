@@ -1,8 +1,8 @@
-/* 
+/*
     Color Picker: Classic : 2011/02/26
     ---------------------------------------
     http://www.colorjack.com/opensource/dhtml+color+picker.html
-    
+
     Native support:  Firefox 2+, Safari 3+, Opera 9+, Google Chrome, IE9+
 
     This color picker is dual licenced under Creative Commons & GPL.
@@ -19,7 +19,7 @@ Color.Picker = function (props) {
     this.sat = props.sat || 0; // 0-100
     this.val = props.val || 100; // 0-100
     this.element = props.element || document.body;
-    this.size = 165; // size of colorpicker
+    this.size = props.size || 165; // size of colorpicker
     this.margin = 10; // margins on colorpicker
     this.offset = this.margin / 2;
     this.hueWidth = 30;
@@ -28,6 +28,7 @@ Color.Picker = function (props) {
     var plugin = document.createElement("div");
     plugin.id = "colorjack_square";
     plugin.style.cssText = "height: " + (this.size + this.margin * 2) + "px";
+    plugin.style.cssText+= ";width:" + (this.size + this.margin + this.hueWidth) + "px";
 
     // shows current selected color as the background of this box
     var hexBox = document.createElement("div");
@@ -110,7 +111,7 @@ Color.Picker = function (props) {
 	var y = clamp(y0, 0, that.size);
 	if (e.target.className == "hexString") {
 	    plugin.style.cursor = "text";
-	    return; // allow selection of HEX		
+	    return; // allow selection of HEX
 	} else if (x != x0 || y != y0) { // move colorpicker
 	    plugin.style.cursor = "move";
 	    if (down) dragElement({
@@ -252,7 +253,7 @@ var dragElement = function(props) {
 	if (typeof(state) == "undefined") state = "move";
 	var coord = XY(e);
 	switch (props.type) {
-	    case "difference": 
+	    case "difference":
 		props.callback({
 		    x: coord.x + oX - eX,
 		    y: coord.y + oY - eY
@@ -310,13 +311,13 @@ var XY = window.ActiveXObject ? // fix XY to work in various browsers
 	};
     };
 
-var abPos = function(o) { 
+var abPos = function(o) {
     o = typeof(o) == 'object' ? o : $(o);
     var offset = { x: 0, y: 0 };
-    while(o != null) { 
-	offset.x += o.offsetLeft; 
-	offset.y += o.offsetTop; 
-	o = o.offsetParent; 
+    while(o != null) {
+	offset.x += o.offsetLeft;
+	offset.y += o.offsetTop;
+	o = o.offsetParent;
     };
     return offset;
 };

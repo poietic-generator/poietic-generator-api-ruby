@@ -19,6 +19,7 @@ $(document).ready( function() {
                 event.preventDefault();
                 if (undefined === picker) {
                     picker = new Color.Picker({
+                        size: Math.floor($(window).width() / 3),
                         callback: function(hex) {
                             drawing.color_set( "#" + hex );
                         }
