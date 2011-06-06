@@ -10,6 +10,7 @@ $(document).ready( function() {
         SESSION_TYPE_DRAW,
         function() {
             //console.log("page_draw/ready: session callback ok");
+	    var board = new Board( session, 'session-board');
             var drawing = new Drawing(session, 'session-drawing');
             // var globalzone = new GlobalZone(session, 'session-global');
             // var colorzone = new ColorZone(session, 'session-colors');
@@ -38,14 +39,6 @@ $(document).ready( function() {
                     $("#brush-action").text("Afficher");
                 }
             });
-            //console.log("page_draw/ready: postpicker");
-
-            // create session with
         }
     );
-    /*
-    setInterval( function() {
-    // refresh connexion to the server
-    }, 10000 );
-    */
 });
