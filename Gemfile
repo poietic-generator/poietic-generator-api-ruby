@@ -13,4 +13,4 @@ gem "dm-sqlite-adapter"
 gem "dm-mysql-adapter"
 gem "dm-aggregates"
 gem "inifile", "~> 0.3"
-
+gem "extlib"
