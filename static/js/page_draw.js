@@ -29,14 +29,14 @@ $(document).ready( function() {
                     picker.el.style.bottom = "50px";
                     picker.el.style.left = "10px";
                     firstClick = true;
-                    $("#brush-action").text("Masquer");
+                    $("#brush-action").text("Hide");
                 }
                 if (true === $(picker.el).is(":hidden")) {
                     $(picker.el).show();
-                    $("#brush-action").text("Masquer");
+                    $("#brush-action").text("Hide");
                 } else if (!firstClick) {
                     $(picker.el).hide();
-                    $("#brush-action").text("Afficher");
+                    $("#brush-action").text("Show");
                 }
             });
         }
