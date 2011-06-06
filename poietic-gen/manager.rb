@@ -84,6 +84,7 @@ module PoieticGen
 			user.expires_at = (now + Rational(@config.user.max_idle, 60 * 60 * 24 ))
 
 			user.save
+			pp user
 			session[PoieticGen::Api::SESSION_USER] = user.id
 
 			# FIXME: send matrix status of user zone
@@ -203,6 +204,7 @@ module PoieticGen
 
 			STDERR.puts "events:"
 			events = Event.all( :id.gt => data[:event] )
+			pp events
 
 			result = {
 				:event => [],
