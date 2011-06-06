@@ -53,6 +53,7 @@
     -webkitbox-shadow: inset 0em 0em 1em black;
     box-shadow: inset 0em 0em 1em black;
     */
+    cursor: pointer;
 }
 
 #session-global {
