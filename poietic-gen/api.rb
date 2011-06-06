@@ -197,7 +197,3 @@ module PoieticGen
 	end
 end
 
-# un moyen d'envoyer un paquet de données
-#
-# recevoir le dernier paquet de données depuis la date X
-#
