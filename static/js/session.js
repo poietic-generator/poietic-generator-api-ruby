@@ -71,7 +71,7 @@ function Session( session_type, callback ) {
 
                 _current_event_id = response.event_id;
                 _current_drawing_id = response.drawing_id;
-                _current_chat_id = response.drawing_id;
+                _current_chat_id = response.chat_id;
 
                 $.cookie( 'user_id', this.user_id );
                 $.cookie( 'user_name', this.user_name );
