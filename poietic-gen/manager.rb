@@ -117,7 +117,8 @@ module PoieticGen
 				:zone_content => zone.to_patches,
 				:event_id => (event_max.id || -1 ),
 				:drawing_id => 0,
-				:view_id => (drawing_max.id || -1 )
+				:view_id => (drawing_max.id || -1 ),
+				:chat_id => (event_max.id || -1 ) # FIXME: use chat_max instead of event_max
 			}
 		end
 
