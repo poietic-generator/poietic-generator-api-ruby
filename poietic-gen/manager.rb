@@ -10,6 +10,8 @@ require 'pp'
 module PoieticGen
 
 
+	UPDATEREQ_EVENT_SINCE = 'event_since'
+
 	#
 	# manage a pool of users
 	#
@@ -96,13 +98,7 @@ module PoieticGen
 			# FIXME: return same user_id if session is still valid
 
 			# return JSON for userid
-			event = Event.create({ 
-				:type => 'join', 
-				:desc => JSON.generate({ :zone => user.zone }),
-				:timestamp => DateTime.now
-			})
-			event.save
-
+			event = Event.create_join user.id, user.zone
 			event_max = Event.first(:order => [ :id.desc ])
 			drawing_max = DrawingPatch.first(:order => [ :id.desc ])
 
@@ -203,12 +199,14 @@ module PoieticGen
 			since_drawing = []
 
 
-			STDERR.puts "events:"
-			events = Event.all( :id.gt => data[:event] )
-			pp events
+			# FIXME: validate event_since as a uint
+			STDERR.puts "events: (since %s)" % data[UPDATEREQ_EVENT_SINCE]
+			events = Event.all( :id.gt => data[UPDATEREQ_EVENT_SINCE].to_i )
+			since_events = events.map{ |e| e.to_hash }
+			pp since_events
 
 			result = {
-				:event => [],
+				:event => since_events,
 				:drawing => since_drawing,
 				:chat => [],
 			}
