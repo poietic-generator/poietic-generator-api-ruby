@@ -133,9 +133,23 @@ function Session( session_type, callback ) {
             success: function( response ){
                 console.log('drawing/update response : ' + JSON.stringify( response ) );
 
-                // FIXME: do something with drawing updates
-                // FIXME: do something with event updates
-                // FIXME: do something with chat updates
+                for (var i=0; i<response.event.length; i++){
+                    // FIXME: do something with event updates
+                    _current_event_id = response.event[i].id;
+                    console.log('drawing/update set response id to %s', _current_event_id);
+                }
+
+                for (var i=0; i<response.drawing.length; i++){
+                    // FIXME: do something with drawing updates
+                    _current_drawing_id = response.drawing[i].id;
+                    console.log('drawing/update set response id to %s', _current_drawing_id);
+                }
+
+                for (var i=0; i<response.chat.length; i++){
+                    // FIXME: do something with chat updates
+                    _current_chat_id = response.chat[i].id;
+                    console.log('drawing/update set response id to %s', _current_chat_id);
+                }
                 window.setTimeout( self.update, SESSION_UPDATE_INTERVAL );
             },
             error: function( response ) {
