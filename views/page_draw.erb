@@ -18,30 +18,40 @@
 
 <!-- la zone de dessin -->
 <div id="session-zone" data-role="page">
-    <div data-role="header">
+    <div data-role="header" data-id="head" data-position="fixed">
         <div data-role="navbar">
             <ul>
-                <li><a href="#session-zone" class="ui-btn-active">Zone de dessin</a></li>
-                <li><a href="#session-global">Dessin global</a></li>
-                <li><a href="#session-chat">Messages</a></li>
+                <li><a href="#session-zone" data-transition="slideup" class="ui-btn-active ui-state-persist">Zone de dessin</a></li>
+                <li><a href="#session-global" data-transition="slideup">Dessin global</a></li>
+                <li><a href="#session-chat" data-transition="slideup">Messages</a></li>
             </ul>
         </div>
     </div>
     <div data-role="content">
-        <div id="session-brush" >
-            <a href="#" data-role="button" data-inline="true" data-theme="c" data-icon="grid" data-iconpos="notext" id="brush">Afficher la palette</a>
-        </div>
         <canvas id="session-drawing"></canvas>
+    </div>
+    <div data-role="footer" data-position="fixed" class="ui-grid-d">
+        <div class="ui-block-a">
+            <a href="#" data-role="button" data-theme="c" id="brush"><span id="brush-action">Afficher</span> la palette</a>
+        </div>
+        <div class="ui-block-b"></div>
+        <div class="ui-block-c"></div>
+        <div class="ui-block-d"></div>
+        <div class="ui-block-e">
+            <ul data-role="listview" data-inset="true">
+                <li><a href="#session-chat">Nouveaux messages<span class="ui-li-count">O</span></a></li>
+            </ul>
+        </div>
     </div>
 </div>
 <!-- la vue globale -->
 <div id="session-global" data-role="page">
-    <div data-role="header">
+    <div data-role="header" data-id="head" data-position="fixed">
         <div data-role="navbar">
             <ul>
-                <li><a href="#session-zone">Zone de dessin</a></li>
-                <li><a href="#session-global" class="ui-btn-active">Dessin global</a></li>
-                <li><a href="#session-chat">Messages</a></li>
+                <li><a href="#session-zone" data-transition="slideup">Zone de dessin</a></li>
+                <li><a href="#session-global" data-transition="slideup" class="ui-btn-active ui-state-persist">Dessin global</a></li>
+                <li><a href="#session-chat" data-transition="slideup">Messages</a></li>
             </ul>
         </div>
     </div>
@@ -51,17 +61,39 @@
 </div>
 <!-- la zone chat -->
 <div id="session-chat" data-role="page">
-    <div data-role="header">
+    <div data-role="header" data-id="head" data-position="fixed">
         <div data-role="navbar">
             <ul>
-                <li><a href="#session-zone">Zone de dessin</a></li>
-                <li><a href="#session-global">Dessin global</a></li>
-                <li><a href="#session-chat" class="ui-btn-active">Messages</a></li>
+                <li><a href="#session-zone" data-transition="slideup">Zone de dessin</a></li>
+                <li><a href="#session-global" data-transition="slideup">Dessin global</a></li>
+                <li><a href="#session-chat" data-transition="slideup" class="ui-btn-active ui-state-persist">Messages</a></li>
             </ul>
         </div>
     </div>
     <div data-role="content">
-        chat zone
+        <a href="#send-message" data-rel="dialog" data-transition="pop">Envoyer un message</a>
+    </div>
+</div>
+<!-- send a message -->
+<div id="send-message" data-role="page">
+    <div data-role="header">
+        <h1>Envoyer un message</h1>
+    </div>
+    <div data-role="content">
+        <form action="" method="post">
+            <div data-role="fieldcontain">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" cols="20" rows="5"></textarea>
+            </div>
+            <div class="ui-grid-a">
+                <div class="ui-block-a">
+                    <a href="#" data-role="button" data-rel="back">Annuler</a>
+                </div>
+                <div class="ui-block-b">
+                    <input type="submit" value="Envoyer">
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
