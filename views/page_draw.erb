@@ -71,7 +71,29 @@
         </div>
     </div>
     <div data-role="content">
-        chat zone
+        <a href="#send-message" data-rel="dialog" data-transition="pop">Envoyer un message</a>
+    </div>
+</div>
+<!-- send a message -->
+<div id="send-message" data-role="page">
+    <div data-role="header">
+        <h1>Envoyer un message</h1>
+    </div>
+    <div data-role="content">
+        <form action="" method="post">
+            <div data-role="fieldcontain">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" cols="20" rows="5"></textarea>
+            </div>
+            <div class="ui-grid-a">
+                <div class="ui-block-a">
+                    <a href="#" data-role="button" data-rel="back">Annuler</a>
+                </div>
+                <div class="ui-block-b">
+                    <input type="submit" value="Envoyer">
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
