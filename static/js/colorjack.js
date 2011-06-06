@@ -41,14 +41,14 @@ Color.Picker = function (props) {
     plugin.appendChild(hexString);
 
     // close the plugin
-    var hexClose = document.createElement("div");
+    /*var hexClose = document.createElement("div");
     hexClose.className = "hexClose";
     hexClose.textContent = "X";
     hexClose.onclick = function () { // close colorpicker
 	plugin.style.display = (plugin.style.display == "none") ? "block" : "none";
     };
     plugin.appendChild(hexClose);
-    plugin.appendChild(document.createElement("br"));
+    plugin.appendChild(document.createElement("br"));*/
 
     /// creating media-resources
     var arrows = document.createElement("canvas");

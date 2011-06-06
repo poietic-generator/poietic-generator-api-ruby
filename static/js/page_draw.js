@@ -17,6 +17,7 @@ $(document).ready( function() {
             //console.log("page_draw/ready: prepicker");
             $("#brush").click(function(event){
                 event.preventDefault();
+                var firstClick = false;
                 if (undefined === picker) {
                     picker = new Color.Picker({
                         size: Math.floor($(window).width() / 3),
@@ -24,11 +25,17 @@ $(document).ready( function() {
                             drawing.color_set( "#" + hex );
                         }
                     });
-                    picker.el.style.top = "5px";
-                    picker.el.style.left = "5px";
+                    picker.el.style.bottom = "50px";
+                    picker.el.style.left = "10px";
+                    firstClick = true;
+                    $("#brush-action").text("Masquer");
                 }
                 if (true === $(picker.el).is(":hidden")) {
                     $(picker.el).show();
+                    $("#brush-action").text("Masquer");
+                } else if (!firstClick) {
+                    $(picker.el).hide();
+                    $("#brush-action").text("Afficher");
                 }
             });
             //console.log("page_draw/ready: postpicker");
