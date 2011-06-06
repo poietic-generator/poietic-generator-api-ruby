@@ -3,6 +3,12 @@
 /**
  * Global view
  */
-function View() {
+function Board() {
+    
+    var self = this;
 
+    this.initialize = function() {
+    }
+
+    this.initialize();
 }
