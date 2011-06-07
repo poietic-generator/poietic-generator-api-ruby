@@ -25,14 +25,14 @@ module PoieticGen
 		end
 
 		def self.post src, dst, stamp, content
-		  msg = Message.create({
-		    :user_src => src,
-		    :user_dst => dst,
-		    :content => content,
-		    :stamp => stamp
-      })
-      msg.save
-    end
+			msg = Message.create({
+				:user_src => src,
+				:user_dst => dst,
+				:content => content,
+				:stamp => stamp
+			})
+			msg.save
+		end
 	end
 
 end
