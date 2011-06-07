@@ -16,7 +16,7 @@ module PoieticGen
 				DRAWING, 
 				CHAT
 			].each do |sym|
-				unless data.include? sym.to_s then
+				unless json.include? sym.to_s then
 					raise ArgumentError, ("The '%s' field is missing" % sym) 
 				end
 			end
