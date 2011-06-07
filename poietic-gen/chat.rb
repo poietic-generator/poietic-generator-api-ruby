@@ -1,6 +1,7 @@
 
 
 module PoieticGen
+
   class ChatUser
     attr_reader :pseudo, :inbox
     attr_writer :pseudo, :inbox
@@ -14,11 +15,18 @@ module PoieticGen
       @inbox.push({:from => from, :stamp => stamp, :message => message})
     end
   end
+
   class Chat
     def initialize config
       @config = config
       @users = []
     end
+
+	def update_data user, data
+		data.each do | msg |
+			@chat.post user.name, msg["stamp"], msg["content"]
+		end
+	end
 
     def post pseudo, stamp, message
       @users.each { | dst |
