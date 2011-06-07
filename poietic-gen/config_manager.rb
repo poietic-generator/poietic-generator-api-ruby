@@ -50,6 +50,7 @@ module PoieticGen
 		#
 		#
 		def initialize conf_file
+			puts "PoieticGen::ConfigManager - initialize with file : '%s'\n" % conf_file
 			ini_fh = IniFile.load conf_file
 			raise MissingSection unless ini_fh.has_section? "server"
 			@server = ConfigServer.new ini_fh["server"]
