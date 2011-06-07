@@ -1,9 +1,11 @@
 
+require 'poietic-gen/board'
 require 'poietic-gen/palette'
 require 'poietic-gen/user'
 require 'poietic-gen/event'
+require 'poietic-gen/chat'
 require 'poietic-gen/drawing_patch'
-require 'poietic-gen/board'
+
 
 require 'pp'
 
@@ -27,8 +29,13 @@ module PoieticGen
 
 			# total count of users seen (FIXME: get it from db)
 			@users_seen = 0
+
+	        # Create board with the configuration
 			@board = Board.new config.board
 
+			@chat = PoieticGen::Chat.new config.chat
+
+			# FIXME put it in db
 			# FIXME : create session in database
 		end
 
@@ -65,8 +72,13 @@ module PoieticGen
 				STDERR.puts "User is requesting a different session"
 				# create new
 				user = User.create param_create
+
+			  @chat.join user.name
+
 				# allocate new zone
-				user.zone = (@board.allocate user).index
+				zone = @board.allocate
+				zone.user = user
+				user.zone = zone.index
 
 			else
 				STDERR.puts "User is in session"
@@ -76,13 +88,23 @@ module PoieticGen
 					STDERR.puts "User session expired"
 					# create new if session expired
 					user = User.create param_create
+
+
+				@board.join user
+				# FIXME: move following code into board
+				# allocate new zone
+				zone = @board.allocate
+				zone.user = user
+			    user.zone = zone.id
+			    @chat.join user
+
 					# allocate new zone
 					user.zone = (@board.allocate user).index
+
 				end
 			end
 
 			# update expiration time
-			# FIXME: use configuration instead of constant
 			user.expires_at = (now + Rational(@config.user.max_idle, 60 * 60 * 24 ))
 
 			user.save
@@ -103,7 +125,6 @@ module PoieticGen
 			drawing_max = DrawingPatch.first(:order => [ :id.desc ])
 
 			# FIXME: send "leave event" to everyone
-			# FIXME: send zone content to user
 			return { :user_id => user.id,
 				:user_session => user.session,
 				:user_name => user.name,
@@ -129,7 +150,8 @@ module PoieticGen
 			}
 			user = User.first param_request
 			if user then
-				self.zone_free user.id
+			  @board.zone_free user.zone
+			  @chat.leave user
 			end
 
 		end
@@ -170,6 +192,8 @@ module PoieticGen
 		# return latest updates from everyone !
 		#
 		def update_data session, data
+			#FIXME: validate data input
+
 			param_request = {
 				:id => session[PoieticGen::Api::SESSION_USER],
 				:session => @session_id
@@ -192,7 +216,12 @@ module PoieticGen
 					("The '%s' field is missing" % sym) unless data.include? sym.to_s
 			end
 
-			# apply drawing to zone
+			# FIXME: implement push & apply drawing to zone
+			@board.push user.zone, data["drawing"]
+			data["chat"].each do | msg |
+			  @chat.post user.name, msg["stamp"], msg["content"]
+      		end
+
 			zone.apply data['drawing']
 
 			# FIXME: include new drawings (excepted from this user) in response
