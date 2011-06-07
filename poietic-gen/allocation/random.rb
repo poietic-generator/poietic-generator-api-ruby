@@ -1,7 +1,9 @@
 
+require 'poietic-gen/allocation/generic'
+
 module PoieticGen ; module Allocation
 
-	module Generic
+	module Random < Generic
 
 		#
 		# return a zone, somewhere...
