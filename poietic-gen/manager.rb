@@ -4,7 +4,7 @@ require 'poietic-gen/palette'
 require 'poietic-gen/user'
 require 'poietic-gen/event'
 require 'poietic-gen/chat'
-require 'poietic-gen/drawing_patch'
+require 'poietic-gen/stroke'
 require 'poietic-gen/update_request'
 
 require 'pp'
