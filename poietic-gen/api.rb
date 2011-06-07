@@ -116,7 +116,7 @@ module PoieticGen
 				result = settings.manager.join session, params
 				pp result
 			rescue Exception => e
-				STDERR.puts e.inspect
+				STDERR.puts e.inspect, e.backtrace
 
 			ensure
 				return JSON.generate( result )
@@ -136,11 +136,11 @@ module PoieticGen
 				session[SESSION_USER] = nil
 
 			rescue InvalidSession => e
-				STDERR.puts e.inspect
+				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_REDIRECTION ]
 
 			rescue Exception => e
-				STDERR.puts e.inspect
+				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_SERVER_ERROR ]
 
 			ensure
@@ -179,7 +179,7 @@ module PoieticGen
 
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors
-				STDERR.puts e.inspect
+				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_BAD_REQUEST, "Invalid content : JSON expected" ]
 
 			rescue ArgumentError => e
