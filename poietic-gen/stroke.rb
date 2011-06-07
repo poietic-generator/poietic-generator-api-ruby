@@ -13,6 +13,7 @@ module PoieticGen
 
 		def to_hash
 			res = {
+				:id => self.id,
 				:color => self.color,
 				:changes => JSON.parse( self.changes ),
 				:stamp => self.timestamp
