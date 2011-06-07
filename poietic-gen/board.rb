@@ -53,9 +53,9 @@ module PoieticGen
 		end
 
 
-		def update_data user, data
+		def update_data user, drawing
 			zone = @allocator[user.zone]
-			zone.apply data['drawing']
+			zone.apply drawing
 		end
 	end
 
