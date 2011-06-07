@@ -10,9 +10,10 @@ $(document).ready( function() {
         SESSION_TYPE_DRAW,
         function() {
             //console.log("page_draw/ready: session callback ok");
-	   
-	    var board = new Board( session, 'session-board');
+
+            var board = new Board( session, 'session-board');
             var drawing = new Drawing(session, board, 'session-drawing');
+            var chat = new Chat(session);
 
             //console.log("page_draw/ready: prepicker");
             $("#brush").click(function(event){
