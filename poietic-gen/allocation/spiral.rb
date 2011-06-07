@@ -91,8 +91,34 @@ module PoieticGen ; module Allocation
 			end
 		end
 
-		private
 
+		#
+		# allocates and return 
+		# a zone                
+		#
+		def allocate
+			next_index = _next_index()
+
+			zone = Zone.new next_index, 
+				(self.index_to_position next_index),
+				@config.width,
+				@config.height
+
+			STDERR.puts "Spiral/allocate zone : ", zone.inspect
+			@zones[next_index] = zone
+			return zone
+		end
+
+		#
+		#
+		#
+		def free zone_idx
+			zone = @zones[zone_idx]
+			zone.user = nil
+			@zones[zone_idx]
+		end
+
+		private
 		# 
 		# Find the first allocatable index
 		#
@@ -114,34 +140,6 @@ module PoieticGen ; module Allocation
 		end
 
 
-
-		#
-		# allocates and return 
-		# a zone                
-		#
-		def allocate user
-
-			next_index = _next_index()
-
-			zone = Zone.new next_index, 
-				(self.index_to_position next_index),
-				@config.width,
-				@config.height
-
-			zone.user = user
-			STDERR.puts "Allocation zone : ", zone.inspect
-			@zones[next_index] = zone
-			return zone
-		end
-
-		#
-		#
-		#
-		def free zone_idx
-			zone = @zones[zone_idx]
-			zone.user = nil
-			@zones[zone_idx]
-		end
 
 	end
 end ; end
