@@ -4,7 +4,7 @@
  * Global view
  */
 function Board( p_session, p_canvas_id ) {
-    
+
     var self = this;
 
     var _real_canvas;
@@ -51,5 +51,5 @@ function Board( p_session, p_canvas_id ) {
 
     }
 
-    this.initialize();
+    this.initialize(p_session, p_canvas_id);
 }

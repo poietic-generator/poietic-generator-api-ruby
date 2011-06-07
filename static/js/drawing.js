@@ -410,6 +410,6 @@ function Drawing( p_session, p_board, p_canvas_id ){
 
 
 
-    this.initialize( p_session, p_canvas_id );
+    this.initialize(p_session, p_board, p_canvas_id);
 }
 
