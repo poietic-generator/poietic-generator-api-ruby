@@ -8,6 +8,14 @@ module PoieticGen
 		DRAWING = 'drawing'
 		CHAT = 'chat'
 
+		private
+
+		def initialize json
+			@json = json	
+		end
+
+		public
+
 		def self.parse json
 			# mandatory fields firstvalidate user input first
 			[	DRAWING_SINCE, 
@@ -27,29 +35,25 @@ module PoieticGen
 
 
 		def drawing
-			return json[DRAWING]
+			return @json[DRAWING]
 		end
 
 		def chat 
-			return json[CHAT]
+			return @json[CHAT]
 		end
 
 		def chat_since
-			return json[CHAT_SINCE].to_i
+			return @json[CHAT_SINCE].to_i
 		end
 
 		def drawing_since
-			return json[DRAWING_SINCE].to_i
+			return @json[DRAWING_SINCE].to_i
 		end
 
 		def event_since
-			return json[EVENT_SINCE].to_i
+			return @json[EVENT_SINCE].to_i
 		end
 
-		private
-		def initialize json
-			@json = json	
-		end
 	end
 end
 
