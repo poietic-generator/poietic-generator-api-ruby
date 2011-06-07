@@ -30,6 +30,13 @@ module PoieticGen
 
 
 		#
+		# Get access to zone with given index
+		#
+		def [] idx
+			return @allocator[idx]
+		end
+
+		#
 		# make the user join the board
 		#
 		def join user
