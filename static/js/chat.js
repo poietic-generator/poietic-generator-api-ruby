@@ -11,6 +11,14 @@ function Chat (p_session) {
         // register chat to session
         p_session.register_chat(self);
 
+        // initialize list of users for the send message form
+        if (0 < p_session.other_users.length) {
+            var select = $("#send-message-form-to");
+            for (var i=0; i < p_session.other_users.length; i++) {
+                select.append('<option value="' + p_session.other_users[i].id + '">' + p_session.other_users[i].name + ' (' + p_session.other_users[i].id + ')</option>');
+            }
+        }
+
         // attach submit event
         $("#send-message-form").submit(function(event){
             event.preventDefault();

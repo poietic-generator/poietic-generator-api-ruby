@@ -61,6 +61,8 @@ function Session( session_type, callback ) {
             success: function( response ){
                 console.log('session/join response : ' + JSON.stringify(response) );
 
+                this.other_users = response.other_users;
+                this.other_zones = response.other_zones;
                 this.user_id = response.user_id;
                 this.user_name = response.user_name;
                 this.user_session = response.user_session;
@@ -154,6 +156,8 @@ function Session( session_type, callback ) {
                     _current_message_id = response.messages[i].id;
                     console.log('drawing/update set response id to %s', _current_message_id);
                 }
+
+                // FIXME : do something with other_*
                 window.setTimeout( self.update, SESSION_UPDATE_INTERVAL );
             },
             error: function( response ) {
