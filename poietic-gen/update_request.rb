@@ -9,28 +9,43 @@ module PoieticGen
 		DRAWING_SINCE = 'strokes_since'
 		EVENT_SINCE = 'events_since'
 
+		CHAT_DST = 'user_dst'
+		CHAT_CONTENT = 'content'
+		CHAT_STAMP = 'stamp'
+
 		private
 
 		def initialize json
-			@json = json	
+			@json = json
 		end
 
 		public
 
 		def self.parse json
 			# mandatory fields firstvalidate user input first
-			[	DRAWING_SINCE, 
-				EVENT_SINCE, 
+			[	DRAWING_SINCE,
+				EVENT_SINCE,
 				CHAT_SINCE,
-				DRAWING, 
+				DRAWING,
 				CHAT
 			].each do |sym|
 				unless json.include? sym.to_s then
-					raise ArgumentError, ("The '%s' field is missing" % sym) 
+					raise ArgumentError, ("The '%s' field is missing" % sym)
 				end
 			end
 			# parse per-field content
 			#
+			json[CHAT].each do |msg|
+				[ CHAT_DST,
+					CHAT_CONTENT,
+					CHAT_STAMP
+				].each do |sym|
+					unless json[CHAT].include? sym.to_s then
+						raise ArgumentError, ("The '%s' sub-field is missing" % sym)
+					end
+				end
+				msg[CHAT_DST].to_i
+			end
 			UpdateRequest.new json
 		end
 
@@ -39,7 +54,7 @@ module PoieticGen
 			return @json[DRAWING]
 		end
 
-		def chat 
+		def chat
 			return @json[CHAT]
 		end
 

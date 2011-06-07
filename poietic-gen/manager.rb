@@ -110,6 +110,7 @@ module PoieticGen
 			event = Event.create_join user.id, user.zone
 			event_max = Event.first(:order => [ :id.desc ])
 			drawing_max = Stroke.first(:order => [ :id.desc ])
+			message_max = Message.first(:order => [ :id.desc ])
 
 			# FIXME: return users & zones
 			#users = User.all( :id.gt => req.events_since )
@@ -128,7 +129,7 @@ module PoieticGen
 				:event_id => (event_max.id || -1 ),
 				:stroke_id => 0,
 				:view_id => (drawing_max.id || -1 ),
-				:message_id => (event_max.id || -1 ) # FIXME: use chat_max instead of event_max
+				:message_id => (message_max.id || -1 )
 			}
 		end
 
