@@ -1,7 +1,7 @@
 
 module PoieticGen ; module Allocation
 
-	module Generic
+	class Generic
 
 		#
 		# return a zone, somewhere...

@@ -2,7 +2,7 @@
 require 'poietic-gen/allocation/generic'
 
 module PoieticGen ; module Allocation
-	module Spiral < Generic
+	class Spiral < Generic
 
 		# helper class fir direction
 		class V

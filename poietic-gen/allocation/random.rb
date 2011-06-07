@@ -3,7 +3,7 @@ require 'poietic-gen/allocation/generic'
 
 module PoieticGen ; module Allocation
 
-	module Random < Generic
+	class Random < Generic
 
 		#
 		# return a zone, somewhere...
