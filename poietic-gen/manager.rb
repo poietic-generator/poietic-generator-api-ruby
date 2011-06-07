@@ -114,11 +114,17 @@ module PoieticGen
 			event_max = Event.first(:order => [ :id.desc ])
 			drawing_max = Stroke.first(:order => [ :id.desc ])
 
+			# FIXME: return users & zones
+			#users = User.all( :id.gt => req.events_since )
+			#zones = ...
+
 			# FIXME: send "leave event" to everyone
 			return { :user_id => user.id,
 				:user_session => user.session,
 				:user_name => user.name,
 				:user_zone => user.zone,
+				:other_users => [],
+				:other_zones => [],
 				:zone_column_count => @config.board.width,
 				:zone_line_count => @config.board.height,
 				:zone_content => zone.to_patches,
