@@ -14,19 +14,5 @@ module PoieticGen
       end
     end
 
-    def get_users
-      list_users = []
-      @users.each { |user|
-        list_user.push user.pseudo
-      }
-      return list_user.sort
-    end
-
-    def get_inbox pseudo
-      user = @users[@users.find_index{|u| u.pseudo == pseudo}]
-      ib = user.inbox
-      user.inbox = []
-      return ib
-    end
   end
 end

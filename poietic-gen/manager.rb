@@ -4,6 +4,7 @@ require 'poietic-gen/palette'
 require 'poietic-gen/user'
 require 'poietic-gen/event'
 require 'poietic-gen/chat_manager'
+require 'poietic-gen/message'
 require 'poietic-gen/stroke'
 require 'poietic-gen/update_request'
 
@@ -215,15 +216,18 @@ module PoieticGen
 			pp since_events
 
 			# FIXME: implement Message class first
-			#STDERR.puts "chat: (since %s)" % req.chat_since
-			#chats = Message.all( :id.gt => req.chat_since )
-			#since_chats = chats.map{ |e| e.to_hash }
-			#pp since_chats
+			STDERR.puts "chat: (since %s)" % req.messages_since
+			messages = Message.all(
+			  :id.gt => req.messages_since,
+			  :user_dst => user.id
+			)
+			since_messages = messages.map{ |e| e.to_hash }
+			pp since_messages
 
 			result = {
 				:events => since_events,
 				:strokes => since_stroke,
-				:messages => [],
+				:messages => since_messages,
 			}
 
 			return result
