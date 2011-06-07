@@ -123,9 +123,9 @@ module PoieticGen
 				:zone_line_count => @config.board.height,
 				:zone_content => zone.to_patches,
 				:event_id => (event_max.id || -1 ),
-				:drawing_id => 0,
+				:stroke_id => 0,
 				:view_id => (drawing_max.id || -1 ),
-				:chat_id => (event_max.id || -1 ) # FIXME: use chat_max instead of event_max
+				:message_id => (event_max.id || -1 ) # FIXME: use chat_max instead of event_max
 			}
 		end
 
@@ -203,13 +203,13 @@ module PoieticGen
 			@chat.update_data user, req.chat
 
 			# FIXME: include new drawings (excepted from this user) in response
-			STDERR.puts "drawings: (since %s)" % req.drawing_since
-			drawings = Stroke.all( :id.gt => req.drawing_since )
-			since_drawing = drawings.map{ |d| d.to_hash }
-			pp since_drawing
+			STDERR.puts "drawings: (since %s)" % req.strokes_since
+			strokes = Stroke.all( :id.gt => req.strokes_since )
+			since_stroke = strokes.map{ |d| d.to_hash }
+			pp since_stroke
 
-			STDERR.puts "events: (since %s)" % req.event_since
-			events = Event.all( :id.gt => req.event_since )
+			STDERR.puts "events: (since %s)" % req.events_since
+			events = Event.all( :id.gt => req.events_since )
 			since_events = events.map{ |e| e.to_hash }
 			pp since_events
 
@@ -220,9 +220,9 @@ module PoieticGen
 			#pp since_chats
 
 			result = {
-				:event => since_events,
-				:drawing => since_drawing,
-				:chat => [],
+				:events => since_events,
+				:strokes => since_stroke,
+				:messages => [],
 			}
 
 			return result

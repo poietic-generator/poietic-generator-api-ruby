@@ -22,8 +22,8 @@ function Session( session_type, callback ) {
     this.zone_column_count = null;
     this.zone_line_count = null;
 
-    var _current_drawing_id = 0;
-    var _current_chat_id = 0;
+    var _current_stroke_id = 0;
+    var _current_message_id = 0;
     var _current_event_id = 0;
 
     var _drawing = null;
@@ -68,8 +68,8 @@ function Session( session_type, callback ) {
                 this.zone_line_count = response.zone_line_count;
 
                 _current_event_id = response.event_id;
-                _current_drawing_id = response.drawing_id;
-                _current_chat_id = response.chat_id;
+                _current_stroke_id = response.stroke_id;
+                _current_message_id = response.message_id;
 
                 $.cookie( 'user_id', this.user_id );
                 $.cookie( 'user_name', this.user_name );
@@ -94,8 +94,8 @@ function Session( session_type, callback ) {
      */
     this.update = function(){
 
-        var drawing_updates = [];
-        var chat_updates = [];
+        var strokes_updates = [];
+        var messages_updates = [];
         var req ;
 
         // skip if no user id assigned
@@ -106,21 +106,21 @@ function Session( session_type, callback ) {
 
         // assign real values if objets are present
         if (_drawing) {
-            drawing_updates = _drawing.patches_get();
+            strokes_updates = _drawing.patches_get();
         }
         if (_chat) {
-            chat_updates = _chat.patches_get();
+            messages_updates = _chat.patches_get();
         }
-        console.log("drawing_updates = %s", drawing_updates);
-        console.log("chat_updates = %s", chat_updates);
+        console.log("strokes_updates = %s", strokes_updates);
+        console.log("messages_updates = %s", messages_updates);
 
         req = {
-            drawing_since : _current_drawing_id,
-            chat_since : _current_chat_id,
-            event_since : _current_event_id,
+            strokes_since : _current_stroke_id,
+            messages_since : _current_message_id,
+            events_since : _current_event_id,
 
-            drawing : drawing_updates,
-            chat : chat_updates,
+            strokes : strokes_updates,
+            messages : messages_updates,
         }
 
         console.log("drawing/patches_update: req = %s", JSON.stringify( req ) ); 
@@ -133,22 +133,22 @@ function Session( session_type, callback ) {
             success: function( response ){
                 console.log('drawing/update response : ' + JSON.stringify( response ) );
 
-                for (var i=0; i<response.event.length; i++){
+                for (var i=0; i<response.events.length; i++){
                     // FIXME: do something with event updates
                     _current_event_id = response.event[i].id;
                     console.log('drawing/update set response id to %s', _current_event_id);
                 }
 
-                for (var i=0; i<response.drawing.length; i++){
+                for (var i=0; i<response.strokes.length; i++){
                     // FIXME: do something with drawing updates
-                    _current_drawing_id = response.drawing[i].id;
-                    console.log('drawing/update set response id to %s', _current_drawing_id);
+                    _current_stroke_id = response.drawing[i].id;
+                    console.log('drawing/update set response id to %s', _current_stroke_id);
                 }
 
-                for (var i=0; i<response.chat.length; i++){
+                for (var i=0; i<response.messages.length; i++){
                     // FIXME: do something with chat updates
-                    _current_chat_id = response.chat[i].id;
-                    console.log('drawing/update set response id to %s', _current_chat_id);
+                    _current_message_id = response.chat[i].id;
+                    console.log('drawing/update set response id to %s', _current_message_id);
                 }
                 window.setTimeout( self.update, SESSION_UPDATE_INTERVAL );
             },

@@ -2,11 +2,12 @@
 module PoieticGen
 	class UpdateRequest
 
-		DRAWING_SINCE = 'event_since'
-		EVENT_SINCE = 'event_since'
-		CHAT_SINCE = 'chat_since'
-		DRAWING = 'drawing'
-		CHAT = 'chat'
+		CHAT = 'messages'
+		DRAWING = 'strokes'
+
+		CHAT_SINCE = 'messages_since'
+		DRAWING_SINCE = 'strokes_since'
+		EVENT_SINCE = 'events_since'
 
 		private
 
@@ -42,15 +43,15 @@ module PoieticGen
 			return @json[CHAT]
 		end
 
-		def chat_since
+		def messages_since
 			return @json[CHAT_SINCE].to_i
 		end
 
-		def drawing_since
+		def strokes_since
 			return @json[DRAWING_SINCE].to_i
 		end
 
-		def event_since
+		def events_since
 			return @json[EVENT_SINCE].to_i
 		end
 
