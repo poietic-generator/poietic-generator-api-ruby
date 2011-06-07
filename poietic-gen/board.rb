@@ -1,6 +1,10 @@
 
+require 'poietic-gen/update_request'
 require 'poietic-gen/zone'
 require 'poietic-gen/user'
+
+require 'poietic-gen/allocation/spiral'
+require 'poietic-gen/allocation/random'
 
 module PoieticGen
 
@@ -12,9 +16,8 @@ module PoieticGen
 		attr_reader :config
 
 		ALLOCATORS = {
-			"spiral" => PoieticGen::Spiral,
-			"random" => PoieticGen::Random,
-			"generic" => PoieticGen::Generic
+			"spiral" => PoieticGen::Allocation::Spiral,
+			"random" => PoieticGen::Allocation::Random,
 		}
 
 
@@ -36,8 +39,6 @@ module PoieticGen
 
 		def update_data user, data
 			zone = @allocator[user.zone]
-			.zone, data["drawing"]
-
 			zone.apply data['drawing']
 		end
 	end
