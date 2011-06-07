@@ -46,6 +46,7 @@ module PoieticGen
 					patch.save
 				rescue DataMapper::SaveFailureError => e
 					puts e.resource.errors.inspect
+					raise e
 				end
 
 				

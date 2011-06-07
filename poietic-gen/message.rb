@@ -25,13 +25,18 @@ module PoieticGen
 		end
 
 		def self.post src, dst, stamp, content
-			msg = Message.create({
-				:user_src => src,
-				:user_dst => dst,
-				:content => content,
-				:stamp => stamp
-			})
-			msg.save
+			begin
+				msg = Message.create({
+					:user_src => src,
+					:user_dst => dst,
+					:content => content,
+					:stamp => stamp
+				})
+				msg.save
+			rescue DataMapper::SaveFailureError => e
+				puts e.resource.errors.inspect
+				raise e
+			end
 		end
 	end
 
