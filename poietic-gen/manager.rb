@@ -112,7 +112,7 @@ module PoieticGen
 			# return JSON for userid
 			event = Event.create_join user.id, user.zone
 			event_max = Event.first(:order => [ :id.desc ])
-			drawing_max = DrawingPatch.first(:order => [ :id.desc ])
+			drawing_max = Stroke.first(:order => [ :id.desc ])
 
 			# FIXME: send "leave event" to everyone
 			return { :user_id => user.id,
@@ -204,7 +204,7 @@ module PoieticGen
 
 			# FIXME: include new drawings (excepted from this user) in response
 			STDERR.puts "drawings: (since %s)" % req.drawing_since
-			drawings = DrawingPatch.all( :id.gt => req.drawing_since )
+			drawings = Stroke.all( :id.gt => req.drawing_since )
 			since_drawing = drawings.map{ |d| d.to_hash }
 			pp since_drawing
 
