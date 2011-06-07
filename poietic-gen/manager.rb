@@ -3,7 +3,7 @@ require 'poietic-gen/board'
 require 'poietic-gen/palette'
 require 'poietic-gen/user'
 require 'poietic-gen/event'
-require 'poietic-gen/chat'
+require 'poietic-gen/chat_manager'
 require 'poietic-gen/stroke'
 require 'poietic-gen/update_request'
 
@@ -30,7 +30,7 @@ module PoieticGen
 			# Create board with the configuration
 			@board = Board.new config.board
 
-			@chat = PoieticGen::Chat.new config.chat
+			@chat = PoieticGen::ChatManager.new config.chat
 
 			# FIXME put it in db
 			# FIXME : create session in database
@@ -70,8 +70,6 @@ module PoieticGen
 				# create new
 				user = User.create param_create
 
-				@chat.join user.name
-
 				# allocate new zone
 				@board.join user
 
@@ -88,8 +86,6 @@ module PoieticGen
 					@board.join user
 					# FIXME: move following code into board
 					# allocate new zone
-					@chat.join user
-
 
 				end
 			end
@@ -147,7 +143,6 @@ module PoieticGen
 			user = User.first param_request
 			if user then
 				@board.leave user
-				@chat.leave user
 			end
 
 		end
