@@ -3,7 +3,7 @@ require 'datamapper'
 
 module PoieticGen
 
-	class DrawingPatch
+	class Stroke
 		include DataMapper::Resource
 
 		property :id,	Serial
