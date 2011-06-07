@@ -51,7 +51,7 @@ function Session( session_type, callback ) {
             session_url += "&user_name="+user_name;
         }
 
-        // get session info from 
+        // get session info from
 
         $.ajax({
             url: session_url,
@@ -109,7 +109,7 @@ function Session( session_type, callback ) {
             strokes_updates = _drawing.patches_get();
         }
         if (_chat) {
-            messages_updates = _chat.patches_get();
+            messages_updates = _chat.getQueue();
         }
         console.log("strokes_updates = %s", strokes_updates);
         console.log("messages_updates = %s", messages_updates);
@@ -123,7 +123,7 @@ function Session( session_type, callback ) {
             messages : messages_updates,
         }
 
-        console.log("drawing/patches_update: req = %s", JSON.stringify( req ) ); 
+        console.log("drawing/patches_update: req = %s", JSON.stringify( req ) );
         $.ajax({
             url: SESSION_URL_UPDATE,
             dataType: "json",
@@ -171,7 +171,9 @@ function Session( session_type, callback ) {
         _view = p_view
     }
 
+    this.register_chat = function( p_chat ) {
+        _chat = p_chat;
+    };
+
     this.initialize();
 }
-
-
