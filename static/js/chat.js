@@ -22,9 +22,9 @@ function Chat (p_session) {
         // attach submit event
         $("#send-message-form").submit(function(event){
             event.preventDefault();
-            var date = new Date(), message = {
+	    var message = {
                 user_dst: parseInt($(this).find("#send-message-form-to").val(), 10),
-                stamp: Math.round(date.getTime() / 1000), // timestamp
+                stamp: new Date(),
                 content: $(this).find("#send-message-form-content").val()
             };
             self.queueMessage(message);
