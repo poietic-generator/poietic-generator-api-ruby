@@ -61,6 +61,7 @@ module PoieticGen ; module Allocation
 			# map index => Zone object (or nil if unallocated)
 			@zones = {}
 			@config = config
+			@mutex = Mutex.new
 
 			# FIXME : maintain boundaries for the board
 			@boundary_left = 0
@@ -78,13 +79,15 @@ module PoieticGen ; module Allocation
 		# return index to position
 		#
 		def index_to_position idx
-			dir = V.new( 1, 0 )
-			pos = V.new( 0, 0 )
-			# puts "%s => %s" % [ 0, pos ]
-			idx.times do |cnt|
-				pos += dir
-				# puts "%s => %s" % [ cnt + 1, pos ]
+			@mutex.synchronize do 
+				dir = V.new( 1, 0 )
+				pos = V.new( 0, 0 )
+				# puts "%s => %s" % [ 0, pos ]
+				idx.times do |cnt|
+					pos += dir
+					# puts "%s => %s" % [ cnt + 1, pos ]
 
+				end
 			end
 		end
 
@@ -95,20 +98,20 @@ module PoieticGen ; module Allocation
 		def _next_index 
 			result_index = nil
 
-			# find a nil zone first
-			nil_zones = @zones.select{ |idx,zone| zone.nil? }
-			if nil_zones.size > 0 then
-				# got an unallocated zone !
-				result_index = nil_zones.first[0]
-			else
-				# try the normal method
-				result_index = @zones.size
+			@mutex.synchronize do
+				# find a nil zone first
+				nil_zones = @zones.select{ |idx,zone| zone.nil? }
+				if nil_zones.size > 0 then
+					# got an unallocated zone !
+					result_index = nil_zones.first[0]
+				else
+					# try the normal method
+					result_index = @zones.size
+				end
 			end
 			return result_index
 		end
 
 
 	end
-
-
-
+end ; end
