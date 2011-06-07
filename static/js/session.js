@@ -135,19 +135,19 @@ function Session( session_type, callback ) {
 
                 for (var i=0; i<response.events.length; i++){
                     // FIXME: do something with event updates
-                    _current_event_id = response.event[i].id;
+                    _current_event_id = response.events[i].id;
                     console.log('drawing/update set response id to %s', _current_event_id);
                 }
 
                 for (var i=0; i<response.strokes.length; i++){
                     // FIXME: do something with drawing updates
-                    _current_stroke_id = response.drawing[i].id;
+                    _current_stroke_id = response.strokes[i].id;
                     console.log('drawing/update set response id to %s', _current_stroke_id);
                 }
 
                 for (var i=0; i<response.messages.length; i++){
                     // FIXME: do something with chat updates
-                    _current_message_id = response.chat[i].id;
+                    _current_message_id = response.messages[i].id;
                     console.log('drawing/update set response id to %s', _current_message_id);
                 }
                 window.setTimeout( self.update, SESSION_UPDATE_INTERVAL );
