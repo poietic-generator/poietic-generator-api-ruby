@@ -56,10 +56,19 @@ module PoieticGen
 			
 		end
 
+		def to_desc_hash 
+			res = {
+				:index => @index,
+				:position => @position,
+				:user => @user.id
+			}
+			return res
+		end
+
 		#
 		# Return an array out of current zone state
 		#
-		def to_patches
+		def to_patches_hash
 			result = []
 			patches = {}
 			@width.times do |w|

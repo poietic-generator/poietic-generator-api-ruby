@@ -108,19 +108,19 @@ module PoieticGen
 
 			# return users & zones
 			users_db = User.all( :expires_at.gt => now )
-			users = users_db.map{ |u| u.to_hash }
-			#zones = ...
+			other_users = users_db.map{ |u| u.to_hash }
+			other_zones = users_db.map{ |u| @board[u.zone].to_desc_hash }
 
 			# FIXME: send "leave event" to everyone
 			return { :user_id => user.id,
 				:user_session => user.session,
 				:user_name => user.name,
 				:user_zone => user.zone,
-				:other_users => users,
-				:other_zones => [],
+				:other_users => other_users,
+				:other_zones => other_zones,
 				:zone_column_count => @config.board.width,
 				:zone_line_count => @config.board.height,
-				:zone_content => zone.to_patches,
+				:zone_content => zone.to_patches_hash,
 				:event_id => (event_max.id || -1 ),
 				:stroke_id => 0,
 				:view_id => (drawing_max.id || -1 ),
