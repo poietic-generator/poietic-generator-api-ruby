@@ -28,23 +28,23 @@ module PoieticGen
 				CHAT_SINCE,
 				DRAWING,
 				CHAT
-			].each do |sym|
-				unless json.include? sym.to_s then
-					raise ArgumentError, ("The '%s' field is missing" % sym)
+			].each do |field|
+				unless json.include? field then
+					raise ArgumentError, ("The '%s' field is missing" % field)
 				end
 			end
 			# parse per-field content
 			#
 			json[CHAT].each do |msg|
-				[ CHAT_DST,
+				[ 	CHAT_DST,
 					CHAT_CONTENT,
 					CHAT_STAMP
-				].each do |sym|
-					unless json[CHAT].include? sym.to_s then
-						raise ArgumentError, ("The '%s' sub-field is missing" % sym)
+				].each do |field|
+					unless msg.include? field then
+						raise ArgumentError, ("The '%s' sub-field is missing" % field)
 					end
 				end
-				msg[CHAT_DST].to_i
+				# FIXME: msg[CHAT_DST].to_i
 			end
 			UpdateRequest.new json
 		end
