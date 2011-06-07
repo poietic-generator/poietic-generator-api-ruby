@@ -132,6 +132,10 @@ function Session( session_type, callback ) {
             context: self,
             success: function( response ){
                 console.log('drawing/update response : ' + JSON.stringify( response ) );
+                if (response.status[0] != 2) {
+                    window.setTimeout( self.update, SESSION_UPDATE_INTERVAL * 2 );
+                    return null;
+                }
 
                 for (var i=0; i<response.events.length; i++){
                     // FIXME: do something with event updates
