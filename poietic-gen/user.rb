@@ -13,6 +13,15 @@ module PoieticGen
 		property :zone, Integer, :required => true
 		property :created_at,	DateTime, :required => true
 		property :expires_at, DateTime, :required => true
+
+		def to_hash
+			res = {
+				:id => self.id,
+				:name => self.name,
+				:zone => self.zone
+			}
+			return res
+		end
 	end
 
 end

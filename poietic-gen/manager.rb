@@ -42,7 +42,6 @@ module PoieticGen
 		# generates an unpredictible user id based on session id & user counter
 		#
 		def join session, params
-
 			req_id = params[:user_id]
 			req_session = params[:user_session]
 			req_name = params[:user_name]
@@ -83,11 +82,7 @@ module PoieticGen
 					# create new if session expired
 					user = User.create param_create
 
-
 					@board.join user
-					# FIXME: move following code into board
-					# allocate new zone
-
 				end
 			end
 
@@ -111,8 +106,9 @@ module PoieticGen
 			event_max = Event.first(:order => [ :id.desc ])
 			drawing_max = Stroke.first(:order => [ :id.desc ])
 
-			# FIXME: return users & zones
-			#users = User.all( :id.gt => req.events_since )
+			# return users & zones
+			users_db = User.all( :expires_at.gt => now )
+			users = users_db.map{ |u| u.to_hash }
 			#zones = ...
 
 			# FIXME: send "leave event" to everyone
@@ -120,7 +116,7 @@ module PoieticGen
 				:user_session => user.session,
 				:user_name => user.name,
 				:user_zone => user.zone,
-				:other_users => [],
+				:other_users => users,
 				:other_zones => [],
 				:zone_column_count => @config.board.width,
 				:zone_line_count => @config.board.height,
@@ -184,7 +180,6 @@ module PoieticGen
 		# return latest updates from everyone !
 		#
 		def update_data session, data
-			#FIXME: validate data input
 
 			param_request = {
 				:id => session[PoieticGen::Api::SESSION_USER],
