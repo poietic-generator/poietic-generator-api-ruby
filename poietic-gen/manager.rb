@@ -11,8 +11,57 @@ require 'pp'
 
 module PoieticGen
 
+	class UpdateRequest
 
-	UPDATEREQ_EVENT_SINCE = 'event_since'
+		DRAWING_SINCE = 'event_since'
+		EVENT_SINCE = 'event_since'
+		CHAT_SINCE = 'chat_since'
+		DRAWING = 'drawing'
+		CHAT = 'chat'
+
+		def self.parse json
+			# mandatory fields firstvalidate user input first
+			[	DRAWING_SINCE, 
+				EVENT_SINCE, 
+				CHAT_SINCE,
+				DRAWING, 
+				CHAT
+			].each do |sym|
+				unless data.include? sym.to_s then
+					raise ArgumentError, ("The '%s' field is missing" % sym) 
+				end
+			end
+			# parse per-field content
+			#
+			UpdateRequest.new json
+		end
+
+		private
+		def initialize json
+			@json = json	
+		end
+
+		def drawing
+			return json[DRAWING]
+		end
+
+		def chat 
+			return json[CHAT]
+		end
+
+		def chat_since
+			return json[CHAT_SINCE].to_i
+		end
+
+		def drawing_since
+			return json[DRAWING_SINCE].to_i
+		end
+
+		def event_since
+			return json[EVENT_SINCE].to_i
+		end
+	end
+
 
 	#
 	# manage a pool of users
@@ -30,7 +79,7 @@ module PoieticGen
 			# total count of users seen (FIXME: get it from db)
 			@users_seen = 0
 
-	        # Create board with the configuration
+			# Create board with the configuration
 			@board = Board.new config.board
 
 			@chat = PoieticGen::Chat.new config.chat
@@ -73,12 +122,10 @@ module PoieticGen
 				# create new
 				user = User.create param_create
 
-			  @chat.join user.name
+				@chat.join user.name
 
 				# allocate new zone
-				zone = @board.allocate
-				zone.user = user
-				user.zone = zone.index
+				@board.join user
 
 			else
 				STDERR.puts "User is in session"
@@ -90,16 +137,11 @@ module PoieticGen
 					user = User.create param_create
 
 
-				@board.join user
-				# FIXME: move following code into board
-				# allocate new zone
-				zone = @board.allocate
-				zone.user = user
-			    user.zone = zone.id
-			    @chat.join user
-
+					@board.join user
+					# FIXME: move following code into board
 					# allocate new zone
-					user.zone = (@board.allocate user).index
+					@chat.join user
+
 
 				end
 			end
@@ -150,8 +192,8 @@ module PoieticGen
 			}
 			user = User.first param_request
 			if user then
-			  @board.zone_free user.zone
-			  @chat.leave user
+				@board.leave user
+				@chat.leave user
 			end
 
 		end
@@ -199,7 +241,6 @@ module PoieticGen
 				:session => @session_id
 			}
 			user = User.first param_request
-			zone = @board[user.zone]
 
 			#STDERR.puts "user:"
 			#pp user
@@ -208,31 +249,27 @@ module PoieticGen
 			STDERR.puts "data:"
 			pp data
 
-			# validate user input first
-			[ :drawing_since, :drawing, 
-				:event_since, :chat, :chat_since
-			].each do |sym|
-				raise ArgumentError, 
-					("The '%s' field is missing" % sym) unless data.include? sym.to_s
-			end
+			req = UpdateRequest.parse data
 
-			# FIXME: implement push & apply drawing to zone
-			@board.push user.zone, data["drawing"]
-			data["chat"].each do | msg |
-			  @chat.post user.name, msg["stamp"], msg["content"]
-      		end
-
-			zone.apply data['drawing']
+			@board.update_data user, req.drawing
+			@chat.update_data user, req.chat
 
 			# FIXME: include new drawings (excepted from this user) in response
-			since_drawing = []
+			STDERR.puts "drawings: (since %s)" % req.drawing_since
+			drawings = DrawingPatch.all( :id.gt => req.drawing_since )
+			since_drawing = drawings.map{ |d| d.to_hash }
+			pp since_drawing
 
-
-			# FIXME: validate event_since as a uint
-			STDERR.puts "events: (since %s)" % data[UPDATEREQ_EVENT_SINCE]
-			events = Event.all( :id.gt => data[UPDATEREQ_EVENT_SINCE].to_i )
+			STDERR.puts "events: (since %s)" % req.event_since
+			events = Event.all( :id.gt => req.event_since )
 			since_events = events.map{ |e| e.to_hash }
 			pp since_events
+
+			# FIXME: implement Message class first
+			#STDERR.puts "chat: (since %s)" % req.chat_since
+			#chats = Message.all( :id.gt => req.chat_since )
+			#since_chats = chats.map{ |e| e.to_hash }
+			#pp since_chats
 
 			result = {
 				:event => since_events,
@@ -243,10 +280,5 @@ module PoieticGen
 			return result
 		end
 
-		#
-		# Relocate user offset
-		def draw user_id, change
-
-		end
 	end
 end
