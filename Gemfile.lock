@@ -54,6 +54,7 @@ GEM
       data_objects (= 0.10.5)
     do_sqlite3 (0.10.5)
       data_objects (= 0.10.5)
+    extlib (0.9.15)
     fastercsv (1.5.4)
     haml (3.1.1)
     inifile (0.3.0)
@@ -90,6 +91,7 @@ DEPENDENCIES
   dm-mysql-adapter
   dm-sqlite-adapter
   dm-transactions
+  extlib
   haml
   inifile (~> 0.3)
   json
