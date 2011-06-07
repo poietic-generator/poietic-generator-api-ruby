@@ -53,77 +53,62 @@ module PoieticGen ; module Allocation
 		end
 
 
-		def initialize
+
+		#
+		#
+		#
+		def initialize config
+			# map index => Zone object (or nil if unallocated)
+			@zones = {}
+			@config = config
+
+			# FIXME : maintain boundaries for the board
+			@boundary_left = 0
+			@boundary_right = 0
+			@boundary_top = 0
+			@boundary_bottom = 0
 		end
 
 
-=begin
-test = {
-	0 => [0,0],
-	1 => [1,0],
-	2 => [1,1],
-	4 => [-1,1],
-	6 => [-1,-1],
-	9 => [2,-1]
-}
+		def [] index
+			return @zones[index]
+		end
 
-test.each do |idx,pos|
-	posv = V.new( pos[0], pos[1] )
-	p = idx_to_pos idx
-	i = pos_to_idx pos[0], pos[1]
-
-	puts posv, idx
-	puts p, i
-
-	raise RuntimeError if p != posv
-	raise RuntimeError if i != idx
-end
-=end
-
-
-		# index to position
-		def idx_to_pos idx
+		#
+		# return index to position
+		#
+		def index_to_position idx
 			dir = V.new( 1, 0 )
 			pos = V.new( 0, 0 )
 			# puts "%s => %s" % [ 0, pos ]
 			idx.times do |cnt|
 				pos += dir
 				# puts "%s => %s" % [ cnt + 1, pos ]
-				if pos.x.abs == pos.y.abs then
-					unless ( pos.y <= 0 and pos.x == -pos.y ) then
-						dir.rotate_left!
-					end
-				elsif ( pos.y <= 0 and pos.x == -pos.y + 1 ) then
-					dir.rotate_left!
-				end
+
 			end
-			return pos
 		end
 
-		# position from index
-		def pos_to_idx x, y
-			dir = V.new( 1, 0 )
-			pos = V.new( 0, 0 )
-			idx = 0
-			# puts "%s => %s" % [ 0, pos ]
-			while ( pos.x != x or pos.y != y ) do
-				idx += 1
-				pos += dir
-				# puts "%s => %s" % [ cnt + 1, pos ]
-				if pos.x.abs == pos.y.abs then
-					unless ( pos.y <= 0 and pos.x == -pos.y ) then
-						dir.rotate_left!
-					end
-				elsif ( pos.y <= 0 and pos.x == -pos.y + 1 ) then
-					dir.rotate_left!
-				end
+		private
+		# 
+		# Find the first allocatable index
+		#
+		def _next_index 
+			result_index = nil
+
+			# find a nil zone first
+			nil_zones = @zones.select{ |idx,zone| zone.nil? }
+			if nil_zones.size > 0 then
+				# got an unallocated zone !
+				result_index = nil_zones.first[0]
+			else
+				# try the normal method
+				result_index = @zones.size
 			end
-			return idx
-			# nothing
+			return result_index
 		end
+
 
 	end
-end
 
 
 
