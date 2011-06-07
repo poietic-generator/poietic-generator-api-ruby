@@ -25,7 +25,7 @@ module PoieticGen
 		SESSION_USER = :user
 		SESSION_SESSION = :name
 
-		enable :sessions
+		enable :sessions, :run
 		# set :session_secret, "FIXME: this should be removed :)"
 		#disable :run
 
@@ -44,8 +44,8 @@ module PoieticGen
 
 		helpers do
 			#
-			# verify that session exist 
-			# FIXME: verify also that it is alive 
+			# verify that session exist
+			# FIXME: verify also that it is alive
 			#
 			def validate_session! session
 				STDERR.puts "validate_session: %s" % session.inspect
@@ -69,6 +69,7 @@ module PoieticGen
 			set :manager, (PoieticGen::Manager.new config)
 			DataMapper::Logger.new(STDERR, :debug)
 			DataMapper.setup(:default, config.database.get_hash)
+
 
 			# raise exception on save failure (globally across all models)
 			DataMapper::Model.raise_on_save_failure = true
@@ -145,7 +146,7 @@ module PoieticGen
 			ensure
 				JSON.generate({
 					:user_id => session[SESSION_USER],
-					:status => status	
+					:status => status
 				})
 			end
 		end
@@ -170,8 +171,11 @@ module PoieticGen
 
 				# FIXME: extract chat information
 
-				data = JSON.parse(request.body.read) 
+				data = JSON.parse(request.body.read)
 				result = settings.manager.update_data session, data
+
+				STDERR.puts "Update_data returned :"
+				pp result
 
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors
@@ -188,6 +192,7 @@ module PoieticGen
 				status = [ STATUS_SERVER_ERROR, "Server error" ]
 
 			ensure
+				# force status of result
 				result[:status] = status
 				return JSON.generate( result )
 
