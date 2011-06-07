@@ -25,10 +25,6 @@ module PoieticGen
 			UpdateRequest.new json
 		end
 
-		private
-		def initialize json
-			@json = json	
-		end
 
 		def drawing
 			return json[DRAWING]
@@ -48,6 +44,11 @@ module PoieticGen
 
 		def event_since
 			return json[EVENT_SINCE].to_i
+		end
+
+		private
+		def initialize json
+			@json = json	
 		end
 	end
 end
