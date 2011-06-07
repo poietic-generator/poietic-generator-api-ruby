@@ -15,7 +15,7 @@ function Chat (p_session) {
         $("#send-message-form").submit(function(event){
             event.preventDefault();
             var date = new Date(), message = {
-                user_dst: $(this).find("#send-message-form-to").val(),
+                user_dst: parseInt($(this).find("#send-message-form-to").val(), 10),
                 stamp: Math.round(date.getTime() / 1000), // timestamp
                 content: $(this).find("#send-message-form-content").val()
             };
