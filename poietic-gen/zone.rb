@@ -42,7 +42,7 @@ module PoieticGen
 				}
 				pp param_create
 				begin
-					patch = DrawingPatch.create param_create
+					patch = Stroke.create param_create
 					patch.save
 				rescue DataMapper::SaveFailureError => e
 					puts e.resource.errors.inspect
