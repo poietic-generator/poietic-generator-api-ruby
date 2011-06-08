@@ -4,7 +4,7 @@ function Chat( p_session ) {
     var self = this,
     _template_received = [
         '<div class="ui-block-a message-src">',
-        '<div class="ui-body ui-body-a">',
+        '<div class="ui-body ui-body-a">from: ',
         "",
         '</div></div>',
         '<div class="ui-block-b message-content">',
@@ -18,10 +18,10 @@ function Chat( p_session ) {
         "",
         '</div></div>',
         '<div class="ui-block-b message-dst">',
-        '<div class="ui-body ui-body-b">',
+        '<div class="ui-body ui-body-b">to: ',
         "",
         '</div></div>'
-    ];
+    ], _session;
 
     this._queue = [];
 
@@ -32,16 +32,17 @@ function Chat( p_session ) {
      */
     this.initialize = function (p_session) {
         // register chat to session
-        p_session.register(self);
+        _session = p_session;
+        _session.register(self);
 
         // initialize list of users for the send message form
-        if (0 < p_session.other_users.length) {
+        if (0 < _session.other_users.length) {
             var select = $("#send-message-form-to");
-            for (var i=0; i < p_session.other_users.length; i++) {
+            for (var i=0; i < _session.other_users.length; i++) {
                 select.append('<option value="'
-                              + p_session.other_users[i].id + '">'
-                              + p_session.other_users[i].name
-                              + ' (' + p_session.other_users[i].id + ')</option>');
+                              + _session.other_users[i].id + '">'
+                              + _session.other_users[i].name
+                              + ' (' + _session.other_users[i].id + ')</option>');
             }
         }
 
@@ -49,15 +50,16 @@ function Chat( p_session ) {
         $("#send-message-form").submit(function(event){
             var content = $(this).find("#send-message-form-content");
             event.preventDefault();
-            var message = {
+            var user_dst = parseInt($(this).find("#send-message-form-to").val(), 10),
+            message = {
                 content: content.val(),
                 stamp: new Date(),
-                user_dst: parseInt($(this).find("#send-message-form-to").val(), 10)
+                user_dst: user_dst
             };
             self.queue_message( message );
             self.display_message({
                 content: content.val(),
-                user_dst: "me"
+                user_dst: user_dst
             }, true);
             // Reset field value.
             content.val("");
@@ -69,10 +71,10 @@ function Chat( p_session ) {
         if (is_sent_message) {
             html = _template_sent;
             html[2] = message.content;
-            html[6] = message.user_dst;
+            html[6] = _session.get_user_name(message.user_dst);
         } else {
             html = _template_received;
-            html[2] = message.user_dst;
+            html[2] = _session.get_user_name(message.user_dst);
             html[6] = message.content;
         }
         $("#message-contener").prepend(html.join(""));
