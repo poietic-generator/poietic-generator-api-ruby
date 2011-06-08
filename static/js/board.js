@@ -46,16 +46,6 @@ function Board( p_session, p_canvas_id ) {
 					);
 		}
 		console.log("board/initialize: zones = %s", JSON.stringify( _zones ) );
-
-
-		// plug some event handlers
-		$(window).resize(function() {
-			self.update_size();
-			self.update_paint();
-		});
-
-		self.update_size();
-		self.update_paint();
 	}
 
 
@@ -115,21 +105,6 @@ function Board( p_session, p_canvas_id ) {
 		z.patch_apply( stk );
 	}
 
-
-	/**
-	 * Update drawing size according to viewport
-	 */
-	this.update_size = function() {
-		// FIXME: not implemented update_size
-	}
-
-
-	/**
-	 * Update repaint board with inside zones
-	 */
-	this.update_paint = function() {
-		// FIXME: not implemented update_paint
-	}
 
 	this.initialize(p_session, p_canvas_id);
 }

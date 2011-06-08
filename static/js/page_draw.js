@@ -11,14 +11,15 @@ $(document).ready( function() {
         function( session ) {
             //console.log("page_draw/ready: session callback ok");
 
-            var board = new Board( session, 'session-board');
-            var editor = new Editor(session, board, 'session-drawing');
-            var chat = new Chat(session);
+            var board = new Board( session );
+            var editor = new Editor( session, board, 'session-editor' );
+            var chat = new Chat( session);
+			var viewer = new Viewer( session, board, 'session-viewer' );
 
             //console.log("page_draw/ready: prepicker");
-            $("#brush").click(function(event){
+            $("#brush").click( function( event ){
                 event.preventDefault();
-                if (true === editor.is_color_picker_visible()) {
+                if ( true === editor.is_color_picker_visible() ) {
                     editor.hide_color_picker();
                     $("#brush-action").text("Show");
                 } else {
@@ -29,3 +30,4 @@ $(document).ready( function() {
         }
     );
 });
+
