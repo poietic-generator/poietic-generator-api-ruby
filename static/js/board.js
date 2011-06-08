@@ -103,6 +103,6 @@ function Board( p_session ) {
 	}
 
 
-	this.initialize(p_session, p_canvas_id);
+	this.initialize( p_session );
 }
 
