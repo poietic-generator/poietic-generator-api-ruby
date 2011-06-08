@@ -9,7 +9,7 @@ module PoieticGen
 		property :id,	Serial
 		property :user_src,	Integer, :required => true
 		property :user_dst,	Integer, :required => true
-		property :content, String, :required => true
+		property :content, Text, :required => true
 		property :stamp,	DateTime, :required => true
 
 
