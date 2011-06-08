@@ -108,7 +108,7 @@ function Viewer( p_session, p_board, p_canvas_id ){
      * Convert zone to local grid position
      */
     function zone_to_local_position( zone, zone_position ) {
-        console.log("viewer/zone_to_local_position: zone = %s", JSON.stringify( zone ));
+        // console.log("viewer/zone_to_local_position: zone = %s", JSON.stringify( zone ));
         return {
             x: zone_position.x + ((zone.position[0] - _boundaries.xmin)* zone.width ), 
             y: zone_position.y + ((_boundaries.ymax - zone.position[1] )* zone.height )
@@ -135,8 +135,8 @@ function Viewer( p_session, p_board, p_canvas_id ){
             remote_zone = _board.get_zone( zones[zone_idx] );
             console.log("viewer/update_paint : remote_zone = %s", zone_idx );
 
-            for (var x = 0 ; x < _session.user_zone.column_count ; x++ ){
-                for (var y = 0; y < _session.user_zone.line_count ; y++ ) {
+            for (var x = 0 ; x < remote_zone.width; x++ ){
+                for (var y = 0; y < remote_zone.height ; y++ ) {
                     zone_pos = { 'x': x, 'y': y };
                     color = remote_zone.pixel_get( zone_pos );
 
@@ -213,7 +213,7 @@ function Viewer( p_session, p_board, p_canvas_id ){
      *
      */
     this.handle_stroke = function( stk ) {
-        // var console = window.noconsole;
+        var console = window.noconsole;
         console.log("viewer/handle_stroke : stroke = %s", JSON.stringify( stk ));
         var remote_zone = _board.get_zone( stk.zone );
         // console.log("viewer/handle_stroke : remote_zone = %s", JSON.stringify( remote_zone )); 
