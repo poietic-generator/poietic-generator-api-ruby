@@ -289,9 +289,9 @@ function Viewer( p_session, p_board, p_canvas_id ){
 	this.handle_event = function( ev ) {
 		console.log("viewer/handle_event : %s", JSON.stringify( ev ) );
 
-        zones = _board.get_zone_list();
+        var zones = _board.get_zone_list();
 
-        _boundaries = { xmin : 0, xmax:0, ymin:0, ymax:0 }
+        _boundaries = { xmin:0, xmax:0, ymin:0, ymax:0 }
         for (var zone_idx=0; zone_idx < zones.length; zone_idx++) {
             remote_zone = _board.get_zone( zones[zone_idx] );
             console.log("viewer/handle_event : %s", JSON.stringify( remote_zone ));
