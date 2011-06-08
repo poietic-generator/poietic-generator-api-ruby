@@ -77,7 +77,7 @@ function Session( session_type, callback ) {
                 $.cookie( 'user_id', this.user_id );
                 $.cookie( 'user_name', this.user_name );
                 $.cookie( 'user_session', this.user_session );
-                console.log('session/join response mod : ' + JSON.stringify(this) );
+                // console.log('session/join response mod : ' + JSON.stringify(this) );
 
                 window.setTimeout( self.update, SESSION_UPDATE_INTERVAL );
                 console.log("gotcha!");
@@ -87,18 +87,9 @@ function Session( session_type, callback ) {
                 //console.log('session/join post-callback ! observers = %s', JSON.stringify( _observers ));
                 var all_zones = this.other_zones.concat( [ this.user_zone ] );
                 // handle other zone events
-                for (var o=0;o<_observers.length;o++) {
-                    // console.log('session/join observer %s',o);
-                    if (!(_observers[o].handle_stroke)) { continue; }
-                    // console.log('session/join observer %s has handle_stroke',o);
-                    for (var i=0;i<all_zones.length;i++) {
-                        // console.log('session/join on zone %s',JSON.stringify(all_zones[i]));
-                        var strokes = all_zones[i].content;
-                        for (var j=0;j<strokes.length;j++) {
-                            // console.log('session/join on stroke %s', JSON.stringify(strokes[j]));
-                            _observers[o].handle_stroke( strokes[j] );
-                        }
-                    }
+                for (var i=0;i<all_zones.length;i++) {
+                    console.log('session/join on zone %s',JSON.stringify(all_zones[i]));
+                    self.dispatch_strokes( all_zones[i].content );
                 }
                 console.log('session/join end');
 
@@ -182,28 +173,9 @@ function Session( session_type, callback ) {
                     return null;
                 }
 
-                for (var o=0; o<_observers.length;o++){
-                    for (var i=0; i<response.events.length; i++){
-                        _current_event_id = response.events[i].id;
-                        if (_observers[o].handle_event) {
-                            _observers[o].handle_event( response.events[i] );
-                        }
-                    }
-
-                    for (var i=0; i<response.strokes.length; i++){
-                        _current_stroke_id = response.strokes[i].id;
-                        if (_observers[o].handle_stroke) {
-                            _observers[o].handle_stroke( response.strokes[i] );
-                        }
-                    }
-
-                    for (var i=0; i<response.messages.length; i++){
-                        _current_message_id = response.messages[i].id;
-                        if (_observers[o].handle_message) {
-                            _observers[o].handle_message( response.messages[i] );
-                        }
-                    }
-                }
+                self.dispatch_events( response.events );
+                self.dispatch_strokes( response.strokes );
+                self.dispatch_messages( response.messages );
 
                 window.setTimeout( self.update, SESSION_UPDATE_INTERVAL );
             },
@@ -213,6 +185,46 @@ function Session( session_type, callback ) {
         });
 
     };
+
+
+    this.dispatch_events = function( events ){
+        for (var o=0; o<_observers.length;o++){
+            for (var i=0; i<events.length; i++){
+                if ( (events[i].id) || (_current_event_id < events[i].id) ) {
+                    _current_event_id = events[i].id;
+                }
+                if (_observers[o].handle_event) {
+                    _observers[o].handle_event( events[i] );
+                }
+            }
+        }
+    }
+
+    this.dispatch_strokes = function( strokes ){
+        for (var o=0; o<_observers.length;o++){
+            for (var i=0; i<strokes.length; i++){
+                if ( (strokes[i].id) || (_current_stroke_id < strokes[i].id) ) {
+                _current_stroke_id = strokes[i].id;
+                }
+                if (_observers[o].handle_stroke) {
+                    _observers[o].handle_stroke( strokes[i] );
+                }
+            }
+        }
+    }
+
+    this.dispatch_messages = function( messages ){
+        for (var o=0; o<_observers.length;o++){
+            for (var i=0; i<messages.length; i++){
+                if ( (messages[i].id) || (_current_message_id < messages[i].id) ) {
+                    _current_message_id = messages[i].id;
+                }
+                if (_observers[o].handle_message) {
+                    _observers[o].handle_message( messages[i] );
+                }
+            }
+        }
+    }
 
     this.register = function( p_observer ){
         _observers.push( p_observer );
