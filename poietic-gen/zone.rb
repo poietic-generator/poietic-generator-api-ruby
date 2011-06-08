@@ -1,4 +1,6 @@
 
+require 'thread'
+
 module PoieticGen
 	class Zone
 
@@ -20,50 +22,55 @@ module PoieticGen
 					@data[w_cnt][h_cnt] = nil
 				end
 			end
+			@mutex = Mutex.new
 		end
 
 		def apply drawing
-			# save patch into database
-			STDERR.puts "Zone - apply:"
-			return if drawing.nil?
+			@mutex.synchronize do
+				# save patch into database
+				STDERR.puts "Zone - apply:"
+				return if drawing.nil?
 
-			drawing.each do |patch|
-
-
-				color = patch['color']
-				changes = patch['changes']
-				timestamp = patch['stamp']
-
-				# add patch into database
-				param_create = {
-					:color => color,
-					:changes => JSON.generate(changes).to_s,
-					:timestamp => DateTime.parse(timestamp)
-				}
-				pp param_create
-				begin
-					patch = Stroke.create param_create
-					patch.save
-				rescue DataMapper::SaveFailureError => e
-					puts e.resource.errors.inspect
-					raise e
-				end
+				drawing.each do |patch|
 
 
-				changes.each do |x,y,t_offset|
-					@data[x][y] = color
+					color = patch['color']
+					changes = patch['changes']
+					timestamp = patch['stamp']
+
+					# add patch into database
+					param_create = {
+						:color => color,
+						:changes => JSON.generate(changes).to_s,
+						:timestamp => DateTime.parse(timestamp)
+					}
+					pp param_create
+					begin
+						patch = Stroke.create param_create
+						patch.save
+					rescue DataMapper::SaveFailureError => e
+						puts e.resource.errors.inspect
+						raise e
+					end
+
+
+					changes.each do |x,y,t_offset|
+						@data[x][y] = color
+					end
 				end
 			end
-
 		end
 
 		def to_desc_hash
-			res = {
-				:index => @index,
-				:position => @position,
-				:user => @user.id,
-				:content => self.to_patches_hash
-			}
+			res = nil
+			@mutex.synchronize do
+				res = {
+					:index => @index,
+					:position => @position,
+					:user => @user.id,
+					:content => self.to_patches_hash
+				}
+			end
 			return res
 		end
 
@@ -72,22 +79,24 @@ module PoieticGen
 		#
 		def to_patches_hash
 			result = []
-			patches = {}
-			@width.times do |w|
-				@height.times do |h|
-					color = @data[w][h]
-					next if color.nil?
-					patches[color] = [] unless patches.include? color
-					patches[color].push [w,h,0]
+			@mutex.synchronize do
+				patches = {}
+				@width.times do |w|
+					@height.times do |h|
+						color = @data[w][h]
+						next if color.nil?
+						patches[color] = [] unless patches.include? color
+						patches[color].push [w,h,0]
+					end
 				end
-			end
-			patches.each do |color, where|
-				patch = {
-					:color => color,
-					:changes => where,
-					:stamp => nil
-				}
-				result.push patch
+				patches.each do |color, where|
+					patch = {
+						:color => color,
+						:changes => where,
+						:stamp => nil
+					}
+					result.push patch
+				end
 			end
 			return result
 		end
