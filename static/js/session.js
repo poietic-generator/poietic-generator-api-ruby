@@ -165,14 +165,14 @@ function Session( session_type, callback ) {
                     for (var i=0; i<response.strokes.length; i++){
                         _current_stroke_id = response.strokes[i].id;
                         if (_observers[o].handle_stroke) {
-                            _observers[o].handle_stroke( response.events[i] );
+                            _observers[o].handle_stroke( response.strokes[i] );
                         }
                     }
 
                     for (var i=0; i<response.messages.length; i++){
                         _current_message_id = response.messages[i].id;
                         if (_observers[o].handle_message) {
-                            _observers[o].handle_message( response.events[i] );
+                            _observers[o].handle_message( response.messages[i] );
                         }
                     }
                 }
