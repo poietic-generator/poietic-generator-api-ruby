@@ -100,7 +100,7 @@ Color.Picker = function (props) {
     canvas.width = this.size + this.hueWidth + this.margin;
     canvas.height = this.size + this.margin;
     plugin.appendChild(canvas);
-    plugin.onmousemove =
+    /*plugin.onmousemove =
     plugin.onmousedown = function (e) {
 	var down = (e.type == "mousedown");
 	var offset = that.margin / 2;
@@ -153,7 +153,7 @@ Color.Picker = function (props) {
 	    plugin.style.cursor = "default";
 	}
 	return false; // prevent selection
-    };
+    };*/
     // appending to element
     this.element.appendChild(plugin);
 
