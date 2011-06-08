@@ -49,19 +49,20 @@ module PoieticGen
 					raise e
 				end
 
-				
+
 				changes.each do |x,y,t_offset|
 					@data[x][y] = color
 				end
 			end
-			
+
 		end
 
-		def to_desc_hash 
+		def to_desc_hash
 			res = {
 				:index => @index,
 				:position => @position,
-				:user => @user.id
+				:user => @user.id,
+				:content => self.to_patches_hash
 			}
 			return res
 		end
