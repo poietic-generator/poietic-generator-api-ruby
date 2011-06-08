@@ -7,6 +7,8 @@ function Board( p_session, p_canvas_id ) {
 
 	var self = this;
 
+    this.name = "Board";
+
 	var _real_canvas = null;
 	var _context = null;
 	var _zones = null;

@@ -27,6 +27,7 @@ function Editor( p_session, p_board, p_canvas_id ){
 
     var _current_zone;
 
+    this.name = "Editor";
     this.column_count = null;
     this.line_count = null;
     this.border_column_count = null;

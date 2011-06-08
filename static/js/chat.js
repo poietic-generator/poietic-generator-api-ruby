@@ -8,6 +8,8 @@ function Chat( p_session ) {
 
     this._queue = [];
 
+    this.name = "Chat";
+
     /**
      * Constructor
      */
