@@ -24,8 +24,8 @@ function Board( p_session, p_canvas_id ) {
 
 		_session = p_session;
 		_session.register( self );
-		_zones = [];
-		_users = [];
+		_zones = {};
+		_users = {};
 
 		// fill zones with zones from session
 		_zones[_session.user_zone.index] = new Zone( 
@@ -81,9 +81,19 @@ function Board( p_session, p_canvas_id ) {
 	/**
 	 *
 	 */
+	this.get_zone = function( index ) {
+		console.log("board/get_zone(%s) : %s", index, JSON.stringify( _zones[index] ) );
+		return _zones[index];
+	}
+
+
+	/**
+	 *
+	 */
 	this.handle_stroke = function( stk ) {
 		console.log("board/handle_stroke : %s", JSON.stringify( stk ));
 		var z = _zones[stk.zone];
+		console.log("board/handle_stroke : FIXME");	
 	}
 
 
@@ -100,15 +110,6 @@ function Board( p_session, p_canvas_id ) {
 	 */
 	this.update_paint = function() {
 		// FIXME: not implemented update_paint
-	}
-
-
-	/**
-	 * Return zone at given location
-	 */
-	this.get_zone = function( x, y ) {
-		// FIXME: not implemented get_zone
-
 	}
 
 	this.initialize(p_session, p_canvas_id);
