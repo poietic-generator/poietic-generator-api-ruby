@@ -2,10 +2,10 @@
 // vim: set ts=4 sw=4 et:
 "use strict";
 
-var DRAWING_GRID_COLOR = '#444';
-var DRAWING_GRID_WIDTH = 0.5;
-var DRAWING_BOUNDARIES_COLOR = '#888';
-var DRAWING_BOUNDARIES_WIDTH = 2;
+var EDITOR_GRID_COLOR = '#444';
+var EDITOR_GRID_WIDTH = 0.5;
+var EDITOR_BOUNDARIES_COLOR = '#888';
+var EDITOR_BOUNDARIES_WIDTH = 2;
 
 var POSITION_TYPE_DRAWING = 0;
 var POSITION_TYPE_ZONE = 0;
@@ -159,7 +159,7 @@ function Drawing( p_session, p_board, p_canvas_id ){
             canvas = self.grid_canvas;
             grid_ctx = canvas.getContext("2d");
 
-            //console.log("drawing/draw_grid: before lines");
+            //console.log("editor/draw_grid: before lines");
 
             var w_max = self.column_count + (2 * self.border_column_count);
             for (var w=0; w <= w_max; w++){
@@ -175,8 +175,8 @@ function Drawing( p_session, p_board, p_canvas_id ){
                 grid_ctx.moveTo(0, canvas_pos.y);
                 grid_ctx.lineTo(canvas.width, canvas_pos.y);
             }
-            grid_ctx.lineWidth = DRAWING_GRID_WIDTH;
-            grid_ctx.strokeStyle = DRAWING_GRID_COLOR;
+            grid_ctx.lineWidth = EDITOR_GRID_WIDTH;
+            grid_ctx.strokeStyle = EDITOR_GRID_COLOR;
             grid_ctx.stroke();
 
             grid_ctx.beginPath();
@@ -188,8 +188,8 @@ function Drawing( p_session, p_board, p_canvas_id ){
             canvas_tl.w = Math.floor( self.column_count * _column_size );
             canvas_tl.h = Math.floor( self.line_count * _line_size );
 
-            grid_ctx.lineWidth = DRAWING_BOUNDARIES_WIDTH;
-            grid_ctx.strokeStyle = DRAWING_BOUNDARIES_COLOR;
+            grid_ctx.lineWidth = EDITOR_BOUNDARIES_WIDTH;
+            grid_ctx.strokeStyle = EDITOR_BOUNDARIES_COLOR;
             grid_ctx.strokeRect( canvas_tl.x, canvas_tl.y, canvas_tl.w, canvas_tl.h );
         }
         ctx.drawImage( self.grid_canvas, 0, 0);
@@ -206,7 +206,7 @@ function Drawing( p_session, p_board, p_canvas_id ){
                 var zone_pos = { 'x': x, 'y': y };
                 var color = _zone.pixel_get( zone_pos );
                 var local_pos = zone_to_local_position( zone_pos );
-                //console.log("drawing/update_paint: zone_pos =", JSON.stringify( zone_pos ) );
+                //console.log("editor/update_paint: zone_pos =", JSON.stringify( zone_pos ) );
                 self.pixel_draw( local_pos, color );
             }
         }
@@ -235,13 +235,13 @@ function Drawing( p_session, p_board, p_canvas_id ){
         real_canvas.style.top = '50px';
         real_canvas.style.left = Math.floor((win.w - real_canvas.width) / 2) + 'px';
 
-        // console.log("drawing/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
+        // console.log("editor/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
 
-        // console.log("drawing/update_size: real_canvas.width = " + real_canvas.width);
+        // console.log("editor/update_size: real_canvas.width = " + real_canvas.width);
         _column_size = real_canvas.width / (self.column_count + (self.border_column_count * 2));
         _line_size = real_canvas.height / (self.line_count + (self.border_line_count * 2));
 
-        // console.log("drawing/update_size: column_size = " + _column_size);
+        // console.log("editor/update_size: column_size = " + _column_size);
 
         self.grid_canvas = null;
 
@@ -305,14 +305,14 @@ function Drawing( p_session, p_board, p_canvas_id ){
             var canvas_pos = { x: event_obj.mouseX, y: event_obj.mouseY };
             var local_pos = canvas_to_local_position( canvas_pos );
             var zone_pos = local_to_zone_position( local_pos );
-            // console.log( "drawing/mousemove: canvas pos : %s", canvas_pos.to_json() );
-            // console.log( "drawing/mousemove:local pos : %s", local_pos.to_json() );
-            // console.log( "drawing/mousemove:zone pos : %s", zone_pos.to_json() );
+            // console.log( "editor/mousemove: canvas pos : %s", canvas_pos.to_json() );
+            // console.log( "editor/mousemove:local pos : %s", local_pos.to_json() );
+            // console.log( "editor/mousemove:zone pos : %s", zone_pos.to_json() );
 
             // FIXME: detect target zone
             // target_zone = local_to_target_ f( zone_pos )
             var bound = _zone.is_bound( zone_pos );
-            // console.log( "drawing/mousemove: zone.is_bound = ", bound );
+            // console.log( "editor/mousemove: zone.is_bound = ", bound );
 
             if ( bound ) {
                 self.pixel_set( local_pos, _color );
@@ -329,7 +329,7 @@ function Drawing( p_session, p_board, p_canvas_id ){
      */
     this.pixel_draw = function( local_pos, color ) {
         var ctx = self.context;
-        //console.log("drawing/pixel_draw local_pos = %s", local_pos.to_json() );
+        //console.log("editor/pixel_draw local_pos = %s", local_pos.to_json() );
         var canvas_pos = local_to_canvas_position( local_pos );
         var rect = {
             x : canvas_pos.x + (0.1 * _column_size),
@@ -337,7 +337,7 @@ function Drawing( p_session, p_board, p_canvas_id ){
             w : _column_size - ( 0.2 * _column_size ),
             h : _line_size - ( 0.2 * _column_size )
         };
-        //console.log("drawing/pixel_draw rect = %s", rect.to_json() );
+        //console.log("editor/pixel_draw rect = %s", rect.to_json() );
 
         ctx.fillStyle = ZONE_BACKGROUND_COLOR;
         ctx.fillRect( rect.x, rect.y, rect.w, rect.h );
@@ -354,7 +354,7 @@ function Drawing( p_session, p_board, p_canvas_id ){
         var zone_pos;
 
         zone_pos = local_to_zone_position( local_pos );
-        //console.log( "drawing/pixel_set: zone_pos = %s", zone_pos.to_json() );
+        //console.log( "editor/pixel_set: zone_pos = %s", zone_pos.to_json() );
         // record to zone
         _zone.pixel_set( zone_pos, color );
         // add to patch structure
@@ -380,7 +380,7 @@ function Drawing( p_session, p_board, p_canvas_id ){
     this.color_set = function( hexcolor ) {
         _color = hexcolor;
         // FIXME:
-        console.log("drawing/color_set: requestion patch enqueue")
+        console.log("editor/color_set: requestion patch enqueue")
         _zone.patch_enqueue();
     }
 
@@ -405,7 +405,7 @@ function Drawing( p_session, p_board, p_canvas_id ){
      *
      */
     this.handle_stroke = function( stk ) {
-        console.log("drawing/handle_stroke : %s", JSON.stringify( stk ));
+        console.log("editor/handle_stroke : %s", JSON.stringify( stk ));
     }
 
 
@@ -413,7 +413,7 @@ function Drawing( p_session, p_board, p_canvas_id ){
      *
      */
     this.handle_message = function( msg ) {
-        console.log("drawing/handle_message : %s", JSON.stringify( msg ));
+        console.log("editor/handle_message : %s", JSON.stringify( msg ));
     }
 
 
@@ -421,7 +421,7 @@ function Drawing( p_session, p_board, p_canvas_id ){
      *
      */
     this.handle_event = function( ev ) {
-        console.log("drawing/handle_event : %s", JSON.stringify( ev ));
+        console.log("editor/handle_event : %s", JSON.stringify( ev ));
     }
 
 
@@ -429,8 +429,8 @@ function Drawing( p_session, p_board, p_canvas_id ){
      * Get patches generated by the drawing
      */
     this.get_strokes = function() {
-        strokes = _zone.patches_get()
-        console.log("drawing/get_strokes: strokes = %s", strokes);
+        var strokes = _zone.patches_get()
+        console.log("editor/get_strokes: strokes = %s", strokes);
         return strokes;
     }
 
