@@ -140,10 +140,27 @@ function Zone( p_index, p_position, p_width, p_height ) {
         return aggregate;
     }
 
+
     /**
       * Request application for a set of patches to current zone
       */
-    this.patches_put = function( p_aggregate ) {
+    this.patch_apply = function( p_patch ) {
+        var color = p_patch.color;
+        var cgset = null;
+        var zone_pos = null;
+
+        for ( var i=0; i<p_patch.changes.length; i++ ) {
+            cgset = p_patch.changes[i];
+            zone_pos = { x: cgset[0], y: cgset[1] }
+            self.pixel_set( zone_pos, color );
+        }
+    }
+
+
+    /**
+     *
+     */
+    this.patches_push = function( p_patches ) {
         // FIXME: call apply patch for each patches' relative time
         // FIXME : append aggregate  instead of replacing
         _input_queue = p_aggregate;
