@@ -1,10 +1,27 @@
-
 "use strict";
 
 function Chat( p_session ) {
-    var _session;
-
-    var self = this;
+    var self = this,
+    _template_received = [
+        '<div class="ui-block-a message-src">',
+        '<div class="ui-body ui-body-a">',
+        "",
+        '</div></div>',
+        '<div class="ui-block-b message-content">',
+        '<div class="ui-body ui-body-a">',
+        "",
+        '</div></div>'
+    ],
+    _template_sent = [
+        '<div class="ui-block-a message-content">',
+        '<div class="ui-body ui-body-b message-dst-content">',
+        "",
+        '</div></div>',
+        '<div class="ui-block-b message-dst">',
+        '<div class="ui-body ui-body-b">',
+        "",
+        '</div></div>'
+    ];
 
     this._queue = [];
 
@@ -22,9 +39,9 @@ function Chat( p_session ) {
             var select = $("#send-message-form-to");
             for (var i=0; i < p_session.other_users.length; i++) {
                 select.append('<option value="'
-			+ p_session.other_users[i].id + '">'
-			+ p_session.other_users[i].name
-			+ ' (' + p_session.other_users[i].id + ')</option>');
+                              + p_session.other_users[i].id + '">'
+                              + p_session.other_users[i].name
+                              + ' (' + p_session.other_users[i].id + ')</option>');
             }
         }
 
@@ -33,25 +50,32 @@ function Chat( p_session ) {
             var content = $(this).find("#send-message-form-content");
             event.preventDefault();
             var message = {
-                user_dst: parseInt($(this).find("#send-message-form-to").val(), 10),
+                content: content.val(),
                 stamp: new Date(),
-                content: content.val()
+                user_dst: parseInt($(this).find("#send-message-form-to").val(), 10)
             };
             self.queue_message( message );
-            $("#message-contener").prepend(
-              '<div class="ui-block-a message-content">'+
-                '<div class="ui-body ui-body-b message-dst-content">' +
-                content.val()+
-                '</div>' +
-              '</div><div class="ui-block-b message-dst">' +
-                '<div class="ui-body ui-body-b">' +
-                'me' +
-                '</div>'+
-              '</div>'
-              );
+            self.display_message({
+                content: content.val(),
+                user_dst: "me"
+            }, true);
             // Reset field value.
             content.val("");
         });
+    };
+
+    this.display_message = function (message, is_sent_message) {
+        var html;
+        if (is_sent_message) {
+            html = _template_sent;
+            html[2] = message.content;
+            html[6] = message.user_dst;
+        } else {
+            html = _template_received;
+            html[2] = message.user_dst;
+            html[6] = message.content;
+        }
+        $("#message-contener").prepend(html.join(""));
     };
 
 
@@ -73,30 +97,9 @@ function Chat( p_session ) {
     /**
      *
      */
-    this.handle_event = function( ev ) {
-	// do nothing here :-)
-	console.log("chat/handle_event : %s", JSON.stringify( ev ));
-    }
-
-
-    /**
-     *
-     */
     this.handle_message = function( msg ) {
-	// FIXME: do something here
-	console.log("chat/handle_message : %s", JSON.stringify( msg ));
-        $("#message-contener").prepend(
-              '<div class="ui-block-a message-src">' +
-                '<div class="ui-body ui-body-a">' +
-                msg.user_dst +
-                '</div>'+
-              '<div class="ui-block-b message-content">'+
-                '<div class="ui-body ui-body-a">' +
-                msg.content+
-                '</div>' +
-                '</div>' +
-              '</div>'
-              );
+        console.log("chat/handle_message : %s", JSON.stringify( msg ));
+        this.display_message(msg, false);
     }
 
 

@@ -26,6 +26,7 @@ function Editor( p_session, p_board, p_canvas_id ){
     var _line_size;
 
     var _current_zone;
+    var _color_picker;
 
     this.name = "Editor";
     this.column_count = null;
@@ -47,6 +48,7 @@ function Editor( p_session, p_board, p_canvas_id ){
         console.log("editor/initialize : _current_zone = %s", _current_zone);
         _board = p_board;
         _color = '#f00';
+        _color_picker = new ColorPicker(self);
 
         _pencil_move = {
             enable : false
@@ -286,6 +288,8 @@ function Editor( p_session, p_board, p_canvas_id ){
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, real_canvas.width, real_canvas.height);
 
+        _color_picker.update_size(_real_canvas);
+
         self.draw_grid();
     };
 
@@ -473,6 +477,30 @@ function Editor( p_session, p_board, p_canvas_id ){
         console.log("editor/get_strokes: strokes = %s", JSON.stringify(strokes) );
         return strokes;
     }
+
+
+    /**
+     * Hide color picker
+     */
+    this.hide_color_picker = function () {
+        _color_picker.hide();
+    };
+
+
+    /**
+     * Is color picker visible ?
+     */
+    this.is_color_picker_visible = function () {
+        return _color_picker.is_visible();
+    };
+
+
+    /**
+     * Show color picker
+     */
+    this.show_color_picker = function () {
+        _color_picker.show();
+    };
 
     // call constructor
     this.initialize(p_session, p_board, p_canvas_id);

@@ -5,6 +5,7 @@
 
     @page.js << "/js/jquery.cookie.js"
     @page.js << "/js/colorjack.js"
+    @page.js << "/js/colorpicker.js"
     @page.js << "/js/session.js"
     @page.js << "/js/patch.js"
     @page.js << "/js/board.js"
@@ -78,65 +79,18 @@
         </div>
     </div>
     <div data-role="content">
-      <div>
         <fieldset class="ui-grid-a">
-          <form id="send-message-form" action="" method="post" data-ajax="false">
-            <div class="ui-block-a">
-              <select id="send-message-form-to" name="send-message-form-to" data-native-menu="false">
-              </select>
-            </div> <!-- ui-block-a -->
-            <div class="ui-block-b">
-              <input id="send-message-form-content" name="send-message-form-content" cols="20" rows="5" type="text">
-              </input>
-            </div> <!-- ui-block-b -->
-          </form>
-        </fieldset> <!-- grid -->
-        <hr>
-        <fieldset> <!-- received/sent messages zone -->
-          <div class="ui-grid-a" id="message-contener">
-            <div class="ui-block-a message-src">
-              <div class="ui-body ui-body-a">toi</div>
-            </div>
-            <div class="ui-block-b message-content">
-              <div class="ui-body ui-body-a">Le message de toi</div>
-            </div>
-            <div class="ui-block-a message-content">
-              <div class="ui-body ui-body-b message-dst-content">Le message de moi</div>
-            </div>
-            <div class="ui-block-b message-dst">
-              <div class="ui-body ui-body-b">moi</div>
-            </div>
-          </div>
-        </fieldset>
-      </div>
-      <!--        <a href="#send-message" data-rel="dialog" data-transition="pop">Send a message</a> -->
-    </div>
-</div>
-<!-- send a message -->
-<div id="send-message" data-role="page">
-    <div data-role="header">
-        <h1>Send a message</h1>
-    </div>
-    <div data-role="content">
-        <form id="send-message-form" action="" method="post" data-ajax="false">
-            <div data-role="fieldcontain">
-                <label for="send-message-form-to">User</label>
-                <select id="send-message-form-to" name="send-message-form-to" data-native-menu="false">
-                </select>
-            </div>
-            <div data-role="fieldcontain">
-                <label for="send-message-form-content">Message</label>
-                <textarea id="send-message-form-content" name="send-message-form-content" cols="20" rows="5"></textarea>
-            </div>
-            <div class="ui-grid-a">
+            <form id="send-message-form" action="" method="post" data-ajax="false">
                 <div class="ui-block-a">
-                    <a href="#" data-role="button" data-rel="back">Cancel</a>
-                </div>
+                    <select id="send-message-form-to" name="send-message-form-to" data-native-menu="false"></select>
+                </div> <!-- ui-block-a -->
                 <div class="ui-block-b">
-                    <input type="submit" value="Send">
-                </div>
-            </div>
-        </form>
+                    <input id="send-message-form-content" name="send-message-form-content" cols="20" rows="5" type="text" />
+                </div> <!-- ui-block-b -->
+            </form>
+        </fieldset> <!-- grid -->
+        <hr />
+        <div class="ui-grid-a" id="message-contener"></div>
     </div>
 </div>
 
