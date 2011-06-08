@@ -65,7 +65,7 @@ function Board( p_session, p_canvas_id ) {
 		console.log("board/handle_event : %s", JSON.stringify( ev ) );
 		if ( ev.type == 'join' ) {
 			var z = ev.desc.zone;
-			_zone[z.index] = new Zone(
+			_zones[z.index] = new Zone(
 					z.index, z.position, 
 					_session.zone_column_count, _session.zone_line_count 
 					);
@@ -83,6 +83,7 @@ function Board( p_session, p_canvas_id ) {
 	 */
 	this.handle_stroke = function( stk ) {
 		console.log("board/handle_stroke : %s", JSON.stringify( stk ));
+		var z = _zones[stk.zone];
 	}
 
 
@@ -112,3 +113,4 @@ function Board( p_session, p_canvas_id ) {
 
 	this.initialize(p_session, p_canvas_id);
 }
+
