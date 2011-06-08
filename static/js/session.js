@@ -88,14 +88,14 @@ function Session( session_type, callback ) {
                 var all_zones = this.other_zones.concat( [ this.user_zone ] );
                 // handle other zone events
                 for (var o=0;o<_observers.length;o++) {
-                    console.log('session/join observer %s',o);
+                    // console.log('session/join observer %s',o);
                     if (!(_observers[o].handle_stroke)) { continue; }
-                    console.log('session/join observer %s has handle_stroke',o);
+                    // console.log('session/join observer %s has handle_stroke',o);
                     for (var i=0;i<all_zones.length;i++) {
-                        console.log('session/join on zone %s',JSON.stringify(all_zones[i]));
+                        // console.log('session/join on zone %s',JSON.stringify(all_zones[i]));
                         var strokes = all_zones[i].content;
                         for (var j=0;j<strokes.length;j++) {
-                            console.log('session/join on stroke %s', JSON.stringify(strokes[j]));
+                            // console.log('session/join on stroke %s', JSON.stringify(strokes[j]));
                             _observers[o].handle_stroke( strokes[j] );
                         }
                     }
