@@ -222,13 +222,28 @@ function Editor( p_session, p_board, p_canvas_id ){
      */
     this.update_paint = function() {
 
-        for (var x = 0 ; x < self.column_count ; x++ ){
-            for (var y = 0; y < self.line_count ; y++ ) {
-                var zone_pos = { 'x': x, 'y': y };
-                var color = _board.get_zone(_current_zone).pixel_get( zone_pos );
-                var local_pos = zone_to_local_position( zone_pos );
-                //console.log("editor/update_paint: zone_pos =", JSON.stringify( zone_pos ) );
-                self.pixel_draw( local_pos, color );
+        var remote_zone;
+        var zones;
+        var rt_zone_pos;
+        var local_pos;
+        var zone_pos;
+        var color;
+
+        zones = _board.get_zone_list();
+
+        for (var zone_idx; zone_idx<zones.length; zone_idx++) {
+            remote_zone = _board.get_zone( zones[zone_idx] );
+            console.log("editor/update_paint : remote_zone = %s", zone_idx );
+
+            for (var x = 0 ; x < self.column_count ; x++ ){
+                for (var y = 0; y < self.line_count ; y++ ) {
+                    zone_pos = { 'x': x, 'y': y };
+                    color = _board.get_zone(_current_zone).pixel_get( zone_pos );
+
+                    rt_zone_pos = zone_relative_position( remote_zone, zone_pos );
+                    local_pos = zone_to_local_position( rt_zone_pos );
+                    self.pixel_draw( local_pos, color );
+                }
             }
         }
 
@@ -434,7 +449,7 @@ function Editor( p_session, p_board, p_canvas_id ){
         console.log("editor/handle_stroke : color = %s", JSON.stringify( color )); 
         var cgset = null;
         var zone_pos = null;
-        var loc_pos = null;
+        var local_pos = null;
         var rt_zone_pos = null;
         for (var i=0;i<stk.changes.length;i++) {
             cgset = stk.changes[i];
@@ -443,9 +458,9 @@ function Editor( p_session, p_board, p_canvas_id ){
             console.log("editor/handle_stroke : zone_pos = %s", JSON.stringify( zone_pos )); 
             rt_zone_pos = zone_relative_position( remote_zone, zone_pos );
             console.log("editor/handle_stroke : rt_zone_pos = %s", JSON.stringify( rt_zone_pos )); 
-            loc_pos = zone_to_local_position( rt_zone_pos );
-            console.log("editor/handle_stroke : loc_pos = %s", JSON.stringify( loc_pos )); 
-            self.pixel_draw( loc_pos, color );
+            local_pos = zone_to_local_position( rt_zone_pos );
+            console.log("editor/handle_stroke : local_pos = %s", JSON.stringify( local_pos )); 
+            self.pixel_draw( local_pos, color );
         }
     }
 
