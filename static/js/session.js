@@ -101,11 +101,27 @@ function Session( session_type, callback ) {
                     }
                 }
                 console.log('session/join end');
-                
+
             }
         });
 
-    }
+    };
+
+
+    /**
+     * Retrieve the user name from given id
+     */
+    this.get_user_name = function ( id ) {
+        if ( id === this.user_id ) {
+            return this.user_name;
+        }
+        for (var i=0; i < this.other_users.length; i++) {
+            if ( id === this.other_users[i].id ) {
+                return this.other_users[i].name;
+            }
+        }
+        return null;
+    };
 
 
     /**
