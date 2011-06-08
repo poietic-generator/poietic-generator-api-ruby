@@ -28,13 +28,16 @@ function Chat( p_session ) {
 
         // attach submit event
         $("#send-message-form").submit(function(event){
+            var content = $(this).find("#send-message-form-content");
             event.preventDefault();
-	    var message = {
+            var message = {
                 user_dst: parseInt($(this).find("#send-message-form-to").val(), 10),
                 stamp: new Date(),
-                content: $(this).find("#send-message-form-content").val()
+                content: content.val()
             };
             self.queue_message( message );
+            // Reset field value.
+            content.val("");
         });
     };
 
