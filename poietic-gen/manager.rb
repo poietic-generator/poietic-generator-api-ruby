@@ -101,6 +101,7 @@ module PoieticGen
 
 			# update expiration time
 			user.expires_at = (now + Rational(@config.user.max_idle, 60 * 60 * 24 ))
+			user.name = req_name
 
 			user.save
 			pp user
