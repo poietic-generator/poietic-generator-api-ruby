@@ -141,23 +141,23 @@ function Editor( p_session, p_board, p_canvas_id ){
      * Get relative zone position
      */
     function zone_relative_position( remote_zone, remote_zone_position ) {
-        console.log("editor/zone_relative_position : remote_zone = %s", JSON.stringify( remote_zone ));
-        console.log("editor/zone_relative_position : remote_zone_position = %s", JSON.stringify( remote_zone_position ));
+        // console.log("editor/zone_relative_position : remote_zone = %s", JSON.stringify( remote_zone ));
+        // console.log("editor/zone_relative_position : remote_zone_position = %s", JSON.stringify( remote_zone_position ));
 
         var dx = remote_zone.position[0] - _board.get_zone(_current_zone).position[0];
         // y coordinates are inverted, because of the canvas ...
         var dy = _board.get_zone(_current_zone).position[1] - remote_zone.position[1];
-        console.log("editor/zone_relative_position : dx = %s  dy = %s", dx, dy );
+        // console.log("editor/zone_relative_position : dx = %s  dy = %s", dx, dy );
 
         var edx = dx * self.column_count;
         var edy = dy * self.line_count;
-        console.log("editor/zone_relative_position : edx = %s  edy = %s", edx, edy );
+        // console.log("editor/zone_relative_position : edx = %s  edy = %s", edx, edy );
 
         var res = {
             x : edx + remote_zone_position.x,
             y : edy + remote_zone_position.y
         };
-        console.log("editor/zone_relative_position : result = %s", JSON.stringify( res ));
+        // console.log("editor/zone_relative_position : result = %s", JSON.stringify( res ));
         return res;
     }
 
