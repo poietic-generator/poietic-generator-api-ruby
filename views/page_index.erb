@@ -2,6 +2,9 @@
     @page.css << "/css/base.css"
 	@page.css << "/css/page_index.css"
 
+    @page.js << "/js/jquery.cookie.js"
+    @page.js << "/js/page_index.js"
+
 	erb :common_header
 %>
 
@@ -12,7 +15,11 @@
     <div id="content" data-role="content">
         <div id="index-menu">
             <img src="poietic-generator.net.gif" /><br />
-            <a href="/page/draw" data-ajax="false">Play</a><!-- or
+            <form action="" method="post" id="credentials">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" value="anonymous" />
+            </form>
+            <a href="/page/draw" data-ajax="false" data-role="button" data-inline="true" id="link_play">Play</a><!-- or
             <a href="/page/view" data-ajax="false">View</a>-->
         </div>
         <div class="spacer"></div>
