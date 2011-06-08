@@ -21,6 +21,7 @@ function Session( session_type, callback ) {
     this.user_id = null;
     this.zone_column_count = null;
     this.zone_line_count = null;
+    this.user_zone = null;
 
     var _current_stroke_id = 0;
     var _current_message_id = 0;
@@ -61,6 +62,7 @@ function Session( session_type, callback ) {
             success: function( response ){
                 console.log('session/join response : ' + JSON.stringify(response) );
 
+                this.user_zone = response.user_zone;
                 this.other_users = response.other_users;
                 this.other_zones = response.other_zones;
                 this.user_id = response.user_id;
@@ -163,14 +165,14 @@ function Session( session_type, callback ) {
                     for (var i=0; i<response.strokes.length; i++){
                         _current_stroke_id = response.strokes[i].id;
                         if (_observers[o].handle_stroke) {
-                            _observers[o].handle_stroke( response.events[i] );
+                            _observers[o].handle_stroke( response.strokes[i] );
                         }
                     }
 
                     for (var i=0; i<response.messages.length; i++){
                         _current_message_id = response.messages[i].id;
                         if (_observers[o].handle_message) {
-                            _observers[o].handle_message( response.events[i] );
+                            _observers[o].handle_message( response.messages[i] );
                         }
                     }
                 }

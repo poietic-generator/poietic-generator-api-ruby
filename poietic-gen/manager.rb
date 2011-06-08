@@ -224,7 +224,7 @@ module PoieticGen
 
 			STDERR.puts "events: (since %s)" % req.events_since
 			events = Event.all( :id.gt => req.events_since )
-			since_events = events.map{ |e| e.to_hash }
+			since_events = events.map{ |e| e.to_hash @board }
 			pp since_events
 
 			# FIXME: implement Message class first
