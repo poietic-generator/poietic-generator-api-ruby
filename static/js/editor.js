@@ -218,21 +218,22 @@ function Editor( p_session, p_board, p_canvas_id ){
      *
      */
     this.update_size = function() {
-        var real_canvas = _real_canvas;
-        var win = {
+        var real_canvas = _real_canvas,
+        win = {
             w: $(window).width(),
             h : $(window).height()
-        };
+        },
+        margin = 80;
 
         real_canvas.style.position = 'absolute';
         if (win.w > win.h) {
-            real_canvas.width = win.h - 2;
-            real_canvas.height = win.h - 2;
+            real_canvas.width = win.h - margin;
+            real_canvas.height = win.h - margin;
         } else {
-            real_canvas.width = win.w - 2;
-            real_canvas.height = win.w - 2;
+            real_canvas.width = win.w - margin;
+            real_canvas.height = win.w - margin;
         }
-        real_canvas.style.top = '50px';
+        real_canvas.style.top = margin + "px";
         real_canvas.style.left = Math.floor((win.w - real_canvas.width) / 2) + 'px';
 
         // console.log("editor/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
