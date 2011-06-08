@@ -2,6 +2,7 @@
 "use strict";
 
 function ColorPicker(p_editor) {
+    var self = this;
     var _color_picker;
 
     this.initialize = function (p_editor) {
@@ -11,10 +12,14 @@ function ColorPicker(p_editor) {
             }
         });
         _color_picker.el.style.display = "none";
+        $("#session-zone").live("pagehide", function (event) {
+            self.hide();
+        });
     };
 
     this.hide = function () {
         $(_color_picker.el).hide();
+        $("#brush-action").text("Show");
     };
 
     this.is_visible = function () {
@@ -23,6 +28,7 @@ function ColorPicker(p_editor) {
 
     this.show = function () {
         $(_color_picker.el).show();
+        $("#brush-action").text("Hide");
     };
 
     this.update_size = function(p_canvas) {

@@ -22,10 +22,8 @@ $(document).ready( function() {
                 event.preventDefault();
                 if (true === editor.is_color_picker_visible()) {
                     editor.hide_color_picker();
-                    $("#brush-action").text("Show");
                 } else {
                     editor.show_color_picker();
-                    $("#brush-action").text("Hide");
                 }
             });
         }
