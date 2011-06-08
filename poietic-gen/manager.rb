@@ -18,10 +18,10 @@ module PoieticGen
 	#
 	class Manager
 
-    # This constant is the one used to check the leaved user, and generate
-    # events. This check is made in the update_data method. It will be done
-    # at min every LEAVE_CHECK_TIME_MIN days at a user update_data request.
-	  LEAVE_CHECK_TIME_MIN = Rational(1,60*60*24)
+		# This constant is the one used to check the leaved user, and generate
+		# events. This check is made in the update_data method. It will be done
+		# at min every LEAVE_CHECK_TIME_MIN days at a user update_data request.
+		LEAVE_CHECK_TIME_MIN = Rational(1,60*60*24)
 
 		def initialize config
 			@config = config
@@ -88,7 +88,7 @@ module PoieticGen
 				user = User.first_or_create param_request, param_create
 
 				if ( (now - user.expires_at) > 0  ) then
-				  # The event will be generated elsewhere (in update_data).
+					# The event will be generated elsewhere (in update_data).
 					STDERR.puts "User session expired"
 					# create new if session expired
 					user = User.create param_create
@@ -98,7 +98,7 @@ module PoieticGen
 			end
 
 			# kill all previous users having the same zone
-			
+
 			# update expiration time
 			user.expires_at = (now + Rational(@config.user.max_idle, 60 * 60 * 24 ))
 
@@ -215,7 +215,10 @@ module PoieticGen
 
 			# FIXME: include new drawings (excepted from this user) in response
 			STDERR.puts "drawings: (since %s)" % req.strokes_since
-			strokes = Stroke.all( :id.gt => req.strokes_since )
+			strokes = Stroke.all( 
+								 :id.gt => req.strokes_since,
+								 :zone.not => user.zone
+								)
 			since_stroke = strokes.map{ |d| d.to_hash }
 			pp since_stroke
 
@@ -227,8 +230,8 @@ module PoieticGen
 			# FIXME: implement Message class first
 			STDERR.puts "chat: (since %s)" % req.messages_since
 			messages = Message.all(
-			  :id.gt => req.messages_since,
-			  :user_dst => user.id
+				:id.gt => req.messages_since,
+				:user_dst => user.id
 			)
 			since_messages = messages.map{ |e| e.to_hash }
 			pp since_messages
@@ -243,35 +246,35 @@ module PoieticGen
 		end
 
 		def check_leaved_users
-		  now = DateTime.now
+			now = DateTime.now
 			if @leave_mutex.try_lock then
-			  STDERR.puts "Should check leavers : %s + %s < %s" % [
-			    @last_leave_check_time.to_s,
-			    LEAVE_CHECK_TIME_MIN.to_s,
-			    now.to_s
-        ]
-			  if (@last_leave_check_time + LEAVE_CHECK_TIME_MIN) < now then
-		      STDERR.puts "++++++ Expired users"
-		      # Get the user which has not be already declared as
-		      newly_expired_users = User.all(
-		        :did_expire => false,
-		        :expires_at.lte => now
-		      )
-		      pp newly_expired_users
-		      newly_expired_users.each do |leaver|
-		        STDERR.puts " User-%d is now marked as expired." % leaver.id
-		        leaver.did_expire = true
-		        leaver.save
-		        Event.create_leave leaver.id, leaver.expires_at
-          end
-		      STDERR.puts "------ Expired users"
-          @last_leave_check_time = now
-        end
-        @leave_mutex.unlock
-      else
-        STDERR.puts "Leaver updates : Can't update because someone is already working on that"
-      end
-    end
+				STDERR.puts "Should check leavers : %s + %s < %s" % [
+					@last_leave_check_time.to_s,
+					LEAVE_CHECK_TIME_MIN.to_s,
+					now.to_s
+				]
+				if (@last_leave_check_time + LEAVE_CHECK_TIME_MIN) < now then
+					STDERR.puts "++++++ Expired users"
+					# Get the user which has not be already declared as
+					newly_expired_users = User.all(
+						:did_expire => false,
+						:expires_at.lte => now
+					)
+					pp newly_expired_users
+					newly_expired_users.each do |leaver|
+						STDERR.puts " User-%d is now marked as expired." % leaver.id
+						leaver.did_expire = true
+						leaver.save
+						Event.create_leave leaver.id, leaver.expires_at
+					end
+					STDERR.puts "------ Expired users"
+					@last_leave_check_time = now
+				end
+				@leave_mutex.unlock
+			else
+				STDERR.puts "Leaver updates : Can't update because someone is already working on that"
+			end
+		end
 
 	end
 end
