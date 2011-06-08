@@ -19,7 +19,7 @@ module PoieticGen
 				:user_src => self.user_src,
 				:user_dst => self.user_dst,
 				:content => self.content,
-				:stamp => self.timestamp
+				:stamp => self.stamp
 			}
 			return res
 		end
