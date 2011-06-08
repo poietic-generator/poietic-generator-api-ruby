@@ -140,9 +140,25 @@ function Editor( p_session, p_board, p_canvas_id ){
     /**
      * Get relative zone position
      */
-    function relative_position( zone_position, zone ) {
-        // FIXME: implement relative zone position
-        return { x: 0, y: 0 };
+    function zone_relative_position( remote_zone, remote_zone_position ) {
+        console.log("editor/zone_relative_position : remote_zone = %s", JSON.stringify( remote_zone ));
+        console.log("editor/zone_relative_position : remote_zone_position = %s", JSON.stringify( remote_zone_position ));
+
+        var dx = remote_zone.position[0] - _board.get_zone(_current_zone).position[0];
+        // y coordinates are inverted, because of the canvas ...
+        var dy = _board.get_zone(_current_zone).position[1] - remote_zone.position[1];
+        console.log("editor/zone_relative_position : dx = %s  dy = %s", dx, dy );
+
+        var edx = dx * self.column_count;
+        var edy = dy * self.line_count;
+        console.log("editor/zone_relative_position : edx = %s  edy = %s", edx, edy );
+
+        var res = {
+            x : edx + remote_zone_position.x,
+            y : edy + remote_zone_position.y
+        };
+        console.log("editor/zone_relative_position : result = %s", JSON.stringify( res ));
+        return res;
     }
 
 
@@ -410,23 +426,26 @@ function Editor( p_session, p_board, p_canvas_id ){
      *
      */
     this.handle_stroke = function( stk ) {
-        console.log("editor/handle_stroke : %s", JSON.stringify( stk ));
-    }
-
-
-    /**
-     *
-     */
-    this.handle_message = function( msg ) {
-        console.log("editor/handle_message : %s", JSON.stringify( msg ));
-    }
-
-
-    /**
-     *
-     */
-    this.handle_event = function( ev ) {
-        console.log("editor/handle_event : %s", JSON.stringify( ev ));
+        console.log("editor/handle_stroke : stroke = %s", JSON.stringify( stk ));
+        var remote_zone = _board.get_zone( stk.zone );
+        console.log("editor/handle_stroke : remote_zone = %s", JSON.stringify( remote_zone )); 
+        var color = stk.color;
+        console.log("editor/handle_stroke : color = %s", JSON.stringify( color )); 
+        var cgset = null;
+        var zone_pos = null;
+        var loc_pos = null;
+        var rt_zone_pos = null;
+        for (var i=0;i<stk.changes.length;i++) {
+            cgset = stk.changes[i];
+            console.log("editor/handle_stroke : cgset = %s", JSON.stringify( cgset )); 
+            zone_pos = { x: cgset[0], y: cgset[1] }
+            console.log("editor/handle_stroke : zone_pos = %s", JSON.stringify( zone_pos )); 
+            rt_zone_pos = zone_relative_position( remote_zone, zone_pos );
+            console.log("editor/handle_stroke : rt_zone_pos = %s", JSON.stringify( rt_zone_pos )); 
+            loc_pos = zone_to_local_position( rt_zone_pos );
+            console.log("editor/handle_stroke : loc_pos = %s", JSON.stringify( loc_pos )); 
+            self.pixel_draw( loc_pos, color );
+        }
     }
 
 
