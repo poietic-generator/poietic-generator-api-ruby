@@ -8,6 +8,8 @@ function Zone( p_index, p_position, p_width, p_height ) {
     var self = this;
 
     // zone dimensions
+    this.index = p_index;
+    this.position = p_position;
     this.width = p_width;
     this.height = p_height;
 
