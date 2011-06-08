@@ -12,7 +12,7 @@ $(document).ready( function() {
             //console.log("page_draw/ready: session callback ok");
 
             var board = new Board( session, 'session-board');
-            var drawing = new Editor(session, board, 'session-drawing');
+            var editor = new Editor(session, board, 'session-drawing');
             var chat = new Chat(session);
 
             //console.log("page_draw/ready: prepicker");
@@ -23,7 +23,7 @@ $(document).ready( function() {
                     picker = new Color.Picker({
                         size: Math.floor($(window).width() / 3),
                         callback: function(hex) {
-                            drawing.color_set( "#" + hex );
+                            editor.color_set( "#" + hex );
                         }
                     });
                     picker.el.style.bottom = "50px";
