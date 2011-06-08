@@ -20,10 +20,10 @@
 
 <!-- la zone de dessin -->
 <div id="session-zone" data-role="page">
-    <div data-role="header" data-id="head" data-position="fixed">
+    <div data-role="header" data-id="head" data-backbtn="false" data-position="fixed">
+        <h1>Drawing zone</h1>
         <div data-role="navbar">
             <ul>
-                <li><a href="#session-zone" data-transition="slideup" class="ui-btn-active ui-state-persist">Drawing zone</a></li>
                 <li><a href="#session-global" data-transition="slideup">Global view</a></li>
                 <li><a href="#session-chat" data-transition="slideup">Messages</a></li>
             </ul>
@@ -48,11 +48,11 @@
 </div>
 <!-- la vue globale -->
 <div id="session-global" data-role="page">
-    <div data-role="header" data-id="head" data-position="fixed">
+    <div data-role="header" data-id="head" data-backbtn="false" data-position="fixed">
+        <h1>Global view</h1>
         <div data-role="navbar">
             <ul>
                 <li><a href="#session-zone" data-transition="slideup">Drawing zone</a></li>
-                <li><a href="#session-global" data-transition="slideup" class="ui-btn-active ui-state-persist">Global view</a></li>
                 <li><a href="#session-chat" data-transition="slideup">Messages</a></li>
             </ul>
         </div>
@@ -63,12 +63,12 @@
 </div>
 <!-- la zone chat -->
 <div id="session-chat" data-role="page">
-    <div data-role="header" data-id="head" data-position="fixed">
+    <div data-role="header" data-id="head" data-backbtn="false" data-position="fixed">
+        <h1>Messages</h1>
         <div data-role="navbar">
             <ul>
                 <li><a href="#session-zone" data-transition="slideup">Drawing Zone</a></li>
                 <li><a href="#session-global" data-transition="slideup">Global view</a></li>
-                <li><a href="#session-chat" data-transition="slideup" class="ui-btn-active ui-state-persist">Messages</a></li>
             </ul>
         </div>
     </div>
