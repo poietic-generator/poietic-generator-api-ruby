@@ -1,6 +1,7 @@
+
 "use strict";
 
-function Chat (p_session) {
+function Chat( p_session ) {
     var _session;
 
     var self = this;
@@ -9,7 +10,7 @@ function Chat (p_session) {
 
     this.initialize = function (p_session) {
         // register chat to session
-        p_session.register_chat(self);
+        p_session.register(self);
 
         // initialize list of users for the send message form
         if (0 < p_session.other_users.length) {
@@ -27,23 +28,35 @@ function Chat (p_session) {
                 stamp: new Date(),
                 content: $(this).find("#send-message-form-content").val()
             };
-            self.queueMessage(message);
+            self.queue_message( message );
 
             // close send message dialog
             $(".ui-dialog").dialog("close");
         });
     };
 
-    this.getQueue = function () {
+    this.get_messages = function () {
         var queue   = this._queue;
         this._queue = [];
         return queue;
     };
 
-    this.queueMessage = function (message) {
+    this.queue_message = function (message) {
         this._queue.push(message);
     };
 
+    this.handle_event = function( ev ) {
+	// do nothing here :-)
+    }
+
+    this.handle_message = function( msg ) {
+    }
+
+    this.handle_stroke = function( stk ) {
+	// do nothing here :-)
+    }
+
     // call initialize method
-    this.initialize(p_session);
+    this.initialize( p_session );
 }
+
