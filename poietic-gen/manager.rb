@@ -7,6 +7,7 @@ require 'poietic-gen/chat_manager'
 require 'poietic-gen/message'
 require 'poietic-gen/stroke'
 require 'poietic-gen/update_request'
+require 'thread'
 
 require 'pp'
 
@@ -16,6 +17,11 @@ module PoieticGen
 	# manage a pool of users
 	#
 	class Manager
+
+    # This constant is the one used to check the leaved user, and generate
+    # events. This check is made in the update_data method. It will be done
+    # at min every LEAVE_CHECK_TIME_MIN days at a user update_data request.
+	  LEAVE_CHECK_TIME_MIN = Rational(1,60*60*24)
 
 		def initialize config
 			@config = config
@@ -32,6 +38,9 @@ module PoieticGen
 			@board = Board.new config.board
 
 			@chat = PoieticGen::ChatManager.new config.chat
+
+			@last_leave_check_time = DateTime.now - LEAVE_CHECK_TIME_MIN
+			@leave_mutex = Mutex.new
 
 			# FIXME put it in db
 			# FIXME : create session in database
@@ -59,10 +68,11 @@ module PoieticGen
 			}
 			param_create = {
 				:session => @session_id,
-				:name => ( req_name || 'anonymous' ),
+				:name => ( req_name || 'anonymous'),
 				:zone => -1,
 				:created_at => now,
-				:expires_at => (now + Rational(@config.user.max_idle, 60 * 60 * 24 ))
+				:expires_at => (now + Rational(@config.user.max_idle, 60 * 60 * 24 )),
+				:did_expire => false
 			}
 
 			if req_session != @session_id then
@@ -78,6 +88,7 @@ module PoieticGen
 				user = User.first_or_create param_request, param_create
 
 				if ( (now - user.expires_at) > 0  ) then
+				  # The event will be generated elsewhere (in update_data).
 					STDERR.puts "User session expired"
 					# create new if session expired
 					user = User.create param_create
@@ -112,7 +123,6 @@ module PoieticGen
 			other_users = users_db.map{ |u| u.to_hash }
 			other_zones = users_db.map{ |u| @board[u.zone].to_desc_hash }
 
-			# FIXME: send "leave event" to everyone
 			return { :user_id => user.id,
 				:user_session => user.session,
 				:user_name => user.name,
@@ -192,6 +202,8 @@ module PoieticGen
 			#pp user
 			#pp zone
 
+			self.check_leaved_users
+
 			STDERR.puts "data:"
 			pp data
 
@@ -228,6 +240,37 @@ module PoieticGen
 
 			return result
 		end
+
+		def check_leaved_users
+		  now = DateTime.now
+			if @leave_mutex.try_lock then
+			  STDERR.puts "Should check leavers : %s + %s < %s" % [
+			    @last_leave_check_time.to_s,
+			    LEAVE_CHECK_TIME_MIN.to_s,
+			    now.to_s
+        ]
+			  if (@last_leave_check_time + LEAVE_CHECK_TIME_MIN) < now then
+		      STDERR.puts "++++++ Expired users"
+		      # Get the user which has not be already declared as
+		      newly_expired_users = User.all(
+		        :did_expire => false,
+		        :expires_at.lte => now
+		      )
+		      pp newly_expired_users
+		      newly_expired_users.each do |leaver|
+		        STDERR.puts " User-%d is now marked as expired." % leaver.id
+		        leaver.did_expire = true
+		        leaver.save
+		        Event.create_leave leaver.id, leaver.expires_at
+          end
+		      STDERR.puts "------ Expired users"
+          @last_leave_check_time = now
+        end
+        @leave_mutex.unlock
+      else
+        STDERR.puts "Leaver updates : Can't update because someone is already working on that"
+      end
+    end
 
 	end
 end

@@ -13,10 +13,19 @@ module PoieticGen
 
 
 		def self.create_join uid, uzone
-			event = Event.create({ 
-				:type => 'join', 
+			event = Event.create({
+				:type => 'join',
 				:desc => JSON.generate({ :user => uid, :zone => uzone }),
 				:timestamp => DateTime.now
+			})
+			event.save
+		end
+
+    def self.create_leave uid, leave_time
+			event = Event.create({
+				:type => 'leave',
+				:desc => JSON.generate({ :user => uid }),
+        :timestamp => leave_time
 			})
 			event.save
 		end
