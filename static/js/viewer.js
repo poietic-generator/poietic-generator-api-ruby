@@ -2,37 +2,29 @@
 // vim: set ts=4 sw=4 et:
 "use strict";
 
-var EDITOR_GRID_COLOR = '#444';
-var EDITOR_GRID_WIDTH = 0.5;
-var EDITOR_BOUNDARIES_COLOR = '#888';
-var EDITOR_BOUNDARIES_WIDTH = 2;
-
 var POSITION_TYPE_DRAWING = 0;
 var POSITION_TYPE_ZONE = 0;
 
-function Editor( p_session, p_board, p_canvas_id ){
+function Viewer( p_session, p_board, p_canvas_id ){
     //var console = { log: function() {} };
 
     var self = this;
 
     var _session;
-    var _enqueue_timer;
     var _board;
-    var _color;
-    var _pencil_move;
     var _real_canvas;
-    var _grid_canvas;
     var _column_size;
     var _line_size;
 
     var _current_zone;
-    var _color_picker;
+    var _boundaries;
 
-    this.name = "Editor";
+    this.name = "Viewer";
     this.column_count = null;
     this.line_count = null;
-    this.border_column_count = null;
-    this.border_line_count = null;
+
+    this.column_size = null;
+    this.line_size = null;
 
     this.context = null;
 
@@ -41,11 +33,17 @@ function Editor( p_session, p_board, p_canvas_id ){
      * Constructor
      */
     this.initialize = function( p_session, p_board, p_canvas_id ) {
+        _boundaries = {
+            xmin: 0,
+            xmax: 0,
+            ymin: 0,
+            ymax: 0
+        }
+
         _current_zone =  p_session.user_zone.index;
         console.log("editor/initialize : _current_zone = %s", _current_zone);
         _board = p_board;
         _color = '#f00';
-        _color_picker = new ColorPicker(self);
 
         _pencil_move = {
             enable : false
@@ -60,24 +58,15 @@ function Editor( p_session, p_board, p_canvas_id ){
         self.border_line_count = p_session.zone_column_count / 4;
 
         _real_canvas = document.getElementById( p_canvas_id );
-        _grid_canvas = null;
 
         // size of editor's big pixels
+        self.column_size = 1;
+        self.line_size = 1;
 
         var zone = _board.get_zone(_current_zone);
         _enqueue_timer = window.setInterval( zone.patch_enqueue, PATCH_LIFESPAN );
 
         self.context = _real_canvas.getContext('2d');
-
-        // plug some event handlers
-        _real_canvas.addEventListener( 'mousedown', canvas_event, false );
-        _real_canvas.addEventListener( 'touchstart', canvas_event, false );
-
-        _real_canvas.addEventListener( 'mouseup', canvas_event, false );
-        _real_canvas.addEventListener( 'touchstop', canvas_event, false );
-
-        _real_canvas.addEventListener( 'mousemove', canvas_event, false );
-        _real_canvas.addEventListener( 'touchmove', canvas_event, false );
 
         $(window).resize(function() {
             self.update_size();
@@ -160,58 +149,6 @@ function Editor( p_session, p_board, p_canvas_id ){
     }
 
 
-    /*
-     * draw zone grid
-     */
-    this.draw_grid = function() {
-        // apply grid canvas on the real canvas
-        var grid_ctx;
-        var canvas;
-        var ctx = self.context;
-
-        // create grid if none exist
-        if ( self.grid_canvas == null ) {
-            self.grid_canvas = document.createElement('canvas');
-            self.grid_canvas.width = _real_canvas.width;
-            self.grid_canvas.height = _real_canvas.height;
-            canvas = self.grid_canvas;
-            grid_ctx = canvas.getContext("2d");
-
-            //console.log("editor/draw_grid: before lines");
-
-            var w_max = self.column_count + (2 * self.border_column_count);
-            for (var w=0; w <= w_max; w++){
-                var local_pos = { 'x': w, 'y': 0 };
-                var canvas_pos = local_to_canvas_position( local_pos );
-                grid_ctx.moveTo(canvas_pos.x, 0);
-                grid_ctx.lineTo(canvas_pos.x, canvas.height);
-            }
-            var h_max = self.line_count + (2 * self.border_line_count);
-            for (var h=0; h <= h_max; h++){
-                var local_pos = { 'x': 0, 'y': h };
-                var canvas_pos = local_to_canvas_position( local_pos );
-                grid_ctx.moveTo(0, canvas_pos.y);
-                grid_ctx.lineTo(canvas.width, canvas_pos.y);
-            }
-            grid_ctx.lineWidth = EDITOR_GRID_WIDTH;
-            grid_ctx.strokeStyle = EDITOR_GRID_COLOR;
-            grid_ctx.stroke();
-
-            grid_ctx.beginPath();
-            var local_tl = {
-                x : self.border_column_count,
-                y : self.border_line_count
-            };
-            var canvas_tl =  local_to_canvas_position( local_tl );
-            canvas_tl.w = Math.floor( self.column_count * _column_size );
-            canvas_tl.h = Math.floor( self.line_count * _line_size );
-
-            grid_ctx.lineWidth = EDITOR_BOUNDARIES_WIDTH;
-            grid_ctx.strokeStyle = EDITOR_BOUNDARIES_COLOR;
-            grid_ctx.strokeRect( canvas_tl.x, canvas_tl.y, canvas_tl.w, canvas_tl.h );
-        }
-        ctx.drawImage( self.grid_canvas, 0, 0);
-    }
 
 
     /**
@@ -278,86 +215,9 @@ function Editor( p_session, p_board, p_canvas_id ){
 
         // console.log("editor/update_size: column_size = " + _column_size);
 
-        self.grid_canvas = null;
-
         var ctx = real_canvas.getContext("2d");
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, real_canvas.width, real_canvas.height);
-
-        _color_picker.update_size(_real_canvas);
-
-        self.draw_grid();
-    };
-
-    /**
-     * Handle mouse event
-     */
-    this.mouseup = function( event_obj ) { self.pencil_up( event_obj ); }
-    this.touchstop = function( event_obj ) {
-        event_obj.mouseX = event_obj.touches[0].pageX;
-        event_obj.mouseY = event_obj.touches[0].pageY;
-        self.pencil_up( event_obj );
-        event_obj.preventDefault();
-    }
-
-    this.pencil_up = function( event_obj ) {
-        _pencil_move.enable = false;
-    };
-
-
-    /**
-     * Handle mouse event
-     */
-    this.mousedown = function( event_obj ) { self.pencil_down( event_obj ); }
-    this.touchstart = function( event_obj ) {
-        event_obj.mouseX = event_obj.touches[0].pageX;
-        event_obj.mouseY = event_obj.touches[0].pageY;
-        self.pencil_down( event_obj );
-        event_obj.preventDefault();
-    }
-
-    this.pencil_down = function( event_obj ) {
-        _pencil_move.enable = true;
-        self.mousemove( event_obj );
-    };
-
-
-
-    /**
-     * Handle mouse event
-     */
-    this.mousemove = function( event_obj ) { self.pencil_move( event_obj ); }
-    this.touchmove = function( event_obj ) {
-        event_obj.mouseX = event_obj.touches[0].pageX;
-        event_obj.mouseY = event_obj.touches[0].pageY;
-        self.pencil_move( event_obj );
-        event_obj.preventDefault();
-    }
-
-    this.pencil_move = function( event_obj ) {
-        var ctx = self.context;
-        var canvas = _real_canvas;
-
-        if (_pencil_move.enable) {
-            var canvas_pos = { x: event_obj.mouseX, y: event_obj.mouseY };
-            var local_pos = canvas_to_local_position( canvas_pos );
-            var zone_pos = local_to_zone_position( local_pos );
-            // console.log( "editor/mousemove: canvas pos : %s", canvas_pos.to_json() );
-            // console.log( "editor/mousemove:local pos : %s", local_pos.to_json() );
-            // console.log( "editor/mousemove:zone pos : %s", zone_pos.to_json() );
-
-            // FIXME: detect target zone
-            // target_zone = local_to_target_ f( zone_pos )
-            var bound = _board.get_zone(_current_zone).is_bound( zone_pos );
-            // console.log( "editor/mousemove: zone.is_bound = ", bound );
-
-            if ( bound ) {
-                self.pixel_set( local_pos, _color );
-            } else {
-                //FIXME: _color = _board.get_zone(_current_zone).pixel_get( zone_pos );
-            }
-
-        }
     };
 
 
@@ -474,29 +334,6 @@ function Editor( p_session, p_board, p_canvas_id ){
         return strokes;
     }
 
-
-    /**
-     * Hide color picker
-     */
-    this.hide_color_picker = function () {
-        _color_picker.hide();
-    };
-
-
-    /**
-     * Is color picker visible ?
-     */
-    this.is_color_picker_visible = function () {
-        return _color_picker.is_visible();
-    };
-
-
-    /**
-     * Show color picker
-     */
-    this.show_color_picker = function () {
-        _color_picker.show();
-    };
 
     // call constructor
     this.initialize(p_session, p_board, p_canvas_id);
