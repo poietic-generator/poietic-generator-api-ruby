@@ -117,9 +117,8 @@ function Zone( p_index, p_position, p_width, p_height ) {
      * Push current patch to local patch queue
      */
     this.patch_enqueue = function() {
-        console.log("zone/patch_enqueue:  !");
+        //console.log("zone/patch_enqueue: !");
         if ( _current_patch != null ) {
-            // FIXME: verify that enqueued patches are not empty
             _output_queue.push(_current_patch);
             _current_patch = null;
             console.log("zone/patch_enqueue: output queue = %s", JSON.stringify( _output_queue ) );
