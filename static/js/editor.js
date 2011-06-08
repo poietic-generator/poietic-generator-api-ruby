@@ -232,15 +232,16 @@ function Editor( p_session, p_board, p_canvas_id ){
         var color;
 
         zones = _board.get_zone_list();
+        console.log("editor/update_paint : %s", JSON.stringify( zones));
 
-        for (var zone_idx; zone_idx<zones.length; zone_idx++) {
+        for (var zone_idx=0; zone_idx < zones.length; zone_idx++) {
             remote_zone = _board.get_zone( zones[zone_idx] );
             console.log("editor/update_paint : remote_zone = %s", zone_idx );
 
             for (var x = 0 ; x < self.column_count ; x++ ){
                 for (var y = 0; y < self.line_count ; y++ ) {
                     zone_pos = { 'x': x, 'y': y };
-                    color = _board.get_zone(_current_zone).pixel_get( zone_pos );
+                    color = remote_zone.pixel_get( zone_pos );
 
                     rt_zone_pos = zone_relative_position( remote_zone, zone_pos );
                     local_pos = zone_to_local_position( rt_zone_pos );
