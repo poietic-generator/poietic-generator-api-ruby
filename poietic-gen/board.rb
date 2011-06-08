@@ -63,7 +63,7 @@ module PoieticGen
 		def update_data user, drawing
 			@monitor.synchronize do
 				zone = @allocator[user.zone]
-				zone.apply drawing
+				zone.apply user, drawing
 			end
 		end
 	end

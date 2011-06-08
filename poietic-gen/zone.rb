@@ -25,7 +25,7 @@ module PoieticGen
 			@monitor = Monitor.new
 		end
 
-		def apply drawing
+		def apply user, drawing
 			@monitor.synchronize do
 				# save patch into database
 				STDERR.puts "Zone - apply:"
@@ -42,7 +42,8 @@ module PoieticGen
 					param_create = {
 						:color => color,
 						:changes => JSON.generate(changes).to_s,
-						:timestamp => DateTime.parse(timestamp)
+						:timestamp => DateTime.parse(timestamp),
+						:zone => user.zone
 					}
 					pp param_create
 					begin
