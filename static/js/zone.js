@@ -4,7 +4,7 @@
 
 var ZONE_BACKGROUND_COLOR = '#000';
 
-function Zone( p_width, p_height ) {
+function Zone( p_index, p_position, p_width, p_height ) {
     var self = this;
 
     // zone dimensions

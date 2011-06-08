@@ -10,6 +10,7 @@ function Board( p_session, p_canvas_id ) {
     var _real_canvas = null;
     var _context = null;
     var _zones = null;
+    var _users = null;
     var _session = null;
 
 
@@ -23,6 +24,14 @@ function Board( p_session, p_canvas_id ) {
 
         _session = p_session;
         _session.register( self );
+	_zones = [];
+	_users = [];
+
+	// fill zones with zones from session
+	for (var i=0; i<p_session.other_zones.length; i++) {
+	    p_session.other_zones[i];
+	}
+	
 
         // plug some event handlers
         $(window).resize(function() {

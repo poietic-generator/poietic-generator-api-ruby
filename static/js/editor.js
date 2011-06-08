@@ -41,7 +41,7 @@ function Editor( p_session, p_board, p_canvas_id ){
      * Constructor
      */
     this.initialize = function( p_session, p_board, p_canvas_id ) {
-        _zone = new Zone( p_session.zone_column_count, p_session.zone_line_count );
+        _zone = new Zone( p_session.user_zone.index, p_session.user_zone.position, p_session.zone_column_count, p_session.zone_line_count );
         _color = '#f00';
 
         _pencil_move = {
