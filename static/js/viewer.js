@@ -50,7 +50,7 @@ function Viewer( p_session, p_board, p_canvas_id ){
         self.update_boundaries();
 
         self.column_count = _boundaries.width * p_session.zone_column_count;
-        self.line_count = boundaries.height * p_session.zone_line_count;
+        self.line_count = _boundaries.height * p_session.zone_line_count;
 
         _real_canvas = document.getElementById( p_canvas_id );
 
@@ -183,35 +183,35 @@ function Viewer( p_session, p_board, p_canvas_id ){
      *
      */
     this.update_size = function() {
-        var real_canvas = _real_canvas,
+        var win, margin;
+
         win = {
             w: $(window).width(),
             h : $(window).height()
         },
         margin = 80;
 
-        real_canvas.style.position = 'absolute';
+        _real_canvas.style.position = 'absolute';
         if (win.w > win.h) {
-            real_canvas.width = win.h - margin;
-            real_canvas.height = win.h - margin;
+            _real_canvas.width = win.h - margin;
+            _real_canvas.height = win.h - margin;
         } else {
-            real_canvas.width = win.w - margin;
-            real_canvas.height = win.w - margin;
+            _real_canvas.width = win.w - margin;
+            _real_canvas.height = win.w - margin;
         }
-        real_canvas.style.top = margin + "px";
-        real_canvas.style.left = Math.floor((win.w - real_canvas.width) / 2) + 'px';
+        _real_canvas.style.top = margin + "px";
+        _real_canvas.style.left = Math.floor((win.w - _real_canvas.width) / 2) + 'px';
 
         // console.log("editor/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
 
         // console.log("editor/update_size: real_canvas.width = " + real_canvas.width);
-        _column_size = real_canvas.width / self.column_count;
-        _line_size = real_canvas.height / self.line_count;
+        _column_size = _real_canvas.width / ( _boundaries.width * self.column_count );
+        _line_size = _real_canvas.height / ( _boundaries.height * self.line_count );
 
         // console.log("editor/update_size: column_size = " + _column_size);
-
-        var ctx = real_canvas.getContext("2d");
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, real_canvas.width, real_canvas.height);
+        var ctx = _real_canvas.getContext("2d");
+        ctx.fillStyle = '#0f0';
+        ctx.fillRect(0, 0, _real_canvas.width, _real_canvas.height);
     };
 
 
@@ -304,12 +304,15 @@ function Viewer( p_session, p_board, p_canvas_id ){
      * Update boundaries from board information
      */
     this.update_boundaries = function() {
+        var zones, remote_zone, x, y, w, h;
+        var zone_idx;
+
         zones = _board.get_zone_list();
 
         // reset boundaries first
         _boundaries = { xmin:0, xmax:0, ymin:0, ymax:0 }
 
-        for (var zone_idx=0; zone_idx < zones.length; zone_idx++) {
+        for (zone_idx=0; zone_idx < zones.length; zone_idx++) {
             remote_zone = _board.get_zone( zones[zone_idx] );
             console.log("viewer/handle_event : %s", JSON.stringify( remote_zone ));
             x = remote_zone.position[0];
