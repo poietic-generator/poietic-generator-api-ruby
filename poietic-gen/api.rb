@@ -107,6 +107,12 @@ module PoieticGen
 		end
 
 
+		get '/page/logout' do
+			session[SESSION_USER] = nil
+			redirect '/'
+		end
+
+
 		#
 		# notify server about the intention of joining the session
 		#
