@@ -430,7 +430,7 @@ function Editor( p_session, p_board, p_canvas_id ){
      */
     this.get_strokes = function() {
         var strokes = _zone.patches_get()
-        console.log("editor/get_strokes: strokes = %s", strokes);
+        console.log("editor/get_strokes: strokes = %s", JSON.stringify(strokes) );
         return strokes;
     }
 
