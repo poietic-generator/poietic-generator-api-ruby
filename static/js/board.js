@@ -43,7 +43,6 @@ function Board( p_session, p_canvas_id ) {
 					_session.zone_column_count, _session.zone_line_count 
 					);
 		}
-		console.log("board/initialize: zones created!");
 		console.log("board/initialize: zones = %s", JSON.stringify( _zones ) );
 
 
@@ -82,7 +81,7 @@ function Board( p_session, p_canvas_id ) {
 	 *
 	 */
 	this.get_zone = function( index ) {
-		console.log("board/get_zone(%s) : %s", index, JSON.stringify( _zones[index] ) );
+		// console.log("board/get_zone(%s) : %s", index, JSON.stringify( _zones[index] ) );
 		return _zones[index];
 	}
 
@@ -91,9 +90,8 @@ function Board( p_session, p_canvas_id ) {
 	 *
 	 */
 	this.handle_stroke = function( stk ) {
-		console.log("board/handle_stroke : %s", JSON.stringify( stk ));
+		console.log("board/handle_stroke : FIXME stroke = %s", JSON.stringify( stk ));
 		var z = _zones[stk.zone];
-		console.log("board/handle_stroke : FIXME");	
 	}
 
 
