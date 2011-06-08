@@ -97,6 +97,8 @@ module PoieticGen
 				end
 			end
 
+			# kill all previous users having the same zone
+			
 			# update expiration time
 			user.expires_at = (now + Rational(@config.user.max_idle, 60 * 60 * 24 ))
 
@@ -126,12 +128,11 @@ module PoieticGen
 			return { :user_id => user.id,
 				:user_session => user.session,
 				:user_name => user.name,
-				:user_zone => user.zone,
+				:user_zone => zone.to_desc_hash,
 				:other_users => other_users,
 				:other_zones => other_zones,
 				:zone_column_count => @config.board.width,
 				:zone_line_count => @config.board.height,
-				:zone_content => zone.to_patches_hash,
 				:event_id => (event_max.id || -1 ),
 				:stroke_id => 0,
 				:view_id => (drawing_max.id || -1 ),
