@@ -110,9 +110,8 @@ module PoieticGen
 			# return users & zones
 			users_db = User.all( :expires_at.gt => now )
 			other_users = users_db.map{ |u| u.to_hash }
-			other_zones = users_db.map{ |u| @board[u.zone].to_desc_hash }
+			other_zones = users_db.map{ |u|	@board[u.zone].to_desc_hash }
 
-			# FIXME: send "leave event" to everyone
 			return { :user_id => user.id,
 				:user_session => user.session,
 				:user_name => user.name,
