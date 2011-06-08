@@ -1,5 +1,5 @@
 
-require 'thread'
+require 'monitor'
 
 module PoieticGen
 	class Zone
@@ -22,11 +22,11 @@ module PoieticGen
 					@data[w_cnt][h_cnt] = nil
 				end
 			end
-			@mutex = Mutex.new
+			@monitor = Monitor.new
 		end
 
 		def apply drawing
-			@mutex.synchronize do
+			@monitor.synchronize do
 				# save patch into database
 				STDERR.puts "Zone - apply:"
 				return if drawing.nil?
@@ -63,7 +63,7 @@ module PoieticGen
 
 		def to_desc_hash
 			res = nil
-			@mutex.synchronize do
+			@monitor.synchronize do
 				res = {
 					:index => @index,
 					:position => @position,
@@ -79,7 +79,7 @@ module PoieticGen
 		#
 		def to_patches_hash
 			result = []
-			@mutex.synchronize do
+			@monitor.synchronize do
 				patches = {}
 				@width.times do |w|
 					@height.times do |h|

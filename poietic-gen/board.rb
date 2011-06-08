@@ -6,7 +6,7 @@ require 'poietic-gen/user'
 require 'poietic-gen/allocation/spiral'
 require 'poietic-gen/allocation/random'
 
-require 'thread'
+require 'monitor'
 
 module PoieticGen
 
@@ -28,7 +28,7 @@ module PoieticGen
 			@config = config
 			@allocator = ALLOCATORS[config.allocator].new config
 			pp @allocator
-			@mutex = Mutex.new
+			@monitor = Monitor.new
 		end
 
 
@@ -43,7 +43,7 @@ module PoieticGen
 		# make the user join the board
 		#
 		def join user
-			@mutex.synchronize do
+			@monitor.synchronize do
 				zone = @allocator.allocate
 				zone.user = user
 				user.zone = zone.index
@@ -54,14 +54,14 @@ module PoieticGen
 		# disconnect user from the board
 		#
 		def leave user
-			@mutex.synchronize do
+			@monitor.synchronize do
 				# do something
 			end
 		end
 
 
 		def update_data user, drawing
-			@mutex.synchronize do
+			@monitor.synchronize do
 				zone = @allocator[user.zone]
 				zone.apply drawing
 			end
