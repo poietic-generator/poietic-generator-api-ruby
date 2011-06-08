@@ -92,6 +92,8 @@ module PoieticGen
 				end
 				patches.each do |color, where|
 					patch = {
+						:id => nil,
+						:zone => @index,
 						:color => color,
 						:changes => where,
 						:stamp => nil
