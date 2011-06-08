@@ -15,6 +15,8 @@ $(document).ready( function() {
             var editor = new Editor(session, board, 'session-drawing');
             var chat = new Chat(session);
 
+            $(".username").text(session.user_name);
+
             //console.log("page_draw/ready: prepicker");
             $("#brush").click(function(event){
                 event.preventDefault();
