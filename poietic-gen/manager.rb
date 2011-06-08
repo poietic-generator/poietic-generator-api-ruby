@@ -117,7 +117,7 @@ module PoieticGen
 			# return JSON for userid
 			event = Event.create_join user.id, user.zone
 			event_max = Event.first(:order => [ :id.desc ])
-			drawing_max = Stroke.first(:order => [ :id.desc ])
+			stroke_max = Stroke.first(:order => [ :id.desc ])
 			message_max = Message.first(:order => [ :id.desc ])
 
 			# return users & zones
@@ -134,8 +134,7 @@ module PoieticGen
 				:zone_column_count => @config.board.width,
 				:zone_line_count => @config.board.height,
 				:event_id => (event_max.id || -1 ),
-				:stroke_id => 0,
-				:view_id => (drawing_max.id || -1 ),
+				:stroke_id => (stroke_max.id || -1 ),
 				:message_id => (message_max.id || -1 )
 			}
 		end
