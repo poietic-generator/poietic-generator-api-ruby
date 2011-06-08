@@ -21,6 +21,7 @@
 <!-- la zone de dessin -->
 <div id="session-zone" data-role="page">
     <div data-role="header" data-id="head" data-backbtn="false" data-position="fixed">
+        <a href="#" id="brush" class="ui-btn-left"><span id="brush-action">Show</span> colors</a>
         <h1>Drawing zone</h1>
         <a href="/logout" data-ajax="false" class="ui-btn-right">Logout</a>
         <div data-role="navbar">
@@ -33,7 +34,7 @@
     <div data-role="content">
         <canvas id="session-drawing"></canvas>
     </div>
-    <div data-role="footer" data-position="fixed" class="ui-grid-d">
+    <!--<div data-role="footer" data-position="fixed" class="ui-grid-d">
         <div class="ui-block-a">
             <a href="#" data-role="button" data-theme="c" id="brush"><span id="brush-action">Show</span> colors</a>
         </div>
@@ -45,7 +46,7 @@
                 <li><a href="#session-chat">New messages<span class="ui-li-count">O</span></a></li>
             </ul>
         </div>
-    </div>
+    </div>-->
 </div>
 <!-- la vue globale -->
 <div id="session-global" data-role="page">
