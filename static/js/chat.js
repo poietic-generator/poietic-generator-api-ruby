@@ -19,9 +19,9 @@ function Chat( p_session ) {
         if (0 < p_session.other_users.length) {
             var select = $("#send-message-form-to");
             for (var i=0; i < p_session.other_users.length; i++) {
-                select.append('<option value="' 
-			+ p_session.other_users[i].id + '">' 
-			+ p_session.other_users[i].name 
+                select.append('<option value="'
+			+ p_session.other_users[i].id + '">'
+			+ p_session.other_users[i].name
 			+ ' (' + p_session.other_users[i].id + ')</option>');
             }
         }
@@ -35,9 +35,6 @@ function Chat( p_session ) {
                 content: $(this).find("#send-message-form-content").val()
             };
             self.queue_message( message );
-
-            // close send message dialog
-            $(".ui-dialog").dialog("close");
         });
     };
 
