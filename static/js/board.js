@@ -7,14 +7,22 @@ function Board( p_session, p_canvas_id ) {
 
     var self = this;
 
-    var _real_canvas;
-    var _context;
-    var _zones;
+    var _real_canvas = null;
+    var _context = null;
+    var _zones = null;
+    var _session = null;
 
+
+    /**
+     * Constructor
+     */
     this.initialize = function( p_session, p_canvas_id ) {
 
         _real_canvas = document.getElementById( p_canvas_id );
         _context = _real_canvas.getContext('2d');
+
+        _session = p_session;
+        _session.register( self );
 
         // plug some event handlers
         $(window).resize(function() {
@@ -24,6 +32,22 @@ function Board( p_session, p_canvas_id ) {
 
         self.update_size();
         self.update_paint();
+    }
+
+
+    /**
+     * 
+     */
+    this.handle_event = function( ev ) {
+	console.log("board/handle_event : %s", JSON.stringify( ev ) );
+    }
+
+
+    /**
+     *
+     */
+    this.handle_stroke = function( stk ) {
+	console.log("board/handle_stroke : %s", JSON.stringify( stk ));
     }
 
 
