@@ -1,5 +1,6 @@
 
 require 'poietic-gen/allocation/generic'
+require 'monitor'
 
 module PoieticGen ; module Allocation
 	class Spiral < Generic
@@ -61,7 +62,7 @@ module PoieticGen ; module Allocation
 			# map index => Zone object (or nil if unallocated)
 			@zones = {}
 			@config = config
-			@mutex = Mutex.new
+			@monitor = Monitor.new
 
 			# FIXME : maintain boundaries for the board
 			@boundary_left = 0
@@ -75,19 +76,53 @@ module PoieticGen ; module Allocation
 			return @zones[index]
 		end
 
+
 		#
 		# return index to position
 		#
 		def index_to_position idx
-			@mutex.synchronize do 
+			@monitor.synchronize do 
 				dir = V.new( 1, 0 )
 				pos = V.new( 0, 0 )
 				# puts "%s => %s" % [ 0, pos ]
 				idx.times do |cnt|
 					pos += dir
 					# puts "%s => %s" % [ cnt + 1, pos ]
-
+					if pos.x.abs == pos.y.abs then
+						unless ( pos.y <= 0 and pos.x == -pos.y ) then
+							dir.rotate_left!
+						end
+					elsif ( pos.y <= 0 and pos.x == -pos.y + 1 ) then
+						dir.rotate_left!
+					end
 				end
+				return pos.to_a
+			end
+		end
+
+
+		#
+		# return position from index
+		#
+		def position_to_index x, y
+			@monitor.synchronize do 
+				dir = V.new( 1, 0 )
+				pos = V.new( 0, 0 )
+				idx = 0
+				# puts "%s => %s" % [ 0, pos ]
+				while ( pos.x != x or pos.y != y ) do
+					idx += 1
+					pos += dir
+					# puts "%s => %s" % [ cnt + 1, pos ]
+					if pos.x.abs == pos.y.abs then
+						unless ( pos.y <= 0 and pos.x == -pos.y ) then
+							dir.rotate_left!
+						end
+					elsif ( pos.y <= 0 and pos.x == -pos.y + 1 ) then
+						dir.rotate_left!
+					end
+				end
+				return idx
 			end
 		end
 
@@ -125,7 +160,7 @@ module PoieticGen ; module Allocation
 		def _next_index 
 			result_index = nil
 
-			@mutex.synchronize do
+			@monitor.synchronize do
 				# find a nil zone first
 				nil_zones = @zones.select{ |idx,zone| zone.nil? }
 				if nil_zones.size > 0 then
