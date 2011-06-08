@@ -252,11 +252,13 @@ function Editor( p_session, p_board, p_canvas_id ){
      *
      */
     this.update_size = function() {
-        var real_canvas = _real_canvas,
+        var real_canvas, win, margin;
+
+        real_canvas = _real_canvas;
         win = {
             w: $(window).width(),
             h : $(window).height()
-        },
+        };
         margin = 80;
 
         real_canvas.style.position = 'absolute';
