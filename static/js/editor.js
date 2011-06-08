@@ -34,9 +34,6 @@ function Editor( p_session, p_board, p_canvas_id ){
     this.border_column_count = null;
     this.border_line_count = null;
 
-    this.column_size = null;
-    this.line_size = null;
-
     this.context = null;
 
 
@@ -66,8 +63,6 @@ function Editor( p_session, p_board, p_canvas_id ){
         _grid_canvas = null;
 
         // size of editor's big pixels
-        self.column_size = 1;
-        self.line_size = 1;
 
         var zone = _board.get_zone(_current_zone);
         _enqueue_timer = window.setInterval( zone.patch_enqueue, PATCH_LIFESPAN );
