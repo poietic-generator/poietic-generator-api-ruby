@@ -21,20 +21,30 @@ module PoieticGen
 			event.save
 		end
 
-    def self.create_leave uid, leave_time
+		def self.create_leave uid, leave_time
 			event = Event.create({
 				:type => 'leave',
 				:desc => JSON.generate({ :user => uid }),
-        :timestamp => leave_time
+				:timestamp => leave_time
 			})
 			event.save
 		end
 
-		def to_hash
+		def to_hash board
+			desc = JSON.parse( self.desc )
+			user = User.first( :id => desc['user'] )
+
+			puts "Event/to_hash desc"
+			pp desc
+
+			res_desc = {
+				:user => user.to_hash,
+				:zone => board[user.zone].to_desc_hash
+			}
 			res = {
 				:id => self.id,
 				:type => self.type,
-				:desc => JSON.parse(self.desc),
+				:desc => res_desc,
 				:stamp => self.timestamp
 			}
 			return res
