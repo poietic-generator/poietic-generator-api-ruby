@@ -29,6 +29,7 @@ function Board( p_session ) {
 
 		// fill zones with zones from session
 		_zones[_session.user_zone.index] = new Zone( 
+				_session,
 				_session.user_zone.index,
 				_session.user_zone.position,
 				_session.zone_column_count,
@@ -39,6 +40,7 @@ function Board( p_session ) {
 			var z = p_session.other_zones[i];
 
 			_zones[z.index] = new Zone(
+					_session,
 					z.index, z.position, 
 					_session.zone_column_count, _session.zone_line_count 
 					);
@@ -55,6 +57,7 @@ function Board( p_session ) {
 		if ( ev.type == 'join' ) {
 			var z = ev.desc.zone;
 			_zones[z.index] = new Zone(
+					_session,
 					z.index, z.position, 
 					_session.zone_column_count, _session.zone_line_count 
 					);

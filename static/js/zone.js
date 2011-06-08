@@ -4,7 +4,7 @@
 
 var ZONE_BACKGROUND_COLOR = '#000';
 
-function Zone( p_index, p_position, p_width, p_height ) {
+function Zone( p_session, p_index, p_position, p_width, p_height ) {
     var self = this;
 
     // zone dimensions
@@ -14,6 +14,7 @@ function Zone( p_index, p_position, p_width, p_height ) {
     this.height = p_height;
 
     // color matrix (for maintaining state localy)
+    var _session = p_session;
     var _matrix = [];
 
     // patches to send
@@ -82,6 +83,7 @@ function Zone( p_index, p_position, p_width, p_height ) {
         if ( _current_patch == null ) {
             // console.log("zone/patch_record: patch creation!");
             _current_patch = {
+                zone: self.index,
                 stamp: new Date(),
                 color: color,
                 changes: [ [ pos.x, pos.y, 0 ]  ]
@@ -90,6 +92,7 @@ function Zone( p_index, p_position, p_width, p_height ) {
             if ( _current_patch.color != color) {
                 self.patch_enqueue();
                 _current_patch = {
+                    zone: self.index,
                     stamp: new Date(),
                     color: color,
                     changes: [ [ pos.x, pos.y, 0 ]  ]
@@ -120,6 +123,7 @@ function Zone( p_index, p_position, p_width, p_height ) {
         //console.log("zone/patch_enqueue: !");
         if ( _current_patch != null ) {
             _output_queue.push(_current_patch);
+            _session.dispatch_strokes( [ _current_patch ] );
             _current_patch = null;
             console.log("zone/patch_enqueue: output queue = %s", JSON.stringify( _output_queue ) );
         }
