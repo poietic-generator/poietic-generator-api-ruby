@@ -89,11 +89,30 @@ function Board( p_session, p_canvas_id ) {
 
 
 	/**
+	 * Return the list of existing zone ids
+	 */
+	this.get_zone_list = function() {
+		var keys = [];
+		for(var i in _zones) {
+			if (_zones.hasOwnProperty(i))
+			{
+				keys.push( parseInt(i,10) );
+			}
+		}
+		// console.log("board/get_zone_list : %s", JSON.stringify( keys ));
+		return keys;
+	}
+
+
+	/**
 	 *
 	 */
 	this.handle_stroke = function( stk ) {
-		console.log("board/handle_stroke : FIXME stroke = %s", JSON.stringify( stk ));
+		console.log("board/handle_stroke : stroke = %s", JSON.stringify( stk ));
+		console.log("board/handle_stroke : zones = %s", JSON.stringify( _zones ));
 		var z = _zones[stk.zone];
+
+		z.patch_apply( stk );
 	}
 
 
