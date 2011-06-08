@@ -31,7 +31,7 @@ function ColorPicker(p_editor) {
         _color_picker.el.style.top = p_canvas.style.top;
         _color_picker.el.style.left = p_canvas.style.left;
         // resize
-        _color_picker.resize($(p_canvas).width());
+        _color_picker.resize($(p_canvas).width() - _color_picker.margin * 2 - _color_picker.hueWidth);
     };
 
     this.initialize(p_editor);
