@@ -99,10 +99,10 @@ function Viewer( p_session, p_board, p_canvas_id ){
     /**
      * Convert local grid to zone position
      */
-    function local_to_zone_position( local_position ){
+    function local_to_zone_position( zone, local_position ){
         return {
-            x: local_position.x - 1, //self.border_column_count,
-            y: local_position.y - 1 //self.border_line_count
+            x: local_position.x, //self.border_column_count,
+            y: local_position.y //self.border_line_count
         };
     }
 
@@ -110,39 +110,12 @@ function Viewer( p_session, p_board, p_canvas_id ){
     /**
      * Convert zone to local grid position
      */
-    function zone_to_local_position( zone_position ) {
+    function zone_to_local_position( zone, zone_position ) {
         return {
-            x: zone_position.x + 1, //self.border_column_count,
-            y: zone_position.y + 1 //self.border_line_count
+            x: zone_position.x, //self.border_column_count,
+            y: zone_position.y //self.border_line_count
         };
     }
-
-
-    /**
-     * Get relative zone position
-     */
-    function zone_relative_position( remote_zone, remote_zone_position ) {
-        // console.log("editor/zone_relative_position : remote_zone = %s", JSON.stringify( remote_zone ));
-        // console.log("editor/zone_relative_position : remote_zone_position = %s", JSON.stringify( remote_zone_position ));
-
-        var dx = remote_zone.position[0] - _board.get_zone(_current_zone).position[0];
-        // y coordinates are inverted, because of the canvas ...
-        var dy = _board.get_zone(_current_zone).position[1] - remote_zone.position[1];
-        // console.log("editor/zone_relative_position : dx = %s  dy = %s", dx, dy );
-
-        var edx = dx * self.column_count;
-        var edy = dy * self.line_count;
-        // console.log("editor/zone_relative_position : edx = %s  edy = %s", edx, edy );
-
-        var res = {
-            x : edx + remote_zone_position.x,
-            y : edy + remote_zone_position.y
-        };
-        // console.log("editor/zone_relative_position : result = %s", JSON.stringify( res ));
-        return res;
-    }
-
-
 
 
     /**
@@ -169,8 +142,7 @@ function Viewer( p_session, p_board, p_canvas_id ){
                     zone_pos = { 'x': x, 'y': y };
                     color = remote_zone.pixel_get( zone_pos );
 
-                    rt_zone_pos = zone_relative_position( remote_zone, zone_pos );
-                    local_pos = zone_to_local_position( rt_zone_pos );
+                    local_pos = zone_to_local_position( remote_zone, zone_pos );
                     self.pixel_draw( local_pos, color );
                 }
             }
@@ -210,7 +182,7 @@ function Viewer( p_session, p_board, p_canvas_id ){
 
         // console.log("editor/update_size: column_size = " + _column_size);
         var ctx = _real_canvas.getContext("2d");
-        ctx.fillStyle = '#0f0';
+        ctx.fillStyle = '#200';
         ctx.fillRect(0, 0, _real_canvas.width, _real_canvas.height);
     };
 
@@ -223,13 +195,13 @@ function Viewer( p_session, p_board, p_canvas_id ){
         //console.log("editor/pixel_draw local_pos = %s", local_pos.to_json() );
         var canvas_pos = local_to_canvas_position( local_pos );
         var rect = {
-            x : canvas_pos.x + (0.1 * _column_size),
-            y : canvas_pos.y + (0.1 * _column_size),
-            w : _column_size - ( 0.2 * _column_size ),
-            h : _line_size - ( 0.2 * _column_size )
+            x : canvas_pos.x + (0.05 * _column_size),
+            y : canvas_pos.y + (0.05 * _column_size),
+            w : _column_size - ( 0.1 * _column_size ),
+            h : _line_size - ( 0.1 * _column_size )
         };
-        //console.log("editor/pixel_draw rect = %s", rect.to_json() );
 
+        //console.log("editor/pixel_draw rect = %s", rect.to_json() );
         ctx.fillStyle = ZONE_BACKGROUND_COLOR;
         ctx.fillRect( rect.x, rect.y, rect.w, rect.h );
 
@@ -243,13 +215,15 @@ function Viewer( p_session, p_board, p_canvas_id ){
      */
     this.pixel_set = function( local_pos, color ) {
         var zone_pos;
-
-        zone_pos = local_to_zone_position( local_pos );
+        var zone;
+            
+        zone = _board.get_zone(_current_zone);
+        zone_pos = local_to_zone_position( zone, local_pos );
         //console.log( "editor/pixel_set: zone_pos = %s", zone_pos.to_json() );
         // record to zone
-        _board.get_zone(_current_zone).pixel_set( zone_pos, color );
+        zone.pixel_set( zone_pos, color );
         // add to patch structure
-        _board.get_zone(_current_zone).patch_record( zone_pos, color );
+        zone.patch_record( zone_pos, color );
         // draw localy
         self.pixel_draw( local_pos, color );
     };
@@ -274,9 +248,7 @@ function Viewer( p_session, p_board, p_canvas_id ){
             // console.log("viewer/handle_stroke : cgset = %s", JSON.stringify( cgset )); 
             zone_pos = { x: cgset[0], y: cgset[1] }
             // console.log("viewer/handle_stroke : zone_pos = %s", JSON.stringify( zone_pos )); 
-            rt_zone_pos = zone_relative_position( remote_zone, zone_pos );
-            // console.log("viewer/handle_stroke : rt_zone_pos = %s", JSON.stringify( rt_zone_pos )); 
-            local_pos = zone_to_local_position( rt_zone_pos );
+            local_pos = zone_to_local_position( remote_zone, zone_pos );
             // console.log("viewer/handle_stroke : local_pos = %s", JSON.stringify( local_pos )); 
             self.pixel_draw( local_pos, color );
         }
