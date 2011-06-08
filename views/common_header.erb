@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta name="app-mobile-web-app-capable" content="yes" />
-		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
-		<meta name="apple-touch-fullscreen" content="YES" />
-		<meta name="viewport" content="width=device-width, initial-scale=0.6666, minimum-scale=0.6666, maximum-scale=1"/>
+    <head>
+	<meta name="app-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<meta name="apple-touch-fullscreen" content="YES" />
+	<meta name="viewport" content="width=device-width, initial-scale=0.6666, minimum-scale=0.6666, maximum-scale=1"/>
 
-		<%=
-			@page.css.insert 0, "/css/minimal.css"
-            @page.css.insert 1, "/css/jquery.mobile-1.0a4.1.min.css"
-			@page.render_css
-		%>
-		<%=
-			@page.js.insert 0, "/js/jquery-1.6.1.min.js"
-            @page.js << "/js/jquery.mobile-1.0a4.1.min.js"
-			@page.render_js
-		%>
+	<%=
+	    @page.css.insert 0, "/css/minimal.css"
+	    @page.css.insert 1, "/css/jquery.mobile-1.0a4.1.min.css"
+	    @page.render_css
+	%>
+	<%=
+	    @page.js.insert 0, "/js/jquery-1.6.1.min.js"
+	    @page.js << "/js/jquery.mobile-1.0a4.1.min.js"
+	    @page.render_js
+	%>
 
-	</head>
-	<body>
+    </head>
+    <body>

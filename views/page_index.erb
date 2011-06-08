@@ -1,6 +1,6 @@
 <%=
     @page.css << "/css/base.css"
-	@page.css << "/css/page_index.css"
+    @page.css << "/css/page_index.css"
 
     @page.js << "/js/jquery.cookie.js"
     @page.js << "/js/page_index.js"
@@ -18,6 +18,13 @@
             <form action="" method="post" id="credentials">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" value="anonymous" />
+		<script>
+		    var user_name = $.cookie('user_name');
+		    if (user_name) {
+			el = document.getElementById('username');
+			el.value = user_name;
+		    }
+		</script>
             </form>
             <a href="/page/draw" data-ajax="false" data-role="button" data-inline="true" id="link_play">Play</a><!-- or
             <a href="/page/view" data-ajax="false">View</a>-->
