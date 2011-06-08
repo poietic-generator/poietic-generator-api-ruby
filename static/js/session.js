@@ -17,7 +17,6 @@ function Session( session_type, callback ) {
 
     var self = this;
 
-    this.brush = null;
     this.user_id = null;
     this.zone_column_count = null;
     this.zone_line_count = null;
