@@ -98,8 +98,8 @@ function Viewer( p_session, p_board, p_canvas_id ){
      */
     function local_to_zone_position( zone, local_position ){
         return {
-            x: local_position.x - (zone.position[0] * _session.user_zone.column_count),
-            y: local_position.y - (zone.position[1] * _session.user_zone.line_count)
+            x: local_position.x - ((zone.position[0] - _boundaries.xmin)* zone.width ),
+            y: local_position.y - ((_boundaries.ymax - zone.position[1] )* zone.height )
         };
     }
 
@@ -108,9 +108,10 @@ function Viewer( p_session, p_board, p_canvas_id ){
      * Convert zone to local grid position
      */
     function zone_to_local_position( zone, zone_position ) {
+        console.log("viewer/zone_to_local_position: zone = %s", JSON.stringify( zone ));
         return {
-            x: zone_position.x + (zone.position[0] * _session.user_zone.column_count), 
-            y: zone_position.y + (zone.position[1] * _session.user_zone.line_count)
+            x: zone_position.x + ((zone.position[0] - _boundaries.xmin)* zone.width ), 
+            y: zone_position.y + ((_boundaries.ymax - zone.position[1] )* zone.height )
         };
     }
 
@@ -212,6 +213,7 @@ function Viewer( p_session, p_board, p_canvas_id ){
      *
      */
     this.handle_stroke = function( stk ) {
+        // var console = window.noconsole;
         console.log("viewer/handle_stroke : stroke = %s", JSON.stringify( stk ));
         var remote_zone = _board.get_zone( stk.zone );
         // console.log("viewer/handle_stroke : remote_zone = %s", JSON.stringify( remote_zone )); 
@@ -223,11 +225,11 @@ function Viewer( p_session, p_board, p_canvas_id ){
         var rt_zone_pos = null;
         for (var i=0;i<stk.changes.length;i++) {
             cgset = stk.changes[i];
-            // console.log("viewer/handle_stroke : cgset = %s", JSON.stringify( cgset )); 
+            console.log("viewer/handle_stroke : cgset = %s", JSON.stringify( cgset )); 
             zone_pos = { x: cgset[0], y: cgset[1] }
-            // console.log("viewer/handle_stroke : zone_pos = %s", JSON.stringify( zone_pos )); 
+            console.log("viewer/handle_stroke : zone_pos = %s", JSON.stringify( zone_pos )); 
             local_pos = zone_to_local_position( remote_zone, zone_pos );
-            // console.log("viewer/handle_stroke : local_pos = %s", JSON.stringify( local_pos )); 
+            console.log("viewer/handle_stroke : local_pos = %s", JSON.stringify( local_pos )); 
             self.pixel_draw( local_pos, color );
         }
     }
@@ -237,6 +239,7 @@ function Viewer( p_session, p_board, p_canvas_id ){
 	 * Handle user-related (join/leave) events
 	 */
 	this.handle_event = function( ev ) {
+        var console = window.noconsole;
         var zones; 
         var remote_zone;
         var x,y, w, h ;
@@ -246,7 +249,6 @@ function Viewer( p_session, p_board, p_canvas_id ){
         self.update_boundaries();
         self.update_size();
         self.update_paint();
-        console.log("viewer/handle_event : boundaries = %s", JSON.stringify( _boundaries ) );
 	}
 
 
@@ -254,6 +256,7 @@ function Viewer( p_session, p_board, p_canvas_id ){
      * Update boundaries from board information
      */
     this.update_boundaries = function() {
+        var console = window.noconsole;
         var zones, remote_zone, x, y;
         var zone_idx;
 
@@ -287,8 +290,8 @@ function Viewer( p_session, p_board, p_canvas_id ){
         }
 
         console.log("viewer/update_boundaries : boundaries = %s", JSON.stringify( _boundaries ));
-        self.column_count = _boundaries.width * p_session.zone_column_count;
-        self.line_count = _boundaries.height * p_session.zone_line_count;
+        self.column_count = _boundaries.width * _session.zone_column_count;
+        self.line_count = _boundaries.height * _session.zone_line_count;
     }
 
     // call constructor
