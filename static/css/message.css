@@ -1,0 +1,15 @@
+.message-src {
+  width:10% !important;
+}
+
+.message-content {
+  width:90% !important;
+}
+
+.message-dst {
+  width:10% !important;
+}
+
+.message-dst-content {
+  text-align:right;
+}
