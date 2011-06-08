@@ -100,7 +100,7 @@ Color.Picker = function (props) {
     canvas.width = this.size + this.hueWidth + this.margin;
     canvas.height = this.size + this.margin;
     plugin.appendChild(canvas);
-    /*plugin.onmousemove =
+    plugin.onmousemove =
     plugin.onmousedown = function (e) {
 	var down = (e.type == "mousedown");
 	var offset = that.margin / 2;
@@ -112,7 +112,7 @@ Color.Picker = function (props) {
 	if (e.target.className == "hexString") {
 	    plugin.style.cursor = "text";
 	    return; // allow selection of HEX
-	} else if (x != x0 || y != y0) { // move colorpicker
+	}/* else if (x != x0 || y != y0) { // move colorpicker
 	    plugin.style.cursor = "move";
 	    if (down) dragElement({
 		type: "difference",
@@ -123,7 +123,7 @@ Color.Picker = function (props) {
 		    plugin.style.top = coords.y + "px";
 		}
 	    });
-	} else if (x <= that.size) { // saturation-value selection
+	}*/ else if (x <= that.size) { // saturation-value selection
 	    plugin.style.cursor = "crosshair";
 	    if (down) dragElement({
 		type: "relative",
@@ -153,7 +153,7 @@ Color.Picker = function (props) {
 	    plugin.style.cursor = "default";
 	}
 	return false; // prevent selection
-    };*/
+    };
     // appending to element
     this.element.appendChild(plugin);
 
