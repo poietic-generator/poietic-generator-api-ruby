@@ -41,16 +41,16 @@ function Viewer( p_session, p_board, p_canvas_id ){
         }
 
         _current_zone =  p_session.user_zone.index;
-        console.log("editor/initialize : _current_zone = %s", _current_zone);
         _board = p_board;
-
         _session = p_session;
         _session.register( self );
 
-        self.column_count = p_session.zone_column_count;
-        self.line_count = p_session.zone_line_count;
-        self.border_column_count = p_session.zone_column_count / 4;
-        self.border_line_count = p_session.zone_column_count / 4;
+        console.log("editor/initialize : _current_zone = %s", _current_zone);
+
+        self.update_boundaries();
+
+        self.column_count = _boundaries.width * p_session.zone_column_count;
+        self.line_count = boundaries.height * p_session.zone_line_count;
 
         _real_canvas = document.getElementById( p_canvas_id );
 
@@ -101,8 +101,8 @@ function Viewer( p_session, p_board, p_canvas_id ){
      */
     function local_to_zone_position( local_position ){
         return {
-            x: local_position.x - self.border_column_count,
-            y: local_position.y - self.border_line_count
+            x: local_position.x - 1, //self.border_column_count,
+            y: local_position.y - 1 //self.border_line_count
         };
     }
 
@@ -112,8 +112,8 @@ function Viewer( p_session, p_board, p_canvas_id ){
      */
     function zone_to_local_position( zone_position ) {
         return {
-            x: zone_position.x + self.border_column_count,
-            y: zone_position.y + self.border_line_count
+            x: zone_position.x + 1, //self.border_column_count,
+            y: zone_position.y + 1 //self.border_line_count
         };
     }
 
@@ -204,8 +204,8 @@ function Viewer( p_session, p_board, p_canvas_id ){
         // console.log("editor/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
 
         // console.log("editor/update_size: real_canvas.width = " + real_canvas.width);
-        _column_size = real_canvas.width / (self.column_count + (self.border_column_count * 2));
-        _line_size = real_canvas.height / (self.line_count + (self.border_line_count * 2));
+        _column_size = real_canvas.width / self.column_count;
+        _line_size = real_canvas.height / self.line_count;
 
         // console.log("editor/update_size: column_size = " + _column_size);
 
@@ -287,22 +287,49 @@ function Viewer( p_session, p_board, p_canvas_id ){
 	 * Handle user-related (join/leave) events
 	 */
 	this.handle_event = function( ev ) {
+        var zones; 
+        var remote_zone;
+        var x,y, w, h ;
+
 		console.log("viewer/handle_event : %s", JSON.stringify( ev ) );
 
-        var zones = _board.get_zone_list();
+        self.update_boundaries();
+        self.update_size();
+        self.update_paint();
+        console.log("viewer/handle_event : boundaries = %s", JSON.stringify( _boundaries ) );
+	}
 
+
+    /**
+     * Update boundaries from board information
+     */
+    this.update_boundaries = function() {
+        zones = _board.get_zone_list();
+
+        // reset boundaries first
         _boundaries = { xmin:0, xmax:0, ymin:0, ymax:0 }
+
         for (var zone_idx=0; zone_idx < zones.length; zone_idx++) {
             remote_zone = _board.get_zone( zones[zone_idx] );
             console.log("viewer/handle_event : %s", JSON.stringify( remote_zone ));
-            var x = remote_zone.position[0];
-            var y = remote_zone.position[1];
+            x = remote_zone.position[0];
+            y = remote_zone.position[1];
             if (x < _boundaries.xmin) { _boundaries.xmin = x; }
             if (x > _boundaries.xmax) { _boundaries.xmax = x; }
             if (y < _boundaries.ymin) { _boundaries.ymin = y; }
             if (y > _boundaries.ymay) { _boundaries.ymay = y; }
         }
-	}
+
+        // we make a square now ^^
+        w = _boundaries.xmax - _boundaries.xmin;
+        h = _boundaries.ymax - _boundaries.ymin;
+
+        if ( w > h ) {
+            _boundaries.xmax = _boundaries.xmin + w;
+        } else {
+            _boundaries.ymax = _boundaries.ymin + h;
+        }
+    }
 
     // call constructor
     this.initialize(p_session, p_board, p_canvas_id);
