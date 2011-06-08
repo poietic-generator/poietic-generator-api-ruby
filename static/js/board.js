@@ -3,7 +3,7 @@
 /**
  * Global view
  */
-function Board( p_session, p_canvas_id ) {
+function Board( p_session ) {
 
 	var self = this;
 
@@ -19,10 +19,7 @@ function Board( p_session, p_canvas_id ) {
 	/**
 	 * Constructor
 	 */
-	this.initialize = function( p_session, p_canvas_id ) {
-
-		_real_canvas = document.getElementById( p_canvas_id );
-		_context = _real_canvas.getContext('2d');
+	this.initialize = function( p_session ) {
 
 		_session = p_session;
 		_session.register( self );
