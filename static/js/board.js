@@ -4,6 +4,7 @@
  * Global view
  */
 function Board( p_session ) {
+	var console = window.noconsole;
 
 	var self = this;
 
