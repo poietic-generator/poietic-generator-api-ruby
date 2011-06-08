@@ -6,14 +6,15 @@ $(document).ready( function() {
     setTimeout(function() { window.scrollTo(0, 1) }, 100);
 
     // initialize zoness
-    session = new Session(
+    sessionF = new Session(
         SESSION_TYPE_DRAW,
-        function() {
+        function( session ) {
             //console.log("page_draw/ready: session callback ok");
 
-            var board = new Board( session, 'session-board');
-            var editor = new Editor(session, board, 'session-drawing');
-            var chat = new Chat(session),
+            var board = new Board( session, 'session-board' );
+            var editor = new Editor( session, board, 'session-drawing' );
+            var chat = new Chat( session ),
+
             picker = new Color.Picker({
                 size: Math.floor($(window).width() / 3),
                 callback: function(hex) {
