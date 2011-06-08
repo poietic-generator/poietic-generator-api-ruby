@@ -36,6 +36,17 @@ function Chat( p_session ) {
                 content: content.val()
             };
             self.queue_message( message );
+            $("#message-contener").prepend(
+              '<div class="ui-block-a message-content">'+
+                '<div class="ui-body ui-body-b message-dst-content">' +
+                content.val()+
+                '</div>' +
+              '</div><div class="ui-block-b message-dst">' +
+                '<div class="ui-body ui-body-b">' +
+                'me' +
+                '</div>'+
+              '</div>'
+              );
             // Reset field value.
             content.val("");
         });
@@ -72,6 +83,18 @@ function Chat( p_session ) {
     this.handle_message = function( msg ) {
 	// FIXME: do something here
 	console.log("chat/handle_message : %s", JSON.stringify( msg ));
+        $("#message-contener").prepend(
+              '<div class="ui-block-a message-src">' +
+                '<div class="ui-body ui-body-a">' +
+                msg.user_dst +
+                '</div>'+
+              '<div class="ui-block-b message-content">'+
+                '<div class="ui-body ui-body-a">' +
+                msg.content+
+                '</div>' +
+                '</div>' +
+              '</div>'
+              );
     }
 
 

@@ -1,6 +1,7 @@
 <%=
     #@page.css << "/css/page_session.css"
     @page.css << "/css/colorjack.css"
+    @page.css << "/css/message.css"
 
     @page.js << "/js/jquery.cookie.js"
     @page.js << "/js/colorjack.js"
@@ -74,7 +75,7 @@
     </div>
     <div data-role="content">
       <div>
-        <div class="ui-grid-a">
+        <fieldset class="ui-grid-a">
           <form id="send-message-form" action="" method="post" data-ajax="false">
             <div class="ui-block-a">
               <select id="send-message-form-to" name="send-message-form-to" data-native-menu="false">
@@ -85,11 +86,24 @@
               </input>
             </div> <!-- ui-block-b -->
           </form>
-        </div> <!-- grid -->
+        </fieldset> <!-- grid -->
         <hr>
-        <div> <!-- received/sent messages zone -->
-          <label>Received/sent messages zone</label>
-        </div>
+        <fieldset> <!-- received/sent messages zone -->
+          <div class="ui-grid-a" id="message-contener">
+            <div class="ui-block-a message-src">
+              <div class="ui-body ui-body-a">toi</div>
+            </div>
+            <div class="ui-block-b message-content">
+              <div class="ui-body ui-body-a">Le message de toi</div>
+            </div>
+            <div class="ui-block-a message-content">
+              <div class="ui-body ui-body-b message-dst-content">Le message de moi</div>
+            </div>
+            <div class="ui-block-b message-dst">
+              <div class="ui-body ui-body-b">moi</div>
+            </div>
+          </div>
+        </fieldset>
       </div>
       <!--        <a href="#send-message" data-rel="dialog" data-transition="pop">Send a message</a> -->
     </div>
