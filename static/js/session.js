@@ -82,6 +82,12 @@ function Session( session_type, callback ) {
                 console.log("gotcha!");
 
                 callback( self );
+
+                // handle other zone events
+                for (var i=0;i<this.other_zones.length;i++){
+                    // FIXME: get initial zone content
+                }
+                
             }
         });
 
@@ -112,8 +118,12 @@ function Session( session_type, callback ) {
         strokes_updates = []
         messages_updates = []
         for (var i=0; i<_observers.length; i++){
-            messages_updates.concat( messages_updates, _observers[i].get_messages() );
-            strokes_updates.concat( strokes_updates, _observers[i].get_strokes() );
+            if (_observers[i].get_messages) {
+                messages_updates.concat( messages_updates, _observers[i].get_messages() );
+            }
+            if (_observers[i].get_strokes) {
+                strokes_updates.concat( strokes_updates, _observers[i].get_strokes() );
+            }
         }
 
         console.log("strokes_updates = %s", strokes_updates);
@@ -145,20 +155,23 @@ function Session( session_type, callback ) {
                 for (var o=0; o<_observers.length;o++){
                     for (var i=0; i<response.events.length; i++){
                         _current_event_id = response.events[i].id;
-                        console.log('drawing/update set response id to %s', _current_event_id);
-                        _observers[o].handle_event( response.events[i] );
+                        if (_observers[o].handle_event) {
+                            _observers[o].handle_event( response.events[i] );
+                        }
                     }
 
                     for (var i=0; i<response.strokes.length; i++){
                         _current_stroke_id = response.strokes[i].id;
-                        console.log('drawing/update set response id to %s', _current_stroke_id);
-                        _observers[o].handle_stroke( response.events[i] );
+                        if (_observers[o].handle_stroke) {
+                            _observers[o].handle_stroke( response.events[i] );
+                        }
                     }
 
                     for (var i=0; i<response.messages.length; i++){
                         _current_message_id = response.messages[i].id;
-                        console.log('drawing/update set response id to %s', _current_message_id);
-                        _observers[o].handle_message( response.events[i] );
+                        if (_observers[o].handle_message) {
+                            _observers[o].handle_message( response.events[i] );
+                        }
                     }
                 }
 
