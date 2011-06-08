@@ -97,6 +97,15 @@ function Chat( p_session ) {
     /**
      *
      */
+    this.handle_event = function( ev ) {
+        // do nothing here :-)
+        console.log("chat/handle_event : %s", JSON.stringify( ev ));
+    }
+
+
+    /**
+     *
+     */
     this.handle_message = function( msg ) {
         console.log("chat/handle_message : %s", JSON.stringify( msg ));
         this.display_message(msg, false);
