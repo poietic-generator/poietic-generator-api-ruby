@@ -243,6 +243,17 @@ Color.Picker = function (props) {
     // drawing color selection
     this.drawSample();
 
+
+    this.resize = function (new_size) {
+        this.size = new_size;
+        // resize elements
+        plugin.style.height = (this.size + this.margin * 2) + "px";
+        plugin.style.width = (this.size + this.margin + this.hueWidth) + "px";
+        canvas.width = this.size + this.hueWidth + this.margin;
+        canvas.height = this.size + this.margin;
+        // redraw
+        that.drawSample();
+    };
     return this;
 };
 
