@@ -11,6 +11,7 @@ var POSITION_TYPE_DRAWING = 0;
 var POSITION_TYPE_ZONE = 0;
 
 function Editor( p_session, p_board, p_canvas_id ){
+    var console = window.noconsole;
     //var console = { log: function() {} };
 
     var self = this;
