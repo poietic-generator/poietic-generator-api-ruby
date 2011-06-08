@@ -23,9 +23,6 @@ function Viewer( p_session, p_board, p_canvas_id ){
     this.column_count = null;
     this.line_count = null;
 
-    this.column_size = null;
-    this.line_size = null;
-
     this.context = null;
 
 
@@ -37,7 +34,9 @@ function Viewer( p_session, p_board, p_canvas_id ){
             xmin: 0,
             xmax: 0,
             ymin: 0,
-            ymax: 0
+            ymax: 0,
+            width: 0,
+            height: 0
         }
 
         _current_zone =  p_session.user_zone.index;
@@ -45,12 +44,10 @@ function Viewer( p_session, p_board, p_canvas_id ){
         _session = p_session;
         _session.register( self );
 
-        console.log("editor/initialize : _current_zone = %s", _current_zone);
+        console.log("viewer/initialize : _current_zone = %s", _current_zone);
 
         self.update_boundaries();
 
-        self.column_count = _boundaries.width * p_session.zone_column_count;
-        self.line_count = _boundaries.height * p_session.zone_line_count;
 
         _real_canvas = document.getElementById( p_canvas_id );
 
@@ -101,8 +98,8 @@ function Viewer( p_session, p_board, p_canvas_id ){
      */
     function local_to_zone_position( zone, local_position ){
         return {
-            x: local_position.x, //self.border_column_count,
-            y: local_position.y //self.border_line_count
+            x: local_position.x - (zone.position[0] * _session.user_zone.column_count),
+            y: local_position.y - (zone.position[1] * _session.user_zone.line_count)
         };
     }
 
@@ -112,8 +109,8 @@ function Viewer( p_session, p_board, p_canvas_id ){
      */
     function zone_to_local_position( zone, zone_position ) {
         return {
-            x: zone_position.x, //self.border_column_count,
-            y: zone_position.y //self.border_line_count
+            x: zone_position.x + (zone.position[0] * _session.user_zone.column_count), 
+            y: zone_position.y + (zone.position[1] * _session.user_zone.line_count)
         };
     }
 
@@ -131,14 +128,14 @@ function Viewer( p_session, p_board, p_canvas_id ){
         var color;
 
         zones = _board.get_zone_list();
-        console.log("editor/update_paint : %s", JSON.stringify( zones));
+        console.log("viewer/update_paint : %s", JSON.stringify( zones));
 
         for (var zone_idx=0; zone_idx < zones.length; zone_idx++) {
             remote_zone = _board.get_zone( zones[zone_idx] );
-            console.log("editor/update_paint : remote_zone = %s", zone_idx );
+            console.log("viewer/update_paint : remote_zone = %s", zone_idx );
 
-            for (var x = 0 ; x < self.column_count ; x++ ){
-                for (var y = 0; y < self.line_count ; y++ ) {
+            for (var x = 0 ; x < _session.user_zone.column_count ; x++ ){
+                for (var y = 0; y < _session.user_zone.line_count ; y++ ) {
                     zone_pos = { 'x': x, 'y': y };
                     color = remote_zone.pixel_get( zone_pos );
 
@@ -160,7 +157,7 @@ function Viewer( p_session, p_board, p_canvas_id ){
         win = {
             w: $(window).width(),
             h : $(window).height()
-        },
+        };
         margin = 80;
 
         _real_canvas.style.position = 'absolute';
@@ -174,13 +171,13 @@ function Viewer( p_session, p_board, p_canvas_id ){
         _real_canvas.style.top = margin + "px";
         _real_canvas.style.left = Math.floor((win.w - _real_canvas.width) / 2) + 'px';
 
-        // console.log("editor/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
+        // console.log("viewer/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
 
-        // console.log("editor/update_size: real_canvas.width = " + real_canvas.width);
-        _column_size = _real_canvas.width / ( _boundaries.width * self.column_count );
-        _line_size = _real_canvas.height / ( _boundaries.height * self.line_count );
+        // console.log("viewer/update_size: real_canvas.width = " + real_canvas.width);
+        _column_size = _real_canvas.width / self.column_count;
+        _line_size = _real_canvas.height / self.line_count;
 
-        // console.log("editor/update_size: column_size = " + _column_size);
+        // console.log("viewer/update_size: column_size = " + _column_size);
         var ctx = _real_canvas.getContext("2d");
         ctx.fillStyle = '#200';
         ctx.fillRect(0, 0, _real_canvas.width, _real_canvas.height);
@@ -192,7 +189,7 @@ function Viewer( p_session, p_board, p_canvas_id ){
      */
     this.pixel_draw = function( local_pos, color ) {
         var ctx = self.context;
-        //console.log("editor/pixel_draw local_pos = %s", local_pos.to_json() );
+        //console.log("viewer/pixel_draw local_pos = %s", local_pos.to_json() );
         var canvas_pos = local_to_canvas_position( local_pos );
         var rect = {
             x : canvas_pos.x + (0.05 * _column_size),
@@ -201,32 +198,13 @@ function Viewer( p_session, p_board, p_canvas_id ){
             h : _line_size - ( 0.1 * _column_size )
         };
 
-        //console.log("editor/pixel_draw rect = %s", rect.to_json() );
+        //console.log("viewer/pixel_draw rect = %s", rect.to_json() );
         ctx.fillStyle = ZONE_BACKGROUND_COLOR;
         ctx.fillRect( rect.x, rect.y, rect.w, rect.h );
 
         ctx.fillStyle = color;
         ctx.fillRect( rect.x, rect.y, rect.w, rect.h );
     }
-
-
-    /*
-     * Set pixel at given position to given color
-     */
-    this.pixel_set = function( local_pos, color ) {
-        var zone_pos;
-        var zone;
-            
-        zone = _board.get_zone(_current_zone);
-        zone_pos = local_to_zone_position( zone, local_pos );
-        //console.log( "editor/pixel_set: zone_pos = %s", zone_pos.to_json() );
-        // record to zone
-        zone.pixel_set( zone_pos, color );
-        // add to patch structure
-        zone.patch_record( zone_pos, color );
-        // draw localy
-        self.pixel_draw( local_pos, color );
-    };
 
 
 
@@ -276,17 +254,16 @@ function Viewer( p_session, p_board, p_canvas_id ){
      * Update boundaries from board information
      */
     this.update_boundaries = function() {
-        var zones, remote_zone, x, y, w, h;
+        var zones, remote_zone, x, y;
         var zone_idx;
 
         zones = _board.get_zone_list();
 
         // reset boundaries first
-        _boundaries = { xmin:0, xmax:0, ymin:0, ymax:0 }
+        _boundaries = { xmin:0, xmax:0, ymin:0, ymax:0, width: 0, height:0 }
 
         for (zone_idx=0; zone_idx < zones.length; zone_idx++) {
             remote_zone = _board.get_zone( zones[zone_idx] );
-            console.log("viewer/handle_event : %s", JSON.stringify( remote_zone ));
             x = remote_zone.position[0];
             y = remote_zone.position[1];
             if (x < _boundaries.xmin) { _boundaries.xmin = x; }
@@ -296,14 +273,22 @@ function Viewer( p_session, p_board, p_canvas_id ){
         }
 
         // we make a square now ^^
-        w = _boundaries.xmax - _boundaries.xmin;
-        h = _boundaries.ymax - _boundaries.ymin;
+        _boundaries.width = _boundaries.xmax - _boundaries.xmin;
+        _boundaries.height = _boundaries.ymax - _boundaries.ymin;
 
-        if ( w > h ) {
-            _boundaries.xmax = _boundaries.xmin + w;
+        if ( _boundaries.width > _boundaries.height ) {
+            _boundaries.ymax = _boundaries.ymin + _boundaries.width;
+            _boundaries.width = _boundaries.width + 1;
+            _boundaries.height = _boundaries.width;
         } else {
-            _boundaries.ymax = _boundaries.ymin + h;
+            _boundaries.xmax = _boundaries.xmin + _boundaries.height;
+            _boundaries.height = _boundaries.height + 1;
+            _boundaries.width = _boundaries.height;
         }
+
+        console.log("viewer/update_boundaries : boundaries = %s", JSON.stringify( _boundaries ));
+        self.column_count = _boundaries.width * p_session.zone_column_count;
+        self.line_count = _boundaries.height * p_session.zone_line_count;
     }
 
     // call constructor
