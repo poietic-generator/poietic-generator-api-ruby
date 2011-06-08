@@ -10,13 +10,12 @@ $(document).ready( function() {
         SESSION_TYPE_DRAW,
         function( session ) {
             //console.log("page_draw/ready: session callback ok");
+            $(".username").text(session.user_name);
 
             var board = new Board( session );
             var editor = new Editor( session, board, 'session-editor' );
             var chat = new Chat( session);
 			var viewer = new Viewer( session, board, 'session-viewer' );
-
-            $(".username").text(session.user_name);
 
             //console.log("page_draw/ready: prepicker");
             $("#brush").click( function( event ){
