@@ -26,6 +26,7 @@ function Editor( p_session, p_board, p_canvas_id ){
     var _line_size;
 
     var _current_zone;
+    var _color_picker;
 
     this.column_count = null;
     this.line_count = null;
@@ -46,6 +47,7 @@ function Editor( p_session, p_board, p_canvas_id ){
         console.log("editor/initialize : _current_zone = %s", _current_zone);
         _board = p_board;
         _color = '#f00';
+        _color_picker = new ColorPicker(self);
 
         _pencil_move = {
             enable : false
@@ -270,6 +272,8 @@ function Editor( p_session, p_board, p_canvas_id ){
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, real_canvas.width, real_canvas.height);
 
+        _color_picker.update_size(_real_canvas);
+
         self.draw_grid();
     };
 
@@ -428,22 +432,22 @@ function Editor( p_session, p_board, p_canvas_id ){
     this.handle_stroke = function( stk ) {
         console.log("editor/handle_stroke : stroke = %s", JSON.stringify( stk ));
         var remote_zone = _board.get_zone( stk.zone );
-        console.log("editor/handle_stroke : remote_zone = %s", JSON.stringify( remote_zone )); 
+        console.log("editor/handle_stroke : remote_zone = %s", JSON.stringify( remote_zone ));
         var color = stk.color;
-        console.log("editor/handle_stroke : color = %s", JSON.stringify( color )); 
+        console.log("editor/handle_stroke : color = %s", JSON.stringify( color ));
         var cgset = null;
         var zone_pos = null;
         var loc_pos = null;
         var rt_zone_pos = null;
         for (var i=0;i<stk.changes.length;i++) {
             cgset = stk.changes[i];
-            console.log("editor/handle_stroke : cgset = %s", JSON.stringify( cgset )); 
+            console.log("editor/handle_stroke : cgset = %s", JSON.stringify( cgset ));
             zone_pos = { x: cgset[0], y: cgset[1] }
-            console.log("editor/handle_stroke : zone_pos = %s", JSON.stringify( zone_pos )); 
+            console.log("editor/handle_stroke : zone_pos = %s", JSON.stringify( zone_pos ));
             rt_zone_pos = zone_relative_position( remote_zone, zone_pos );
-            console.log("editor/handle_stroke : rt_zone_pos = %s", JSON.stringify( rt_zone_pos )); 
+            console.log("editor/handle_stroke : rt_zone_pos = %s", JSON.stringify( rt_zone_pos ));
             loc_pos = zone_to_local_position( rt_zone_pos );
-            console.log("editor/handle_stroke : loc_pos = %s", JSON.stringify( loc_pos )); 
+            console.log("editor/handle_stroke : loc_pos = %s", JSON.stringify( loc_pos ));
             self.pixel_draw( loc_pos, color );
         }
     }
@@ -457,6 +461,30 @@ function Editor( p_session, p_board, p_canvas_id ){
         console.log("editor/get_strokes: strokes = %s", JSON.stringify(strokes) );
         return strokes;
     }
+
+
+    /**
+     * Hide color picker
+     */
+    this.hide_color_picker = function () {
+        _color_picker.hide();
+    };
+
+
+    /**
+     * Is color picker visible ?
+     */
+    this.is_color_picker_visible = function () {
+        return _color_picker.is_visible();
+    };
+
+
+    /**
+     * Show color picker
+     */
+    this.show_color_picker = function () {
+        _color_picker.show();
+    };
 
     // call constructor
     this.initialize(p_session, p_board, p_canvas_id);

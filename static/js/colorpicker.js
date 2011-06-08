@@ -1,78 +1,38 @@
-
 // vim: set ts=4 sw=4 et:
 "use strict";
 
-function ColorPicker( p_session, p_canvas_id ) {
-	var self = this;
+function ColorPicker(p_editor) {
+    var _color_picker;
 
-	this.update_size = function() {
-        // canvas 
-        var win = { 
-            w: $(window).width(),
-            h : $(window).height()
-        };
-
-        if (win.w > win.h) {
-            real_canvas.width = win.h - 20;
-            real_canvas.height = win.h - 20;
-        } else {
-            real_canvas.width = win.w - 20;
-            real_canvas.height = win.w - 20;
-        }
-
-	}
-
-
-    /** 
-     * Handle mouse event
-     */
-    this.mouseup = function( event_obj ) {
-        // FIXME: do something useful
+    this.initialize = function (p_editor) {
+        _color_picker = new Color.Picker({
+            callback: function(hex) {
+                p_editor.color_set( "#" + hex );
+            }
+        });
+        _color_picker.el.style.display = "none";
     };
 
-
-    /** 
-     * Handle mouse event
-     */
-    this.mousedown = function( event_obj ) {
-        // FIXME: do something useful
+    this.hide = function () {
+        $(_color_picker.el).hide();
     };
 
-
-    /** 
-     * Handle mouse event
-     */
-    this.mousemove = function( event_obj ) {
-        // FIXME: do something useful
+    this.is_visible = function () {
+        return $(_color_picker.el).is(":visible");
     };
 
-    var canvas_event = function( event_obj ) {
-        event_obj.mouseX = event_obj.pageX - _canvas.offsetLeft;
-        event_obj.mouseY = event_obj.pageY - _canvas.offsetTop;
-
-        var func = self[event_obj.type];
-        if (func) { func( event_obj ); }
-        // console.log("clicked at %s,%s", mouseX, mouseY );
+    this.show = function () {
+        $(_color_picker.el).show();
     };
 
+    this.update_size = function(p_canvas) {
+        // position
+        _color_picker.el.style.position = p_canvas.style.position;
+        _color_picker.el.style.top = p_canvas.style.top;
+        _color_picker.el.style.left = p_canvas.style.left;
+        // resize
+        _color_picker.resize($(p_canvas).width());
+    };
 
-    this.to_s = function() { JSON.stringify(this); };
-
-	this.session = p_session;
-
-    var _canvas_id = picker_id
-    var _canvas = document.getElementById( p_canvas_id );
-
-    // add handlers for mouse events
-    _canvas.addEventListener( 'mousedown', canvas_event, false );
-    _canvas.addEventListener( 'mouseup', canvas_event, false );
-    _canvas.addEventListener( 'mousemove', canvas_event, false );
-
-    // add handler for resize event
-    $(window).resize(function() {
-        self.update_size();
-        self.update_paint();
-    });
-
+    this.initialize(p_editor);
 }
-

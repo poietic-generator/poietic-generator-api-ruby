@@ -1,4 +1,4 @@
-var session = null, picker;
+var session = null;
 
 // instead of windows.onload
 $(document).ready( function() {
@@ -13,26 +13,17 @@ $(document).ready( function() {
 
             var board = new Board( session, 'session-board');
             var editor = new Editor(session, board, 'session-drawing');
-            var chat = new Chat(session),
-            picker = new Color.Picker({
-                size: Math.floor($(window).width() / 3),
-                callback: function(hex) {
-                    editor.color_set( "#" + hex );
-                }
-            });
-            $(picker.el).hide(); // hide color picker on startup
-            picker.el.style.bottom = "50px";
-            picker.el.style.left = "10px";
+            var chat = new Chat(session);
 
             //console.log("page_draw/ready: prepicker");
             $("#brush").click(function(event){
                 event.preventDefault();
-                if (true === $(picker.el).is(":hidden")) {
-                    $(picker.el).show();
-                    $("#brush-action").text("Hide");
-                } else {
-                    $(picker.el).hide();
+                if (true === editor.is_color_picker_visible()) {
+                    editor.hide_color_picker();
                     $("#brush-action").text("Show");
+                } else {
+                    editor.show_color_picker();
+                    $("#brush-action").text("Hide");
                 }
             });
         }
