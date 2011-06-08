@@ -119,15 +119,15 @@ function Session( session_type, callback ) {
         messages_updates = []
         for (var i=0; i<_observers.length; i++){
             if (_observers[i].get_messages) {
-                messages_updates.concat( messages_updates, _observers[i].get_messages() );
+                messages_updates = messages_updates.concat( messages_updates, _observers[i].get_messages() );
             }
             if (_observers[i].get_strokes) {
-                strokes_updates.concat( strokes_updates, _observers[i].get_strokes() );
+                strokes_updates = strokes_updates.concat( strokes_updates, _observers[i].get_strokes() );
             }
         }
 
-        console.log("strokes_updates = %s", strokes_updates);
-        console.log("messages_updates = %s", messages_updates);
+        console.log("session/update: strokes_updates = %s", JSON.stringify( strokes_updates ));
+        console.log("session/update: messages_updates = %s", JSON.stringify( messages_updates ));
 
         req = {
             strokes_since : _current_stroke_id,
@@ -138,7 +138,7 @@ function Session( session_type, callback ) {
             messages : messages_updates,
         }
 
-        console.log("drawing/patches_update: req = %s", JSON.stringify( req ) );
+        console.log("session/update: req = %s", JSON.stringify( req ) );
         $.ajax({
             url: SESSION_URL_UPDATE,
             dataType: "json",
@@ -146,7 +146,7 @@ function Session( session_type, callback ) {
             type: 'POST',
             context: self,
             success: function( response ){
-                console.log('drawing/update response : ' + JSON.stringify( response ) );
+                console.log('session/update response : ' + JSON.stringify( response ) );
                 if (response.status[0] != 2) {
                     window.setTimeout( self.update, SESSION_UPDATE_INTERVAL * 2 );
                     return null;
