@@ -30,9 +30,9 @@ function Chat( p_session ) {
         $("#send-message-form").submit(function(event){
             event.preventDefault();
 	    var message = {
-                user_dst: parseInt($(self).find("#send-message-form-to").val(), 10),
+                user_dst: parseInt($(this).find("#send-message-form-to").val(), 10),
                 stamp: new Date(),
-                content: $(self).find("#send-message-form-content").val()
+                content: $(this).find("#send-message-form-content").val()
             };
             self.queue_message( message );
 
