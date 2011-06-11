@@ -122,7 +122,10 @@ module PoieticGen
 			message_max = Message.first(:order => [ :id.desc ])
 
 			# return users & zones
-			users_db = User.all( :expires_at.gt => now )
+			users_db = User.all(
+				:expires_at.gt => now,
+				:id.not => req_id
+			)
 			other_users = users_db.map{ |u| u.to_hash }
 			other_zones = users_db.map{ |u|	@board[u.zone].to_desc_hash }
 
@@ -215,7 +218,7 @@ module PoieticGen
 
 			# FIXME: include new drawings (excepted from this user) in response
 			STDERR.puts "drawings: (since %s)" % req.strokes_since
-			strokes = Stroke.all( 
+			strokes = Stroke.all(
 								 :id.gt => req.strokes_since,
 								 :zone.not => user.zone
 								)
