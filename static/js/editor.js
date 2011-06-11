@@ -447,22 +447,22 @@ function Editor( p_session, p_board, p_canvas_id ){
     this.handle_stroke = function( stk ) {
         // console.log("editor/handle_stroke : stroke = %s", JSON.stringify( stk ));
         var remote_zone = _board.get_zone( stk.zone );
-        // console.log("editor/handle_stroke : remote_zone = %s", JSON.stringify( remote_zone )); 
+        // console.log("editor/handle_stroke : remote_zone = %s", JSON.stringify( remote_zone ));
         var color = stk.color;
-        // console.log("editor/handle_stroke : color = %s", JSON.stringify( color )); 
+        // console.log("editor/handle_stroke : color = %s", JSON.stringify( color ));
         var cgset = null;
         var zone_pos = null;
         var local_pos = null;
         var rt_zone_pos = null;
         for (var i=0;i<stk.changes.length;i++) {
             cgset = stk.changes[i];
-            // console.log("editor/handle_stroke : cgset = %s", JSON.stringify( cgset )); 
+            // console.log("editor/handle_stroke : cgset = %s", JSON.stringify( cgset ));
             zone_pos = { x: cgset[0], y: cgset[1] }
-            // console.log("editor/handle_stroke : zone_pos = %s", JSON.stringify( zone_pos )); 
+            // console.log("editor/handle_stroke : zone_pos = %s", JSON.stringify( zone_pos ));
             rt_zone_pos = zone_relative_position( remote_zone, zone_pos );
-            // console.log("editor/handle_stroke : rt_zone_pos = %s", JSON.stringify( rt_zone_pos )); 
+            // console.log("editor/handle_stroke : rt_zone_pos = %s", JSON.stringify( rt_zone_pos ));
             local_pos = zone_to_local_position( rt_zone_pos );
-            // console.log("editor/handle_stroke : local_pos = %s", JSON.stringify( local_pos )); 
+            // console.log("editor/handle_stroke : local_pos = %s", JSON.stringify( local_pos ));
             self.pixel_draw( local_pos, color );
         }
     }
