@@ -15,16 +15,9 @@
     <div id="content" data-role="content">
         <div id="index-menu">
             <img src="poietic-generator.net.gif" /><br />
-            <form action="" method="post" id="credentials">
+            <form action="/page/draw" method="post" id="credentials" data-ajax="false">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" value="anonymous" />
-		<script>
-		    var user_name = $.cookie('user_name');
-		    if (user_name) {
-			el = document.getElementById('username');
-			el.value = user_name;
-		    }
-		</script>
             </form>
             <a href="/page/draw" data-ajax="false" data-role="button" data-inline="true" id="link_play">Play</a><!-- or
             <a href="/page/view" data-ajax="false">View</a>-->

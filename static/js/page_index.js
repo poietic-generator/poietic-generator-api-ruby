@@ -1,12 +1,25 @@
 "use strict";
 
+function setUsernameCookie () {
+    $.cookie(
+        "user_name",
+        $("#credentials").find("input#username").val(),
+        {path: "/page/"}
+    );
+}
+
 $(document).ready(function() {
+    var user_name = $.cookie('user_name');
+    if (user_name) {
+        $("#username").val(user_name);
+    }
+    $("#credentials").submit(function (event) {
+        event.preventDefault();
+        setUsernameCookie();
+        document.location = $(this).attr("action");
+    });
     $("#link_play").click(function (event) {
-        $.cookie(
-            "user_name",
-            $("#credentials").find("input#username").val(),
-            {path: "/page/"}
-        );
+        setUsernameCookie();
         return true;
     });
 });
