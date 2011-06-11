@@ -36,16 +36,7 @@ function Chat( p_session ) {
         _session.register(self);
 
         // initialize list of users for the send message form
-        if (0 < _session.other_users.length) {
-            var select = $("#send-message-form-to");
-            for (var i=0; i < _session.other_users.length; i++) {
-                select.append('<option value="'
-                    + _session.other_users[i].id + '">'
-                    + _session.other_users[i].name
-                    + '</option>'
-                );
-            }
-        }
+        this.refreshUserList();
 
         // attach submit event
         $("#send-message-form").submit(function(event){
@@ -101,9 +92,16 @@ function Chat( p_session ) {
      *
      */
     this.handle_event = function( ev ) {
-        // do nothing here :-)
         console.log("chat/handle_event : %s", JSON.stringify( ev ));
-    }
+        switch (ev.type) {
+            case "join" : // on both join and leave refresh users list
+            case "leave" :
+                this.refreshUserList();
+                break;
+            default : // all other events are ignored
+                break;
+        }
+    };
 
 
     /**
@@ -112,7 +110,24 @@ function Chat( p_session ) {
     this.handle_message = function( msg ) {
         console.log("chat/handle_message : %s", JSON.stringify( msg ));
         this.display_message(msg, false);
-    }
+    };
+
+
+    /**
+     * Refresh user list
+     */
+    this.refreshUserList = function () {
+        if (0 < _session.other_users.length) {
+            var select = $("#send-message-form-to").empty();
+            for (var i=0; i < _session.other_users.length; i++) {
+                select.append('<option value="'
+                    + _session.other_users[i].id + '">'
+                    + _session.other_users[i].name
+                    + '</option>'
+                );
+            }
+        }
+    };
 
 
     // call initialize method

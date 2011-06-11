@@ -96,6 +96,7 @@ function Session( session_type, callback ) {
             }
         });
 
+        this.register( self );
     };
 
 
@@ -225,6 +226,24 @@ function Session( session_type, callback ) {
             }
         }
     }
+
+
+    this.handle_event = function( ev ) {
+        switch (ev.type) {
+            case "join" :
+                this.other_users.push(ev.desc.user);
+                break;
+            case "leave" :
+                for (var i = 0; i < this.other_users.length; i++) {
+                    if (ev.desc.user.id === this.other_users[i].id) {
+                        this.other_users.splice(i, 1);
+                    }
+                }
+                break;
+            default : // other events are ignored
+                break;
+        }
+    };
 
     this.register = function( p_observer ){
         _observers.push( p_observer );
