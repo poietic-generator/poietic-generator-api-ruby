@@ -229,6 +229,7 @@ function Session( session_type, callback ) {
 
 
     this.handle_event = function( ev ) {
+        console.log("session/handle_event : %s", JSON.stringify( ev ));
         switch (ev.type) {
             case "join" :
                 this.other_users.push(ev.desc.user);
