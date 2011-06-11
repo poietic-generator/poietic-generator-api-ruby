@@ -191,7 +191,7 @@ function Session( session_type, callback ) {
     this.dispatch_events = function( events ){
         for (var o=0; o<_observers.length;o++){
             for (var i=0; i<events.length; i++){
-                if ( (events[i].id) || (_current_event_id < events[i].id) ) {
+                if ( (events[i].id) || (_current_event_id < events[i].id) ) {
                     _current_event_id = events[i].id;
                 }
                 if (_observers[o].handle_event) {
@@ -204,7 +204,7 @@ function Session( session_type, callback ) {
     this.dispatch_strokes = function( strokes ){
         for (var o=0; o<_observers.length;o++){
             for (var i=0; i<strokes.length; i++){
-                if ( (strokes[i].id) || (_current_stroke_id < strokes[i].id) ) {
+                if ( (strokes[i].id) || (_current_stroke_id < strokes[i].id) ) {
                 _current_stroke_id = strokes[i].id;
                 }
                 if (_observers[o].handle_stroke) {
@@ -217,7 +217,7 @@ function Session( session_type, callback ) {
     this.dispatch_messages = function( messages ){
         for (var o=0; o<_observers.length;o++){
             for (var i=0; i<messages.length; i++){
-                if ( (messages[i].id) || (_current_message_id < messages[i].id) ) {
+                if ( (messages[i].id) || (_current_message_id < messages[i].id) ) {
                     _current_message_id = messages[i].id;
                 }
                 if (_observers[o].handle_message) {

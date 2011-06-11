@@ -36,7 +36,7 @@ function Chat( p_session ) {
         _session.register(self);
 
         // initialize list of users for the send message form
-        this.refreshUserList();
+        this.refreshUserList(true);
 
         // attach submit event
         $("#send-message-form").submit(function(event){
@@ -116,15 +116,20 @@ function Chat( p_session ) {
     /**
      * Refresh user list
      */
-    this.refreshUserList = function () {
+    this.refreshUserList = function (firstRefresh) {
+        var first = (undefined !== firstRefresh) ? firstRefresh : false;
         if (0 < _session.other_users.length) {
-            var select = $("#send-message-form-to").empty();
+            var select = $("#send-message-form-to");
+            select.empty();
             for (var i=0; i < _session.other_users.length; i++) {
                 select.append('<option value="'
                     + _session.other_users[i].id + '">'
                     + _session.other_users[i].name
                     + '</option>'
                 );
+            }
+            if (!first) {
+                select.selectmenu("refresh");
             }
         }
     };
