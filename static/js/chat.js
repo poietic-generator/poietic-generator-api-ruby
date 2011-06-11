@@ -40,9 +40,10 @@ function Chat( p_session ) {
             var select = $("#send-message-form-to");
             for (var i=0; i < _session.other_users.length; i++) {
                 select.append('<option value="'
-                              + _session.other_users[i].id + '">'
-                              + _session.other_users[i].name
-                              + ' (' + _session.other_users[i].id + ')</option>');
+                    + _session.other_users[i].id + '">'
+                    + _session.other_users[i].name
+                    + '</option>'
+                );
             }
         }
 
