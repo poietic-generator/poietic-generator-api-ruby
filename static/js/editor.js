@@ -481,8 +481,8 @@ function Editor( p_session, p_board, p_canvas_id ){
     /**
      * Hide color picker
      */
-    this.hide_color_picker = function () {
-        _color_picker.hide();
+    this.hide_color_picker = function (p_link) {
+        _color_picker.hide(p_link);
     };
 
 
@@ -497,8 +497,8 @@ function Editor( p_session, p_board, p_canvas_id ){
     /**
      * Show color picker
      */
-    this.show_color_picker = function () {
-        _color_picker.show();
+    this.show_color_picker = function (p_link) {
+        _color_picker.show(p_link);
     };
 
     // call constructor

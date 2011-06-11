@@ -21,9 +21,9 @@ $(document).ready( function() {
             $("#brush").click( function( event ){
                 event.preventDefault();
                 if ( true === editor.is_color_picker_visible() ) {
-                    editor.hide_color_picker();
+                    editor.hide_color_picker(this);
                 } else {
-                    editor.show_color_picker();
+                    editor.show_color_picker(this);
                 }
             });
         }

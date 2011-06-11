@@ -17,8 +17,13 @@ function ColorPicker(p_editor) {
         });
     };
 
-    this.hide = function () {
+    this.hide = function (p_link) {
         $(_color_picker.el).hide();
+        $(p_link)
+            .attr("data-icon", "plus")
+            .find("span.ui-icon-minus")
+            .removeClass("ui-icon-minus")
+            .addClass("ui-icon-plus");
         $("#brush-action").text("Show");
     };
 
@@ -26,8 +31,13 @@ function ColorPicker(p_editor) {
         return $(_color_picker.el).is(":visible");
     };
 
-    this.show = function () {
+    this.show = function (p_link) {
         $(_color_picker.el).show();
+        $(p_link)
+            .attr("data-icon", "minus")
+            .find("span.ui-icon-plus")
+            .removeClass("ui-icon-plus")
+            .addClass("ui-icon-minus");
         $("#brush-action").text("Hide");
     };
 
