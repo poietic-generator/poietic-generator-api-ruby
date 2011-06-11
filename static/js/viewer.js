@@ -110,7 +110,7 @@ function Viewer( p_session, p_board, p_canvas_id ){
     function zone_to_local_position( zone, zone_position ) {
         // console.log("viewer/zone_to_local_position: zone = %s", JSON.stringify( zone ));
         return {
-            x: zone_position.x + ((zone.position[0] - _boundaries.xmin)* zone.width ), 
+            x: zone_position.x + ((zone.position[0] - _boundaries.xmin)* zone.width ),
             y: zone_position.y + ((_boundaries.ymax - zone.position[1] )* zone.height )
         };
     }
@@ -161,7 +161,7 @@ function Viewer( p_session, p_board, p_canvas_id ){
         };
         margin = 80;
 
-        _real_canvas.style.position = 'absolute';
+        //_real_canvas.style.position = 'absolute';
         if (win.w > win.h) {
             _real_canvas.width = win.h - margin;
             _real_canvas.height = win.h - margin;
@@ -169,8 +169,8 @@ function Viewer( p_session, p_board, p_canvas_id ){
             _real_canvas.width = win.w - margin;
             _real_canvas.height = win.w - margin;
         }
-        _real_canvas.style.top = margin + "px";
-        _real_canvas.style.left = Math.floor((win.w - _real_canvas.width) / 2) + 'px';
+        //_real_canvas.style.top = margin + "px";
+        //_real_canvas.style.left = Math.floor((win.w - _real_canvas.width) / 2) + 'px';
 
         // console.log("viewer/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
 
@@ -216,20 +216,20 @@ function Viewer( p_session, p_board, p_canvas_id ){
         var console = window.noconsole;
         console.log("viewer/handle_stroke : stroke = %s", JSON.stringify( stk ));
         var remote_zone = _board.get_zone( stk.zone );
-        // console.log("viewer/handle_stroke : remote_zone = %s", JSON.stringify( remote_zone )); 
+        // console.log("viewer/handle_stroke : remote_zone = %s", JSON.stringify( remote_zone ));
         var color = stk.color;
-        // console.log("viewer/handle_stroke : color = %s", JSON.stringify( color )); 
+        // console.log("viewer/handle_stroke : color = %s", JSON.stringify( color ));
         var cgset = null;
         var zone_pos = null;
         var local_pos = null;
         var rt_zone_pos = null;
         for (var i=0;i<stk.changes.length;i++) {
             cgset = stk.changes[i];
-            console.log("viewer/handle_stroke : cgset = %s", JSON.stringify( cgset )); 
+            console.log("viewer/handle_stroke : cgset = %s", JSON.stringify( cgset ));
             zone_pos = { x: cgset[0], y: cgset[1] }
-            console.log("viewer/handle_stroke : zone_pos = %s", JSON.stringify( zone_pos )); 
+            console.log("viewer/handle_stroke : zone_pos = %s", JSON.stringify( zone_pos ));
             local_pos = zone_to_local_position( remote_zone, zone_pos );
-            console.log("viewer/handle_stroke : local_pos = %s", JSON.stringify( local_pos )); 
+            console.log("viewer/handle_stroke : local_pos = %s", JSON.stringify( local_pos ));
             self.pixel_draw( local_pos, color );
         }
     }
@@ -240,7 +240,7 @@ function Viewer( p_session, p_board, p_canvas_id ){
 	 */
 	this.handle_event = function( ev ) {
         var console = window.noconsole;
-        var zones; 
+        var zones;
         var remote_zone;
         var x,y, w, h ;
 

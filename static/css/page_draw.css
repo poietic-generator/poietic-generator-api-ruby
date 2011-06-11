@@ -1,0 +1,8 @@
+.editor,
+.viewer {
+    text-align:center;
+}
+
+.viewer {
+    margin-top:2em;
+}

@@ -262,7 +262,7 @@ function Editor( p_session, p_board, p_canvas_id ){
         };
         margin = 80;
 
-        real_canvas.style.position = 'absolute';
+        //real_canvas.style.position = 'absolute';
         if (win.w > win.h) {
             real_canvas.width = win.h - margin;
             real_canvas.height = win.h - margin;
@@ -270,8 +270,8 @@ function Editor( p_session, p_board, p_canvas_id ){
             real_canvas.width = win.w - margin;
             real_canvas.height = win.w - margin;
         }
-        real_canvas.style.top = margin + "px";
-        real_canvas.style.left = Math.floor((win.w - real_canvas.width) / 2) + 'px';
+        //real_canvas.style.top = margin + "px";
+        //real_canvas.style.left = Math.floor((win.w - real_canvas.width) / 2) + 'px';
 
         // console.log("editor/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
 

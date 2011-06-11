@@ -1,5 +1,5 @@
 <%=
-    #@page.css << "/css/page_session.css"
+    @page.css << "/css/page_draw.css"
     @page.css << "/css/colorjack.css"
     @page.css << "/css/message.css"
 
@@ -21,7 +21,7 @@
 %>
 
 
-<!-- la zone de dessin -->
+<!-- drawing zone -->
 <div id="session-zone" data-role="page">
     <div data-role="header" data-id="head" data-backbtn="false" data-position="fixed">
         <a href="#" id="brush" class="ui-btn-left" data-icon="plus"><span id="brush-action">Show</span> colors</a>
@@ -30,41 +30,27 @@
         <div data-role="navbar">
             <ul>
                 <li><a href="#session-zone" data-transition="slideup" class="ui-btn-active ui-state-persist">Drawing zone</a></li>
-                <li><a href="#session-global" data-transition="slideup">Global view</a></li>
                 <li><a href="#session-chat" data-transition="slideup">Messages</a></li>
             </ul>
         </div>
     </div>
     <div data-role="content">
-        <canvas id="session-editor"></canvas>
-    </div>
-</div>
-<!-- la vue globale -->
-<div id="session-global" data-role="page">
-    <div data-role="header" data-id="head" data-backbtn="false" data-position="fixed">
-        <h1 class="username"></h1>
-        <a href="/page/logout" data-ajax="false" class="ui-btn-right">Logout</a>
-        <div data-role="navbar">
-            <ul>
-                <li><a href="#session-zone" data-transition="slideup">Drawing zone</a></li>
-                <li><a href="#session-global" data-transition="slideup" class="ui-btn-active ui-state-persist">Global view</a></li>
-                <li><a href="#session-chat" data-transition="slideup">Messages</a></li>
-            </ul>
+        <div class="ui-grid-a editor">
+            <canvas id="session-editor"></canvas>
+        </div>
+        <div class="ui-grid-a viewer">
+            <canvas id="session-viewer"></canvas>
         </div>
     </div>
-    <div data-role="content">
-        <canvas id="session-viewer"></canvas>
-    </div>
 </div>
-<!-- la zone chat -->
+<!-- chat zone -->
 <div id="session-chat" data-role="page">
     <div data-role="header" data-id="head" data-backbtn="false" data-position="fixed">
         <h1 class="username"></h1>
         <a href="/page/logout" data-ajax="false" class="ui-btn-right">Logout</a>
         <div data-role="navbar">
             <ul>
-                <li><a href="#session-zone" data-transition="slideup">Drawing Zone</a></li>
-                <li><a href="#session-global" data-transition="slideup">Global view</a></li>
+                <li><a href="#session-zone" data-transition="slideup">Drawing zone</a></li>
                 <li><a href="#session-chat" data-transition="slideup" class="ui-btn-active ui-state-persist">Messages</a></li>
             </ul>
         </div>
