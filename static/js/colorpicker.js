@@ -24,7 +24,6 @@ function ColorPicker(p_editor) {
             .find("span.ui-icon-minus")
             .removeClass("ui-icon-minus")
             .addClass("ui-icon-plus");
-        $("#brush-action").text("Show");
     };
 
     this.is_visible = function () {
@@ -38,7 +37,6 @@ function ColorPicker(p_editor) {
             .find("span.ui-icon-plus")
             .removeClass("ui-icon-plus")
             .addClass("ui-icon-minus");
-        $("#brush-action").text("Hide");
     };
 
     this.update_size = function(p_canvas) {

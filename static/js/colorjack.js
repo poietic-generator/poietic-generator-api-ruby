@@ -175,6 +175,7 @@ Color.Picker = function (props) {
 	hexString.textContent = hex.toUpperCase();
 	// display background color
 	hexBox.style.backgroundColor = "#" + hex;
+	document.getElementById("current_color").style.backgroundColor = "#" + hex;
 	// arrow-selection
 	var y = (that.hue / 362) * that.size - 2;
 	ctx.drawImage(arrows, that.size + that.offset + 4, Math.round(y) + that.offset);

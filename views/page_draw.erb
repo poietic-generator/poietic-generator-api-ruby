@@ -42,7 +42,12 @@
         </div>
     </div>
     <div data-role="footer" data-id="foot" data-position="fixed">
-        <a href="#" id="brush" class="ui-btn-left" data-icon="plus"><span id="brush-action">Show</span> colors</a>
+        <div data-role="navbar" data-type="horizontal">
+            <ul>
+                <li><a href="#" id="brush">Color <span id="current_color" style="float:right;width:20px;">&nbsp;</span></a></li>
+                <li><a href="#" id="picker">Color picker</a></li>
+            </ul>
+        </div>
     </div>
 </div>
 <!-- chat zone -->
