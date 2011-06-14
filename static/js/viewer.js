@@ -5,7 +5,7 @@
 var POSITION_TYPE_DRAWING = 0;
 var POSITION_TYPE_ZONE = 0;
 
-function Viewer( p_session, p_board, p_canvas_id ){
+function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
     //var console = { log: function() {} };
 
     var self = this;
@@ -19,6 +19,8 @@ function Viewer( p_session, p_board, p_canvas_id ){
     var _current_zone;
     var _boundaries;
 
+    var _color_picker = null;
+
     this.name = "Viewer";
     this.column_count = null;
     this.line_count = null;
@@ -29,7 +31,9 @@ function Viewer( p_session, p_board, p_canvas_id ){
     /**
      * Constructor
      */
-    this.initialize = function( p_session, p_board, p_canvas_id ) {
+    this.initialize = function( p_session, p_board, p_canvas_id, p_color_picker ) {
+        _color_picker = p_color_picker;
+
         _boundaries = {
             xmin: 0,
             xmax: 0,
@@ -37,7 +41,7 @@ function Viewer( p_session, p_board, p_canvas_id ){
             ymax: 0,
             width: 0,
             height: 0
-        }
+        };
 
         _current_zone =  p_session.user_zone.index;
         _board = p_board;
@@ -182,6 +186,8 @@ function Viewer( p_session, p_board, p_canvas_id ){
         var ctx = _real_canvas.getContext("2d");
         ctx.fillStyle = '#200';
         ctx.fillRect(0, 0, _real_canvas.width, _real_canvas.height);
+
+        _color_picker.update_size( _real_canvas );
     };
 
 
@@ -295,6 +301,6 @@ function Viewer( p_session, p_board, p_canvas_id ){
     }
 
     // call constructor
-    this.initialize(p_session, p_board, p_canvas_id);
+    this.initialize(p_session, p_board, p_canvas_id, p_color_picker);
 }
 
