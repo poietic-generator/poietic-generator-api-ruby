@@ -24,7 +24,6 @@
 <!-- drawing zone -->
 <div id="session-zone" data-role="page">
     <div data-role="header" data-id="head" data-backbtn="false" data-position="fixed">
-        <a href="#" id="brush" class="ui-btn-left" data-icon="plus"><span id="brush-action">Show</span> colors</a>
         <h1 class="username"></h1>
         <a href="/page/logout" data-ajax="false" class="ui-btn-right">Logout</a>
         <div data-role="navbar">
@@ -41,6 +40,9 @@
         <div class="ui-grid-a viewer">
             <canvas id="session-viewer"></canvas>
         </div>
+    </div>
+    <div data-role="footer" data-id="foot">
+        <a href="#" id="brush" class="ui-btn-left" data-icon="plus"><span id="brush-action">Show</span> colors</a>
     </div>
 </div>
 <!-- chat zone -->

@@ -34,7 +34,7 @@ function Session( session_type, callback ) {
      */
     this.initialize = function() {
 
-        _observers = []
+        _observers = [];
 
         var user_id = $.cookie('user_id');
         var user_name = $.cookie('user_name');
