@@ -42,10 +42,11 @@ function ColorPicker(p_editor) {
     };
 
     this.update_size = function(p_canvas) {
+        var offset = $(p_canvas).offset();
         // position
-        _color_picker.el.style.position = p_canvas.style.position;
-        _color_picker.el.style.top = p_canvas.style.top;
-        _color_picker.el.style.left = p_canvas.style.left;
+        _color_picker.el.style.position = "absolute";
+        _color_picker.el.style.top = offset.top + "px";
+        _color_picker.el.style.left = offset.left + "px";
         // resize
         _color_picker.resize($(p_canvas).width() - _color_picker.margin * 2 - _color_picker.hueWidth);
     };
