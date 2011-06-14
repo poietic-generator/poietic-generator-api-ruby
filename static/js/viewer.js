@@ -193,10 +193,10 @@ function Viewer( p_session, p_board, p_canvas_id ){
         //console.log("viewer/pixel_draw local_pos = %s", local_pos.to_json() );
         var canvas_pos = local_to_canvas_position( local_pos );
         var rect = {
-            x : canvas_pos.x + (0.05 * _column_size),
-            y : canvas_pos.y + (0.05 * _column_size),
-            w : _column_size - ( 0.1 * _column_size ),
-            h : _line_size - ( 0.1 * _column_size )
+            x : canvas_pos.x,
+            y : canvas_pos.y,
+            w : _column_size,
+            h : _line_size
         };
 
         //console.log("viewer/pixel_draw rect = %s", rect.to_json() );
