@@ -121,8 +121,10 @@ module PoieticGen
 				result = {}
 				result = settings.manager.join session, params
 				pp result
+
 			rescue Exception => e
 				STDERR.puts e.inspect, e.backtrace
+				Process.exit! #FIXME: remove in prod mode
 
 			ensure
 				return JSON.generate( result )
@@ -148,6 +150,7 @@ module PoieticGen
 			rescue Exception => e
 				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_SERVER_ERROR ]
+				Process.exit! #FIXME: remove in prod mode
 
 			ensure
 				JSON.generate({
@@ -196,6 +199,7 @@ module PoieticGen
 				# handle non-JSON parsing errors
 				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_SERVER_ERROR, "Server error" ]
+				Process.exit! #FIXME: remove in prod mode
 
 			ensure
 				# force status of result
