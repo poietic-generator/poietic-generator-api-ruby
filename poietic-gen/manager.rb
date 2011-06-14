@@ -1,4 +1,8 @@
 
+require 'thread'
+require 'time'
+require 'pp'
+
 require 'poietic-gen/board'
 require 'poietic-gen/palette'
 require 'poietic-gen/user'
@@ -7,9 +11,6 @@ require 'poietic-gen/chat_manager'
 require 'poietic-gen/message'
 require 'poietic-gen/stroke'
 require 'poietic-gen/update_request'
-require 'thread'
-
-require 'pp'
 
 module PoieticGen
 
@@ -28,6 +29,7 @@ module PoieticGen
 			pp config
 			# a 16-char long random string
 			@session_id = (0...16).map{ ('a'..'z').to_a[rand(26)] }.join
+			@session_start = Time.now
 
 			# @palette = Palette.new
 
@@ -202,47 +204,38 @@ module PoieticGen
 			}
 			user = User.first param_request
 
-			#STDERR.puts "user:"
-			#pp user
-			#pp zone
-
 			self.check_leaved_users
-
-			STDERR.puts "data:"
-			pp data
 
 			req = UpdateRequest.parse data
 
 			@board.update_data user, req.drawing
 			@chat.update_data user, req.chat
 
-			# FIXME: include new drawings (excepted from this user) in response
-			STDERR.puts "drawings: (since %s)" % req.strokes_since
+			#STDERR.puts "drawings: (since %s)" % req.strokes_after
 			strokes = Stroke.all(
-								 :id.gt => req.strokes_since,
-								 :zone.not => user.zone
-								)
-			since_stroke = strokes.map{ |d| d.to_hash }
-			pp since_stroke
+				:id.gt => req.strokes_after,
+				:zone.not => user.zone
+			)
+			strokes_collection = strokes.map{ |d| d.to_hash }
 
-			STDERR.puts "events: (since %s)" % req.events_since
-			events = Event.all( :id.gt => req.events_since )
-			since_events = events.map{ |e| e.to_hash @board }
-			pp since_events
+			#STDERR.puts "events: (since %s)" % req.events_after
+			events = Event.all( 
+							   :id.gt => req.events_after 
+							  )
+			events_collection = events.map{ |e| e.to_hash @board }
 
-			# FIXME: implement Message class first
-			STDERR.puts "chat: (since %s)" % req.messages_since
+			#STDERR.puts "chat: (since %s)" % req.messages_after
 			messages = Message.all(
-				:id.gt => req.messages_since,
+				:id.gt => req.messages_after,
 				:user_dst => user.id
 			)
-			since_messages = messages.map{ |e| e.to_hash }
-			pp since_messages
+			messages_collection = messages.map{ |e| e.to_hash }
 
 			result = {
-				:events => since_events,
-				:strokes => since_stroke,
-				:messages => since_messages,
+				:events => events_collection,
+				:strokes => strokes_collection,
+				:messages => messages_collection,
+				:stamp => (Time.now - @session_start).to_i
 			}
 
 			return result

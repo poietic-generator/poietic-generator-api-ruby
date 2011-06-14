@@ -152,9 +152,9 @@ function Session( session_type, callback ) {
         console.log("session/update: messages_updates = %s", JSON.stringify( messages_updates ));
 
         req = {
-            strokes_since : _current_stroke_id,
-            messages_since : _current_message_id,
-            events_since : _current_event_id,
+            strokes_after : _current_stroke_id,
+            messages_after : _current_message_id,
+            events_after : _current_event_id,
 
             strokes : strokes_updates,
             messages : messages_updates,
