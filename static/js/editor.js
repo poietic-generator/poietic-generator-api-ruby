@@ -6,6 +6,7 @@ var EDITOR_GRID_COLOR = '#444';
 var EDITOR_GRID_WIDTH = 0.5;
 var EDITOR_BOUNDARIES_COLOR = '#888';
 var EDITOR_BOUNDARIES_WIDTH = 2;
+var EDITOR_BORDER_RATIO = 0;
 
 var POSITION_TYPE_DRAWING = 0;
 var POSITION_TYPE_ZONE = 0;
@@ -57,8 +58,8 @@ function Editor( p_session, p_board, p_canvas_id ){
 
         self.column_count = p_session.zone_column_count;
         self.line_count = p_session.zone_line_count;
-        self.border_column_count = p_session.zone_column_count / 4;
-        self.border_line_count = p_session.zone_column_count / 4;
+        self.border_column_count = EDITOR_BORDER_RATIO * p_session.zone_column_count;
+        self.border_line_count = EDITOR_BORDER_RATIO * p_session.zone_column_count;
 
         _real_canvas = document.getElementById( p_canvas_id );
         _grid_canvas = null;
