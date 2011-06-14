@@ -208,8 +208,8 @@ module PoieticGen
 
 			req = UpdateRequest.parse data
 
-			@board.update_data user, req.drawing
-			@chat.update_data user, req.chat
+			@board.update_data user, req.strokes
+			@chat.update_data user, req.messages
 
 			#STDERR.puts "drawings: (since %s)" % req.strokes_after
 			strokes = Stroke.all(
