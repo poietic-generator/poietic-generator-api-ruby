@@ -5,6 +5,13 @@ $(document).ready( function() {
     // hide iphone/ipad URL bar
     setTimeout(function() { window.scrollTo(0, 1) }, 100);
 
+    $(".logout").click( function ( event ) {
+        if (!confirm("Leave Poietic Generator?")) {
+            return false;
+        }
+        return true;
+    });
+
     // initialize zoness
     sessionF = new Session(
         SESSION_TYPE_DRAW,
@@ -26,14 +33,6 @@ $(document).ready( function() {
                 } else {
                     color_picker.show(this);
                 }
-            });
-
-
-            $(".logout").click( function ( event ) {
-                if (!confirm("Leave Poietic Generator?")) {
-                    return false;
-                }
-                return true;
             });
         }
     );
