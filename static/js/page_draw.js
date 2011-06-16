@@ -27,6 +27,14 @@ $(document).ready( function() {
                     color_picker.show(this);
                 }
             });
+
+
+            $(".logout").click( function ( event ) {
+                if (!confirm("Leave Poietic Generator?")) {
+                    return false;
+                }
+                return true;
+            });
         }
     );
 });
