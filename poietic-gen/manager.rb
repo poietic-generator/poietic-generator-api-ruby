@@ -68,9 +68,14 @@ module PoieticGen
 				:id => req_id,
 				:session => @session_id
 			}
+			param_name = if req_name.nil? or (req_name.length == 0) then
+							 "anonymous"
+						 else
+							 req_name
+						 end
 			param_create = {
 				:session => @session_id,
-				:name => ( req_name || 'anonymous'),
+				:name => param_name,
 				:zone => -1,
 				:created_at => now,
 				:expires_at => (now + Rational(@config.user.max_idle, 60 * 60 * 24 )),
@@ -103,9 +108,15 @@ module PoieticGen
 
 			# update expiration time
 			user.expires_at = (now + Rational(@config.user.max_idle, 60 * 60 * 24 ))
-			user.name = req_name
+			# reset name if requested
+			user.name = param_name
 
-			user.save
+			begin
+				user.save
+			rescue DataMapper::SaveFailureError => e
+				puts e.resource.errors.inspect
+				raise e
+			end
 			pp user
 			session[PoieticGen::Api::SESSION_USER] = user.id
 
