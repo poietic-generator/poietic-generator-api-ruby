@@ -231,6 +231,7 @@ function Editor( p_session, p_board, p_canvas_id ){
 
         for (var zone_idx=0; zone_idx < zones.length; zone_idx++) {
             remote_zone = _board.get_zone( zones[zone_idx] );
+            if (!remote_zone) { continue; }
             console.log("editor/update_paint : remote_zone = %s", zone_idx );
 
             for (var x = 0 ; x < self.column_count ; x++ ){
@@ -294,8 +295,8 @@ function Editor( p_session, p_board, p_canvas_id ){
      */
     this.mouseup = function( event_obj ) { self.pencil_up( event_obj ); }
     this.touchstop = function( event_obj ) {
-        event_obj.mouseX = event_obj.touches[0].pageX;
-        event_obj.mouseY = event_obj.touches[0].pageY;
+        event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
+        event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
         self.pencil_up( event_obj );
         event_obj.preventDefault();
     }
@@ -310,8 +311,8 @@ function Editor( p_session, p_board, p_canvas_id ){
      */
     this.mousedown = function( event_obj ) { self.pencil_down( event_obj ); }
     this.touchstart = function( event_obj ) {
-        event_obj.mouseX = event_obj.touches[0].pageX;
-        event_obj.mouseY = event_obj.touches[0].pageY;
+        event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
+        event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
         self.pencil_down( event_obj );
         event_obj.preventDefault();
     }
@@ -328,8 +329,8 @@ function Editor( p_session, p_board, p_canvas_id ){
      */
     this.mousemove = function( event_obj ) { self.pencil_move( event_obj ); }
     this.touchmove = function( event_obj ) {
-        event_obj.mouseX = event_obj.touches[0].pageX;
-        event_obj.mouseY = event_obj.touches[0].pageY;
+        event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
+        event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
         self.pencil_move( event_obj );
         event_obj.preventDefault();
     }
@@ -342,9 +343,6 @@ function Editor( p_session, p_board, p_canvas_id ){
             var canvas_pos = { x: event_obj.mouseX, y: event_obj.mouseY };
             var local_pos = canvas_to_local_position( canvas_pos );
             var zone_pos = local_to_zone_position( local_pos );
-            // console.log( "editor/mousemove: canvas pos : %s", canvas_pos.to_json() );
-            // console.log( "editor/mousemove:local pos : %s", local_pos.to_json() );
-            // console.log( "editor/mousemove:zone pos : %s", zone_pos.to_json() );
 
             var bound = _board.get_zone(_current_zone).contains_position( zone_pos );
 
