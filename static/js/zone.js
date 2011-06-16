@@ -5,6 +5,7 @@
 var ZONE_BACKGROUND_COLOR = '#000';
 
 function Zone( p_session, p_index, p_position, p_width, p_height ) {
+    var console = noconsole;
     var self = this;
 
     // zone dimensions
