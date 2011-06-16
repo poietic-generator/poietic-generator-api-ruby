@@ -42,7 +42,8 @@ module PoieticGen ; class ConfigManager
 					"database"  => @database,
 					"username"  => "",
 					"password"  => "",
-					"host"      => ""
+					"host"      => "",
+					"timeout" 	=> 15000
 				}
 			when 'mysql' then
 				return {
