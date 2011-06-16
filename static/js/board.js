@@ -63,9 +63,9 @@ function Board( p_session ) {
 					);
 		} else if ( ev.type == 'leave' ) {
 			var z = ev.desc.zone;
-			_zone.splice(z.index,1);
+			_zones.splice(z.index,1);
 		} else {
-			// unknown event...
+			// FIXME: unknown event...
 		}
 	}
 
