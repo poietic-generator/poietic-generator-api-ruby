@@ -12,6 +12,13 @@ var SESSION_UPDATE_INTERVAL = 10 * 1000 ;
 var SESSION_TYPE_DRAW = "draw";
 var SESSION_TYPE_VIEW = "view";
 
+var STATUS_INFORMATION = 1
+var STATUS_SUCCESS = 2
+var STATUS_REDIRECTION = 3
+var STATUS_SERVER_ERROR = 4
+var STATUS_BAD_REQUEST = 5
+
+
 
 function Session( session_type, callback ) {
 
@@ -117,6 +124,31 @@ function Session( session_type, callback ) {
 
 
     /**
+     * Treat not ok Status (!STATUS_SUCCESS)
+     */
+    this.treat_status_nok = function ( response ) {
+
+        switch(response.status[0]) {
+            case STATUS_INFORMATION:
+                break;
+            case STATUS_SUCCESS:
+                // ???
+                break;
+            case STATUS_REDIRECTION:
+                // We got redirected for some reason, we do execute ourselfs
+                console.log("STATUS_REDIRECTION --> Got redirected to '%s'" % response.status[2]);
+                document.location.href = response.status[2];
+                break;
+            case STATUS_SERVER_ERROR:
+                // FIXME : We got a server error, we should try to reload the page.
+                break;
+            case STATUS_BAD_REQUEST:
+                // FIXME : OK ???
+                break;
+        }
+        return null;
+    };
+    /**
      *
      */
     this.update = function(){
@@ -171,7 +203,7 @@ function Session( session_type, callback ) {
                 console.log('session/update response : ' + JSON.stringify( response ) );
                 if (response.status[0] != 2) {
                     window.setTimeout( self.update, SESSION_UPDATE_INTERVAL * 2 );
-                    return null;
+                    return self.treat_status_nok(response);
                 }
 
                 self.dispatch_events( response.events );

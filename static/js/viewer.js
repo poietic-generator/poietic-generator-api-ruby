@@ -273,12 +273,14 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
 
         for (zone_idx=0; zone_idx < zones.length; zone_idx++) {
             remote_zone = _board.get_zone( zones[zone_idx] );
-            x = remote_zone.position[0];
-            y = remote_zone.position[1];
-            if (x < _boundaries.xmin) { _boundaries.xmin = x; }
-            if (x > _boundaries.xmax) { _boundaries.xmax = x; }
-            if (y < _boundaries.ymin) { _boundaries.ymin = y; }
-            if (y > _boundaries.ymay) { _boundaries.ymay = y; }
+            if(remote_zone != null) {
+              x = remote_zone.position[0];
+              y = remote_zone.position[1];
+              if (x < _boundaries.xmin) { _boundaries.xmin = x; }
+              if (x > _boundaries.xmax) { _boundaries.xmax = x; }
+              if (y < _boundaries.ymin) { _boundaries.ymin = y; }
+              if (y > _boundaries.ymay) { _boundaries.ymay = y; }
+            }
         }
 
         // we make a square now ^^

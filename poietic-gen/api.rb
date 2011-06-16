@@ -108,7 +108,7 @@ module PoieticGen
 
 
 		get '/page/logout' do
-			session[SESSION_USER] = nil
+		  settings.manager.leave session
 			redirect '/'
 		end
 
@@ -176,15 +176,18 @@ module PoieticGen
 				status = [ STATUS_SUCCESS ]
 
 				# FIXME: extract patches information
-				settings.manager.update_lease! session
+				if settings.manager.update_lease! session then
 
-				# FIXME: extract chat information
+  				# FIXME: extract chat information
 
-				data = JSON.parse(request.body.read)
-				result = settings.manager.update_data session, data
+				  data = JSON.parse(request.body.read)
+				  result = settings.manager.update_data session, data
 
-				STDERR.puts "Update_data returned :"
-				pp result
+				  STDERR.puts "Update_data returned :"
+				  pp result
+        else
+          status = [ STATUS_REDIRECTION, "Session has expired !", "/"]
+        end
 
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors

@@ -21,10 +21,10 @@ module PoieticGen
 			event.save
 		end
 
-		def self.create_leave uid, leave_time
+		def self.create_leave uid, leave_time, uzone
 			event = Event.create({
 				:type => 'leave',
-				:desc => JSON.generate({ :user => uid }),
+				:desc => JSON.generate({ :user => uid, :zone => uzone }),
 				:timestamp => leave_time
 			})
 			event.save
@@ -36,10 +36,11 @@ module PoieticGen
 
 			puts "Event/to_hash desc"
 			pp desc
+			pp user
 
 			res_desc = {
 				:user => user.to_hash,
-				:zone => board[user.zone].to_desc_hash
+			  :zone => board[desc['zone']].to_desc_hash
 			}
 			res = {
 				:id => self.id,

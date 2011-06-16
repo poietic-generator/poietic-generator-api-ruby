@@ -147,7 +147,6 @@ module PoieticGen
 
 
 		def leave session
-			# FIXME: send "leave event" to everyone
 			# zone_idx = @users[user_id].zone
 
 			param_request = {
@@ -157,6 +156,10 @@ module PoieticGen
 			user = User.first param_request
 			if user then
 				@board.leave user
+				user.expires_at = DateTime.now
+				user.did_expire = true
+				Event.create_leave user.id, user.expires_at, user.zone
+				user.save
 			end
 
 		end
@@ -170,8 +173,8 @@ module PoieticGen
 		def update_lease! session
 			now = DateTime.now
 
-			# FIXME: use configuration instead of constant
 			next_expires_at = (now + Rational(@config.user.max_idle, 60 * 60 * 24 ))
+			STDERR.puts "  Next expires at : %s" % next_expires_at.to_s
 			param_request = {
 				:id => session[PoieticGen::Api::SESSION_USER],
 				:session => @session_id
@@ -182,11 +185,12 @@ module PoieticGen
 			if ( (now - user.expires_at) > 0  ) then
 				# expired lease...
 				STDERR.puts "User session expired"
-				raise RuntimeError, "expired lease"
+				return false
 			else
 				STDERR.puts "Updated lease for %s" % param_request
 				user.expires_at = next_expires_at
 				user.save
+				return true
 			end
 		end
 
@@ -219,8 +223,8 @@ module PoieticGen
 			strokes_collection = strokes.map{ |d| d.to_hash }
 
 			#STDERR.puts "events: (since %s)" % req.events_after
-			events = Event.all( 
-							   :id.gt => req.events_after 
+			events = Event.all(
+							   :id.gt => req.events_after
 							  )
 			events_collection = events.map{ |e| e.to_hash @board }
 
@@ -251,17 +255,17 @@ module PoieticGen
 				]
 				if (@last_leave_check_time + LEAVE_CHECK_TIME_MIN) < now then
 					STDERR.puts "++++++ Expired users"
-					# Get the user which has not be already declared as
+					# Get the users which has not been already declared as
 					newly_expired_users = User.all(
 						:did_expire => false,
 						:expires_at.lte => now
 					)
-					pp newly_expired_users
+					# pp newly_expired_users
 					newly_expired_users.each do |leaver|
-						STDERR.puts " User-%d is now marked as expired." % leaver.id
-						leaver.did_expire = true
-						leaver.save
-						Event.create_leave leaver.id, leaver.expires_at
+					  session = {}
+					  session[PoieticGen::Api::SESSION_USER] = leaver.id
+					  session[PoieticGen::Api::SESSION_SESSION] = leaver.session
+					  self.leave session
 					end
 					STDERR.puts "------ Expired users"
 					@last_leave_check_time = now
