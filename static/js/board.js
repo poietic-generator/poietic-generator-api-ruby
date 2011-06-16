@@ -28,12 +28,12 @@ function Board( p_session ) {
 		_users = {};
 
 		// fill zones with zones from session
-		_zones[_session.user_zone.index] = new Zone( 
+		_zones[_session.user_zone.index] = new Zone(
 				_session,
 				_session.user_zone.index,
 				_session.user_zone.position,
 				_session.zone_column_count,
-				_session.zone_line_count 
+				_session.zone_line_count
 				);
 
 		for (var i=0; i<p_session.other_zones.length; i++) {
@@ -41,8 +41,8 @@ function Board( p_session ) {
 
 			_zones[z.index] = new Zone(
 					_session,
-					z.index, z.position, 
-					_session.zone_column_count, _session.zone_line_count 
+					z.index, z.position,
+					_session.zone_column_count, _session.zone_line_count
 					);
 		}
 		console.log("board/initialize: zones = %s", JSON.stringify( _zones ) );
@@ -50,7 +50,7 @@ function Board( p_session ) {
 
 
 	/**
-	 * 
+	 *
 	 */
 	this.handle_event = function( ev ) {
 		console.log("board/handle_event : %s", JSON.stringify( ev ) );
@@ -58,12 +58,12 @@ function Board( p_session ) {
 			var z = ev.desc.zone;
 			_zones[z.index] = new Zone(
 					_session,
-					z.index, z.position, 
-					_session.zone_column_count, _session.zone_line_count 
+					z.index, z.position,
+					_session.zone_column_count, _session.zone_line_count
 					);
 		} else if ( ev.type == 'leave' ) {
 			var z = ev.desc.zone;
-			_zones[z.index] = null;
+			_zone.splice(z.index,1);
 		} else {
 			// unknown event...
 		}

@@ -136,7 +136,7 @@ module PoieticGen
 
 			# return users & zones
 			users_db = User.all(
-				:expires_at.gt => now,
+				:did_expire.not => true,
 				:id.not => req_id
 			)
 			other_users = users_db.map{ |u| u.to_hash }

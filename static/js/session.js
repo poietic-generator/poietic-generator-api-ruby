@@ -7,7 +7,7 @@ var SESSION_URL_JOIN = "/api/session/join";
 var SESSION_URL_LEAVE = "/api/session/leave";
 var SESSION_URL_UPDATE = "/api/session/update";
 
-var SESSION_UPDATE_INTERVAL = 10 * 1000 ;
+var SESSION_UPDATE_INTERVAL = 1 * 1000 ;
 
 var SESSION_TYPE_DRAW = "draw";
 var SESSION_TYPE_VIEW = "view";
