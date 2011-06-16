@@ -15,6 +15,7 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
     var _real_canvas;
     var _column_size;
     var _line_size;
+    var _pencil_move;
 
     var _current_zone;
     var _boundaries;
@@ -43,6 +44,10 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
             height: 0
         };
 
+        _pencil_move = {
+            enable : false
+        }
+
         _current_zone =  p_session.user_zone.index;
         _board = p_board;
         _session = p_session;
@@ -62,6 +67,16 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
         var zone = _board.get_zone(_current_zone);
 
         self.context = _real_canvas.getContext('2d');
+
+        // plug some event handlers
+        _real_canvas.addEventListener( 'mousedown', canvas_event, false );
+        _real_canvas.addEventListener( 'touchstart', canvas_event, false );
+
+        _real_canvas.addEventListener( 'mouseup', canvas_event, false );
+        _real_canvas.addEventListener( 'touchstop', canvas_event, false );
+
+        _real_canvas.addEventListener( 'mousemove', canvas_event, false );
+        _real_canvas.addEventListener( 'touchmove', canvas_event, false );
 
         $(window).resize(function() {
             self.update_size();
@@ -102,8 +117,8 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
      */
     function local_to_zone_position( zone, local_position ){
         return {
-            x: local_position.x - ((zone.position[0] - _boundaries.xmin)* zone.width ),
-            y: local_position.y - ((_boundaries.ymax - zone.position[1] )* zone.height )
+            x: local_position.x - (( zone.position[0] - _boundaries.xmin ) * zone.width ),
+            y: local_position.y - (( _boundaries.ymax - zone.position[1] ) * zone.height )
         };
     }
 
@@ -114,9 +129,34 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
     function zone_to_local_position( zone, zone_position ) {
         // console.log("viewer/zone_to_local_position: zone = %s", JSON.stringify( zone ));
         return {
-            x: zone_position.x + ((zone.position[0] - _boundaries.xmin)* zone.width ),
-            y: zone_position.y + ((_boundaries.ymax - zone.position[1] )* zone.height )
+            x: zone_position.x + (( zone.position[0] - _boundaries.xmin ) * zone.width ),
+            y: zone_position.y + (( _boundaries.ymax - zone.position[1] ) * zone.height )
         };
+    }
+
+    /**
+     * Detect target zone given a local position
+     */
+    function local_to_target_zone( local_position ) {
+        var result_zone;
+        var zones;
+        var zone_pos;
+
+        zones = _board.get_zone_list();
+        for (var zone_idx=0; zone_idx < zones.length; zone_idx++) {
+            // console.log("viewer/local_to_target_zone: trying index = %s", zones[zone_idx] );
+            result_zone = _board.get_zone( zones[zone_idx] );
+            console.log("viewer/local_to_target_zone: result_zone = %s", JSON.stringify( result_zone ) );
+
+            if (!result_zone) { continue; }
+
+            zone_pos = local_to_zone_position( result_zone, local_position );
+            console.log("viewer/local_to_target_zone: zone_pos = %s", JSON.stringify( zone_pos ) );
+            if ( result_zone.contains_position( zone_pos ) ) {
+                return result_zone;
+            }
+        }
+        return null;
     }
 
 
@@ -213,6 +253,86 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
         ctx.fillRect( rect.x, rect.y, rect.w, rect.h );
     }
 
+
+    /**
+      * Handle all types on canvas events and dispatch
+      */
+    var canvas_event = function( event_obj ) {
+        var canvas = _real_canvas;
+
+        // FIXME verify the same formula is used with touchscreens
+        event_obj.mouseX = event_obj.pageX - canvas.offsetLeft;
+        event_obj.mouseY = event_obj.pageY - canvas.offsetTop;
+
+        var func = self[event_obj.type];
+        if (func) { func( event_obj ); }
+        // console.log("clicked at %s,%s", event_obj.mouseX, event_obj.mouseY );
+    };
+
+
+    /**
+     * Handle mouse event
+     */
+    this.mouseup = function( event_obj ) { self.pencil_up( event_obj ); }
+    this.touchstop = function( event_obj ) {
+        event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
+        event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
+        self.pencil_up( event_obj );
+        event_obj.preventDefault();
+    }
+
+    this.pencil_up = function( event_obj ) {
+        _pencil_move.enable = false;
+    };
+
+
+    /**
+     * Handle mouse event
+     */
+    this.mousedown = function( event_obj ) { self.pencil_down( event_obj ); }
+    this.touchstart = function( event_obj ) {
+        event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
+        event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
+        self.pencil_down( event_obj );
+        event_obj.preventDefault();
+    }
+
+    this.pencil_down = function( event_obj ) {
+        _pencil_move.enable = true;
+        self.mousemove( event_obj );
+    };
+
+
+
+    /**
+     * Handle mouse event
+     */
+    this.mousemove = function( event_obj ) { self.pencil_move( event_obj ); }
+    this.touchmove = function( event_obj ) {
+        event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
+        event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
+        self.pencil_move( event_obj );
+        event_obj.preventDefault();
+    }
+
+    this.pencil_move = function( event_obj ) {
+        var ctx = self.context;
+        var canvas = _real_canvas;
+
+        if (_pencil_move.enable) {
+            var canvas_pos = { x: event_obj.mouseX, y: event_obj.mouseY };
+            var local_pos = canvas_to_local_position( canvas_pos );
+            var target_zone = local_to_target_zone( local_pos );
+            if (!target_zone) { return; }
+
+            console.log("viewer/pencil_move: target_zone = %s", JSON.stringify( target_zone ));
+            var zone_pos = local_to_zone_position( target_zone, local_pos );
+
+            var color = _board.get_zone(_current_zone).pixel_get( zone_pos );
+            console.log("viewer/pencil_move: color = %s", color);
+
+        }
+    };
 
 
     /**
