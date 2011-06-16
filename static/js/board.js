@@ -63,6 +63,7 @@ function Board( p_session ) {
 					);
 		} else if ( ev.type == 'leave' ) {
 			var z = ev.desc.zone;
+			console.log("board/handle_event: _zones bf splice %s", JSON.stringify( _zones ) );
 			_zones.splice(z.index,1);
 		} else {
 			// FIXME: unknown event...
