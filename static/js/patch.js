@@ -1,5 +1,5 @@
 
-var PATCH_LIFESPAN = 3000;
+var PATCH_LIFESPAN = 500;
 
 /*
 function PatchQueue() {
