@@ -346,10 +346,7 @@ function Editor( p_session, p_board, p_canvas_id ){
             // console.log( "editor/mousemove:local pos : %s", local_pos.to_json() );
             // console.log( "editor/mousemove:zone pos : %s", zone_pos.to_json() );
 
-            // FIXME: detect target zone
-            // target_zone = local_to_target_ f( zone_pos )
-            var bound = _board.get_zone(_current_zone).is_bound( zone_pos );
-            // console.log( "editor/mousemove: zone.is_bound = ", bound );
+            var bound = _board.get_zone(_current_zone).contains_position( zone_pos );
 
             if ( bound ) {
                 self.pixel_set( local_pos, _color );

@@ -63,7 +63,7 @@ function Zone( p_session, p_index, p_position, p_width, p_height ) {
     /* 
      * Return whethe given position is inside or outside zone
      */
-    this.is_bound = function( pos ) {
+    this.contains_position = function( pos ) {
         if ( pos.x < 0 ) return false;
         if ( pos.x >= self.width ) return false;
         if ( pos.y < 0 ) return false;
