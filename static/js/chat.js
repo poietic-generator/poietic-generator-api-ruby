@@ -56,6 +56,12 @@ function Chat( p_session ) {
             // Reset field value.
             content.val("");
         });
+
+
+        // when the messages page is shown reset unread messages count
+        $("#session-chat").live("pageshow", function () {
+            $("span.ui-li-count").text(0);
+        });
     };
 
     this.display_message = function (message, is_sent_message) {
@@ -109,6 +115,16 @@ function Chat( p_session ) {
      */
     this.handle_message = function( msg ) {
         console.log("chat/handle_message : %s", JSON.stringify( msg ));
+        var liCount = $("span.ui-li-count"), count = parseInt($(liCount).text(), 10), link;
+        // refresh unread count and blink for notification only when not on messages page
+        if ("session-chat" !== $.mobile.activePage.attr("id")) {
+            $(liCount).text(count + 1);
+            link = $(liCount).closest("a")
+                .removeClass("ui-btn-up-a").addClass("ui-btn-up-e");
+            setTimeout(function () {
+                $(link).removeClass("ui-btn-up-e").addClass("ui-btn-up-a");
+            }, 100);
+        }
         this.display_message(msg, false);
     };
 
