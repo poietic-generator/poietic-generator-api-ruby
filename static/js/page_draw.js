@@ -9,8 +9,6 @@ $(document).ready( function() {
         if (!confirm("Leave Poietic Generator?")) {
             return false;
         }
-        $.cookie('user_id', null, {path: "/"} );
-        $.cookie('user_session', null, {path: "/"} );
         return true;
     });
 
