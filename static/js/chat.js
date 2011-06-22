@@ -36,7 +36,7 @@ function Chat( p_session ) {
         _session.register(self);
 
         // initialize list of users for the send message form
-        this.refreshUserList();
+        this.refresh_user_list();
 
         // attach submit event
         $("#send-message-form").submit(function(event){
@@ -102,7 +102,7 @@ function Chat( p_session ) {
         switch (ev.type) {
             case "join" : // on both join and leave refresh users list
             case "leave" :
-                this.refreshUserList();
+                this.refresh_user_list();
                 break;
             default : // all other events are ignored
                 break;
@@ -132,7 +132,8 @@ function Chat( p_session ) {
     /**
      * Refresh user list
      */
-    this.refreshUserList = function () {
+    this.refresh_user_list = function () {
+        console.log("chat/refresh_user_list : %s", JSON.stringify( _session.other_users ));
         var select = $("#send-message-form-to");
         select.empty().selectmenu();
         for (var i=0; i < _session.other_users.length; i++) {
