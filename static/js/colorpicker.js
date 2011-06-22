@@ -21,11 +21,6 @@ function ColorPicker(p_editor) {
 
     this.hide = function (p_link) {
         $(_color_picker.el).hide();
-        $(p_link)
-            .attr("data-icon", "plus")
-            .find("span.ui-icon-minus")
-            .removeClass("ui-icon-minus")
-            .addClass("ui-icon-plus");
     };
 
     this.is_visible = function () {
@@ -39,11 +34,6 @@ function ColorPicker(p_editor) {
 
     this.show = function (p_link) {
         $(_color_picker.el).show();
-        $(p_link)
-            .attr("data-icon", "minus")
-            .find("span.ui-icon-plus")
-            .removeClass("ui-icon-plus")
-            .addClass("ui-icon-minus");
     };
 
     this.update_size = function(p_canvas) {
