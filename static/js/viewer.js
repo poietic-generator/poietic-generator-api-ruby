@@ -25,6 +25,7 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
     this.name = "Viewer";
     this.column_count = null;
     this.line_count = null;
+    this.color_picker_enabled = false;
 
     this.context = null;
 
@@ -328,10 +329,12 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
             console.log("viewer/pencil_move: target_zone = %s", JSON.stringify( target_zone ));
             var zone_pos = local_to_zone_position( target_zone, local_pos );
 
-            var color = _board.get_zone(_current_zone).pixel_get( zone_pos );
-            console.log("viewer/pencil_move: color = %s", color);
+            if ( true === this.color_picker_enabled ) {
+                var color = _board.get_zone(_current_zone).pixel_get( zone_pos );
+                console.log("viewer/pencil_move: color = %s", color);
 
-            _color_picker.set_color( color );
+                _color_picker.set_color( color );
+            }
         }
     };
 
@@ -421,7 +424,12 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
         console.log("viewer/update_boundaries : boundaries = %s", JSON.stringify( _boundaries ));
         self.column_count = _boundaries.width * _session.zone_column_count;
         self.line_count = _boundaries.height * _session.zone_line_count;
-    }
+    };
+
+
+    this.toggle_color_picker = function () {
+        this.color_picker_enabled = ( true === this.color_picker_enabled ) ? false : true;
+    };
 
     // call constructor
     this.initialize(p_session, p_board, p_canvas_id, p_color_picker);

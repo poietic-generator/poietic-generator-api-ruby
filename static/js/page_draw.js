@@ -34,6 +34,11 @@ $(document).ready( function() {
                     color_picker.show(this);
                 }
             });
+
+            $("#picker").click( function ( event ) {
+                event.preventDefault();
+                viewer.toggle_color_picker();
+            });
         }
     );
 });
