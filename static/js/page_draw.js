@@ -29,15 +29,19 @@ $(document).ready( function() {
             $("#brush").click( function( event ){
                 event.preventDefault();
                 if ( true === color_picker.is_visible() ) {
-                    color_picker.hide(this);
+                    color_picker.hide( this );
+                    $(this).removeClass( "ui-btn-active" );
+                    return false;
                 } else {
-                    color_picker.show(this);
+                    color_picker.show( this );
+                    return true;
                 }
             });
 
             $("#picker").click( function ( event ) {
                 event.preventDefault();
                 viewer.toggle_color_picker();
+                return $(this).toggleClass( "ui-btn-active" ).hasClass( "ui-btn-active" );
             });
         }
     );
