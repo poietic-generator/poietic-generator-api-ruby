@@ -82,9 +82,9 @@ function Session( session_type, callback ) {
                 _current_stroke_id = response.stroke_id;
                 _current_message_id = response.message_id;
 
-                $.cookie( 'user_id', this.user_id );
-                $.cookie( 'user_name', this.user_name );
-                $.cookie( 'user_session', this.user_session );
+                $.cookie( 'user_id', this.user_id, {path: "/"} );
+                $.cookie( 'user_name', this.user_name, {path: "/"} );
+                $.cookie( 'user_session', this.user_session, {path: "/"} );
                 // console.log('session/join response mod : ' + JSON.stringify(this) );
 
                 window.setTimeout( self.update, SESSION_UPDATE_INTERVAL );
