@@ -167,7 +167,7 @@ module PoieticGen
 
 			param_request = {
 				:id => session[PoieticGen::Api::SESSION_USER],
-				:session => session[PoieticGen::Api::SESSION_SESSION]
+				:session => @session_id
 			}
 			user = User.first param_request
 			if user then
@@ -176,6 +176,9 @@ module PoieticGen
 				user.did_expire = true
 				Event.create_leave user.id, user.expires_at, user.zone
 				user.save
+      else
+        STDERR.puts "Could not find user for this request";
+        pp param_request;
 			end
 
 		end

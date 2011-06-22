@@ -1,6 +1,7 @@
 
 require 'sinatra/base'
 
+
 require 'poietic-gen/config_manager'
 require 'poietic-gen/page'
 require 'poietic-gen/manager'
@@ -109,6 +110,8 @@ module PoieticGen
 
 		get '/page/logout' do
 		  settings.manager.leave session
+		  response.set_cookie('user_id', nil);
+		  response.set_cookie('user_session', nil);
 			redirect '/'
 		end
 
