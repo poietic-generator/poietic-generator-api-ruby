@@ -64,16 +64,18 @@
         </div>
     </div>
     <div data-role="content">
-        <fieldset class="ui-grid-a">
+        <fieldset>
             <form id="send-message-form" action="" method="post" data-ajax="false">
-                <div class="ui-block-a">
+                <div data-role="fieldcontain">
+                    <label for="send-message-form-to">User</label>
                     <select id="send-message-form-to" name="send-message-form-to"></select>
-                </div> <!-- ui-block-a -->
-                <div class="ui-block-b">
+                </div>
+                <div data-role="fieldcontain">
+                    <label for="send-message-form-content">Message</label>
                     <input id="send-message-form-content" name="send-message-form-content" type="text" value="" />
-                </div> <!-- ui-block-b -->
+                </div>
             </form>
-        </fieldset> <!-- grid -->
+        </fieldset>
         <hr />
         <div class="ui-grid-a" id="message-contener"></div>
     </div>
