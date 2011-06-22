@@ -4,7 +4,7 @@ function setUsernameCookie () {
     $.cookie(
         "user_name",
         $("#credentials").find("input#username").val(),
-        {path: "/page/"}
+        {path: "/"}
     );
 }
 
