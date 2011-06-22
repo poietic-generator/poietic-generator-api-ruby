@@ -55,7 +55,7 @@ module PoieticGen
 		#
 		def leave user
 			@monitor.synchronize do
-				# do something
+				@allocator.free user.zone
 			end
 		end
 
