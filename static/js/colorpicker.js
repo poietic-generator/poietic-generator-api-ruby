@@ -2,10 +2,12 @@
 "use strict";
 
 function ColorPicker(p_editor) {
-    var self = this;
-    var _color_picker;
+    var self = this,
+    _editor,
+    _color_picker;
 
-    this.initialize = function (p_editor) {
+    this.initialize = function ( p_editor ) {
+        _editor = p_editor;
         _color_picker = new Color.Picker({
             callback: function(hex) {
                 p_editor.color_set( "#" + hex );
@@ -28,6 +30,11 @@ function ColorPicker(p_editor) {
 
     this.is_visible = function () {
         return $(_color_picker.el).is(":visible");
+    };
+
+    this.set_color = function ( color ) {
+        $("#current_color").css( "background-color",  color );
+        _editor.color_set( color );
     };
 
     this.show = function (p_link) {

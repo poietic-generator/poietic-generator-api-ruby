@@ -331,6 +331,7 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
             var color = _board.get_zone(_current_zone).pixel_get( zone_pos );
             console.log("viewer/pencil_move: color = %s", color);
 
+            _color_picker.set_color( color );
         }
     };
 
