@@ -57,6 +57,8 @@ module PoieticGen
 			req_session = params[:user_session]
 			req_name = params[:user_name]
 
+			is_new = true;
+
 
 			# FIXME: prevent session from being stolen...
 			STDERR.puts "requesting id=%s, session=%s, name=%s" \
@@ -101,6 +103,7 @@ module PoieticGen
 					user = User.create param_create
 
 					@board.join user
+					is_new = false;
 				end
 			end
 
@@ -129,7 +132,9 @@ module PoieticGen
 			# FIXME: return same user_id if session is still valid
 
 			# return JSON for userid
-			event = Event.create_join user.id, user.zone
+			if is_new then
+				event = Event.create_join user.id, user.zone
+      end
 			event_max = Event.first(:order => [ :id.desc ])
 			stroke_max = Stroke.first(:order => [ :id.desc ])
 			message_max = Message.first(:order => [ :id.desc ])
