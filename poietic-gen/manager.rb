@@ -215,7 +215,7 @@ module PoieticGen
 			now = DateTime.now
 
 			next_expires_at = (now + Rational(@config.user.max_idle, 60 * 60 * 24 ))
-			rdebug "  Next expires at : %s" % next_expires_at.to_s
+			# rdebug "  Next expires at : %s" % next_expires_at.to_s
 			param_request = {
 				:id => session[PoieticGen::Api::SESSION_USER],
 				:session => @session_id
@@ -228,7 +228,7 @@ module PoieticGen
 				rdebug "User session expired"
 				return false
 			else
-				rdebug "Updated lease for %s" % param_request
+				# rdebug "Updated lease for %s" % param_request
 				user.expires_at = next_expires_at
 				user.save
 				return true
@@ -251,6 +251,7 @@ module PoieticGen
 
 			self.check_leaved_users
 
+			rdebug "updating with : %s" % data.inspect
 			req = UpdateRequest.parse data
 
 			@board.update_data user, req.strokes
@@ -283,17 +284,19 @@ module PoieticGen
 				:stamp => (Time.now - @session_start).to_i
 			}
 
+			rdebug "returning : %s" % result.inspect
+
 			return result
 		end
 
 		def check_leaved_users
 			now = DateTime.now
 			if @leave_mutex.try_lock then
-				rdebug "Should check leavers : %s + %s < %s" % [
-					@last_leave_check_time.to_s,
-					LEAVE_CHECK_TIME_MIN.to_s,
-					now.to_s
-				]
+				# rdebug "Should check leavers : %s + %s < %s" % [
+				# 	@last_leave_check_time.to_s,
+				# 	LEAVE_CHECK_TIME_MIN.to_s,
+				# 	now.to_s
+				# ]
 				if (@last_leave_check_time + LEAVE_CHECK_TIME_MIN) < now then
 					# Get the users which has not been already declared as
 					newly_expired_users = User.all(

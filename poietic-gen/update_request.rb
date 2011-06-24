@@ -45,6 +45,7 @@ module PoieticGen
 			@enable_strokes = false
 			@enable_events = false
 			@enable_messages = false
+			@debug = true
 		end
 
 		public
@@ -52,7 +53,7 @@ module PoieticGen
 		def self.parse hash
 			# mandatory fields firstvalidate user input first
 			hash.each do |key, val|
-				case key 
+				case key
 				when STROKES_AFTER then
 					@enable_strokes = true
 				when STROKES_BEFORE then
@@ -66,9 +67,13 @@ module PoieticGen
 				when EVENTS_BEFORE then
 					@enable_events = true
 				when MESSAGES then
-					pp "messages", val	
+					if val.length != 0 then
+					  rdebug "messages : %s" % val.inspect
+          end
 				when STROKES then
-					pp "strokes", val
+				  if val.length != 0 then
+					  rdebug "strokes : %s" % val.inspect
+          end
 				else
 					raise RuntimeError, "unknow request field '%s'" % key
 				end

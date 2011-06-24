@@ -44,13 +44,15 @@ module PoieticGen
 				end
 			end
 			@monitor = Monitor.new
+			@debug = true
 		end
 
 		def apply user, drawing
 			@monitor.synchronize do
 				# save patch into database
-				STDERR.puts "Zone - apply:"
 				return if drawing.nil?
+
+				rdebug drawing.inspect if drawing.length != 0
 
 				drawing.each do |patch|
 
@@ -66,12 +68,11 @@ module PoieticGen
 						:timestamp => DateTime.parse(timestamp),
 						:zone => user.zone
 					}
-					pp param_create
 					begin
 						patch = Stroke.create param_create
 						patch.save
 					rescue DataMapper::SaveFailureError => e
-						puts e.resource.errors.inspect
+						rdebug "Saving failure : %s" % e.resource.errors.inspect
 						raise e
 					end
 
