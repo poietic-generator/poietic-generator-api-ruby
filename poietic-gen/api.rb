@@ -6,6 +6,7 @@ require 'poietic-gen/config_manager'
 require 'poietic-gen/page'
 require 'poietic-gen/manager'
 
+require 'rdebug/base'
 require 'json'
 require 'pp'
 
@@ -68,7 +69,7 @@ module PoieticGen
 
 			set :config, config
 			set :manager, (PoieticGen::Manager.new config)
-			DataMapper::Logger.new(STDERR, :debug)
+			DataMapper::Logger.new(STDERR, :info)
 			DataMapper.setup(:default, config.database.get_hash)
 
 
