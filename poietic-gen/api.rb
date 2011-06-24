@@ -49,7 +49,7 @@ module PoieticGen
 			# FIXME: verify also that it is alive
 			#
 			def validate_session! session
-				STDERR.puts "validate_session: %s" % session.inspect
+				STDERR.puts "API -- validate_session: %s" % session.inspect
 				unless session.include? SESSION_USER and
 					not session[SESSION_USER].nil? then
 					throw :halt, [401, "Not authorized\n"]
@@ -123,7 +123,6 @@ module PoieticGen
 			begin
 				result = {}
 				result = settings.manager.join session, params
-				pp result
 
 			rescue Exception => e
 				STDERR.puts e.inspect, e.backtrace
@@ -186,8 +185,6 @@ module PoieticGen
 				  data = JSON.parse(request.body.read)
 				  result = settings.manager.update_data session, data
 
-				  STDERR.puts "Update_data returned :"
-				  pp result
         else
           status = [ STATUS_REDIRECTION, "Session has expired !", "/"]
         end
