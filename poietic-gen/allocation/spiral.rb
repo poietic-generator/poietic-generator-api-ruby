@@ -15,7 +15,7 @@ module PoieticGen ; module Allocation
 
 			def rotate_left!
 				@x, @y = -@y, @x
-				#puts "rotate! now %s" % self
+				# rdebug "rotate! now %s" % self
 				self
 			end
 
@@ -60,6 +60,7 @@ module PoieticGen ; module Allocation
 		#
 		def initialize config
 			# map index => Zone object (or nil if unallocated)
+			@debug = true
 			@zones = {}
 			@config = config
 			@monitor = Monitor.new
@@ -84,10 +85,10 @@ module PoieticGen ; module Allocation
 			@monitor.synchronize do 
 				dir = V.new( 1, 0 )
 				pos = V.new( 0, 0 )
-				# puts "%s => %s" % [ 0, pos ]
+				# rdebug "%s => %s" % [ 0, pos ]
 				idx.times do |cnt|
 					pos += dir
-					# puts "%s => %s" % [ cnt + 1, pos ]
+					# rdebug "%s => %s" % [ cnt + 1, pos ]
 					if pos.x.abs == pos.y.abs then
 						unless ( pos.y <= 0 and pos.x == -pos.y ) then
 							dir.rotate_left!
@@ -109,11 +110,11 @@ module PoieticGen ; module Allocation
 				dir = V.new( 1, 0 )
 				pos = V.new( 0, 0 )
 				idx = 0
-				# puts "%s => %s" % [ 0, pos ]
+				# rdebug "%s => %s" % [ 0, pos ]
 				while ( pos.x != x or pos.y != y ) do
 					idx += 1
 					pos += dir
-					# puts "%s => %s" % [ cnt + 1, pos ]
+					# rdebug "%s => %s" % [ cnt + 1, pos ]
 					if pos.x.abs == pos.y.abs then
 						unless ( pos.y <= 0 and pos.x == -pos.y ) then
 							dir.rotate_left!
@@ -139,7 +140,7 @@ module PoieticGen ; module Allocation
 				@config.width,
 				@config.height
 
-			STDERR.puts "Spiral/allocate zone : ", zone.inspect
+			rdebug "Spiral/allocate zone : ", zone.inspect
 			@zones[next_index] = zone
 			return zone
 		end

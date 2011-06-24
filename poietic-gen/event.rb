@@ -6,6 +6,8 @@ module PoieticGen
 	class Event
 		include DataMapper::Resource
 
+		@debug = true
+
 		property :id,	Serial
 		property :type,	String, :required => true
 		property :desc, String, :required => true
@@ -34,7 +36,7 @@ module PoieticGen
 			desc = JSON.parse( self.desc )
 			user = User.first( :id => desc['user'] )
 
-			puts "Event/to_hash desc"
+			rdebug "Event/to_hash desc"
 			pp desc
 			pp user
 

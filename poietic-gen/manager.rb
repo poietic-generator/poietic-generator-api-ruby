@@ -26,6 +26,7 @@ module PoieticGen
 
 		def initialize config
 			@config = config
+			@debug = true
 			pp config
 			# a 16-char long random string
 			@session_id = (0...16).map{ ('a'..'z').to_a[rand(26)] }.join
@@ -61,7 +62,7 @@ module PoieticGen
 
 
 			# FIXME: prevent session from being stolen...
-			STDERR.puts "requesting id=%s, session=%s, name=%s" \
+			rdebug "requesting id=%s, session=%s, name=%s" \
 				% [ req_id, req_session, req_name ]
 
 			user = nil
@@ -85,7 +86,7 @@ module PoieticGen
 			}
 
 			if req_session != @session_id then
-				STDERR.puts "User is requesting a different session"
+				rdebug "User is requesting a different session"
 				# create new
 				user = User.create param_create
 
@@ -93,12 +94,12 @@ module PoieticGen
 				@board.join user
 
 			else
-				STDERR.puts "User is in session"
+				rdebug "User is in session"
 				user = User.first_or_create param_request, param_create
 
 				if ( (now - user.expires_at) > 0  ) then
 					# The event will be generated elsewhere (in update_data).
-					STDERR.puts "User session expired"
+					rdebug "User session expired"
 					# create new if session expired
 					user = User.create param_create
 
@@ -117,7 +118,7 @@ module PoieticGen
 			begin
 				user.save
 			rescue DataMapper::SaveFailureError => e
-				puts e.resource.errors.inspect
+				STDERR.puts e.resource.errors.inspect
 				raise e
 			end
 			pp user
@@ -134,7 +135,7 @@ module PoieticGen
 			# return JSON for userid
 			if is_new then
 				event = Event.create_join user.id, user.zone
-      end
+			end
 			event_max = Event.first(:order => [ :id.desc ])
 			stroke_max = Stroke.first(:order => [ :id.desc ])
 			message_max = Message.first(:order => [ :id.desc ])
@@ -176,9 +177,9 @@ module PoieticGen
 				user.did_expire = true
 				Event.create_leave user.id, user.expires_at, user.zone
 				user.save
-      else
-        STDERR.puts "Could not find user for this request";
-        pp param_request;
+			else
+				rdebug "Could not find any user for this request";
+				pp param_request;
 			end
 
 		end
@@ -193,7 +194,7 @@ module PoieticGen
 			now = DateTime.now
 
 			next_expires_at = (now + Rational(@config.user.max_idle, 60 * 60 * 24 ))
-			STDERR.puts "  Next expires at : %s" % next_expires_at.to_s
+			rdebug "  Next expires at : %s" % next_expires_at.to_s
 			param_request = {
 				:id => session[PoieticGen::Api::SESSION_USER],
 				:session => @session_id
@@ -203,10 +204,10 @@ module PoieticGen
 
 			if ( (now - user.expires_at) > 0  ) then
 				# expired lease...
-				STDERR.puts "User session expired"
+				rdebug "User session expired"
 				return false
 			else
-				STDERR.puts "Updated lease for %s" % param_request
+				rdebug "Updated lease for %s" % param_request
 				user.expires_at = next_expires_at
 				user.save
 				return true
@@ -234,20 +235,20 @@ module PoieticGen
 			@board.update_data user, req.strokes
 			@chat.update_data user, req.messages
 
-			#STDERR.puts "drawings: (since %s)" % req.strokes_after
+			# rdebug "drawings: (since %s)" % req.strokes_after
 			strokes = Stroke.all(
 				:id.gt => req.strokes_after,
 				:zone.not => user.zone
 			)
 			strokes_collection = strokes.map{ |d| d.to_hash }
 
-			#STDERR.puts "events: (since %s)" % req.events_after
+			# rdebug "events: (since %s)" % req.events_after
 			events = Event.all(
-							   :id.gt => req.events_after
-							  )
+				:id.gt => req.events_after
+			)
 			events_collection = events.map{ |e| e.to_hash @board }
 
-			#STDERR.puts "chat: (since %s)" % req.messages_after
+			# rdebug "chat: (since %s)" % req.messages_after
 			messages = Message.all(
 				:id.gt => req.messages_after,
 				:user_dst => user.id
@@ -267,7 +268,7 @@ module PoieticGen
 		def check_leaved_users
 			now = DateTime.now
 			if @leave_mutex.try_lock then
-				STDERR.puts "Should check leavers : %s + %s < %s" % [
+				rdebug "Should check leavers : %s + %s < %s" % [
 					@last_leave_check_time.to_s,
 					LEAVE_CHECK_TIME_MIN.to_s,
 					now.to_s
@@ -280,16 +281,16 @@ module PoieticGen
 					)
 					# pp newly_expired_users
 					newly_expired_users.each do |leaver|
-					  session = {}
-					  session[PoieticGen::Api::SESSION_USER] = leaver.id
-					  session[PoieticGen::Api::SESSION_SESSION] = leaver.session
-					  self.leave session
+						session = {}
+						session[PoieticGen::Api::SESSION_USER] = leaver.id
+						session[PoieticGen::Api::SESSION_SESSION] = leaver.session
+						self.leave session
 					end
 					@last_leave_check_time = now
 				end
 				@leave_mutex.unlock
 			else
-				STDERR.puts "Leaver updates : Can't update because someone is already working on that"
+				rdebug "Leaver updates : Can't update because someone is already working on that"
 			end
 		end
 
