@@ -273,7 +273,6 @@ module PoieticGen
 					now.to_s
 				]
 				if (@last_leave_check_time + LEAVE_CHECK_TIME_MIN) < now then
-					STDERR.puts "++++++ Expired users"
 					# Get the users which has not been already declared as
 					newly_expired_users = User.all(
 						:did_expire => false,
@@ -286,7 +285,6 @@ module PoieticGen
 					  session[PoieticGen::Api::SESSION_SESSION] = leaver.session
 					  self.leave session
 					end
-					STDERR.puts "------ Expired users"
 					@last_leave_check_time = now
 				end
 				@leave_mutex.unlock
