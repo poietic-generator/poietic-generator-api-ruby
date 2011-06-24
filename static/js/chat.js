@@ -94,7 +94,7 @@ function Chat( p_session ) {
             html[6] = _session.get_user_name(message.user_dst);
         } else {
             html = _template_received;
-            html[2] = _session.get_user_name(message.user_from);
+            html[2] = _session.get_user_name(message.user_src);
             html[6] = message.content;
         }
         $("#message-contener").prepend(html.join(""));
