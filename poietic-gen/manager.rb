@@ -186,7 +186,9 @@ module PoieticGen
 			msg_history_req_dst = Message.all(:user_dst => user.id)
 			msg_history_req_src = Message.all(:user_src => user.id)
 			msg_history = msg_history_req_dst.map{ |msg| msg.to_hash }
+			rdebug "req_dst : %s" % msg_history.inspect
 			msg_history = msg_history + msg_history_req_src.map{ |msg| msg.to_hash }
+			rdebug "req_dst : %s" % msg_history.inspect
 
 			result = { :user_id => user.id,
 				:user_session => user.session,
