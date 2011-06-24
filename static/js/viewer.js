@@ -351,7 +351,7 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
             var zone_pos = local_to_zone_position( target_zone, local_pos );
 
             if ( true === this.color_picker_enabled ) {
-                var color = _board.get_zone(target_zone).pixel_get( zone_pos );
+                var color = _board.get_zone(target_zone.index).pixel_get( zone_pos );
                 console.log("viewer/pencil_move: color = %s", color);
 
                 _color_picker.set_color( color );
