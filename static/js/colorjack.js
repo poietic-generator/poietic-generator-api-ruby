@@ -236,7 +236,7 @@ Color.Picker = function (props) {
 	ctx.strokeRect(left + 0.5, that.offset + 0.5, 19, that.size-1);
     };
 
-    this.destory = function () {
+    this.destroy = function () {
 	document.body.removeChild(plugin);
 	for (var key in that) delete that[key];
     };
