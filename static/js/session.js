@@ -223,9 +223,9 @@ function Session( session_type, callback ) {
             context: self,
             success: function( response ){
                 console.log('session/update response : ' + JSON.stringify( response ) );
-                if (response.status[0] != 2) {
+				self.treat_status_nok(response);
+                if (response.status[0] != STATUS_SUCCESS) {
                     window.setTimeout( self.update, SESSION_UPDATE_INTERVAL * 2 );
-                    return self.treat_status_nok(response);
                 }
 
                 self.dispatch_events( response.events );
