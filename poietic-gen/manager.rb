@@ -157,9 +157,24 @@ module PoieticGen
 			if is_new then
 				event = Event.create_join user.id, user.zone
 			end
-			event_max = Event.first(:order => [ :id.desc ])
-			stroke_max = Stroke.first(:order => [ :id.desc ])
-			message_max = Message.first(:order => [ :id.desc ])
+			event_max = begin
+							e = Event.first(:order => [ :id.desc ])
+							if e.nil? then 0
+							else e.id
+							end
+						end
+			stroke_max = begin
+							 s = Stroke.first(:order => [ :id.desc ])
+							 if s.nil? then 0
+							 else s.id
+							 end
+						 end
+			message_max = begin
+							  m = Message.first(:order => [ :id.desc ])
+							  if m.nil? then 0
+							  else m.id
+							  end
+						  end
 
 			# return users & zones
 			users_db = User.all(
@@ -177,9 +192,9 @@ module PoieticGen
 				:other_zones => other_zones,
 				:zone_column_count => @config.board.width,
 				:zone_line_count => @config.board.height,
-				:event_id => (event_max.id || -1 ),
-				:stroke_id => (stroke_max.id || -1 ),
-				:message_id => (message_max.id || -1 )
+				:event_id => event_max,
+				:stroke_id => stroke_max,
+				:message_id => message_max
 			}
 
 			rdebug "result : %s" % result.inspect
