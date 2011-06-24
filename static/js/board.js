@@ -124,8 +124,11 @@ function Board( p_session ) {
 		console.log("board/handle_stroke : stroke = %s", JSON.stringify( stk ));
 		console.log("board/handle_stroke : zones = %s", JSON.stringify( _zones ));
 		var z = _zones[stk.zone];
-
-		z.patch_apply( stk );
+		if (z) {
+			z.patch_apply( stk );
+		} else {
+			console.warn("board/handle_stroke: trying to apply stroke for missing zone %s", stk.zone);
+		}
 	}
 
 
