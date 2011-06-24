@@ -147,7 +147,11 @@ function Chat( p_session ) {
                 $(link).removeClass("ui-btn-up-e").addClass("ui-btn-up-a");
             }, 100);
         }
-        this.display_message(msg, false);
+        if (msg.user_src == _session.user_id) {
+          this.display_message(msg, true);
+        } else {
+          this.display_message(msg, false);
+        }
     };
 
 

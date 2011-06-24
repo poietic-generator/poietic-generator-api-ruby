@@ -183,6 +183,10 @@ module PoieticGen
 			)
 			other_users = users_db.map{ |u| u.to_hash }
 			other_zones = users_db.map{ |u|	@board[u.zone].to_desc_hash }
+			msg_history_req_dst = Message.all(:user_dst => user.id)
+			msg_history_req_src = Message.all(:user_src => user.id)
+			msg_history = msg_history_req_dst.map{ |msg| msg.to_hash }
+			msg_history = msg_history + msg_history_req_src.map{ |msg| msg.to_hash }
 
 			result = { :user_id => user.id,
 				:user_session => user.session,
@@ -194,7 +198,8 @@ module PoieticGen
 				:zone_line_count => @config.board.height,
 				:event_id => event_max,
 				:stroke_id => stroke_max,
-				:message_id => message_max
+				:message_id => message_max,
+				:msg_history => msg_history
 			}
 
 			rdebug "result : %s" % result.inspect

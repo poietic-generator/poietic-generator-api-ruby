@@ -108,7 +108,6 @@ function Session( session_type, callback ) {
                 $.cookie( 'user_session', this.user_session, {path: "/"} );
                 // console.log('session/join response mod : ' + JSON.stringify(this) );
 
-                window.setTimeout( self.update, SESSION_UPDATE_INTERVAL );
                 console.log("gotcha!");
 
                 callback( self );
@@ -120,6 +119,11 @@ function Session( session_type, callback ) {
                     console.log('session/join on zone %s',JSON.stringify(all_zones[i]));
                     self.dispatch_strokes( all_zones[i].content );
                 }
+
+                self.dispatch_messages( response.msg_history );
+
+                window.setTimeout( self.update, SESSION_UPDATE_INTERVAL );
+
                 console.log('session/join end');
 
             }
@@ -243,11 +247,11 @@ function Session( session_type, callback ) {
 
 
     this.dispatch_events = function( events ){
-        for (var o=0; o<_observers.length;o++){
-            for (var i=0; i<events.length; i++){
-                if ( (events[i].id) || (_current_event_id < events[i].id) ) {
-                    _current_event_id = events[i].id;
-                }
+        for (var i=0; i<events.length; i++) {
+            if ( (events[i].id) || (_current_event_id < events[i].id) ) {
+                _current_event_id = events[i].id;
+            }
+            for (var o=0; o<_observers.length;o++){
                 if (_observers[o].handle_event) {
                     _observers[o].handle_event( events[i] );
                 }
@@ -256,11 +260,11 @@ function Session( session_type, callback ) {
     }
 
     this.dispatch_strokes = function( strokes ){
-        for (var o=0; o<_observers.length;o++){
-            for (var i=0; i<strokes.length; i++){
-                if ( (strokes[i].id) || (_current_stroke_id < strokes[i].id) ) {
+        for (var i=0; i<strokes.length; i++) {
+            if ( (strokes[i].id) || (_current_stroke_id < strokes[i].id) ) {
                 _current_stroke_id = strokes[i].id;
-                }
+            }
+            for (var o=0; o<_observers.length;o++){
                 if (_observers[o].handle_stroke) {
                     _observers[o].handle_stroke( strokes[i] );
                 }
@@ -269,11 +273,11 @@ function Session( session_type, callback ) {
     }
 
     this.dispatch_messages = function( messages ){
-        for (var o=0; o<_observers.length;o++){
-            for (var i=0; i<messages.length; i++){
-                if ( (messages[i].id) || (_current_message_id < messages[i].id) ) {
-                    _current_message_id = messages[i].id;
-                }
+        for (var i=0; i<messages.length; i++) {
+            if ( (messages[i].id) || (_current_message_id < messages[i].id) ) {
+                _current_message_id = messages[i].id;
+            }
+            for (var o=0; o<_observers.length;o++){
                 if (_observers[o].handle_message) {
                     _observers[o].handle_message( messages[i] );
                 }
