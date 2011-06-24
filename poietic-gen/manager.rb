@@ -169,7 +169,7 @@ module PoieticGen
 			other_users = users_db.map{ |u| u.to_hash }
 			other_zones = users_db.map{ |u|	@board[u.zone].to_desc_hash }
 
-			return { :user_id => user.id,
+			result = { :user_id => user.id,
 				:user_session => user.session,
 				:user_name => user.name,
 				:user_zone => zone.to_desc_hash,
@@ -181,6 +181,10 @@ module PoieticGen
 				:stroke_id => (stroke_max.id || -1 ),
 				:message_id => (message_max.id || -1 )
 			}
+
+			rdebug "result : %s" % result.inspect
+
+			return result
 		end
 
 
