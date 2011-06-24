@@ -24,7 +24,8 @@ module PoieticGen
 
 
 		def initialize config
-			puts "Board/initialize: using allocator %s" % config.allocator
+			@debug = true
+			rdebug "using allocator %s" % config.allocator
 			@config = config
 			@allocator = ALLOCATORS[config.allocator].new config
 			pp @allocator
