@@ -59,12 +59,6 @@ $(document).ready( function() {
                     return true;
                 }
             });
-
-            $("#picker").click( function ( event ) {
-                event.preventDefault();
-                viewer.toggle_color_picker();
-                return $(this).toggleClass( "ui-btn-active" ).hasClass( "ui-btn-active" );
-            });
         }
     );
 });

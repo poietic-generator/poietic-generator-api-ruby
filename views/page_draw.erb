@@ -24,6 +24,7 @@
 <!-- drawing zone -->
 <div id="session-zone" data-role="page">
     <div data-role="header" data-id="head" data-position="fixed">
+        <a href="#" id="brush"><span id="current_color">&nbsp;&nbsp;&nbsp;&nbsp;</span>Color</a>
         <h1 class="username"></h1>
         <a href="/page/logout" data-ajax="false" class="ui-btn-right logout">Logout</a>
         <div data-role="navbar">
@@ -40,15 +41,6 @@
         <div class="ui-grid-a editor">
             <canvas id="session-editor"></canvas>
         </div>
-    </div>
-    <div data-role="footer" data-id="foot" data-position="fixed">
-        <div data-role="navbar" data-type="horizontal">
-            <ul>
-                <li><a href="#" id="brush">Color</a></li>
-                <li><a href="#" id="picker">Color picker</a></li>
-            </ul>
-        </div>
-        <div id="current_color" style="height:5px;"></div>
     </div>
 </div>
 <!-- chat zone -->
