@@ -65,17 +65,19 @@ function DrawSession( callback ) {
         var user_id = $.cookie('user_id');
         var user_name = $.cookie('user_name');
         var user_session = $.cookie('user_session');
+		var session_opts = [];
+		var session_url = null;
 
-        var session_url = DRAW_SESSION_URL_JOIN;
         if ( user_id != null ) {
-            session_url += "&user_id="+user_id;
+            session_opts.push( "user_id=" + user_id );
         }
         if ( user_session != null ) {
-            session_url += "&user_session="+user_session;
+            session_opts.push( "user_session=" + user_session );
         }
         if ( user_name != null ) {
-            session_url += "&user_name="+user_name;
+            session_opts.push( "user_name=" + user_name );
         }
+        session_url = DRAW_SESSION_URL_JOIN + "?" + session_opts.join('&');
 
         // get session info from
 
