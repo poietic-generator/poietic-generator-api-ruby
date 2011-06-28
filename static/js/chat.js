@@ -64,19 +64,25 @@ function Chat( p_session ) {
         $("#send-message-form").submit(function(event){
             var content = $(this).find("#send-message-form-content");
             event.preventDefault();
-            var user_dst = parseInt($(this).find("#send-message-form-to").val(), 10),
-            message = {
-                content: content.val(),
-                stamp: new Date(),
-                user_dst: user_dst
-            };
-            self.queue_message( message );
-            self.display_message({
-                content: content.val(),
-                user_dst: user_dst
-            }, true);
-            // Reset field value.
-            content.val("");
+            var user_dst = $(this).find("#send-message-form-to").val(),
+            user_dst_id = parseInt(user_dst, 10),
+            message;
+            if (null !== user_dst && 0 < user_dst_id && "" !== content.val()) {
+                message = {
+                    content: content.val(),
+                    stamp: new Date(),
+                    user_dst: user_dst_id
+                }
+                self.queue_message( message );
+                self.display_message({
+                    content: content.val(),
+                    user_dst: user_dst_id
+                }, true);
+                // Reset field value.
+                content.val("");
+            } else {
+                alert("You must select an user and write a message.");
+            }
         });
 
 
