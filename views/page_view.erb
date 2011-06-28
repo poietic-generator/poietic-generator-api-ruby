@@ -1,25 +1,35 @@
-<%= 
-	#return @page.inspect
-	@page.css << "/css/session.css"
-	@page.js << "/js/page_session.js"
-	@page.js << "/js/zone.js"
-	@page.js << "/js/board.js"
-	@page.js << "/js/console.js"
-	@page.js << "/js/session.js"
-	@page.js << "/js/patch.js"
-	@page.js << "/js/drawing.js"
-	@page.js << "/js/brushzone.js"
-	erb :common_header 
+<%=
+    @page.css << "/css/page_draw.css"
+    @page.css << "/css/colorjack.css"
+    @page.css << "/css/message.css"
+
+    @page.js << "/js/jquery.cookie.js"
+    @page.js << "/js/colorjack.js"
+    @page.js << "/js/colorpicker.js"
+    @page.js << "/js/view_session.js"
+    @page.js << "/js/patch.js"
+    @page.js << "/js/board.js"
+    @page.js << "/js/zone.js"
+    @page.js << "/js/console.js"
+    @page.js << "/js/editor.js"
+    @page.js << "/js/viewer.js"
+    @page.js << "/js/brushzone.js"
+    @page.js << "/js/chat.js"
+ #   @page.js << "/js/page_draw.js"
+
+    erb :common_header
 %>
 
-<!-- la vue globale -->
-<canvas id="view-global">
-	global zone
-</canvas>
+<div data-role="page">
+    <div data-role="header" data-id="head" data-position="fixed">
+        <h1 class="username">Son dark vador</h1>
+        <a href="/" data-ajax="false" class="ui-btn-right logout">Back</a>
+    </div>
+    <div data-role="content">
+        <div class="ui-grid-a viewer">
+            <canvas id="session-viewer"></canvas>
+        </div>
+    </div>
 
-<div class="spacer"></div>
-<div id="session-chat" >
-	chat zone
 </div>
-
 <%= erb :common_footer %>
