@@ -24,14 +24,11 @@
 // vim: set ts=4 sw=4 et:
 "use strict";
 
-var SESSION_URL_JOIN = "/api/session/join";
-var SESSION_URL_LEAVE = "/api/session/leave";
-var SESSION_URL_UPDATE = "/api/session/update";
+var DRAW_SESSION_URL_JOIN = "/api/session/join";
+var DRAW_SESSION_URL_LEAVE = "/api/session/leave";
+var DRAW_SESSION_URL_UPDATE = "/api/session/update";
 
-var SESSION_UPDATE_INTERVAL = 1000 ;
-
-var SESSION_TYPE_DRAW = "draw";
-var SESSION_TYPE_VIEW = "view";
+var DRAW_SESSION_UPDATE_INTERVAL = 1000 ;
 
 var STATUS_INFORMATION = 1
 var STATUS_SUCCESS = 2
@@ -41,7 +38,7 @@ var STATUS_BAD_REQUEST = 5
 
 
 
-function Session( session_type, callback ) {
+function DrawSession( callback ) {
     var console = noconsole;
 
     var self = this;
@@ -69,7 +66,7 @@ function Session( session_type, callback ) {
         var user_name = $.cookie('user_name');
         var user_session = $.cookie('user_session');
 
-        var session_url = SESSION_URL_JOIN + "?type=" + session_type;
+        var session_url = DRAW_SESSION_URL_JOIN;
         if ( user_id != null ) {
             session_url += "&user_id="+user_id;
         }
@@ -122,7 +119,7 @@ function Session( session_type, callback ) {
 
                 self.dispatch_messages( response.msg_history );
 
-                window.setTimeout( self.update, SESSION_UPDATE_INTERVAL );
+                window.setTimeout( self.update, DRAW_SESSION_UPDATE_INTERVAL );
 
                 console.log('session/join end');
 
@@ -185,13 +182,13 @@ function Session( session_type, callback ) {
 
         // skip if no user id assigned
         if (!self.user_id) {
-            window.setTimeout( self.update, SESSION_UPDATE_INTERVAL );
+            window.setTimeout( self.update, DRAW_SESSION_UPDATE_INTERVAL );
             return null;
         }
 
         // assign real values if objets are present
         if (_observers.length < 1) {
-            window.setTimeout( self.update, SESSION_UPDATE_INTERVAL );
+            window.setTimeout( self.update, DRAW_SESSION_UPDATE_INTERVAL );
             return null;
         }
 
@@ -220,7 +217,7 @@ function Session( session_type, callback ) {
 
         console.log("session/update: req = %s", JSON.stringify( req ) );
         $.ajax({
-            url: SESSION_URL_UPDATE,
+            url: DRAW_SESSION_URL_UPDATE,
             dataType: "json",
             data: JSON.stringify( req ),
             type: 'POST',
@@ -229,17 +226,17 @@ function Session( session_type, callback ) {
                 console.log('session/update response : ' + JSON.stringify( response ) );
 				self.treat_status_nok(response);
                 if (response.status[0] != STATUS_SUCCESS) {
-                    window.setTimeout( self.update, SESSION_UPDATE_INTERVAL * 2 );
+                    window.setTimeout( self.update, DRAW_SESSION_UPDATE_INTERVAL * 2 );
                 }
 
                 self.dispatch_events( response.events );
                 self.dispatch_strokes( response.strokes );
                 self.dispatch_messages( response.messages );
 
-                window.setTimeout( self.update, SESSION_UPDATE_INTERVAL );
+                window.setTimeout( self.update, DRAW_SESSION_UPDATE_INTERVAL );
             },
             error: function( response ) {
-               window.setTimeout( self.update, SESSION_UPDATE_INTERVAL * 2 );
+               window.setTimeout( self.update, DRAW_SESSION_UPDATE_INTERVAL * 2 );
            }
         });
 

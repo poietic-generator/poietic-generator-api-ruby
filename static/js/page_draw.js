@@ -35,8 +35,7 @@ $(document).ready( function() {
     });
 
     // initialize zoness
-    sessionF = new Session(
-        SESSION_TYPE_DRAW,
+    sessionF = new DrawSession(
         function( session ) {
             //console.log("page_draw/ready: session callback ok");
             $(".username").text(session.user_name);
