@@ -1,10 +1,13 @@
 .editor,
 .viewer {
+    margin:0;
+    padding:0;
     text-align:center;
 }
+#canvas-container {
+    margin:0.5em;
+}
 
-.editor { margin:0; padding:0; }
-.viewer { margin:0; padding:0; }
 
 .ui-content { margin:0; padding: 0; }
 .ui-grid-a { margin:0; padding: 0; }

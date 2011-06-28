@@ -281,18 +281,10 @@ function Editor( p_session, p_board, p_canvas_id ){
             w: $(window).width(),
             h : $(window).height()
         };
-        margin = 80;
+        margin = 50;
 
-        //real_canvas.style.position = 'absolute';
-        if (win.w > win.h) {
-            real_canvas.width = win.h - margin;
-            real_canvas.height = win.h - margin;
-        } else {
-            real_canvas.width = win.w - margin;
-            real_canvas.height = win.w - margin;
-        }
-        //real_canvas.style.top = margin + "px";
-        //real_canvas.style.left = Math.floor((win.w - real_canvas.width) / 2) + 'px';
+        real_canvas.width = Math.round(win.h / 2) - margin;
+        real_canvas.height = Math.round(win.h / 2) - margin;
 
         // console.log("editor/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
 

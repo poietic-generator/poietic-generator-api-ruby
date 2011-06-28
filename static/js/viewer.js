@@ -224,18 +224,10 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
             w: $(window).width(),
             h : $(window).height()
         };
-        margin = 80;
+        margin = 50;
 
-        //_real_canvas.style.position = 'absolute';
-        if (win.w > win.h) {
-            _real_canvas.width = win.h - margin;
-            _real_canvas.height = win.h - margin;
-        } else {
-            _real_canvas.width = win.w - margin;
-            _real_canvas.height = win.w - margin;
-        }
-        //_real_canvas.style.top = margin + "px";
-        //_real_canvas.style.left = Math.floor((win.w - _real_canvas.width) / 2) + 'px';
+        _real_canvas.width = Math.round(win.h / 2) - margin;
+        _real_canvas.height = Math.round(win.h /2) - margin;
 
         // console.log("viewer/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
 
