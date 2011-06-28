@@ -62,9 +62,9 @@ function Chat( p_session ) {
 
         // attach submit event
         $("#send-message-form").submit(function(event){
-            var content = $(this).find("#send-message-form-content");
             event.preventDefault();
-            var user_dst = $(this).find("#send-message-form-to").val(),
+            var content = $(this).find("#send-message-form-content"),
+            user_dst = $(this).find("#send-message-form-to").val(),
             user_dst_id = parseInt(user_dst, 10),
             message;
             if (null !== user_dst && 0 < user_dst_id && "" !== content.val()) {
