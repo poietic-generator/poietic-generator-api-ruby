@@ -56,6 +56,7 @@ $(document).ready( function() {
                     return false;
                 } else {
                     color_picker.show( this );
+                    $(this).addClass( "ui-btn-active" );
                     return true;
                 }
             });
