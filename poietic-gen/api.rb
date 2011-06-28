@@ -101,6 +101,7 @@ module PoieticGen
 		end
 
 
+
 		#
 		#
 		#
@@ -109,7 +110,6 @@ module PoieticGen
 			@page = Page.new "Index"
 			erb :page_index
 		end
-
 
 
 		#
@@ -131,9 +131,9 @@ module PoieticGen
 
 
 		get '/page/logout' do
-		  settings.manager.leave session
-		  response.set_cookie('user_id', nil);
-		  response.set_cookie('user_session', nil);
+			settings.manager.leave session
+			response.set_cookie('user_id', nil);
+			response.set_cookie('user_session', nil);
 			redirect '/'
 		end
 
@@ -148,7 +148,7 @@ module PoieticGen
 
 			rescue Exception => e
 				STDERR.puts e.inspect, e.backtrace
-				Process.exit! #FIXME: remove in prod mode
+				Process.exit! #FIXME: remove in prod mode ? :-)
 
 			ensure
 				return JSON.generate( result )
@@ -202,14 +202,14 @@ module PoieticGen
 				# FIXME: extract patches information
 				if settings.manager.update_lease! session then
 
-  				# FIXME: extract chat information
+					# FIXME: extract chat information
 
-				  data = JSON.parse(request.body.read)
-				  result = settings.manager.update_data session, data
+					data = JSON.parse(request.body.read)
+					result = settings.manager.update_data session, data
 
-        else
-          status = [ STATUS_REDIRECTION, "Session has expired !", "/"]
-        end
+				else
+					status = [ STATUS_REDIRECTION, "Session has expired !", "/"]
+				end
 
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors
