@@ -38,6 +38,7 @@ function ColorPicker(p_editor) {
         _color_picker.el.style.display = "none";
         $("#session-zone").live("pagehide", function (event) {
             self.hide();
+            $("#brush").removeClass( "ui-btn-active" );
         });
     };
 
