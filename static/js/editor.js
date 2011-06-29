@@ -312,8 +312,8 @@ function Editor( p_session, p_board, p_canvas_id ){
      */
     this.mouseup = function( event_obj ) { self.pencil_up( event_obj ); }
     this.touchstop = function( event_obj ) {
-        event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
-        event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
+        event_obj.mouseX = event_obj.touches[0].pageX - _real_canvas.offsetLeft;
+        event_obj.mouseY = event_obj.touches[0].pageY - _real_canvas.offsetTop;
         self.pencil_up( event_obj );
     }
 
@@ -327,8 +327,8 @@ function Editor( p_session, p_board, p_canvas_id ){
      */
     this.mousedown = function( event_obj ) { self.pencil_down( event_obj ); }
     this.touchstart = function( event_obj ) {
-        event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
-        event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
+        event_obj.mouseX = event_obj.touches[0].pageX - _real_canvas.offsetLeft;
+        event_obj.mouseY = event_obj.touches[0].pageY - _real_canvas.offsetTop;
         self.pencil_down( event_obj );
     }
 
@@ -344,8 +344,8 @@ function Editor( p_session, p_board, p_canvas_id ){
      */
     this.mousemove = function( event_obj ) { self.pencil_move( event_obj ); }
     this.touchmove = function( event_obj ) {
-        event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
-        event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
+        event_obj.mouseX = event_obj.touches[0].pageX - _real_canvas.offsetLeft;
+        event_obj.mouseY = event_obj.touches[0].pageY - _real_canvas.offsetTop;
         self.pencil_move( event_obj );
     }
 
