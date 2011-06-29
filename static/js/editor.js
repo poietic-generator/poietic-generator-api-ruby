@@ -315,7 +315,6 @@ function Editor( p_session, p_board, p_canvas_id ){
         event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
         event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
         self.pencil_up( event_obj );
-        event_obj.preventDefault();
     }
 
     this.pencil_up = function( event_obj ) {
@@ -331,7 +330,6 @@ function Editor( p_session, p_board, p_canvas_id ){
         event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
         event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
         self.pencil_down( event_obj );
-        event_obj.preventDefault();
     }
 
     this.pencil_down = function( event_obj ) {
@@ -349,7 +347,6 @@ function Editor( p_session, p_board, p_canvas_id ){
         event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
         event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
         self.pencil_move( event_obj );
-        event_obj.preventDefault();
     }
 
     this.pencil_move = function( event_obj ) {
@@ -447,6 +444,7 @@ function Editor( p_session, p_board, p_canvas_id ){
 
         var func = self[event_obj.type];
         if (func) { func( event_obj ); }
+        event_obj.preventDefault();
         // console.log("clicked at %s,%s", event_obj.mouseX, event_obj.mouseY );
     };
 

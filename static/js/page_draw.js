@@ -27,7 +27,7 @@ $(document).ready( function() {
     // hide iphone/ipad URL bar
     //setTimeout(function() { window.scrollTo(0, 1) }, 100);
 
-    $(".logout").click( function ( event ) {
+    $(".logout").bind( "vclick", function ( event ) {
         if (!confirm("Leave Poietic Generator?")) {
             return false;
         }
@@ -47,7 +47,7 @@ $(document).ready( function() {
 			var viewer = new Viewer( session, board, 'session-viewer', editor );
 
             //console.log("page_draw/ready: prepicker");
-            $("#brush").click( function( event ){
+            $("#brush").bind( "vclick", function( event ){
                 event.preventDefault();
                 if ( true === editor.is_color_picker_visible() ) {
                     return editor.hide_color_picker( this );
