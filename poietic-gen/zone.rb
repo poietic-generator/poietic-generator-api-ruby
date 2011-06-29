@@ -65,7 +65,7 @@ module PoieticGen
 					param_create = {
 						:color => color,
 						:changes => JSON.generate(changes).to_s,
-						:timestamp => timestamp.to_i, # FIXME : Timestamp shouldn't be given by the client...
+						:timestamp => Time.now.to_i,
 						:zone => user.zone
 					}
 					begin
