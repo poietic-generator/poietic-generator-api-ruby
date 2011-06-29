@@ -45,7 +45,7 @@ module PoieticGen
 		# This constant is the one used to check the leaved user, and generate
 		# events. This check is made in the update_data method. It will be done
 		# at min every LEAVE_CHECK_TIME_MIN days at a user update_data request.
-		LEAVE_CHECK_TIME_MIN = Rational(1,60*60*24)
+		LEAVE_CHECK_TIME_MIN = 1
 
 		def initialize config
 			@config = config
@@ -65,7 +65,7 @@ module PoieticGen
 
 			@chat = PoieticGen::ChatManager.new config.chat
 
-			@last_leave_check_time = DateTime.now - LEAVE_CHECK_TIME_MIN
+			@last_leave_check_time = Time.now - LEAVE_CHECK_TIME_MIN
 			@leave_mutex = Mutex.new
 
 			# FIXME put it in db
@@ -89,7 +89,7 @@ module PoieticGen
 				% [ req_id, req_session, req_name ]
 
 			user = nil
-			now = DateTime.now
+			now = Time.now
 			param_request = {
 				:id => req_id,
 				:session => @session_id
@@ -103,8 +103,8 @@ module PoieticGen
 				:session => @session_id,
 				:name => param_name,
 				:zone => -1,
-				:created_at => now,
-				:expires_at => (now + Rational(@config.user.max_idle, 60 * 60 * 24 )),
+				:created_at => now.to_i,
+				:expires_at => (now + @config.user.max_idle).to_i,
 				:did_expire => false
 			}
 
@@ -134,7 +134,8 @@ module PoieticGen
 			# kill all previous users having the same zone
 
 			# update expiration time
-			user.expires_at = (now + Rational(@config.user.max_idle, 60 * 60 * 24 ))
+			user.expires_at = (now + @config.user.max_idle)
+			rdebug "Set expiring at %s" % user.expires_at.to_s
 			# reset name if requested
 			user.name = param_name
 
@@ -219,7 +220,8 @@ module PoieticGen
 			user = User.first param_request
 			if user then
 				@board.leave user
-				user.expires_at = DateTime.now
+				user.expires_at = Time.now.to_i
+			  rdebug "Set expiring at %s" % user.expires_at.to_s
 				user.did_expire = true
 				Event.create_leave user.id, user.expires_at, user.zone
 				user.save
@@ -237,24 +239,28 @@ module PoieticGen
 		# no result expected
 		#
 		def update_lease! session
-			now = DateTime.now
+			now = Time.now.to_i
 
-			next_expires_at = (now + Rational(@config.user.max_idle, 60 * 60 * 24 ))
-			# rdebug "  Next expires at : %s" % next_expires_at.to_s
+			next_expires_at = (now + @config.user.max_idle)
+			rdebug "  Next expires at : %s (Now is %s)" % [
+			  next_expires_at.to_s, now.to_s]
 			param_request = {
 				:id => session[PoieticGen::Api::SESSION_USER],
 				:session => @session_id
 			}
 			user = User.first param_request
+			pp user
 			raise RuntimeError, "No user found with session_id %s in DB" % @session_id if user.nil?
 
-			if ( (now - user.expires_at) > 0  ) then
+			if ( (now.to_i - user.expires_at) > 0  ) then
 				# expired lease...
-				rdebug "User session expired"
+				rdebug "User session expired : %s - %s = %s" % [
+				  now, user.expires_at, (now - user.expires_at)]
 				return false
 			else
 				# rdebug "Updated lease for %s" % param_request
 				user.expires_at = next_expires_at
+			  rdebug "Set expiring at %s" % user.expires_at.to_s
 				user.save
 				return true
 			end
@@ -319,9 +325,24 @@ module PoieticGen
 			rdebug "call with %s" % params.inspect
 			req = SnapshotRequest.parse params
 
+			raise RuntimeError, "Invalid session" if req.session != @session_id
 
-			users = []
-			zones = []
+
+			if req.date == -1 then
+			  # get the current state
+			  users_db = User.all(
+				  :did_expire.not => true
+			  )
+			  users = users_db.map{ |u| u.to_hash }
+			  zones = users_db.map{ |u| @board[u.zone].to_desc_hash }
+			elsif req.date == 0 then
+			  # get the beginning state.
+			  users = []
+			  zones = []
+			else
+			  raise RuntimeError, "Invalide date, other than -1 and 0 is not supported"
+      end
+
 
 		  # TODO : must return : snapshot params (user, zone), start_time, and
 		  ### duration of the session since then.
@@ -330,6 +351,8 @@ module PoieticGen
 				:zones => zones,
 				:zone_column_count => @config.board.width,
 				:zone_line_count => @config.board.height,
+				:start_date => @session_start.to_i,
+				:duration => (Time.now - @session_start).to_i
       }
 
 			rdebug "returning : %s" % result.inspect
@@ -342,14 +365,36 @@ module PoieticGen
 			rdebug "call with %s" % params.inspect
 			req = PlayRequest.parse params
 
+			raise RuntimeError, "Invalid session" if req.session != @session_id
+
 			# request structure :
 			# req.since : date from where we want the params
 			# req.duration : amount of time we want.
 
-			# Server computes until : req.since + req.duration
+			pp req.since
+			pp req.duration
 
-			events_collection = []
-			strokes_collection = []
+
+			rdebug "req.since = %d ; req.duration = %d" % [req.since, req.duration]
+
+
+
+			evt_req = Event.all(
+			  :timestamp.gte => Time.at(req.since),
+			  :timestamp.lt => Time.at(req.since + req.duration)
+			)
+
+			pp evt_req
+
+			srk_req = Stroke.all(
+			  :timestamp.gte => Time.at(req.since),
+			  :timestamp.lt => Time.at(req.since + req.duration)
+			)
+
+			pp srk_req
+
+			events_collection = evt_req.map{ |e| e.to_hash @board}
+			strokes_collection = srk_req.map{ |s| s.to_hash }
 			#TODO : Get strokes [req.since..until]
 			#TODO : Get events [req.since..until]
 
@@ -365,20 +410,20 @@ module PoieticGen
 		end
 
 		def check_leaved_users
-			now = DateTime.now
+			now = Time.now
 			if @leave_mutex.try_lock then
-				# rdebug "Should check leavers : %s + %s < %s" % [
-				# 	@last_leave_check_time.to_s,
-				# 	LEAVE_CHECK_TIME_MIN.to_s,
-				# 	now.to_s
-				# ]
+				rdebug "Should check leavers : %s + %s < %s" % [
+					@last_leave_check_time.to_s,
+					LEAVE_CHECK_TIME_MIN.to_s,
+					now.to_s
+				]
 				if (@last_leave_check_time + LEAVE_CHECK_TIME_MIN) < now then
 					# Get the users which has not been already declared as
 					newly_expired_users = User.all(
 						:did_expire => false,
 						:expires_at.lte => now
 					)
-					# pp newly_expired_users
+					 pp newly_expired_users
 					newly_expired_users.each do |leaver|
 						session = {}
 						session[PoieticGen::Api::SESSION_USER] = leaver.id

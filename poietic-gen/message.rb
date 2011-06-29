@@ -33,7 +33,7 @@ module PoieticGen
 		property :user_src,	Integer, :required => true
 		property :user_dst,	Integer, :required => true
 		property :content, Text, :required => true
-		property :stamp,	DateTime, :required => true
+		property :stamp,	Time, :required => true
 
 
 		def to_hash

@@ -32,14 +32,14 @@ module PoieticGen
 		property :id,	Serial
 		property :type,	String, :required => true
 		property :desc, String, :required => true
-		property :timestamp,	DateTime
+		property :timestamp, Integer, :required => true
 
 
 		def self.create_join uid, uzone
 			event = Event.create({
 				:type => 'join',
 				:desc => JSON.generate({ :user => uid, :zone => uzone }),
-				:timestamp => DateTime.now
+				:timestamp => Time.now.to_i
 			})
 			event.save
 		end

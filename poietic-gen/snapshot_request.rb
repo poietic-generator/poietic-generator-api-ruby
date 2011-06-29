@@ -65,7 +65,7 @@ module PoieticGen
 		end
 
 		def date
-			return @hash[DATE]
+			return @hash[DATE].to_i
 		end
 
 	end

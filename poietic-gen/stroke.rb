@@ -32,7 +32,7 @@ module PoieticGen
 		property :zone, Integer, :required => true
 		property :color, String, :required => true
 		property :changes, Text, :required => true, :lazy => false
-		property :timestamp,	DateTime
+		property :timestamp, Integer, :required => true
 
 		def to_hash
 			res = {

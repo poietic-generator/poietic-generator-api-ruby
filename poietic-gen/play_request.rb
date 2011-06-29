@@ -65,11 +65,11 @@ module PoieticGen
 
 
 		def since
-			return @hash[SINCE]
+			return @hash[SINCE].to_i
 		end
 
 		def duration
-			return @hash[DURATION]
+			return @hash[DURATION].to_i
 		end
 
 		def session
