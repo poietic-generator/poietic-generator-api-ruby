@@ -42,7 +42,7 @@ function ColorPicker(p_editor) {
         });
     };
 
-    this.hide = function (p_link) {
+    this.hide = function () {
         $(_color_picker.el).hide();
     };
 
@@ -50,21 +50,16 @@ function ColorPicker(p_editor) {
         return $(_color_picker.el).is(":visible");
     };
 
-    this.set_color = function ( color ) {
-        $("#current_color").css( "background-color",  color );
-        _editor.color_set( color );
-    };
-
-    this.show = function (p_link) {
+    this.show = function () {
         $(_color_picker.el).show();
     };
 
     this.update_size = function(p_canvas) {
-        var offset = $(p_canvas).offset();
+        var position = $(p_canvas).position();
         // position
         _color_picker.el.style.position = "absolute";
-        _color_picker.el.style.top = offset.top + "px";
-        _color_picker.el.style.left = offset.left + "px";
+        _color_picker.el.style.top = position.top + "px";
+        _color_picker.el.style.left = position.left + "px";
         // resize
         _color_picker.resize($(p_canvas).width() - _color_picker.margin * 2 - _color_picker.hueWidth);
     };
