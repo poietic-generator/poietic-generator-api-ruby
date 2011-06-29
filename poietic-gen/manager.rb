@@ -32,6 +32,8 @@ require 'poietic-gen/chat_manager'
 require 'poietic-gen/message'
 require 'poietic-gen/stroke'
 require 'poietic-gen/update_request'
+require 'poietic-gen/snapshot_request'
+require 'poietic-gen/play_request'
 
 module PoieticGen
 
@@ -305,6 +307,56 @@ module PoieticGen
 				:strokes => strokes_collection,
 				:messages => messages_collection,
 				:stamp => (Time.now - @session_start).to_i
+			}
+
+			rdebug "returning : %s" % result.inspect
+
+			return result
+		end
+
+		def snapshot session, params
+
+			rdebug "call with %s" % data.inspect
+			req = SnapshotRequest.parse data
+
+
+			users = []
+			zones = []
+
+		  # TODO : must return : snapshot data (user, zone), start_time, and
+		  ### duration of the session since then.
+		  result = {
+				:users => users,
+				:zones => zones,
+				:zone_column_count => @config.board.width,
+				:zone_line_count => @config.board.height,
+      }
+
+			rdebug "returning : %s" % result.inspect
+
+      return result
+		end
+
+		def play session, data
+
+			rdebug "call with %s" % data.inspect
+			req = PlayRequest.parse data
+
+			# request structure :
+			# req.since : date from where we want the data
+			# req.duration : amount of time we want.
+
+			# Server computes until : req.since + req.duration
+
+			events_collection = []
+			strokes_collection = []
+			#TODO : Get strokes [req.since..until]
+			#TODO : Get events [req.since..until]
+
+			result = {
+				:events => events_collection,
+				:strokes => strokes_collection,
+				:duration => (Time.now - @session_start).to_i
 			}
 
 			rdebug "returning : %s" % result.inspect
