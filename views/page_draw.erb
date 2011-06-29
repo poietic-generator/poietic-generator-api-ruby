@@ -22,9 +22,9 @@
 
 
 <!-- drawing zone -->
-<div id="session-zone" data-role="page">
+<div id="session-zone" data-role="page" data-fullscreen="true">
     <div data-role="header" data-id="head" data-position="fixed">
-        <a href="#" id="brush"><span id="current_color">&nbsp;&nbsp;&nbsp;&nbsp;</span>Color</a>
+        <a href="#" id="brush" data-ajax="false"><span id="current_color">&nbsp;&nbsp;&nbsp;&nbsp;</span>Color</a>
         <h1 class="username"></h1>
         <a href="/page/logout" data-ajax="false" class="ui-btn-right logout">Logout</a>
         <div data-role="navbar">
@@ -44,7 +44,7 @@
     </div>
 </div>
 <!-- chat zone -->
-<div id="session-chat" data-role="page">
+<div id="session-chat" data-role="page" data-fullscreen="true">
     <div data-role="header" data-id="head" data-position="fixed">
         <h1 class="username"></h1>
         <a href="/page/logout" data-ajax="false" class="ui-btn-right logout">Logout</a>

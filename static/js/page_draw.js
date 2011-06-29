@@ -27,7 +27,7 @@ $(document).ready( function() {
     // hide iphone/ipad URL bar
     //setTimeout(function() { window.scrollTo(0, 1) }, 100);
 
-    $(".logout").click( function ( event ) {
+    $(".logout").bind( "click", function ( event ) {
         if (!confirm("Leave Poietic Generator?")) {
             return false;
         }
@@ -42,21 +42,17 @@ $(document).ready( function() {
 
             var board = new Board( session );
             var editor = new Editor( session, board, 'session-editor' );
-            var color_picker = new ColorPicker( editor );
+            //var color_picker = new ColorPicker( editor );
             var chat = new Chat( session);
-			var viewer = new Viewer( session, board, 'session-viewer', color_picker );
+			var viewer = new Viewer( session, board, 'session-viewer', editor );
 
             //console.log("page_draw/ready: prepicker");
-            $("#brush").click( function( event ){
+            $("#brush").bind( "vclick", function( event ){
                 event.preventDefault();
-                if ( true === color_picker.is_visible() ) {
-                    color_picker.hide( this );
-                    $(this).removeClass( "ui-btn-active" );
-                    return false;
+                if ( true === editor.is_color_picker_visible() ) {
+                    return editor.hide_color_picker( this );
                 } else {
-                    color_picker.show( this );
-                    $(this).addClass( "ui-btn-active" );
-                    return true;
+                    return editor.show_color_picker( this );
                 }
             });
         }

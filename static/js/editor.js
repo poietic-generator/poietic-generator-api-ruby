@@ -49,6 +49,7 @@ function Editor( p_session, p_board, p_canvas_id ){
     var _line_size;
 
     var _current_zone;
+    var _color_picker;
 
     this.name = "Editor";
     this.column_count = null;
@@ -67,6 +68,8 @@ function Editor( p_session, p_board, p_canvas_id ){
         console.log("editor/initialize : _current_zone = %s", _current_zone);
         _board = p_board;
         _color = '#f00';
+
+        _color_picker = new ColorPicker( this );
 
         _pencil_move = {
             enable : false
@@ -267,7 +270,7 @@ function Editor( p_session, p_board, p_canvas_id ){
             }
         }
 
-    }
+    };
 
 
     /**
@@ -301,6 +304,7 @@ function Editor( p_session, p_board, p_canvas_id ){
         ctx.fillRect(0, 0, real_canvas.width, real_canvas.height);
 
         self.draw_grid();
+        this.update_color_picker_size();
     };
 
     /**
@@ -308,10 +312,9 @@ function Editor( p_session, p_board, p_canvas_id ){
      */
     this.mouseup = function( event_obj ) { self.pencil_up( event_obj ); }
     this.touchstop = function( event_obj ) {
-        event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
-        event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
+        event_obj.mouseX = event_obj.touches[0].pageX - _real_canvas.offsetLeft;
+        event_obj.mouseY = event_obj.touches[0].pageY - _real_canvas.offsetTop;
         self.pencil_up( event_obj );
-        event_obj.preventDefault();
     }
 
     this.pencil_up = function( event_obj ) {
@@ -324,10 +327,9 @@ function Editor( p_session, p_board, p_canvas_id ){
      */
     this.mousedown = function( event_obj ) { self.pencil_down( event_obj ); }
     this.touchstart = function( event_obj ) {
-        event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
-        event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
+        event_obj.mouseX = event_obj.touches[0].pageX - _real_canvas.offsetLeft;
+        event_obj.mouseY = event_obj.touches[0].pageY - _real_canvas.offsetTop;
         self.pencil_down( event_obj );
-        event_obj.preventDefault();
     }
 
     this.pencil_down = function( event_obj ) {
@@ -342,10 +344,9 @@ function Editor( p_session, p_board, p_canvas_id ){
      */
     this.mousemove = function( event_obj ) { self.pencil_move( event_obj ); }
     this.touchmove = function( event_obj ) {
-        event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
-        event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
+        event_obj.mouseX = event_obj.touches[0].pageX - _real_canvas.offsetLeft;
+        event_obj.mouseY = event_obj.touches[0].pageY - _real_canvas.offsetTop;
         self.pencil_move( event_obj );
-        event_obj.preventDefault();
     }
 
     this.pencil_move = function( event_obj ) {
@@ -427,6 +428,7 @@ function Editor( p_session, p_board, p_canvas_id ){
         // FIXME:
         console.log("editor/color_set: requestion patch enqueue")
         _board.get_zone(_current_zone).patch_enqueue();
+        $("#current_color").css( "background-color",  _color );
     }
 
 
@@ -442,6 +444,7 @@ function Editor( p_session, p_board, p_canvas_id ){
 
         var func = self[event_obj.type];
         if (func) { func( event_obj ); }
+        event_obj.preventDefault();
         // console.log("clicked at %s,%s", event_obj.mouseX, event_obj.mouseY );
     };
 
@@ -480,9 +483,30 @@ function Editor( p_session, p_board, p_canvas_id ){
         var strokes = _board.get_zone(_current_zone).patches_get()
         console.log("editor/get_strokes: strokes = %s", JSON.stringify(strokes) );
         return strokes;
-    }
+    };
+
+
+    this.update_color_picker_size = function () {
+        _color_picker.update_size( _real_canvas );
+    };
+
+
+    this.hide_color_picker = function ( p_link ) {
+        _color_picker.hide();
+        $( p_link ).removeClass( "ui-btn-active" );
+        return false;
+    };
+
+    this.is_color_picker_visible = function () {
+        return _color_picker.is_visible();
+    };
+
+    this.show_color_picker = function ( p_link ) {
+        _color_picker.show();
+        $( p_link ).addClass( "ui-btn-active" );
+        return true;
+    };
 
     // call constructor
     this.initialize(p_session, p_board, p_canvas_id);
 }
-

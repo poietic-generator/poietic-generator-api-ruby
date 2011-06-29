@@ -26,7 +26,7 @@
 var POSITION_TYPE_DRAWING = 0;
 var POSITION_TYPE_ZONE = 0;
 
-function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
+function Viewer( p_session, p_board, p_canvas_id, p_editor ){
     //var console = { log: function() {} };
 
     var self = this;
@@ -41,7 +41,7 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
     var _current_zone;
     var _boundaries;
 
-    var _color_picker = null;
+    var _editor = null;
 
     this.name = "Viewer";
     this.column_count = null;
@@ -53,8 +53,8 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
     /**
      * Constructor
      */
-    this.initialize = function( p_session, p_board, p_canvas_id, p_color_picker ) {
-        _color_picker = p_color_picker;
+    this.initialize = function( p_session, p_board, p_canvas_id, p_editor ) {
+        _editor = p_editor;
 
         _boundaries = {
             xmin: 0,
@@ -106,6 +106,9 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
 
         self.update_size();
         self.update_paint();
+
+        // update color picker's size for correct positionning
+        _editor.update_color_picker_size();
     }
 
 
@@ -239,8 +242,6 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
         var ctx = _real_canvas.getContext("2d");
         ctx.fillStyle = '#200';
         ctx.fillRect(0, 0, _real_canvas.width, _real_canvas.height);
-
-        _color_picker.update_size( _real_canvas );
     };
 
 
@@ -344,7 +345,7 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
             var color = _board.get_zone(target_zone.index).pixel_get( zone_pos );
             console.log("viewer/pencil_move: color = %s", color);
 
-            _color_picker.set_color( color );
+            _editor.color_set( color );
         }
     };
 
@@ -437,6 +438,6 @@ function Viewer( p_session, p_board, p_canvas_id, p_color_picker ){
     };
 
     // call constructor
-    this.initialize(p_session, p_board, p_canvas_id, p_color_picker);
+    this.initialize(p_session, p_board, p_canvas_id, p_editor);
 }
 

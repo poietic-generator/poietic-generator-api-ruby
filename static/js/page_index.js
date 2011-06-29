@@ -40,7 +40,7 @@ $(document).ready(function() {
         setUsernameCookie();
         document.location = $(this).attr("action");
     });
-    $("#link_play").click(function (event) {
+    $("#link_play").bind( "vclick", function (event) {
         setUsernameCookie();
         return true;
     });
