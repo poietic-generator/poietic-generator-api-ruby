@@ -24,6 +24,7 @@ module PoieticGen
 	class SnapshotRequest
 
 		DATE = 'date'
+		SESSION = 'session'
 
 		private
 
@@ -40,13 +41,16 @@ module PoieticGen
 				case key
 				when DATE then
 					rdebug "date : %s" % val.inspect
+				when SESSION then
+					rdebug "session : %s" % val.inspect
 				else
 					raise RuntimeError, "unknow request field '%s'" % key
 				end
 			end
 
 			[
-				DATE
+				DATE,
+				SESSION
 			].each do |field|
 				unless hash.include? field then
 					raise ArgumentError, ("The '%s' field is missing" % field)
@@ -55,6 +59,10 @@ module PoieticGen
 			SnapshotRequest.new hash
 		end
 
+
+		def session
+			return @hash[SESSION]
+		end
 
 		def date
 			return @hash[DATE]

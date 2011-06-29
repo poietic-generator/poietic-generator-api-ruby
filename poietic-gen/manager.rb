@@ -316,14 +316,14 @@ module PoieticGen
 
 		def snapshot session, params
 
-			rdebug "call with %s" % data.inspect
-			req = SnapshotRequest.parse data
+			rdebug "call with %s" % params.inspect
+			req = SnapshotRequest.parse params
 
 
 			users = []
 			zones = []
 
-		  # TODO : must return : snapshot data (user, zone), start_time, and
+		  # TODO : must return : snapshot params (user, zone), start_time, and
 		  ### duration of the session since then.
 		  result = {
 				:users => users,
@@ -337,13 +337,13 @@ module PoieticGen
       return result
 		end
 
-		def play session, data
+		def play session, params
 
-			rdebug "call with %s" % data.inspect
-			req = PlayRequest.parse data
+			rdebug "call with %s" % params.inspect
+			req = PlayRequest.parse params
 
 			# request structure :
-			# req.since : date from where we want the data
+			# req.since : date from where we want the params
 			# req.duration : amount of time we want.
 
 			# Server computes until : req.since + req.duration

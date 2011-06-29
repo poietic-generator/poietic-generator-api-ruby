@@ -21,10 +21,11 @@
 ##############################################################################
 
 module PoieticGen
-	class SnapshotRequest
+	class PlayRequest
 
 		SINCE = 'since'
 		DURATION = 'duration'
+		SESSION = 'session'
 
 		private
 
@@ -43,6 +44,8 @@ module PoieticGen
 					rdebug "since : %s" % val.inspect
 				when DURATION then
 					rdebug "duration : %s" % val.inspect
+				when SESSION then
+					rdebug "session : %s" % val.inspect
 				else
 					raise RuntimeError, "unknow request field '%s'" % key
 				end
@@ -50,7 +53,8 @@ module PoieticGen
 
 			[
 				SINCE,
-				DURATION
+				DURATION,
+				SESSION
 			].each do |field|
 				unless hash.include? field then
 					raise ArgumentError, ("The '%s' field is missing" % field)
@@ -64,9 +68,12 @@ module PoieticGen
 			return @hash[SINCE]
 		end
 
-	end
 		def duration
 			return @hash[DURATION]
+		end
+
+		def session
+			return @hash[SESSION]
 		end
 
 	end

@@ -234,16 +234,15 @@ module PoieticGen
 			end
 		end
 
-		post '/api/session/play' do
+		#
+		# get a snapshot from the server.
+		#
+		get '/api/session/snapshot' do
 			begin
 				result = {}
 				# verify session expiration..
-				validate_session! session
 				status = [ STATUS_SUCCESS ]
-
-
-				data = JSON.parse(request.body.read)
-				result = settings.manager.play session, data
+        result = settings.manager.snapshot session, params
 
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors
@@ -253,6 +252,47 @@ module PoieticGen
 			rescue ArgumentError => e
 				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_BAD_REQUEST, "Invalid content" ]
+
+			rescue RuntimeError => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_BAD_REQUEST, "Invalid argument" ]
+
+			rescue Exception => e
+				# handle non-JSON parsing errors
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_SERVER_ERROR, "Server error" ]
+				Process.exit! #FIXME: remove in prod mode
+
+			ensure
+				# force status of result
+				result[:status] = status
+				return JSON.generate( result )
+			end
+		end
+
+
+		get '/api/session/play' do
+			begin
+				result = {}
+				# verify session expiration..
+				validate_session! session
+				status = [ STATUS_SUCCESS ]
+
+
+				result = settings.manager.play session, params
+
+			rescue JSON::ParserError => e
+				# handle non-JSON parsing errors
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_BAD_REQUEST, "Invalid content : JSON expected" ]
+
+			rescue ArgumentError => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_BAD_REQUEST, "Invalid content" ]
+
+			rescue RuntimeError => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_BAD_REQUEST, "Invalid argument" ]
 
 			rescue Exception => e
 				# handle non-JSON parsing errors
