@@ -22,26 +22,51 @@
 
 // use phantomjs
 
-var BASE_URL = "http://localhost:9393";
+var BASE_URL = "http://localhost:9393/";
+
+phantom.click = function ( el ) {
+	var evt = document.createEvent('MouseEvents');
+	evt.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0,
+			false, false, false, false, 0, null);
+	el.dispatchEvent(evt);
+}
 
 if (phantom.state.length === 0) {
 	console.log("Setting up Phantom...");
+	var r = Math.floor( Math.random() * 256 ).toString(16);
+	var g = Math.floor( Math.random() * 256 ).toString(16);
+	var b = Math.floor( Math.random() * 256 ).toString(16);
+	phantom.state = "#" + r + g + b;
 
 	phantom.open( BASE_URL );
 
 } else {
+	console.log( "[color] " + phantom.state );
+	console.log( "[url] " + document.location.href );
 
 	if ( document.location.href == BASE_URL ) {
 		// on base url
 		// set username (bot + date)
 		// set logout date
 		// validate
+		var username_elem = document.getElementById('username');
+		var play_elem = document.getElementById('link_play');
+		username_elem.value = "bot_" + phantom.state;
 
+		phantom.click( play_elem );
+
+
+	} else if ( document.location.href.match( /\/page\/draw$/ ) ) {
 		// on drawing page
-		// pick a color
+		// set color
 		// generate a random number of strokes in editor
 		//   set a direction
 		//   continue in that direction
+		var editor = document.getElementById('session-editor');
+		// console.log( "  [canvas] width" + canvas_elem.width );
+		// console.log( document.body.innerHTML );
+		console.log( editor );
+
 	} else {
 		console.log("  [oops] unknown page");
 		phantom.exit();
