@@ -21,6 +21,8 @@
 /******************************************************************************/
 
 var session = null;
+var viewer = null;
+var board = null;
 
 // instead of windows.onload
 $(document).ready( function() {
@@ -28,11 +30,11 @@ $(document).ready( function() {
     //setTimeout(function() { window.scrollTo(0, 1) }, 100);
 
     // initialize zoness
-    sessionF = new ViewSession(
+    session = new ViewSession(
         function( session ) {
             //console.log("page_draw/ready: session callback ok");
-            var board = new Board( session );
-			var viewer = new Viewer( session, board, 'session-viewer', color_picker );
+            board = new Board( session );
+			viewer = new Viewer( session, board, 'session-viewer', color_picker );
             //console.log("page_draw/ready: prepicker");
         }
     );

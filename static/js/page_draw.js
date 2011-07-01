@@ -21,6 +21,10 @@
 /******************************************************************************/
 
 var session = null;
+var viewer = null;
+var board = null;
+var editor = null;
+var chat = null;
 
 // instead of windows.onload
 $(document).ready( function() {
@@ -35,16 +39,16 @@ $(document).ready( function() {
     });
 
     // initialize zoness
-    sessionF = new DrawSession(
+    session = new DrawSession(
         function( session ) {
             //console.log("page_draw/ready: session callback ok");
             $(".username").text(session.user_name);
 
-            var board = new Board( session );
-            var editor = new Editor( session, board, 'session-editor' );
+            board = new Board( session );
+            editor = new Editor( session, board, 'session-editor' );
             //var color_picker = new ColorPicker( editor );
-            var chat = new Chat( session);
-			var viewer = new Viewer( session, board, 'session-viewer', editor );
+            chat = new Chat( session);
+			viewer = new Viewer( session, board, 'session-viewer', editor );
 
             //console.log("page_draw/ready: prepicker");
             $("#brush").bind( "vclick", function( event ){
