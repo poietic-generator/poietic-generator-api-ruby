@@ -22,3 +22,29 @@
 
 // use phantomjs
 
+var BASE_URL = "http://localhost:9393";
+
+if (phantom.state.length === 0) {
+	console.log("Setting up Phantom...");
+
+	phantom.open( BASE_URL );
+
+} else {
+
+	if ( document.location.href == BASE_URL ) {
+		// on base url
+		// set username (bot + date)
+		// set logout date
+		// validate
+
+		// on drawing page
+		// pick a color
+		// generate a random number of strokes in editor
+		//   set a direction
+		//   continue in that direction
+	} else {
+		console.log("  [oops] unknown page");
+		phantom.exit();
+	}
+
+}
