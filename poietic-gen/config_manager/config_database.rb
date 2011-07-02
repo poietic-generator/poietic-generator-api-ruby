@@ -43,6 +43,7 @@ module PoieticGen ; class ConfigManager
 				@username = nil
 				@password = nil
 			when "mysql" then
+				@adapter = 'mysql'
 				raise MissingField, "database.host" unless hash.include? "host"
 				@host = hash["host"]
 				raise MissingField, "database.username" unless hash.include? "username"
@@ -74,6 +75,8 @@ module PoieticGen ; class ConfigManager
 					"password"  => @password,
 					"host"      => @host
 				}
+			else
+				raise UnknownAdapter, @adapter
 			end
 		end
 
