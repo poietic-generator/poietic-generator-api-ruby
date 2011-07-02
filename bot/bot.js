@@ -62,10 +62,26 @@ if (phantom.state.length === 0) {
 		// generate a random number of strokes in editor
 		//   set a direction
 		//   continue in that direction
-		var editor = document.getElementById('session-editor');
+		//var editor = document.getElementById('session-editor');
 		// console.log( "  [canvas] width" + canvas_elem.width );
 		// console.log( document.body.innerHTML );
-		console.log( editor );
+		//editor.color_set( phantom.state );
+
+		var stroke = function() {
+			var local_pos = { 
+				x: Math.floor( Math.random() * editor.column_count ),
+				y: Math.floor( Math.random() * editor.line_count )
+			};
+
+			is_black = ( Math.floor( Math.random() * 20 ) > 10 ) ;
+			if (is_black) {
+				editor.pixel_set( local_pos, "#000" );
+			} else {
+				editor.pixel_set( local_pos, phantom.state );
+			}
+			setTimeout( stroke, 100 );
+		}
+		setTimeout( stroke, 100 );
 
 	} else {
 		console.log("  [oops] unknown page");
