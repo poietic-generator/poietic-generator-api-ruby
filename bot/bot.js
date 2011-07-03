@@ -36,12 +36,12 @@ if (phantom.state.length === 0) {
 	var r = Math.floor( Math.random() * 256 ).toString(16);
 	var g = Math.floor( Math.random() * 256 ).toString(16);
 	var b = Math.floor( Math.random() * 256 ).toString(16);
-	phantom.state = "#" + r + g + b;
+	phantom.state = r + g + b;
 
 	phantom.open( BASE_URL );
 
 } else {
-	console.log( "[color] " + phantom.state );
+	console.log( "[color] #" + phantom.state );
 	console.log( "[url] " + document.location.href );
 
 	if ( document.location.href == BASE_URL ) {
@@ -73,11 +73,11 @@ if (phantom.state.length === 0) {
 				y: Math.floor( Math.random() * editor.line_count )
 			};
 
-			is_black = ( Math.floor( Math.random() * 20 ) > 10 ) ;
+			is_black = ( Math.floor( Math.random() * 20 ) > 5 ) ;
 			if (is_black) {
 				editor.pixel_set( local_pos, "#000" );
 			} else {
-				editor.pixel_set( local_pos, phantom.state );
+				editor.pixel_set( local_pos, "#" + phantom.state );
 			}
 			setTimeout( stroke, 100 );
 		}
