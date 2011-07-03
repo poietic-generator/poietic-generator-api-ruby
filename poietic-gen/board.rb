@@ -61,6 +61,13 @@ module PoieticGen
 			return @allocator[idx]
 		end
 
+		def include? idx
+			@monitor.synchronize do
+				val = @allocator[idx]
+				return (not val.nil?)
+			end
+		end
+
 		#
 		# make the user join the board
 		#
