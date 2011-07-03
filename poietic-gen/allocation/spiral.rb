@@ -95,7 +95,11 @@ module PoieticGen ; module Allocation
 
 
 		def [] index
-			return @zones[index]
+			res = if @zones.include? index then
+				@zones[index]
+			else nil
+			end
+			return res
 		end
 
 
