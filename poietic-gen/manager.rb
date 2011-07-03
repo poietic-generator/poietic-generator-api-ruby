@@ -226,14 +226,17 @@ module PoieticGen
 
 			param_request = {
 				:id => session[PoieticGen::Api::SESSION_USER],
-				:session => @session_id
+				:session => session[PoieticGen::Api::SESSION_SESSION]
 			}
 			user = User.first param_request
 			if user then
 				@board.leave user
 				user.expires_at = Time.now.to_i
 				user.did_expire = true
-				Event.create_leave user.id, user.expires_at, user.zone
+				# create leave event if session is the current one
+				if session[PoieticGen::Api::SESSION_SESSION] == @session_id then
+					Event.create_leave user.id, user.expires_at, user.zone
+				end
 				user.save
 			else
 				rdebug "Could not find any user for this request";
