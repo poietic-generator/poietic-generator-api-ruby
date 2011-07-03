@@ -120,10 +120,10 @@ module PoieticGen
 				rdebug "User is in session"
 				user = User.first_or_create param_request, param_create
 
-				res = (now - user.expires_at)
+				tdiff = (now.to_i - user.expires_at)
 				require 'pp'
-				pp res
-				if ( res > 0  ) then
+				pp [ now.to_i, user.expires_at, tdiff ]
+				if ( tdiff > 0  ) then
 					# The event will be generated elsewhere (in update_data).
 					rdebug "User session expired"
 					# create new if session expired
