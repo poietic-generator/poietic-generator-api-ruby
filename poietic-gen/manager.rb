@@ -182,23 +182,15 @@ module PoieticGen
 							  end
 						  end
 
-			# return users & zones
+			# clean-up users first
+			check_expired_users
+
+			# get real users
 			users_db = User.all(
 				:did_expire.not => true,
 				:id.not => user.id
 			)
-			# FIXME
-			users_db.select! do |u|
-				# verify that user really has a zone in that program instance
-				has_zone = @board.include? u.zone
-				# disable users without a zone
-				if not has_zone then
-					# kill user
-				end
-				has_zone
-			end
 			other_users = users_db.map{ |u| u.to_hash }
-
 			other_zones = users_db.map{ |u|	
 				puts "requesting zone for %s" % u.inspect
 				@board[u.zone].to_desc_hash 
@@ -291,7 +283,7 @@ module PoieticGen
 			}
 			user = User.first param_request
 
-			self.check_leaved_users
+			self.check_expired_users
 
 			rdebug "updating with : %s" % data.inspect
 			req = UpdateRequest.parse data
@@ -415,26 +407,35 @@ module PoieticGen
 			return result
 		end
 
-		def check_leaved_users
+		def check_expired_users
 			now = Time.now.to_i
 			if @leave_mutex.try_lock then
-				# rdebug "Should check leavers : %s + %s < %s" % [
-				# 	@last_leave_check_time.to_s,
-				# 	LEAVE_CHECK_TIME_MIN.to_s,
-				# 	now.to_s
-				# ]
+				# remove users without a zone
+				users_db = User.all( :did_expire.not => true )
+				users_db.each do |u|
+					# verify that user really has a zone in that program instance
+					has_zone = @board.include? u.zone
+					# disable users without a zone
+					if not has_zone then
+						# kill non-existant user
+						u.expires_at = Time.now.to_i
+						u.did_expire = true
+						u.save
+					end
+				end
+
+				# remove expired users that have not yet been declared as expired
 				if (@last_leave_check_time + LEAVE_CHECK_TIME_MIN) < now then
-					# Get the users which has not been already declared as
 					newly_expired_users = User.all(
 						:did_expire => false,
 						:expires_at.lte => now
 					)
 					rdebug "New expired list : %s" % newly_expired_users.inspect
 					newly_expired_users.each do |leaver|
-						session = {}
-						session[PoieticGen::Api::SESSION_USER] = leaver.id
-						session[PoieticGen::Api::SESSION_SESSION] = leaver.session
-						self.leave session
+						fake_session = {}
+						fake_session[PoieticGen::Api::SESSION_USER] = leaver.id
+						fake_session[PoieticGen::Api::SESSION_SESSION] = leaver.session
+						self.leave fake_session
 					end
 					@last_leave_check_time = now
 				end
