@@ -188,7 +188,9 @@ module PoieticGen
 			# get real users
 			users_db = User.all(
 				:did_expire.not => true,
-				:id.not => user.id
+				:id.not => user.id,
+				:session => @session_id,
+				:zone.gte => 0
 			)
 			other_users = users_db.map{ |u| u.to_hash }
 			other_zones = users_db.map{ |u|	
