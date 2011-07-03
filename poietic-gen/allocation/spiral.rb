@@ -107,23 +107,21 @@ module PoieticGen ; module Allocation
 		# return index to position
 		#
 		def index_to_position idx
-			@monitor.synchronize do 
-				dir = V.new( 1, 0 )
-				pos = V.new( 0, 0 )
-				# rdebug "%s => %s" % [ 0, pos ]
-				idx.times do |cnt|
-					pos += dir
-					# rdebug "%s => %s" % [ cnt + 1, pos ]
-					if pos.x.abs == pos.y.abs then
-						unless ( pos.y <= 0 and pos.x == -pos.y ) then
-							dir.rotate_left!
-						end
-					elsif ( pos.y <= 0 and pos.x == -pos.y + 1 ) then
+			dir = V.new( 1, 0 )
+			pos = V.new( 0, 0 )
+			# rdebug "%s => %s" % [ 0, pos ]
+			idx.times do |cnt|
+				pos += dir
+				# rdebug "%s => %s" % [ cnt + 1, pos ]
+				if pos.x.abs == pos.y.abs then
+					unless ( pos.y <= 0 and pos.x == -pos.y ) then
 						dir.rotate_left!
 					end
+				elsif ( pos.y <= 0 and pos.x == -pos.y + 1 ) then
+					dir.rotate_left!
 				end
-				return pos.to_a
 			end
+			return pos.to_a
 		end
 
 
@@ -131,25 +129,23 @@ module PoieticGen ; module Allocation
 		# return position from index
 		#
 		def position_to_index x, y
-			@monitor.synchronize do 
-				dir = V.new( 1, 0 )
-				pos = V.new( 0, 0 )
-				idx = 0
-				# rdebug "%s => %s" % [ 0, pos ]
-				while ( pos.x != x or pos.y != y ) do
-					idx += 1
-					pos += dir
-					# rdebug "%s => %s" % [ cnt + 1, pos ]
-					if pos.x.abs == pos.y.abs then
-						unless ( pos.y <= 0 and pos.x == -pos.y ) then
-							dir.rotate_left!
-						end
-					elsif ( pos.y <= 0 and pos.x == -pos.y + 1 ) then
+			dir = V.new( 1, 0 )
+			pos = V.new( 0, 0 )
+			idx = 0
+			# rdebug "%s => %s" % [ 0, pos ]
+			while ( pos.x != x or pos.y != y ) do
+				idx += 1
+				pos += dir
+				# rdebug "%s => %s" % [ cnt + 1, pos ]
+				if pos.x.abs == pos.y.abs then
+					unless ( pos.y <= 0 and pos.x == -pos.y ) then
 						dir.rotate_left!
 					end
+				elsif ( pos.y <= 0 and pos.x == -pos.y + 1 ) then
+					dir.rotate_left!
 				end
-				return idx
 			end
+			return idx
 		end
 
 
@@ -158,16 +154,18 @@ module PoieticGen ; module Allocation
 		# a zone                
 		#
 		def allocate
-			next_index = _next_index()
+			@monitor.synchronize do
+				next_index = _next_index()
 
-			zone = Zone.new next_index, 
-				(self.index_to_position next_index),
-				@config.width,
-				@config.height
+				zone = Zone.new next_index, 
+					(self.index_to_position next_index),
+					@config.width,
+					@config.height
 
-			rdebug "Spiral/allocate zone : ", zone.inspect
-			@zones[next_index] = zone
-			return zone
+				rdebug "Spiral/allocate zone : ", zone.inspect
+				@zones[next_index] = zone
+				return zone
+			end
 		end
 
 		#
@@ -190,7 +188,7 @@ module PoieticGen ; module Allocation
 
 			@monitor.synchronize do
 				# find a nil zone first
-				nil_zones = @zones.select{ |idx,zone| zone.nil? }
+				nil_zones = @zones.select{ |idx,zone| zone.user.nil? }
 				if nil_zones.size > 0 then
 					# got an unallocated zone !
 					result_index = nil_zones.first[0]
@@ -201,8 +199,6 @@ module PoieticGen ; module Allocation
 			end
 			return result_index
 		end
-
-
 
 	end
 end ; end
