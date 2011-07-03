@@ -170,9 +170,11 @@ module PoieticGen ; module Allocation
 		#
 		#
 		def free zone_idx
-			zone = @zones[zone_idx]
-			zone.user = nil
-			@zones[zone_idx]
+			@monitor.synchronize do
+				zone = @zones[zone_idx]
+				zone.user = nil
+				return zone
+			end
 		end
 
 		private
