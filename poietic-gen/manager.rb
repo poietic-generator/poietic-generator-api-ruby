@@ -187,8 +187,22 @@ module PoieticGen
 				:did_expire.not => true,
 				:id.not => user.id
 			)
+			# FIXME
+			users_db.select! do |u|
+				# verify that user really has a zone in that program instance
+				has_zone = @board.include? u.zone
+				# disable users without a zone
+				if not has_zone then
+					# kill user
+				end
+				has_zone
+			end
 			other_users = users_db.map{ |u| u.to_hash }
-			other_zones = users_db.map{ |u|	@board[u.zone].to_desc_hash }
+
+			other_zones = users_db.map{ |u|	
+				puts "requesting zone for %s" % u.inspect
+				@board[u.zone].to_desc_hash 
+			}
 			msg_history_req = Message.all(:user_dst => user.id) + Message.all(:user_src => user.id)
 			msg_history = msg_history_req.map{ |msg| msg.to_hash }
 			rdebug "msg_history req : %s" % msg_history.inspect
