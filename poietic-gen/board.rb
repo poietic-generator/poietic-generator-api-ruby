@@ -92,7 +92,11 @@ module PoieticGen
 		def update_data user, drawing
 			@monitor.synchronize do
 				zone = @allocator[user.zone]
-				zone.apply user, drawing
+				unless zone.nil? then
+					zone.apply user, drawing
+				else
+					#FIXME: return an error to the user ?
+				end
 			end
 		end
 	end
