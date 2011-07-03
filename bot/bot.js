@@ -33,10 +33,15 @@ phantom.click = function ( el ) {
 
 if (phantom.state.length === 0) {
 	console.log("Setting up Phantom...");
-	var r = Math.floor( Math.random() * 256 ).toString(16);
-	var g = Math.floor( Math.random() * 256 ).toString(16);
-	var b = Math.floor( Math.random() * 256 ).toString(16);
-	phantom.state = r + g + b;
+
+	if (phantom.args.length > 0) {
+	    phantom.state = phantom.args[0]
+	} else {
+	    var r = Math.floor( Math.random() * 256 ).toString(16);
+	    var g = Math.floor( Math.random() * 256 ).toString(16);
+	    var b = Math.floor( Math.random() * 256 ).toString(16);
+	    phantom.state = r + g + b;
+	};
 
 	phantom.open( BASE_URL );
 
