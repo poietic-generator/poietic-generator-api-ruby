@@ -84,9 +84,9 @@ if (phantom.state.length === 0) {
 			} else {
 				editor.pixel_set( local_pos, "#" + phantom.state );
 			}
-			setTimeout( stroke, 100 );
+			setTimeout( stroke, 40 );
 		}
-		setTimeout( stroke, 100 );
+		setTimeout( stroke, 40 );
 
 	} else {
 		console.log("  [oops] unknown page");
