@@ -133,8 +133,8 @@ module PoieticGen
 
 		get '/page/logout' do
 			settings.manager.leave session
-			response.set_cookie('user_id', nil);
-			response.set_cookie('user_session', nil);
+			response.set_cookie('user_id', {:value => nil, :path => "/"});
+			response.set_cookie('user_session', {:value => nil, :path => "/"});
 			redirect '/'
 		end
 
