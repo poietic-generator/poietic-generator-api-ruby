@@ -56,6 +56,11 @@ $(document).ready( function() {
                     return editor.show_color_picker( this );
                 }
             });
+            $("#canvas-container").bind( "vclick", function ( event ) {
+                if ( true === editor.is_color_picker_visible() ) {
+                    editor.hide_color_picker( $("#brush") );
+                }
+            });
         }
     );
 });
