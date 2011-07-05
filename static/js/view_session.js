@@ -63,6 +63,7 @@ function ViewSession( callback ) {
         // get session info from
         $.ajax({
             url: VIEW_SESSION_URL_JOIN,
+            data: {date: -1, session: "default"},
             dataType: "json",
             type: 'GET',
             context: self,
