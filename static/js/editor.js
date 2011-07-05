@@ -284,7 +284,7 @@ function Editor( p_session, p_board, p_canvas_id ){
             w: $(window).width(),
             h : $(window).height()
         };
-        margin = 50;
+        margin = 15;
 
         real_canvas.width = Math.round(win.h / 2) - margin;
         real_canvas.height = Math.round(win.h / 2) - margin;

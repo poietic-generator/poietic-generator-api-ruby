@@ -227,7 +227,7 @@ function Viewer( p_session, p_board, p_canvas_id, p_editor ){
             w: $(window).width(),
             h : $(window).height()
         };
-        margin = 50;
+        margin = 15;
 
         _real_canvas.width = Math.round(win.h / 2) - margin;
         _real_canvas.height = Math.round(win.h /2) - margin;
