@@ -193,9 +193,9 @@ module PoieticGen
 				:zone.gte => 0
 			)
 			other_users = users_db.map{ |u| u.to_hash }
-			other_zones = users_db.map{ |u|	
+			other_zones = users_db.map{ |u|
 				puts "requesting zone for %s" % u.inspect
-				@board[u.zone].to_desc_hash 
+				@board[u.zone].to_desc_hash
 			}
 			msg_history_req = Message.all(:user_dst => user.id) + Message.all(:user_src => user.id)
 			msg_history = msg_history_req.map{ |msg| msg.to_hash }
@@ -333,7 +333,9 @@ module PoieticGen
 			rdebug "call with %s" % params.inspect
 			req = SnapshotRequest.parse params
 
-			raise RuntimeError, "Invalid session" if req.session != @session_id
+
+			# TODO : ignore session_id because it is unknow for the viewer for now
+			#raise RuntimeError, "Invalid session" if req.session != @session_id
 
 
 			if req.date == -1 then
