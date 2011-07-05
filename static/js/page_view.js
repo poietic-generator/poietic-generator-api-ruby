@@ -31,7 +31,7 @@ $(document).ready( function() {
         function( session ) {
             //console.log("page_draw/ready: session callback ok");
             board = new Board( session );
-			viewer = new Viewer( session, board, 'session-viewer', color_picker );
+			viewer = new Viewer( session, board, 'session-viewer' );
             //console.log("page_draw/ready: prepicker");
         }
     );
