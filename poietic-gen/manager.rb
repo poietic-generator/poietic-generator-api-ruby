@@ -183,7 +183,7 @@ module PoieticGen
 						  end
 
 			# clean-up users first
-			check_expired_users
+			self.check_expired_users
 
 			# get real users
 			users_db = User.all(
@@ -423,7 +423,8 @@ module PoieticGen
 					# disable users without a zone
 					if not has_zone then
 						# kill non-existant user
-						u.expires_at = Time.now.to_i
+						rdebug "Killing user with no zone : %s" % u.inspect
+						u.expires_at = now
 						u.did_expire = true
 						u.save
 					end
