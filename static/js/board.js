@@ -25,7 +25,7 @@
  * Global view
  */
 function Board( p_session ) {
-	var console = window.noconsole;
+	//var console = window.noconsole;
 
 	var self = this;
 
@@ -48,14 +48,18 @@ function Board( p_session ) {
 		_zones = {};
 		_users = {};
 
+		console.debug(_session);
+
 		// fill zones with zones from session
-		_zones[_session.user_zone.index] = new Zone(
+		if ( undefined !== _session.user_zone) {
+			_zones[_session.user_zone.index] = new Zone(
 				_session,
 				_session.user_zone.index,
 				_session.user_zone.position,
 				_session.zone_column_count,
 				_session.zone_line_count
-				);
+			);
+		}
 
 		for (var i=0; i<p_session.other_zones.length; i++) {
 			var z = p_session.other_zones[i];

@@ -69,12 +69,12 @@ function Viewer( p_session, p_board, p_canvas_id, p_editor ){
             enable : false
         }
 
-        _current_zone =  p_session.user_zone.index;
+        //_current_zone =  p_session.user_zone.index;
         _board = p_board;
         _session = p_session;
         _session.register( self );
 
-        console.log("viewer/initialize : _current_zone = %s", _current_zone);
+        //console.log("viewer/initialize : _current_zone = %s", _current_zone);
 
         self.update_boundaries();
 
@@ -85,7 +85,7 @@ function Viewer( p_session, p_board, p_canvas_id, p_editor ){
         self.column_size = 1;
         self.line_size = 1;
 
-        var zone = _board.get_zone(_current_zone);
+        //var zone = _board.get_zone(_current_zone);
 
         self.context = _real_canvas.getContext('2d');
 
@@ -108,7 +108,9 @@ function Viewer( p_session, p_board, p_canvas_id, p_editor ){
         self.update_paint();
 
         // update color picker's size for correct positionning
-        _editor.update_color_picker_size();
+        if (undefined !== _editor) {
+            _editor.update_color_picker_size();
+        }
     }
 
 

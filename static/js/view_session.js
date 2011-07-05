@@ -44,7 +44,6 @@ function ViewSession( callback ) {
 
     this.zone_column_count = null;
     this.zone_line_count = null;
-    this.user_session = null;
 
     var _current_stroke_id = 0;
     var _current_message_id = 0;
@@ -70,7 +69,6 @@ function ViewSession( callback ) {
             success: function( response ){
                 console.log('session/join response : ' + JSON.stringify(response) );
 
-                this.user_session = response.user_session;
                 this.zone_column_count = response.zone_column_count;
                 this.zone_line_count = response.zone_line_count;
 
@@ -78,22 +76,23 @@ function ViewSession( callback ) {
                 _current_stroke_id = response.stroke_id;
                 _current_message_id = response.message_id;
 
-                $.cookie( 'user_session', this.user_session, {path: "/"} );
                 // console.log('session/join response mod : ' + JSON.stringify(this) );
 
                 console.log("gotcha!");
 
+                self.other_zones = response.zones;
+
                 callback( self );
 
                 //console.log('session/join post-callback ! observers = %s', JSON.stringify( _observers ));
-                var all_zones = this.other_zones.concat( [ this.user_zone ] );
+                //var all_zones = this.other_zones.concat( [ this.user_zone ] );
                 // handle other zone events
-                for (var i=0;i<all_zones.length;i++) {
-                    console.log('session/join on zone %s',JSON.stringify(all_zones[i]));
-                    self.dispatch_strokes( all_zones[i].content );
+                for (var i=0;i<self.other_zones.length;i++) {
+                    console.log('session/join on zone %s',JSON.stringify(self.other_zones[i]));
+                    self.dispatch_strokes( self.other_zones[i].content );
                 }
 
-                self.dispatch_messages( response.msg_history );
+                //self.dispatch_messages( response.msg_history );
 
                 window.setTimeout( self.update, VIEW_SESSION_UPDATE_INTERVAL );
 
