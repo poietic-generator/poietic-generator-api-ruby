@@ -26,9 +26,6 @@ var board = null;
 
 // instead of windows.onload
 $(document).ready( function() {
-    // hide iphone/ipad URL bar
-    //setTimeout(function() { window.scrollTo(0, 1) }, 100);
-
     // initialize zoness
     session = new ViewSession(
         function( session ) {

@@ -28,9 +28,6 @@ var chat = null;
 
 // instead of windows.onload
 $(document).ready( function() {
-    // hide iphone/ipad URL bar
-    //setTimeout(function() { window.scrollTo(0, 1) }, 100);
-
     $(".logout").bind( "click", function ( event ) {
         if (!confirm("Leave Poietic Generator?")) {
             return false;
