@@ -375,7 +375,8 @@ module PoieticGen
 			rdebug "call with %s" % params.inspect
 			req = PlayRequest.parse params
 
-			raise RuntimeError, "Invalid session" if req.session != @session_id
+			# TODO : ignore session_id because it is unknow for the viewer for now
+			#raise RuntimeError, "Invalid session" if req.session != @session_id
 
 			# request structure :
 			# req.since : date from where we want the params
