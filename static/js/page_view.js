@@ -35,5 +35,16 @@ $(document).ready( function() {
             //console.log("page_draw/ready: prepicker");
         }
     );
+
+    $("#view_start").bind( "vclick", function ( event ) {
+        event.preventDefault();
+        $("#view_now").removeClass("ui-btn-active");
+        $(this).addClass("ui-btn-active");
+    });
+    $("#view_now").bind( "vclick", function ( event ) {
+        event.preventDefault();
+        $("#view_start").removeClass("ui-btn-active");
+        $(this).addClass("ui-btn-active");
+    });
 });
 
