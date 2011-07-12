@@ -275,8 +275,6 @@ module PoieticGen
 		get '/api/session/play' do
 			begin
 				result = {}
-				# verify session expiration..
-				validate_session! session
 				status = [ STATUS_SUCCESS ]
 
 
