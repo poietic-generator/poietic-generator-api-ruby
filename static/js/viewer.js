@@ -26,8 +26,10 @@
 var POSITION_TYPE_DRAWING = 0;
 var POSITION_TYPE_ZONE = 0;
 
-function Viewer( p_session, p_board, p_canvas_id, p_editor ){
+function Viewer( p_session, p_board, p_canvas_id, p_editor, options ){
     //var console = { log: function() {} };
+
+    options = options || {};
 
     var self = this;
 
@@ -48,6 +50,8 @@ function Viewer( p_session, p_board, p_canvas_id, p_editor ){
     this.line_count = null;
 
     this.context = null;
+
+    this.fullsize = options.fullsize || false;
 
 
     /**
@@ -108,7 +112,7 @@ function Viewer( p_session, p_board, p_canvas_id, p_editor ){
         self.update_paint();
 
         // update color picker's size for correct positionning
-        if (undefined !== _editor) {
+        if (undefined !== _editor && null !== _editor) {
             _editor.update_color_picker_size();
         }
     }
@@ -223,7 +227,7 @@ function Viewer( p_session, p_board, p_canvas_id, p_editor ){
      *
      */
     this.update_size = function() {
-        var win, margin;
+        var win, margin, width, height;
 
         win = {
             w: $(window).width(),
@@ -231,8 +235,11 @@ function Viewer( p_session, p_board, p_canvas_id, p_editor ){
         };
         margin = 15;
 
-        _real_canvas.width = Math.round(win.h / 2) - margin;
-        _real_canvas.height = Math.round(win.h /2) - margin;
+        width   = this.fullsize ? win.h : win.h / 2;
+        height  = this.fullsize ? win.h : win.h / 2;
+
+        _real_canvas.width = Math.round(width) - margin;
+        _real_canvas.height = Math.round(height) - margin;
 
         // console.log("viewer/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
 
