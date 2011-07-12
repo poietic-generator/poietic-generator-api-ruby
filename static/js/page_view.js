@@ -40,11 +40,13 @@ $(document).ready( function() {
         event.preventDefault();
         $("#view_now").removeClass("ui-btn-active");
         $(this).addClass("ui-btn-active");
+        session.restart();
     });
     $("#view_now").bind( "vclick", function ( event ) {
         event.preventDefault();
         $("#view_start").removeClass("ui-btn-active");
         $(this).addClass("ui-btn-active");
+        session.current();
     });
 });
 

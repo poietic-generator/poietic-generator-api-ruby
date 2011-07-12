@@ -205,5 +205,19 @@ function ViewSession( callback ) {
         _observers.push( p_observer );
     };
 
+
+    /**
+     * Play from current position
+     */
+    this.current = function () {
+    };
+
+    /**
+     * Replay from begining
+     */
+    this.restart = function () {
+        this.initialize(0);
+    };
+
     this.initialize();
 }
