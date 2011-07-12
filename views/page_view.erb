@@ -11,16 +11,18 @@
     erb :common_header
 %>
 
-<div data-role="page">
+<div data-role="page" data-fullscreen="true">
     <div data-role="header" data-id="head" data-position="fixed">
         <h1 class="username">Poietic Generator's view</h1>
         <a href="/" data-ajax="false" class="ui-btn-right logout">Back</a>
+        <div data-role="navbar">
+            <ul>
+                <li><a href="#"  class="ui-btn-active ui-state-persist">View from begining</a></li>
+                <li><a href="#">View from current state</a></li>
+            </ul>
+        </div>
     </div>
     <div data-role="content">
-        <div class="center">
-            <a href="#" data-inline="true" data-role="button">View from begining</a>
-            <a href="#" data-inline="true" data-role="button">View from current state</a>
-        </div>
         <div class="center">
             <canvas id="session-viewer"></canvas>
         </div>
