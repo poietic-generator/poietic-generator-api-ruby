@@ -28,7 +28,7 @@ var VIEW_SESSION_URL_JOIN = "/api/session/snapshot";
 var VIEW_SESSION_URL_UPDATE = "/api/session/play";
 
 var VIEW_SESSION_UPDATE_INTERVAL = 1000 ;
-var VIEW_PLAY_UPDATE_INTERVAL = (VIEW_SESSION_UPDATE_INTERVAL / 1000) * 2 ;
+var VIEW_PLAY_UPDATE_INTERVAL = VIEW_SESSION_UPDATE_INTERVAL / 1000 ;
 
 var STATUS_INFORMATION = 1
 var STATUS_SUCCESS = 2
@@ -41,27 +41,33 @@ var STATUS_BAD_REQUEST = 5
 function ViewSession( callback ) {
   //  var console = noconsole;
 
-    var self = this;
+    var self = this,
+    _observers = null,
+    _start_date = 0,
+    _duration = 0,
+    _timer = null,
+    _restart = false;
+
 
     this.zone_column_count = null;
     this.zone_line_count = null;
-
-    var _observers = null;
-    var _start_date = 0;
-    var _duration = 0;
 
 
     /**
      * Semi-Constructor
      */
-    this.initialize = function(date) {
+    this.initialize = function() {
 
         _observers = [];
+        var date = (_restart) ? 0 : -1;
 
         // get session info from
         $.ajax({
             url: VIEW_SESSION_URL_JOIN,
-            data: {date: date || -1, session: "default"},
+            data: {
+                date: date,
+                session: "default"
+            },
             dataType: "json",
             type: 'GET',
             context: self,
@@ -72,7 +78,11 @@ function ViewSession( callback ) {
                 this.zone_line_count = response.zone_line_count;
 
                 _start_date = response.start_date;
-                _duration = response.duration;
+                if (!_restart) {
+                    _duration = response.duration;
+                } else {
+                    _duration = VIEW_PLAY_UPDATE_INTERVAL * 100;
+                }
 
                 // console.log('session/join response mod : ' + JSON.stringify(this) );
 
@@ -81,19 +91,15 @@ function ViewSession( callback ) {
                 callback( self );
 
                 //console.log('session/join post-callback ! observers = %s', JSON.stringify( _observers ));
-                //var all_zones = this.other_zones.concat( [ this.user_zone ] );
                 // handle other zone events
                 for (var i=0;i<self.other_zones.length;i++) {
                     console.log('session/join on zone %s',JSON.stringify(self.other_zones[i]));
                     self.dispatch_strokes( self.other_zones[i].content );
                 }
 
-                //self.dispatch_messages( response.msg_history );
-
-                window.setTimeout( self.update, VIEW_SESSION_UPDATE_INTERVAL );
+                self.setTimer( self.update, VIEW_SESSION_UPDATE_INTERVAL );
 
                 console.log('session/join end');
-
             }
         });
     };
@@ -133,7 +139,7 @@ function ViewSession( callback ) {
 
         // assign real values if objets are present
         if (_observers.length < 1) {
-            window.setTimeout( self.update, VIEW_SESSION_UPDATE_INTERVAL );
+            self.setTimer( self.update, VIEW_SESSION_UPDATE_INTERVAL );
             return null;
         }
 
@@ -149,7 +155,7 @@ function ViewSession( callback ) {
         req = {
             session: "default",
             since: _start_date + _duration,
-            duration: VIEW_PLAY_UPDATE_INTERVAL
+            duration: VIEW_PLAY_UPDATE_INTERVAL * 100
         };
 
         console.log("session/update: req = %s", JSON.stringify( req ) );
@@ -163,18 +169,22 @@ function ViewSession( callback ) {
                 console.log('session/update response : ' + JSON.stringify( response ) );
                 self.treat_status_nok(response);
                 if (response.status[0] != STATUS_SUCCESS) {
-                    window.setTimeout( self.update, VIEW_SESSION_UPDATE_INTERVAL * 2 );
+                    self.setTimer( self.update, VIEW_SESSION_UPDATE_INTERVAL * 2 );
                 }
 
-                _duration = response.duration;
+                if (!_restart) {
+                    _duration = response.duration;
+                } else {
+                    _duration+= VIEW_PLAY_UPDATE_INTERVAL * 100;
+                }
 
                 self.dispatch_events( response.events );
                 self.dispatch_strokes( response.strokes );
 
-                window.setTimeout( self.update, VIEW_SESSION_UPDATE_INTERVAL );
+                self.setTimer( self.update, VIEW_SESSION_UPDATE_INTERVAL );
             },
             error: function( response ) {
-               window.setTimeout( self.update, VIEW_SESSION_UPDATE_INTERVAL * 2 );
+               self.setTimer( self.update, VIEW_SESSION_UPDATE_INTERVAL * 2 );
            }
         });
 
@@ -201,8 +211,29 @@ function ViewSession( callback ) {
         }
     };
 
+    this.dispatch_reset = function () {
+        for (var o=0; o<_observers.length; o++){
+            if (_observers[o].handle_reset) {
+                _observers[o].handle_reset();
+            }
+        }
+    };
+
     this.register = function( p_observer ){
         _observers.push( p_observer );
+    };
+
+
+    this.clearTimer = function () {
+        if (null !== _timer) {
+            window.clearTimeout( _timer );
+            _timer = null;
+        }
+    };
+
+    this.setTimer = function ( fn, interval ) {
+        this.clearTimer();
+        _timer = window.setTimeout( fn, interval );
     };
 
 
@@ -210,13 +241,22 @@ function ViewSession( callback ) {
      * Play from current position
      */
     this.current = function () {
+        console.log("view_session/current");
+        _restart = false;
+        this.clearTimer();
+        this.initialize();
+        this.dispatch_reset( this );
     };
 
     /**
      * Replay from begining
      */
     this.restart = function () {
-        this.initialize(0);
+        console.log("view_session/restart");
+        _restart = true;
+        this.clearTimer();
+        this.initialize();
+        this.dispatch_reset( this );
     };
 
     this.initialize();

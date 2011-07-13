@@ -134,6 +134,12 @@ function Board( p_session ) {
 	};
 
 
+	this.handle_reset = function ( session ) {
+		console.log("board/handle_reset");
+		this.initialize( session );
+	};
+
+
 	this.initialize( p_session );
 }
 
