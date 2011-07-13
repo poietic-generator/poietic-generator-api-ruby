@@ -48,8 +48,6 @@ function Board( p_session ) {
 		_zones = {};
 		_users = {};
 
-		console.debug(_session);
-
 		// fill zones with zones from session
 		if ( undefined !== _session.user_zone) {
 			_zones[_session.user_zone.index] = new Zone(
@@ -118,7 +116,7 @@ function Board( p_session ) {
 		}
 		// console.log("board/get_zone_list : %s", JSON.stringify( keys ));
 		return keys;
-	}
+	};
 
 
 	/**
@@ -133,7 +131,7 @@ function Board( p_session ) {
 		} else {
 			console.warn("board/handle_stroke: trying to apply stroke for missing zone %s", stk.zone);
 		}
-	}
+	};
 
 
 	this.initialize( p_session );
