@@ -249,7 +249,7 @@ function ViewSession( callback ) {
     };
 
     /**
-     * Replay from begining
+     * Replay from beginning
      */
     this.restart = function () {
         console.log("view_session/restart");
