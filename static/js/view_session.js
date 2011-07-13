@@ -39,14 +39,15 @@ var STATUS_BAD_REQUEST = 5
 
 
 function ViewSession( callback ) {
-  //  var console = noconsole;
+    var console = noconsole;
 
     var self = this,
     _observers = null,
     _start_date = 0,
     _duration = 0,
     _timer = null,
-    _restart = false;
+    _restart = false,
+    _play_speed = 1;
 
 
     this.zone_column_count = null;
@@ -81,9 +82,8 @@ function ViewSession( callback ) {
                 if (!_restart) {
                     _duration = response.duration;
                 } else {
-                    _duration = VIEW_PLAY_UPDATE_INTERVAL * 100;
+                    _duration = VIEW_PLAY_UPDATE_INTERVAL * _play_speed;
                 }
-
                 // console.log('session/join response mod : ' + JSON.stringify(this) );
 
                 self.other_zones = response.zones;
@@ -155,7 +155,7 @@ function ViewSession( callback ) {
         req = {
             session: "default",
             since: _start_date + _duration,
-            duration: VIEW_PLAY_UPDATE_INTERVAL * 100
+            duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed
         };
 
         console.log("session/update: req = %s", JSON.stringify( req ) );
@@ -165,7 +165,7 @@ function ViewSession( callback ) {
             data: req,
             type: 'GET',
             context: self,
-            success: function( response ){
+            success: function( response ) {
                 console.log('session/update response : ' + JSON.stringify( response ) );
                 self.treat_status_nok(response);
                 if (response.status[0] != STATUS_SUCCESS) {
@@ -175,7 +175,11 @@ function ViewSession( callback ) {
                 if (!_restart) {
                     _duration = response.duration;
                 } else {
-                    _duration+= VIEW_PLAY_UPDATE_INTERVAL * 100;
+                    _duration+= VIEW_PLAY_UPDATE_INTERVAL * _play_speed;
+                    if ( response.duration < _duration  ) {
+                        _duration = response.duration;
+                        _restart = false;
+                    }
                 }
 
                 self.dispatch_events( response.events );
