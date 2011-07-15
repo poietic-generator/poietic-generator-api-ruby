@@ -42,7 +42,7 @@ function Editor( p_session, p_board, p_canvas_id ){
     var _enqueue_timer;
     var _board;
     var _color;
-    var _pencil_move;
+    var _pencil_move = { enable : false };
     var _real_canvas;
     var _grid_canvas;
     var _column_size;
@@ -64,6 +64,7 @@ function Editor( p_session, p_board, p_canvas_id ){
      * Constructor
      */
     this.initialize = function( p_session, p_board, p_canvas_id ) {
+
         _current_zone =  p_session.user_zone.index;
         console.log("editor/initialize : _current_zone = %s", _current_zone);
         _board = p_board;
