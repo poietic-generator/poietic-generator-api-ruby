@@ -93,15 +93,6 @@ function Viewer( p_session, p_board, p_canvas_id, p_editor, options ){
 
         self.context = _real_canvas.getContext('2d');
 
-        // plug some event handlers
-        _real_canvas.addEventListener( 'mousedown', canvas_event, false );
-        _real_canvas.addEventListener( 'touchstart', canvas_event, false );
-
-        _real_canvas.addEventListener( 'mouseup', canvas_event, false );
-        _real_canvas.addEventListener( 'touchstop', canvas_event, false );
-
-        _real_canvas.addEventListener( 'mousemove', canvas_event, false );
-        _real_canvas.addEventListener( 'touchmove', canvas_event, false );
 
         $(window).resize(function() {
             self.update_size();
@@ -113,6 +104,16 @@ function Viewer( p_session, p_board, p_canvas_id, p_editor, options ){
 
         // update color picker's size for correct positionning
         if (undefined !== _editor && null !== _editor) {
+	    // plug some event handlers
+	    _real_canvas.addEventListener( 'mousedown', canvas_event, false );
+	    _real_canvas.addEventListener( 'touchstart', canvas_event, false );
+
+	    _real_canvas.addEventListener( 'mouseup', canvas_event, false );
+	    _real_canvas.addEventListener( 'touchstop', canvas_event, false );
+
+	    _real_canvas.addEventListener( 'mousemove', canvas_event, false );
+	    _real_canvas.addEventListener( 'touchmove', canvas_event, false );
+
             _editor.update_color_picker_size();
         }
     }
