@@ -32,8 +32,12 @@ function ColorPicker(p_editor) {
         _editor = p_editor;
         _color_picker = new Color.Picker({
             callback: function(hex) {
+			  console.log("colorpicker/initialize/callback: hex = " + hex);
                 p_editor.color_set( "#" + hex );
-            }
+            },
+	    hue : Math.floor( Math.random() * 360 ),
+	    sat :  Math.floor( 70 + Math.random() * 30 ),
+	    val : Math.floor( 70 + Math.random() * 30 )
         });
         _color_picker.el.style.display = "none";
         $("#session-zone").live("pagehide", function (event) {
