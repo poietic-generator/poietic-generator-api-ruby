@@ -48,7 +48,8 @@ module PoieticGen
 		SESSION_USER = :user
 		SESSION_SESSION = :name
 
-		enable :sessions, :run
+		enable :sessions
+		enable :run
 		# set :session_secret, "FIXME: this should be removed :)"
 		#disable :run
 
@@ -132,6 +133,8 @@ module PoieticGen
 
 
 		get '/page/logout' do
+			# ensure that lazy session loading will work
+			session[SESSION_USER] ||= nil
 			settings.manager.leave session
 			response.set_cookie('user_id', {:value => nil, :path => "/"});
 			response.set_cookie('user_session', {:value => nil, :path => "/"});
