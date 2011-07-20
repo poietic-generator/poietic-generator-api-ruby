@@ -108,6 +108,7 @@ module PoieticGen
 				:did_expire => false
 			}
 
+			# reuse user_id if session is still valid
 			if req_session != @session_id then
 				rdebug "User is requesting a different session"
 				# create new
@@ -139,6 +140,7 @@ module PoieticGen
 			# update expiration time
 			user.expires_at = (now + @config.user.max_idle)
 			rdebug "Set expiring at %s" % user.expires_at.to_s
+
 			# reset name if requested
 			user.name = param_name
 
@@ -150,14 +152,12 @@ module PoieticGen
 			end
 			pp user
 			session[PoieticGen::Api::SESSION_USER] = user.id
+			session[PoieticGen::Api::SESSION_SESSION] = @session_id
 
-			# FIXME: send matrix status of user zone
 			zone = @board[user.zone]
 
 			# FIXME: test request user_id
 			# FIXME: test request username
-			# FIXME: validate session
-			# FIXME: return same user_id if session is still valid
 
 			# return JSON for userid
 			if is_new then
@@ -222,24 +222,29 @@ module PoieticGen
 
 
 		def leave session
+			pp "FIXME: LEAVE(session)", session
 			# zone_idx = @users[user_id].zone
 
 			param_request = {
 				:id => session[PoieticGen::Api::SESSION_USER],
 				:session => session[PoieticGen::Api::SESSION_SESSION]
 			}
+			pp "FIXME: LEAVE(param_request)", param_request
+
 			user = User.first param_request
+			pp "FIXME: LEAVE(user)", user
+
 			if user then
-				@board.leave user
 				user.expires_at = Time.now.to_i
 				user.did_expire = true
 				# create leave event if session is the current one
 				if session[PoieticGen::Api::SESSION_SESSION] == @session_id then
+					@board.leave user
 					Event.create_leave user.id, user.expires_at, user.zone
 				end
 				user.save
 			else
-				rdebug "Could not find any user for this request";
+				rdebug "Could not find any user for this request (user=%s)" % param_request.inspect;
 				pp param_request;
 			end
 
@@ -328,6 +333,9 @@ module PoieticGen
 			return result
 		end
 
+		#
+		#
+		#
 		def snapshot session, params
 
 			rdebug "call with %s" % params.inspect
@@ -339,35 +347,35 @@ module PoieticGen
 
 
 			if req.date == -1 then
-			  # get the current state
-			  users_db = User.all(
-				  :did_expire.not => true
-			  )
-			  users = users_db.map{ |u| u.to_hash }
-			  zones = users_db.map{ |u| @board[u.zone].to_desc_hash }
+				# get the current state
+				users_db = User.all(
+					:did_expire.not => true
+				)
+				users = users_db.map{ |u| u.to_hash }
+				zones = users_db.map{ |u| @board[u.zone].to_desc_hash }
 			elsif req.date == 0 then
-			  # get the beginning state.
-			  users = []
-			  zones = []
+				# get the beginning state.
+				users = []
+				zones = []
 			else
-			  raise RuntimeError, "Invalide date, other than -1 and 0 is not supported"
-      end
+				raise RuntimeError, "Invalide date, other than -1 and 0 is not supported"
+			end
 
 
-		  # TODO : must return : snapshot params (user, zone), start_time, and
-		  ### duration of the session since then.
-		  result = {
+			# return snapshot params (user, zone), start_time, and
+			# duration of the session since then.
+			result = {
 				:users => users,
 				:zones => zones,
 				:zone_column_count => @config.board.width,
 				:zone_line_count => @config.board.height,
 				:start_date => @session_start,
 				:duration => (Time.now.to_i - @session_start)
-      }
+			}
 
 			rdebug "returning : %s" % result.inspect
 
-      return result
+			return result
 		end
 
 		def play session, params
@@ -388,15 +396,15 @@ module PoieticGen
 
 
 			evt_req = Event.all(
-			  :timestamp.gte => Time.at(req.since),
-			  :timestamp.lt => Time.at(req.since + req.duration)
+				:timestamp.gte => Time.at(req.since),
+				:timestamp.lt => Time.at(req.since + req.duration)
 			)
 
 			pp evt_req
 
 			srk_req = Stroke.all(
-			  :timestamp.gte => Time.at(req.since),
-			  :timestamp.lt => Time.at(req.since + req.duration)
+				:timestamp.gte => Time.at(req.since),
+				:timestamp.lt => Time.at(req.since + req.duration)
 			)
 
 			pp srk_req
@@ -415,6 +423,10 @@ module PoieticGen
 			return result
 		end
 
+
+		#
+		#
+		#
 		def check_expired_users
 			now = Time.now.to_i
 			if @leave_mutex.try_lock then
