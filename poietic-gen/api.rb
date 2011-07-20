@@ -161,35 +161,6 @@ module PoieticGen
 
 
 		#
-		# notify server about the intention of leaving the session
-		# return null user_id for confirmation
-		#
-		get '/api/session/leave' do
-			begin
-				validate_session! session
-				status = [ STATUS_SUCCESS ]
-
-				session[SESSION_USER] = nil
-
-			rescue InvalidSession => e
-				STDERR.puts e.inspect, e.backtrace
-				status = [ STATUS_REDIRECTION ]
-
-			rescue Exception => e
-				STDERR.puts e.inspect, e.backtrace
-				status = [ STATUS_SERVER_ERROR ]
-				Process.exit! #FIXME: remove in prod mode
-
-			ensure
-				JSON.generate({
-					:user_id => session[SESSION_USER],
-					:status => status
-				})
-			end
-		end
-
-
-		#
 		# Get latest patches from server
 		# (update current lease)
 		#
