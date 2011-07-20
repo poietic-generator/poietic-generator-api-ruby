@@ -84,6 +84,9 @@ module PoieticGen
 		#
 		def leave user
 			@monitor.synchronize do
+				# reset zone
+				@allocator[user.zone].reset
+				# unallocate it
 				@allocator.free user.zone
 			end
 		end

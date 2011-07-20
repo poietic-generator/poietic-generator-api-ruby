@@ -48,7 +48,8 @@ module PoieticGen
 		SESSION_USER = :user
 		SESSION_SESSION = :name
 
-		enable :sessions, :run
+		enable :sessions
+		enable :run
 		# set :session_secret, "FIXME: this should be removed :)"
 		#disable :run
 
@@ -132,6 +133,8 @@ module PoieticGen
 
 
 		get '/page/logout' do
+			# ensure that lazy session loading will work
+			session[SESSION_USER] ||= nil
 			settings.manager.leave session
 			response.set_cookie('user_id', {:value => nil, :path => "/"});
 			response.set_cookie('user_session', {:value => nil, :path => "/"});
@@ -153,35 +156,6 @@ module PoieticGen
 
 			ensure
 				return JSON.generate( result )
-			end
-		end
-
-
-		#
-		# notify server about the intention of leaving the session
-		# return null user_id for confirmation
-		#
-		get '/api/session/leave' do
-			begin
-				validate_session! session
-				status = [ STATUS_SUCCESS ]
-
-				session[SESSION_USER] = nil
-
-			rescue InvalidSession => e
-				STDERR.puts e.inspect, e.backtrace
-				status = [ STATUS_REDIRECTION ]
-
-			rescue Exception => e
-				STDERR.puts e.inspect, e.backtrace
-				status = [ STATUS_SERVER_ERROR ]
-				Process.exit! #FIXME: remove in prod mode
-
-			ensure
-				JSON.generate({
-					:user_id => session[SESSION_USER],
-					:status => status
-				})
 			end
 		end
 

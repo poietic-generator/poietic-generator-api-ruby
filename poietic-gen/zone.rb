@@ -47,6 +47,17 @@ module PoieticGen
 			@debug = true
 		end
 
+		def reset
+			@monitor.synchronize do
+				@width.times do |w_cnt|
+					@data[w_cnt] = []
+					@height.times do |h_cnt|
+						@data[w_cnt][h_cnt] = "#000"
+					end
+				end
+			end
+		end
+
 		def apply user, drawing
 			@monitor.synchronize do
 				# save patch into database
