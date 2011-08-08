@@ -88,6 +88,9 @@ module PoieticGen
 
 		configure do
 			config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
+			File.open config.server.pidfile, "w" do |fh|
+				fh.puts Process.pid
+			end
 
 			set :config, config
 			set :manager, (PoieticGen::Manager.new config)
