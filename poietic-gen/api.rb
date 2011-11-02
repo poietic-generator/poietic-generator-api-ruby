@@ -135,6 +135,16 @@ module PoieticGen
 		end
 
 
+		#
+		# display global activity on this session
+		# without toolbar
+		#
+		get '/view/standalone' do
+			@page = Page.new "View"
+			erb :page_view_standalone
+		end
+
+
 		get '/page/logout' do
 			# ensure that lazy session loading will work
 			session[SESSION_USER] ||= nil

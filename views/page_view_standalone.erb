@@ -1,0 +1,21 @@
+<%=
+    @page.css << "/css/page_view.css"
+
+    @page.js << "/js/view_session.js"
+    @page.js << "/js/console.js"
+    @page.js << "/js/viewer.js"
+    @page.js << "/js/board.js"
+    @page.js << "/js/zone.js"
+    @page.js << "/js/page_view.js"
+
+    erb :common_header
+%>
+
+<div data-role="page" data-fullscreen="true">
+    <div data-role="content">
+        <div class="viewer">
+            <canvas id="session-viewer"></canvas>
+        </div>
+    </div>
+</div>
+<%= erb :common_footer %>
