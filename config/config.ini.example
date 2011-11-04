@@ -12,6 +12,9 @@ root = /
 ; port on which to listen
 port = 80
 
+; file in which daemon's pid will be stored
+pidfile = tmp/poieticgen.pid
+
 
 [board]
 ; name for that board, also used to access this board with the url.
@@ -44,7 +47,7 @@ username = johndoe
 password = foobar
 
 ; database name
-database = poieticgen.sqlite3
+database = tmp/poieticgen.sqlite3
 
 
 [chat]
