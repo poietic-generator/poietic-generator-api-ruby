@@ -256,10 +256,9 @@ module PoieticGen
 		#
 		# no result expected
 		#
-		def update_lease! session
+		def check_lease! session
 			now = Time.now.to_i
 
-			next_expires_at = (now + @config.user.max_idle)
 			param_request = {
 				:id => session[PoieticGen::Api::SESSION_USER],
 				:session => @session_id
@@ -272,9 +271,6 @@ module PoieticGen
 				# expired lease...
 				return false
 			else
-				# rdebug "Updated lease for %s" % param_request
-				user.expires_at = next_expires_at
-				user.save
 				return true
 			end
 		end
@@ -298,6 +294,10 @@ module PoieticGen
 			rdebug "updating with : %s" % data.inspect
 			req = UpdateRequest.parse data
 
+      if req.strokes.length > 0 then
+				user.expires_at = (Time.now.to_i + @config.user.max_idle)
+				user.save
+      end
 			@board.update_data user, req.strokes
 			@chat.update_data user, req.messages
 

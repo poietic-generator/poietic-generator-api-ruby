@@ -188,7 +188,7 @@ module PoieticGen
 				status = [ STATUS_SUCCESS ]
 
 				# FIXME: extract patches information
-				if settings.manager.update_lease! session then
+				if settings.manager.check_lease! session then
 
 					# FIXME: extract chat information
 
