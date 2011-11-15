@@ -72,7 +72,7 @@ function Zone( p_session, p_index, p_position, p_width, p_height ) {
     };
 
 
-    /* 
+    /*
      * Get color at given matrix position
      */
     this.pixel_get = function( pos ) {
@@ -82,7 +82,7 @@ function Zone( p_session, p_index, p_position, p_width, p_height ) {
     };
 
 
-    /* 
+    /*
      * Return whethe given position is inside or outside zone
      */
     this.contains_position = function( pos ) {
@@ -106,7 +106,7 @@ function Zone( p_session, p_index, p_position, p_width, p_height ) {
             // console.log("zone/patch_record: patch creation!");
             _current_patch = {
                 zone: self.index,
-                stamp: new Date(),
+                diff: (new Date()) - _session.last_update_time,
                 color: color,
                 changes: [ [ pos.x, pos.y, 0 ]  ]
             }
@@ -115,7 +115,7 @@ function Zone( p_session, p_index, p_position, p_width, p_height ) {
                 self.patch_enqueue();
                 _current_patch = {
                     zone: self.index,
-                    stamp: new Date(),
+                    diff: (new Date()) - self._session._last_update_time,
                     color: color,
                     changes: [ [ pos.x, pos.y, 0 ]  ]
                 }
@@ -153,7 +153,7 @@ function Zone( p_session, p_index, p_position, p_width, p_height ) {
 
 
     /**
-      * 
+      *
       */
     this.patches_get = function() {
         var aggregate = [];
@@ -162,7 +162,7 @@ function Zone( p_session, p_index, p_position, p_width, p_height ) {
             // FIXME: compute relative time since last sync
             aggregate.push( _output_queue.shift() );
         }
-        
+
         return aggregate;
     }
 

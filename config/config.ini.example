@@ -59,8 +59,12 @@ enable = false
 ; maximum number of allowed clients
 max_clients = 100
 
-; maximum idle seconds for a client (uint)
+; maximum drawing idle seconds for a client (uint)
 max_idle = 300
+
+; maximum amount of time the session is keep alive by the server without
+; activity at all from the client
+alive_timeout = 30
 
 ; number of seconds between keepalive messages (pull messages)
 keepalive = 5

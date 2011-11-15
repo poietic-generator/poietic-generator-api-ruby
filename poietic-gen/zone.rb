@@ -65,18 +65,20 @@ module PoieticGen
 
 				rdebug drawing.inspect if drawing.length != 0
 
+				ref = user.last_update_time
+
 				drawing.each do |patch|
 
 
 					color = patch['color']
 					changes = patch['changes']
-					timestamp = patch['stamp']
+					timestamp = patch['diff'].to_i + ref
 
 					# add patch into database
 					param_create = {
 						:color => color,
 						:changes => JSON.generate(changes).to_s,
-						:timestamp => Time.now.to_i,
+						:timestamp => timestamp,
 						:zone => user.zone
 					}
 					begin

@@ -47,12 +47,14 @@ function DrawSession( callback ) {
     this.zone_column_count = null;
     this.zone_line_count = null;
     this.user_zone = null;
+    this.last_update_time = new Date();
 
     var _current_stroke_id = 0;
     var _current_message_id = 0;
     var _current_event_id = 0;
 
     var _observers = null;
+
 
 
     /**
@@ -218,6 +220,7 @@ function DrawSession( callback ) {
         }
 
         console.log("session/update: req = %s", JSON.stringify( req ) );
+        self.last_update_time = new Date();
         $.ajax({
             url: DRAW_SESSION_URL_UPDATE,
             dataType: "json",
@@ -226,16 +229,17 @@ function DrawSession( callback ) {
             context: self,
             success: function( response ){
                 console.log('session/update response : ' + JSON.stringify( response ) );
-				self.treat_status_nok(response);
+                self.treat_status_nok(response);
                 if (response.status[0] != STATUS_SUCCESS) {
-                    window.setTimeout( self.update, DRAW_SESSION_UPDATE_INTERVAL * 2 );
+                    self.treat_status_nok(response);
+                } else {
+
+                    self.dispatch_events( response.events );
+                    self.dispatch_strokes( response.strokes );
+                    self.dispatch_messages( response.messages );
+
+                    window.setTimeout( self.update, DRAW_SESSION_UPDATE_INTERVAL );
                 }
-
-                self.dispatch_events( response.events );
-                self.dispatch_strokes( response.strokes );
-                self.dispatch_messages( response.messages );
-
-                window.setTimeout( self.update, DRAW_SESSION_UPDATE_INTERVAL );
             },
             error: function( response ) {
                window.setTimeout( self.update, DRAW_SESSION_UPDATE_INTERVAL * 2 );

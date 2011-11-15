@@ -25,11 +25,15 @@ module PoieticGen ; class ConfigManager
 	class ConfigUser
 		attr_reader :max_clients
 		attr_reader :max_idle
+		attr_reader :alive_timeout
 		attr_reader :keepalive
 
 		def initialize hash
 			raise MissingField,"User.max_clients" unless hash.include? "max_clients"
 			@max_clients = ConfigManager.parse_int hash["max_clients"], "User.max_clients"
+
+			raise MissingField, "User.alive_timeout" unless hash.include? "alive_timeout"
+			@alive_timeout = ConfigManager.parse_int hash["alive_timeout"], "User.alive_timeout"
 
 			raise MissingField, "User.max_idle" unless hash.include? "max_idle"
 			@max_idle = ConfigManager.parse_int hash["max_idle"], "User.max_idle"

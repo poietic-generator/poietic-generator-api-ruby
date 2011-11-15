@@ -33,8 +33,10 @@ module PoieticGen
 		property :name,	String, :required => true
 		property :zone, Integer, :required => true
 		property :created_at, Integer, :required => true
-		property :expires_at, Integer, :required => true
+		property :alive_expires_at, Integer, :required => true
+		property :idle_expires_at, Integer, :required => true
 		property :did_expire, Boolean, :required => true
+		property :last_update_time, Integer, :required => true
 
 		def to_hash
 			res = {

@@ -104,8 +104,10 @@ module PoieticGen
 				:name => param_name,
 				:zone => -1,
 				:created_at => now.to_i,
-				:expires_at => (now + @config.user.max_idle).to_i,
-				:did_expire => false
+				:alive_expires_at => (now + @config.user.alive_timeout).to_i,
+				:idle_expires_at => (now + @config.user.max_idle).to_i,
+				:did_expire => false,
+				:last_update_time => now
 			}
 
 			# reuse user_id if session is still valid
@@ -121,9 +123,9 @@ module PoieticGen
 				rdebug "User is in session"
 				user = User.first_or_create param_request, param_create
 
-				tdiff = (now.to_i - user.expires_at)
+				tdiff = (now.to_i - user.alive_expires_at)
 				require 'pp'
-				pp [ now.to_i, user.expires_at, tdiff ]
+				pp [ now.to_i, user.alive_expires_at, tdiff ]
 				if ( tdiff > 0  ) then
 					# The event will be generated elsewhere (in update_data).
 					rdebug "User session expired"
@@ -138,8 +140,9 @@ module PoieticGen
 			# kill all previous users having the same zone
 
 			# update expiration time
-			user.expires_at = (now + @config.user.max_idle)
-			rdebug "Set expiring at %s" % user.expires_at.to_s
+			user.idle_expires_at = (now + @config.user.max_idle)
+			user.alive_expires_at = (now + @config.user.max_idle)
+			rdebug "Set expiring times at %s" % user.alive_expires_at.to_s
 
 			# reset name if requested
 			user.name = param_name
@@ -235,12 +238,13 @@ module PoieticGen
 			pp "FIXME: LEAVE(user)", user
 
 			if user then
-				user.expires_at = Time.now.to_i
+				user.idle_expires_at = Time.now.to_i
+				user.alive_expires_at = Time.now.to_i
 				user.did_expire = true
 				# create leave event if session is the current one
 				if session[PoieticGen::Api::SESSION_SESSION] == @session_id then
 					@board.leave user
-					Event.create_leave user.id, user.expires_at, user.zone
+					Event.create_leave user.id, user.alive_expires_at, user.zone
 				end
 				user.save
 			else
@@ -264,10 +268,10 @@ module PoieticGen
 				:session => @session_id
 			}
 			user = User.first param_request
-			pp user
+			pp user, now
 			raise RuntimeError, "No user found with session_id %s in DB" % @session_id if user.nil?
 
-			if ( (now.to_i - user.expires_at) > 0  ) then
+			if ( (now > user.alive_expires_at) or (now > user.idle_expires_at) ) then
 				# expired lease...
 				return false
 			else
@@ -294,10 +298,11 @@ module PoieticGen
 			rdebug "updating with : %s" % data.inspect
 			req = UpdateRequest.parse data
 
+      user.alive_expires_at = (Time.now.to_i + @config.user.alive_timeout)
       if req.strokes.length > 0 then
-				user.expires_at = (Time.now.to_i + @config.user.max_idle)
-				user.save
+				user.idle_expires_at = (Time.now.to_i + @config.user.max_idle)
       end
+			user.save
 			@board.update_data user, req.strokes
 			@chat.update_data user, req.messages
 
@@ -329,6 +334,9 @@ module PoieticGen
 			}
 
 			rdebug "returning : %s" % result.inspect
+
+      user.last_update_time = Time.now.to_i
+      user.save
 
 			return result
 		end
@@ -439,7 +447,8 @@ module PoieticGen
 					if not has_zone then
 						# kill non-existant user
 						rdebug "Killing user with no zone : %s" % u.inspect
-						u.expires_at = now
+						u.idle_expires_at = now
+						u.alive_expires_at = now
 						u.did_expire = true
 						u.save
 					end
@@ -449,8 +458,11 @@ module PoieticGen
 				if (@last_leave_check_time + LEAVE_CHECK_TIME_MIN) < now then
 					newly_expired_users = User.all(
 						:did_expire => false,
-						:expires_at.lte => now
-					)
+						:alive_expires_at.lte => now
+					) + User.all(
+					  :did_expire => false,
+					  :idle_expires_at.lte => now
+          )
 					rdebug "New expired list : %s" % newly_expired_users.inspect
 					newly_expired_users.each do |leaver|
 						fake_session = {}
