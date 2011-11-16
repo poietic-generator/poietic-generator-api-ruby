@@ -34,13 +34,13 @@ module PoieticGen
 		property :changes, Text, :required => true, :lazy => false
 		property :timestamp, Integer, :required => true
 
-		def to_hash
+		def to_hash ref
 			res = {
 				:id => self.id,
 				:zone => self.zone,
 				:color => self.color,
 				:changes => JSON.parse( self.changes ),
-				:stamp => self.timestamp
+				:diffstamp => self.timestamp - ref
 			}
 			return res
 		end

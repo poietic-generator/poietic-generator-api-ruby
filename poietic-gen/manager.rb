@@ -271,7 +271,7 @@ module PoieticGen
 			pp user, now
 			raise RuntimeError, "No user found with session_id %s in DB" % @session_id if user.nil?
 
-			if ( (now > user.alive_expires_at) or (now > user.idle_expires_at) ) then
+			if ( (now >= user.alive_expires_at) or (now >= user.idle_expires_at) ) then
 				# expired lease...
 				return false
 			else
@@ -311,7 +311,6 @@ module PoieticGen
 				:id.gt => req.strokes_after,
 				:zone.not => user.zone
 			)
-			strokes_collection = strokes.map{ |d| d.to_hash }
 
 			# rdebug "events: (since %s)" % req.events_after
 			events = Event.all(
@@ -326,6 +325,11 @@ module PoieticGen
 			)
 			messages_collection = messages.map{ |e| e.to_hash }
 
+      user.last_update_time = Time.now.to_i
+      user.save
+
+			strokes_collection = strokes.map{ |d| d.to_hash user.last_update_time }
+
 			result = {
 				:events => events_collection,
 				:strokes => strokes_collection,
@@ -334,9 +338,6 @@ module PoieticGen
 			}
 
 			rdebug "returning : %s" % result.inspect
-
-      user.last_update_time = Time.now.to_i
-      user.save
 
 			return result
 		end
@@ -418,7 +419,7 @@ module PoieticGen
 			pp srk_req
 
 			events_collection = evt_req.map{ |e| e.to_hash @board}
-			strokes_collection = srk_req.map{ |s| s.to_hash }
+			strokes_collection = srk_req.map{ |s| s.to_hash 0}
 
 			result = {
 				:events => events_collection,

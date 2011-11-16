@@ -106,7 +106,7 @@ function Zone( p_session, p_index, p_position, p_width, p_height ) {
             // console.log("zone/patch_record: patch creation!");
             _current_patch = {
                 zone: self.index,
-                diff: (new Date()) - _session.last_update_time,
+                diff: ((new Date()) - _session.last_update_time)/1000,
                 color: color,
                 changes: [ [ pos.x, pos.y, 0 ]  ]
             }

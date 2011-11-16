@@ -28,7 +28,7 @@ var DRAW_SESSION_URL_JOIN = "/api/session/join";
 var DRAW_SESSION_URL_LEAVE = "/api/session/leave";
 var DRAW_SESSION_URL_UPDATE = "/api/session/update";
 
-var DRAW_SESSION_UPDATE_INTERVAL = 1000 ;
+var DRAW_SESSION_UPDATE_INTERVAL = 10000 ;
 
 var STATUS_INFORMATION = 1
 var STATUS_SUCCESS = 2
