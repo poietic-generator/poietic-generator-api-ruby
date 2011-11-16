@@ -64,7 +64,7 @@ max_idle = 300
 
 ; maximum amount of time the session is keep alive by the server without
 ; activity at all from the client
-alive_timeout = 30
+alive_timeout = 60
 
 ; number of seconds between keepalive messages (pull messages)
 keepalive = 5
