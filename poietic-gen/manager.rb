@@ -312,6 +312,8 @@ module PoieticGen
 				:zone.not => user.zone
 			)
 
+			strokes_collection = strokes.map{ |d| d.to_hash user.last_update_time }
+
 			# rdebug "events: (since %s)" % req.events_after
 			events = Event.all(
 				:id.gt => req.events_after
@@ -327,8 +329,6 @@ module PoieticGen
 
       user.last_update_time = Time.now.to_i
       user.save
-
-			strokes_collection = strokes.map{ |d| d.to_hash user.last_update_time }
 
 			result = {
 				:events => events_collection,
