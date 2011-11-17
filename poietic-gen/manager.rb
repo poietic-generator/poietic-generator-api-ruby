@@ -419,7 +419,7 @@ module PoieticGen
 			pp srk_req
 
 			events_collection = evt_req.map{ |e| e.to_hash @board}
-			strokes_collection = srk_req.map{ |s| s.to_hash 0}
+			strokes_collection = srk_req.map{ |s| s.to_hash req.since}
 
 			result = {
 				:events => events_collection,
