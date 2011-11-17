@@ -364,6 +364,16 @@ function Viewer( p_session, p_board, p_canvas_id, p_editor, options ){
      *
      */
     this.handle_stroke = function( stk ) {
+        if ( 0 >= stk.diffstamp ) {
+            this.draw_stroke( stk );
+        } else {
+            window.setTimeout( function () {
+                self.draw_stroke( stk )
+            }, stk.diffstamp * 1000 );
+        }
+    };
+
+    this.draw_stroke = function ( stk ) {
         var console = window.noconsole;
         console.log("viewer/handle_stroke : stroke = %s", JSON.stringify( stk ));
         var remote_zone = _board.get_zone( stk.zone );
@@ -383,7 +393,7 @@ function Viewer( p_session, p_board, p_canvas_id, p_editor, options ){
             console.log("viewer/handle_stroke : local_pos = %s", JSON.stringify( local_pos ));
             self.pixel_draw( local_pos, color );
         }
-    }
+    };
 
 
 	/**
