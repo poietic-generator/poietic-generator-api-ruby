@@ -38,6 +38,8 @@ module PoieticGen
 		MESSAGES_CONTENT = 'content'
 		MESSAGES_STAMP = 'stamp'
 
+		UPDATE_INTERVAL = 'update_interval'
+
 		private
 
 		def initialize hash
@@ -74,6 +76,13 @@ module PoieticGen
 				  if val.length != 0 then
 					  rdebug "strokes : %s" % val.inspect
           end
+        when UPDATE_INTERVAL then
+          begin
+            rdebug "update_interval : %d" % val.to_i
+          rescue Exception => e
+            rdebug e
+            raise ArgumentError, ("%s with invalid value : " % UPDATE_INTERVAL)
+          end
 				else
 					raise RuntimeError, "unknow request field '%s'" % key
 				end
@@ -81,7 +90,8 @@ module PoieticGen
 
 			[
 				STROKES,
-				MESSAGES
+				MESSAGES,
+				UPDATE_INTERVAL
 			].each do |field|
 				unless hash.include? field then
 					raise ArgumentError, ("The '%s' field is missing" % field)
@@ -123,6 +133,10 @@ module PoieticGen
 		def events_after
 			return @hash[EVENTS_AFTER].to_i
 		end
+
+		def update_interval
+		  return @hash[UPDATE_INTERVAL].to_i
+    end
 
 	end
 end

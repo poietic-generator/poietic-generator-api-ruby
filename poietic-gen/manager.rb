@@ -312,7 +312,7 @@ module PoieticGen
 				:zone.not => user.zone
 			)
 
-			strokes_collection = strokes.map{ |d| d.to_hash user.last_update_time }
+			strokes_collection = strokes.map{ |d| d.to_hash(user.last_update_time - req.update_interval) }
 
 			# rdebug "events: (since %s)" % req.events_after
 			events = Event.all(

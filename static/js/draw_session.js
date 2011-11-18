@@ -217,6 +217,8 @@ function DrawSession( callback ) {
 
             strokes : strokes_updates,
             messages : messages_updates,
+
+            update_interval : DRAW_SESSION_UPDATE_INTERVAL/1000,
         }
 
         console.log("session/update: req = %s", JSON.stringify( req ) );
