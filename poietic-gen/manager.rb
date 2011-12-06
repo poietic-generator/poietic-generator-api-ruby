@@ -133,6 +133,7 @@ module PoieticGen
 					user = User.create param_create
 
 					@board.join user
+				else
 					is_new = false;
 				end
 			end
