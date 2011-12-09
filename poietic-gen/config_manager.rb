@@ -31,7 +31,7 @@ module PoieticGen
 		attr_reader :user
 		attr_reader :board
 
-		DEFAULT_CONFIG_PATH = File.expand_path( File.join File.dirname(__FILE__), "../config.ini" )
+		DEFAULT_CONFIG_PATH = File.expand_path( File.join File.dirname(__FILE__), "../config/config.ini" )
 
 		# Exception raised when a section is missing.
 		class MissingSection < RuntimeError ; end
