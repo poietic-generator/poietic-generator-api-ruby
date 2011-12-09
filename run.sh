@@ -1,9 +1,9 @@
 #!/bin/sh
 
 
-LOGFILE=log/poietic-$(date +%Y_%m_%d-%Hh%Mm%S).log
+#LOGFILE=log/poietic-$(date +%Y_%m_%d-%Hh%Mm%S).log
 
-echo Logs are stored in : $LOGFILE
+#echo Logs are stored in : $LOGFILE
 
 cd `dirname $0`
 #rm -f *.sqlite3
