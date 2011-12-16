@@ -21,7 +21,6 @@
 ##############################################################################
 
 require 'poietic-gen/zone'
-require 'datamapper'
 
 module PoieticGen
 
