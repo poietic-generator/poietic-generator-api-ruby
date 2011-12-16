@@ -72,6 +72,10 @@ module PoieticGen
 		#
 		def initialize conf_file
 			puts "PoieticGen::ConfigManager - initialize with file : '%s'\n" % conf_file
+			unless File.exist? conf_file then
+				raise RuntimeError, "Configuration file %s not found" % conf_file
+			end
+
 			ini_fh = IniFile.load conf_file
 			raise MissingSection unless ini_fh.has_section? "server"
 			@server = ConfigServer.new ini_fh["server"]
