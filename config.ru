@@ -2,10 +2,10 @@
 require 'rubygems'
 require 'bundler/setup'
 
-require 'datamapper'
 require 'dm-core'
 require 'dm-validations'
 require 'dm-sqlite-adapter'
+require 'dm-migrations'
 
 require 'poietic-gen/manager'
 require 'poietic-gen/api'
