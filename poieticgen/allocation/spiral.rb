@@ -20,7 +20,7 @@
 #                                                                            #
 ##############################################################################
 
-require 'poietic-gen/allocation/generic'
+require 'poieticgen/allocation/generic'
 require 'monitor'
 
 module PoieticGen ; module Allocation

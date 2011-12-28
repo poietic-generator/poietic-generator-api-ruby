@@ -20,12 +20,12 @@
 #                                                                            #
 ##############################################################################
 
-require 'poietic-gen/update_request'
-require 'poietic-gen/zone'
-require 'poietic-gen/user'
+require 'poieticgen/update_request'
+require 'poieticgen/zone'
+require 'poieticgen/user'
 
-require 'poietic-gen/allocation/spiral'
-require 'poietic-gen/allocation/random'
+require 'poieticgen/allocation/spiral'
+require 'poieticgen/allocation/random'
 
 require 'monitor'
 

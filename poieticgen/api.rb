@@ -23,9 +23,9 @@
 require 'sinatra/base'
 
 
-require 'poietic-gen/config_manager'
-require 'poietic-gen/page'
-require 'poietic-gen/manager'
+require 'poieticgen/config_manager'
+require 'poieticgen/page'
+require 'poieticgen/manager'
 
 require 'rdebug/base'
 require 'json'
@@ -83,7 +83,7 @@ module PoieticGen
 		configure :development do |c|
 			require "sinatra/reloader"
 			register Sinatra::Reloader
-			#also_reload "poietic-gen/**/*.rb"
+			#also_reload "poieticgen/**/*.rb"
 		end
 
 		configure do

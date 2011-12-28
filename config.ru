@@ -7,8 +7,8 @@ require 'dm-validations'
 require 'dm-sqlite-adapter'
 require 'dm-migrations'
 
-require 'poietic-gen/manager'
-require 'poietic-gen/api'
+require 'poieticgen/manager'
+require 'poieticgen/api'
 
 #use Rack::Session::Cookie
 

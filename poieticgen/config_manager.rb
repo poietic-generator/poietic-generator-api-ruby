@@ -97,9 +97,9 @@ module PoieticGen
 
 end
 
-require 'poietic-gen/config_manager/config_server'
-require 'poietic-gen/config_manager/config_chat'
-require 'poietic-gen/config_manager/config_user'
-require 'poietic-gen/config_manager/config_board'
-require 'poietic-gen/config_manager/config_database'
+require 'poieticgen/config_manager/config_server'
+require 'poieticgen/config_manager/config_chat'
+require 'poieticgen/config_manager/config_user'
+require 'poieticgen/config_manager/config_board'
+require 'poieticgen/config_manager/config_database'
 

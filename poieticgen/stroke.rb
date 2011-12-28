@@ -20,7 +20,7 @@
 #                                                                            #
 ##############################################################################
 
-require 'poietic-gen/zone'
+require 'poieticgen/zone'
 
 module PoieticGen
 
