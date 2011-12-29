@@ -68,16 +68,22 @@ module PoieticGen
 			end
 		end
 
+
 		#
 		# make the user join the board
 		#
 		def join user
+			zone = nil
 			@monitor.synchronize do
 				zone = @allocator.allocate
-				zone.user = user
+				zone.user_id = user.id
 				user.zone = zone.index
+				zone.save
+				user.save
 			end
+			return zone
 		end
+
 
 		#
 		# disconnect user from the board

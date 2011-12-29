@@ -24,51 +24,81 @@ require 'monitor'
 
 module PoieticGen
 	class Zone
+		include DataMapper::Resource
 
-		attr_reader :index, :position
+		property :id,	Serial
 
-		attr_accessor :user
+		# the position, from center
+		property :index, Integer, :required => true
+
+		# position
+		property :position, Csv, :required => true
+	
+		# size attributes
+		property :width, Integer, :required => true
+		property :height, Integer, :required => true
+
+		# user 
+		property :user_id, Integer 
+
+		property :created_at, Integer, :required => true
+		property :deleted_at, Integer, :required => true
+		property :deleted, Boolean, :required => true
+
+		property :data, Csv, :required => true
+
+	#	attr_reader :index, :position
+
+		def position
+			super.map{|x| x.to_i}
+		end
 
 		def initialize index, position, width, height
-			@index = index
-			@position =	position
-			@width = width
-			@height = height
-			@user = nil
-
-			@data = []
-			@width.times do |w_cnt|
-				@data[w_cnt] = []
-				@height.times do |h_cnt|
-					@data[w_cnt][h_cnt] = nil
-				end
-			end
-			@monitor = Monitor.new
 			@debug = true
+
+			param_create = {
+				:index => index,
+				:position => position.map{|x| x.to_s},
+				:width => width,
+				:height => height,
+				:data => Array.new( width * height, '#000'),
+				:user_id => nil,
+				:created_at => Time.now.to_i,
+				:deleted_at => 0,
+				:deleted => false
+			}
+			super param_create
+
+			begin
+				self.save
+			rescue DataMapper::SaveFailureError => e
+				rdebug "Saving failure : %s" % e.resource.errors.inspect
+				raise e
+			end
+			rdebug "zone created!"
 		end
 
 		def reset
-			@monitor.synchronize do
-				@width.times do |w_cnt|
-					@data[w_cnt] = []
-					@height.times do |h_cnt|
-						@data[w_cnt][h_cnt] = "#000"
-					end
-				end
+			self.data = Array.new( width * height, '#000');
+			begin
+				self.save
+			rescue DataMapper::SaveFailureError => e
+				rdebug "Saving failure : %s" % e.resource.errors.inspect
+				raise e
 			end
 		end
 
 		def apply user, drawing
-			@monitor.synchronize do
+			Zone.transaction do
 				# save patch into database
 				return if drawing.nil?
 
 				rdebug drawing.inspect if drawing.length != 0
 
+				# FIXME: get user from user_id
 				ref = user.last_update_time
 
 				drawing.each do |patch|
-
 
 					color = patch['color']
 					changes = patch['changes']
@@ -89,37 +119,46 @@ module PoieticGen
 						raise e
 					end
 
-
 					changes.each do |x,y,t_offset|
-						@data[x][y] = color
+						idx = _xy2idx(x,y)
+						self.data[idx] = color
 					end
+				end
+
+				begin
+					self.save
+				rescue DataMapper::SaveFailureError => e
+					rdebug "Saving failure : %s" % e.resource.errors.inspect
+					raise e
 				end
 			end
 		end
 
 		def to_desc_hash
 			res = nil
-			@monitor.synchronize do
+			Zone.transaction do
 				res = {
-					:index => @index,
-					:position => @position,
-					:user => @user.id,
+					:index => self.index,
+					:position => self.position,
+					:user => self.user_id,
 					:content => self.to_patches_hash
 				}
 			end
 			return res
 		end
 
+
 		#
 		# Return an array out of current zone state
 		#
 		def to_patches_hash
 			result = []
-			@monitor.synchronize do
+			Zone.transaction do
 				patches = {}
-				@width.times do |w|
-					@height.times do |h|
-						color = @data[w][h]
+
+				self.width.times do |w|
+					self.height.times do |h|
+						color = self.data[_xy2idx(w,h)]
 						next if color.nil?
 						patches[color] = [] unless patches.include? color
 						patches[color].push [w,h,0]
@@ -128,7 +167,7 @@ module PoieticGen
 				patches.each do |color, where|
 					patch = {
 						:id => nil,
-						:zone => @index,
+						:zone => self.index,
 						:color => color,
 						:changes => where,
 						:stamp => nil
@@ -137,6 +176,18 @@ module PoieticGen
 				end
 			end
 			return result
+		end
+
+		private
+
+		def _xy2idx x,y
+			return (y * self.width + x)
+		end
+
+		def _idx2xy idx
+			x = idx % self.width
+			y = idx / self.width
+			return x,y
 		end
 	end
 end
