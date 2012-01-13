@@ -92,10 +92,6 @@ module PoieticGen
 				File.open config.server.pidfile, "w" do |fh|
 					fh.puts Process.pid
 				end
-			rescue PoieticGen::ConfigManager::ConfigurationError => e
-				STDERR.puts "ERROR: %s" % e.message
-				exit 1
-			end
 
 			set :config, config
 			set :manager, (PoieticGen::Manager.new config)
@@ -108,6 +104,11 @@ module PoieticGen
 			DataMapper::Model.raise_on_save_failure = true
 
 			DataMapper.auto_upgrade!
+
+			rescue PoieticGen::ConfigManager::ConfigurationError => e
+				STDERR.puts "ERROR: %s" % e.message
+				exit 1
+			end
 		end
 
 
