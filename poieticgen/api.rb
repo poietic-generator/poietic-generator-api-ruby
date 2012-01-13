@@ -87,9 +87,14 @@ module PoieticGen
 		end
 
 		configure do
-			config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
-			File.open config.server.pidfile, "w" do |fh|
-				fh.puts Process.pid
+			begin
+				config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
+				File.open config.server.pidfile, "w" do |fh|
+					fh.puts Process.pid
+				end
+			rescue PoieticGen::ConfigManager::ConfigurationError => e
+				STDERR.puts "ERROR: %s" % e.message
+				exit 1
 			end
 
 			set :config, config
