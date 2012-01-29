@@ -1,3 +1,5 @@
 Gemfile.lock
 config/config.ini
 .bundle
+vendor
+tmp
