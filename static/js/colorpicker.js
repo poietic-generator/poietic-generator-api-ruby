@@ -30,6 +30,7 @@ function ColorPicker(p_editor) {
 
     this.initialize = function ( p_editor ) {
         _editor = p_editor;
+	// rely on the colojack.js 
         _color_picker = new Color.Picker({
             callback: function(hex) {
 			  console.log("colorpicker/initialize/callback: hex = " + hex);
