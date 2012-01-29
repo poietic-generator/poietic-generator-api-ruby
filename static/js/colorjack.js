@@ -8,7 +8,7 @@
     This color picker is dual licenced under Creative Commons & GPL.
 */
 
-if(window.Color == undefined) Color = {};
+if(window.Color == undefined) window.Color = {};
 
 Color.Picker = function (props) {
 
