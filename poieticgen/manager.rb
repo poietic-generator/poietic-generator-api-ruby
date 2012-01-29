@@ -293,15 +293,16 @@ module PoieticGen
 				:session => @session_id
 			}
 			user = User.first param_request
+			now_i = Time.now.to_i
 
 			self.check_expired_users
 
 			rdebug "updating with : %s" % data.inspect
 			req = UpdateRequest.parse data
 
-      user.alive_expires_at = (Time.now.to_i + @config.user.alive_timeout)
+      user.alive_expires_at = (now_i + @config.user.alive_timeout)
       if req.strokes.length > 0 then
-				user.idle_expires_at = (Time.now.to_i + @config.user.max_idle)
+				user.idle_expires_at = (now_i + @config.user.max_idle)
       end
 			user.save
 			@board.update_data user, req.strokes
@@ -328,14 +329,14 @@ module PoieticGen
 			)
 			messages_collection = messages.map{ |e| e.to_hash }
 
-      user.last_update_time = Time.now.to_i
+      user.last_update_time = now_i
       user.save
 
 			result = {
 				:events => events_collection,
 				:strokes => strokes_collection,
 				:messages => messages_collection,
-				:stamp => (Time.now.to_i - @session_start)
+				:stamp => (now_i - @session_start)
 			}
 
 			rdebug "returning : %s" % result.inspect

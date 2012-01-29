@@ -17,7 +17,7 @@ Also install mandatory gem packages on your system
     sudo gem install capistrano capistrano-ext
     sudo gem install thin
 
-And make sure that /var/lib/gems/1.8/bin is in your path. Update your ~.profile 
+And make sure that /var/lib/gems/1.8/bin is in your path. Update your ~/.profile 
 or ~/.bashrc or simply run
 
     export PATH=$PATH:/var/lib/gems/1.8/bin/
@@ -31,12 +31,15 @@ their dependencies :
 
 ## 2. Configuration
 
+Copy config/config.ini.example to config/config.ini then edit it to your needs.
+
+Create a tmp directory locally. It will be use by the devel-script to run the service.
 
 ## 3. Running (development mode)
 
 Simply type the following command, from the project directory :
 
-    ./run.sh
+    ./devel-run.sh
 
 ## 4. Deploying 
 

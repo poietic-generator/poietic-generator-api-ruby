@@ -33,14 +33,19 @@ module PoieticGen
 
 		DEFAULT_CONFIG_PATH = File.expand_path( File.join File.dirname(__FILE__), "../config/config.ini" )
 
+		class ConfigurationError < RuntimeError ; end
+
+		# Exception raised when a configuration file is missing
+		class MissingFile < ConfigurationError ; end
+
 		# Exception raised when a section is missing.
-		class MissingSection < RuntimeError ; end
+		class MissingSection < ConfigurationError ; end
 
 		# Exception raised when a field is missing in a section.
-		class MissingField < RuntimeError ; end
+		class MissingField < ConfigurationError ; end
 
 		# Exception raised when a field has a bad type.
-		class BadFieldType < RuntimeError ; end
+		class BadFieldType < ConfigurationError ; end
 
 
 		#
@@ -73,7 +78,7 @@ module PoieticGen
 		def initialize conf_file
 			puts "PoieticGen::ConfigManager - initialize with file : '%s'\n" % conf_file
 			unless File.exist? conf_file then
-				raise RuntimeError, "Configuration file %s not found" % conf_file
+				raise MissingFile, "Configuration file %s not found" % conf_file
 			end
 
 			ini_fh = IniFile.load conf_file
