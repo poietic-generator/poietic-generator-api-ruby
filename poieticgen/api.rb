@@ -193,14 +193,9 @@ module PoieticGen
 				validate_session! session
 				status = [ STATUS_SUCCESS ]
 
-				# FIXME: extract patches information
 				if settings.manager.check_lease! session then
-
-					# FIXME: extract chat information
-
 					data = JSON.parse(request.body.read)
 					result = settings.manager.update_data session, data
-
 				else
 					status = [ STATUS_REDIRECTION, "Session has expired !", "/"]
 				end
