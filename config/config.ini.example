@@ -34,7 +34,7 @@ colors = truecolor
 
 
 [database]
-; the type of database
+; the type of database ('sqlite', 'mysql')
 adapter = sqlite
 
 ; database host
