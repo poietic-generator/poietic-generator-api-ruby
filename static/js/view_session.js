@@ -82,7 +82,7 @@ function ViewSession( callback ) {
                 if (!_restart) {
                     _duration = response.duration;
                 } else {
-                    _duration = VIEW_PLAY_UPDATE_INTERVAL * _play_speed;
+                    _duration = 0;
                 }
                 // console.log('session/join response mod : ' + JSON.stringify(this) );
 
@@ -97,7 +97,7 @@ function ViewSession( callback ) {
                     self.dispatch_strokes( self.other_zones[i].content );
                 }
 
-                self.setTimer( self.update, VIEW_SESSION_UPDATE_INTERVAL );
+                self.setTimer( self.update, 1 );
 
                 console.log('session/join end');
             }
