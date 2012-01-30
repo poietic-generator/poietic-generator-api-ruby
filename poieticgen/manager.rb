@@ -366,6 +366,7 @@ module PoieticGen
 
 			rdebug "call with %s" % params.inspect
 			req = SnapshotRequest.parse params
+			result = nil
 
 			User.transaction do 
 
@@ -402,8 +403,8 @@ module PoieticGen
 
 				rdebug "returning : %s" % result.inspect
 
-				return result
 			end
+			return result
 		end
 
 		def play session, params
@@ -411,6 +412,7 @@ module PoieticGen
 			rdebug "call with %s" % params.inspect
 			req = PlayRequest.parse params
 			now = Time.now.to_i
+			result = nil
 
 			# TODO : ignore session_id because it is unknow for the viewer for now
 			#raise RuntimeError, "Invalid session" if req.session != @session_id
@@ -421,8 +423,6 @@ module PoieticGen
 
 			Event.transaction do
 				rdebug "req.since = %d ; req.duration = %d" % [req.since, req.duration]
-
-
 
 				evt_req = Event.all(
 					:timestamp.gte => Time.at(req.since),
@@ -449,8 +449,8 @@ module PoieticGen
 
 				rdebug "returning : %s" % result.inspect
 
-				return result
 			end
+			return result
 		end
 
 
