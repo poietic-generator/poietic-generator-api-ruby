@@ -368,12 +368,14 @@ module PoieticGen
 			req = SnapshotRequest.parse params
 			result = nil
 
-			User.transaction do 
+			User.transaction do
 
 				# TODO : ignore session_id because it is unknow for the viewer for now
 				#raise RuntimeError, "Invalid session" if req.session != @session_id
 
-
+				now_i = Time.now.to_i - 1
+				# we take a snapshot one second in the past to be sure we will get
+				# a complete second.
 				if req.date == -1 then
 					# get the current state
 					users_db = User.all(
@@ -398,7 +400,7 @@ module PoieticGen
 					:zone_column_count => @config.board.width,
 					:zone_line_count => @config.board.height,
 					:start_date => @session_start,
-					:duration => (Time.now.to_i - @session_start)
+					:duration => (now_i - @session_start)
 				}
 
 				rdebug "returning : %s" % result.inspect
@@ -411,7 +413,7 @@ module PoieticGen
 
 			rdebug "call with %s" % params.inspect
 			req = PlayRequest.parse params
-			now = Time.now.to_i
+			now_i = Time.now.to_i
 			result = nil
 
 			# TODO : ignore session_id because it is unknow for the viewer for now
@@ -421,19 +423,27 @@ module PoieticGen
 			# req.since : date from where we want the params
 			# req.duration : amount of time we want.
 
+
+			# This allow to make the request fit in an already elapsed time.
+			if now_i <= (req.since + req.duration) then
+				duration = (now_i - 1) - req.since
+			else
+				duration = req.duration
+			end
+
 			Event.transaction do
 				rdebug "req.since = %d ; req.duration = %d" % [req.since, req.duration]
 
 				evt_req = Event.all(
 					:timestamp.gte => Time.at(req.since),
-					:timestamp.lt => Time.at(req.since + req.duration)
+					:timestamp.lt => Time.at(req.since + duration)
 				)
 
 				pp evt_req
 
 				srk_req = Stroke.all(
 					:timestamp.gte => Time.at(req.since),
-					:timestamp.lt => Time.at(req.since + req.duration)
+					:timestamp.lt => Time.at(req.since + duration)
 				)
 
 				pp srk_req
@@ -444,7 +454,7 @@ module PoieticGen
 				result = {
 					:events => events_collection,
 					:strokes => strokes_collection,
-					:duration => (now - @session_start)
+					:duration => ((req.since + duration) - @session_start)
 				}
 
 				rdebug "returning : %s" % result.inspect
