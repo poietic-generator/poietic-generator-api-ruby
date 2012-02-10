@@ -6,7 +6,7 @@ require 'bundler/capistrano'
 #
 set :default_stage, "development"
 set :stages, %w{production testing development}
-require 'capistrano/multistage'
+require 'capistrano/ext/multistage'
 
 #
 # Define application parameters
@@ -26,11 +26,11 @@ namespace :deploy do
 		run "echo $PATH"
 		run "mkdir #{deploy_to}/current/log"
 		run "mkdir #{deploy_to}/current/tmp"
-		run "cd #{deploy_to}/current && nohup bundle exec thin -C config/thin_#{deploy_env}.yml -R config.ru start"
+		run "cd #{deploy_to}/current && nohup bundle exec thin -C config/#{deploy_env}/thin.yml -R config.ru start"
 	end
 
 	task :stop, :roles => [:web, :app] do
-		run "cd #{deploy_to}/current && nohup bundle exec thin -C config/thin_#{deploy_env}.yml -R config.ru stop"
+		run "cd #{deploy_to}/current && nohup bundle exec thin -C config/#{deploy_env}/thin.yml -R config.ru stop"
 	end
 
 	task :restart, :roles => [:web, :app] do
