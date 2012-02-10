@@ -3,3 +3,4 @@ config/config.ini
 .bundle
 vendor
 tmp
+log
