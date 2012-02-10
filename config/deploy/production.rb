@@ -1,10 +1,10 @@
 
 # Your HTTP server, Apache/etc
-role :web, "play.poietic-generator.com"
+role :web, "play.poietic-generator.net"
 # This may be the same as your `Web` server
-role :app, "play.poietic-generator.com"
+role :app, "play.poietic-generator.net"
 # This is where Rails migrations will run
-role :db,  "play.poietic-generator.com", :primary => true
+role :db,  "play.poietic-generator.net", :primary => true
 
 set :user, "admin"
 set :use_sudo, false
