@@ -57,7 +57,7 @@ module PoieticGen
 		set :environment, :production
 
 		set :static, true
-		set :public, File.expand_path( File.dirname(__FILE__) + '/../static' )
+		set :public_folder, File.expand_path( File.dirname(__FILE__) + '/../static' )
 		set :views, File.expand_path( File.dirname(__FILE__) + '/../views' )
 
 		mime_type :ttf, "application/octet-stream"
