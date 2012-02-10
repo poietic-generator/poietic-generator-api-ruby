@@ -24,8 +24,8 @@ set :scm_verbose, true
 namespace :deploy do
 	task :start, :roles => [:web, :app] do
 		run "echo $PATH"
-		run "mkdir #{deploy_to}/current/log"
-		run "mkdir #{deploy_to}/current/tmp"
+		run "mkdir -p #{deploy_to}/current/log"
+		run "mkdir -p #{deploy_to}/current/tmp"
 		run "cd #{deploy_to}/current && nohup bundle exec thin -C config/#{deploy_env}/thin.yml -R config.ru start"
 	end
 

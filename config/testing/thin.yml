@@ -3,7 +3,7 @@ pid: tmp/pids/thin.pid
 address: 0.0.0.0
 wait: 30
 timeout: 30
-port: 9393
+port: 9494
 log: log/thin.log
 max_conns: 1024
 require: []
