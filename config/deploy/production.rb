@@ -9,7 +9,7 @@ role :db,  "play.poietic-generator.com", :primary => true
 set :user, "admin"
 set :use_sudo, false
 
-set :deploy_to, "/home/FIXME/production"
+set :deploy_to, "/home/admin/d_poiesis/www/play.poietic-generator.net/play"
 set :deploy_env, 'production'
 
 # limit number of releases on server
