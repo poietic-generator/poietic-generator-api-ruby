@@ -23,10 +23,10 @@ or ~/.bashrc or simply run
     export PATH=$PATH:/var/lib/gems/1.8/bin/
 
 Finally, from the project directory, run the following command to install
-locally into the "vendor/" directory the gems required by this project and all
-their dependencies :
+locally into the "vendor/bundle" directory the gems required by this project
+and all their dependencies :
 
-    bundle install --path vendor
+    bundle install --path vendor/bundle
 
 
 ## 2. Configuration
