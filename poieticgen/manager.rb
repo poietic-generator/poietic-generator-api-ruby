@@ -370,8 +370,8 @@ module PoieticGen
 
 			User.transaction do
 
-				# TODO : ignore session_id because it is unknow for the viewer for now
-				#raise RuntimeError, "Invalid session" if req.session != @session_id
+				# ignore session_id from the viewer point of view but use server one
+				# to distinguish old sessions/old users
 
 				now_i = Time.now.to_i - 1
 				# we take a snapshot one second in the past to be sure we will get
@@ -379,6 +379,8 @@ module PoieticGen
 				if req.date == -1 then
 					# get the current state
 					users_db = User.all(
+						# select only this session
+						:session => @session_id,
 						:did_expire.not => true
 					)
 					users = users_db.map{ |u| u.to_hash }
