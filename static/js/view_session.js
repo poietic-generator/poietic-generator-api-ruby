@@ -39,12 +39,12 @@ var STATUS_BAD_REQUEST = 5
 
 
 function ViewSession( callback ) {
-    var console = noconsole;
+    //var console = noconsole;
 
     var self = this,
     _observers = null,
     _start_date = 0,
-    _duration = 0,
+    _time_offset = 0,
     _timer = null,
     _restart = false,
     _play_speed = 1;
@@ -80,11 +80,13 @@ function ViewSession( callback ) {
 
                 _start_date = response.start_date;
                 if (!_restart) {
-                    _duration = response.duration;
+                    _time_offset = response.time_offset;
                 } else {
-                    _duration = 0;
+                    _time_offset = 0;
                 }
-                // console.log('session/join response mod : ' + JSON.stringify(this) );
+                console.log('session/join response mod : ' + JSON.stringify(this) );
+				console.log('session/join start_date : ' + _start_date );
+				console.log('session/join time_offset : ' + _time_offset );
 
                 self.other_zones = response.zones;
 
@@ -156,7 +158,7 @@ function ViewSession( callback ) {
 
         req = {
             session: "default",
-            since: _start_date + _duration,
+            since: _start_date + _time_offset,
             duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed
         };
 
@@ -175,11 +177,11 @@ function ViewSession( callback ) {
                 }
 
                 if (!_restart) {
-                    _duration = response.duration;
+                    _time_offset = response.time_offset;
                 } else {
-                    _duration+= VIEW_PLAY_UPDATE_INTERVAL * _play_speed;
-                    if ( response.duration < _duration  ) {
-                        _duration = response.duration;
+                    _time_offset+= VIEW_PLAY_UPDATE_INTERVAL * _play_speed;
+                    if ( response.time_offset < _time_offset  ) {
+                        _time_offset = response.time_offset;
                         _restart = false;
                     }
                 }
