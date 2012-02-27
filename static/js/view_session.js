@@ -130,6 +130,8 @@ function ViewSession( callback ) {
         }
         return null;
     };
+
+
     /**
      *
      */
