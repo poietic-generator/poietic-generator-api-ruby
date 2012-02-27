@@ -402,7 +402,7 @@ module PoieticGen
 					:zone_column_count => @config.board.width,
 					:zone_line_count => @config.board.height,
 					:start_date => @session_start,
-					:time_offset => (now_i - @session_start)
+					:duration => (now_i - @session_start)
 				}
 
 				rdebug "returning : %s" % result.inspect
@@ -459,7 +459,6 @@ module PoieticGen
 					:events => events_collection,
 					:strokes => strokes_collection,
 					:duration => ((req.since + duration - 2) - @session_start)
-					:time_offset => ((req.since + duration - 2) - @session_start)
 				}
 
 				rdebug "returning : %s" % result.inspect
