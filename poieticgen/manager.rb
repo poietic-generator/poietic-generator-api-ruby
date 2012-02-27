@@ -428,8 +428,10 @@ module PoieticGen
 
 			# This allow to make the request fit in an already elapsed time.
 			if now_i <= (req.since + req.duration) then
-				duration = (now_i - 1) - req.since
+				# client requests a date in the future
+				duration = now_i - req.since
 			else
+				# client requests a past date
 				duration = req.duration
 			end
 
@@ -437,15 +439,15 @@ module PoieticGen
 				rdebug "req.since = %d ; req.duration = %d" % [req.since, req.duration]
 
 				evt_req = Event.all(
-					:timestamp.gte => Time.at(req.since),
-					:timestamp.lt => Time.at(req.since + duration)
+					:timestamp.gte => Time.at(req.since - 1),
+					:timestamp.lte => Time.at(req.since + duration - 1)
 				)
 
 				pp evt_req
 
 				srk_req = Stroke.all(
-					:timestamp.gte => Time.at(req.since),
-					:timestamp.lt => Time.at(req.since + duration)
+					:timestamp.gte => Time.at(req.since - 1),
+					:timestamp.lte => Time.at(req.since + duration - 1)
 				)
 
 				pp srk_req
@@ -456,11 +458,10 @@ module PoieticGen
 				result = {
 					:events => events_collection,
 					:strokes => strokes_collection,
-					:duration => ((req.since + duration) - @session_start)
+					:duration => ((req.since + duration - 2) - @session_start)
 				}
 
 				rdebug "returning : %s" % result.inspect
-
 			end
 			return result
 		end
