@@ -361,18 +361,25 @@ function Viewer( p_session, p_board, p_canvas_id, p_editor, options ){
 
 
     /**
-     *
+     * Handle stroke 
+	 *
+	 * Draw strokes with a relative apparition time
      */
     this.handle_stroke = function( stk ) {
-        if ( 0 >= stk.diffstamp ) {
-            this.draw_stroke( stk );
-        } else {
-            window.setTimeout( function () {
-                self.draw_stroke( stk )
-            }, stk.diffstamp * 1000 );
-        }
+		if ( 0 >= stk.diffstamp ) { 
+			this.draw_stroke( stk );
+
+		} else {
+			window.setTimeout( function () {
+				self.draw_stroke( stk )
+			}, stk.diffstamp * 1000 );
+		}
     };
 
+
+	/**
+	 * Draw stroke
+	 */
     this.draw_stroke = function ( stk ) {
         var console = window.noconsole;
         console.log("viewer/handle_stroke : stroke = %s", JSON.stringify( stk ));
