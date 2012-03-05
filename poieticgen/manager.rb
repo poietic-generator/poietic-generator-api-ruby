@@ -370,6 +370,8 @@ module PoieticGen
 
 			User.transaction do
 
+				self.check_expired_users
+
 				# ignore session_id from the viewer point of view but use server one
 				# to distinguish old sessions/old users
 
@@ -436,6 +438,9 @@ module PoieticGen
 			end
 
 			Event.transaction do
+
+				self.check_expired_users
+
 				rdebug "req.since = %d ; req.duration = %d" % [req.since, req.duration]
 
 				evt_req = Event.all(
