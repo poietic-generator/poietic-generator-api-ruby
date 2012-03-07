@@ -6,6 +6,10 @@ role :app, "play.poietic-generator.net"
 # This is where Rails migrations will run
 role :db,  "play.poietic-generator.net", :primary => true
 
+set :default_environment, {
+	'PATH' => "/var/lib/gems/1.8/bin:$PATH"
+}
+
 set :user, "admin"
 set :use_sudo, false
 
