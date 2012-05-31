@@ -123,14 +123,6 @@ module PoieticGen
 			erb :page_index
 		end
 
-		#
-		# Restart session
-		#
-		get '/restart' do
-			session[SESSION_USER] ||= nil
-			settings.manager.restart session, params
-			redirect '/'
-		end
 
 		#
 		#
@@ -217,9 +209,6 @@ module PoieticGen
 			rescue ArgumentError => e
 				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_BAD_REQUEST, "Invalid content" ]
-
-			rescue PoieticGen::InvalidSession => e
-				status = [ STATUS_REDIRECTION, "Session has expired !", "/"]
 
 			rescue Exception => e
 				# handle non-JSON parsing errors
