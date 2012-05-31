@@ -9,6 +9,7 @@ require 'dm-migrations'
 require 'dm-transactions'
 require 'dm-types'
 
+$:.insert(0,".")
 require 'poieticgen/manager'
 require 'poieticgen/api'
 
