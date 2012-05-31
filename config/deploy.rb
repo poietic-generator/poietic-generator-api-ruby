@@ -12,7 +12,7 @@ require 'capistrano/ext/multistage'
 # Define application parameters
 #
 set :application, "poietic-generator"
-set :repository,  "http://github.com/Gnuside/poietic-generator-reloaded.git"
+set :repository,  "http://github.com/Gnuside/poietic-generator.git"
 
 set :scm, :git
 set :scm_verbose, true
