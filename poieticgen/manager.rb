@@ -37,8 +37,6 @@ require 'poieticgen/play_request'
 
 module PoieticGen
 
-	class InvalidSession < RuntimeError ; end
-
 	#
 	# manage a pool of users
 	#
@@ -54,16 +52,26 @@ module PoieticGen
 			@debug = true
 			pp config
 			# a 16-char long random string
+			@session_id = (0...16).map{ ('a'..'z').to_a[rand(26)] }.join
+			@session_start = Time.now.to_i
 
-			_session_init
+			# @palette = Palette.new
+
+			# total count of users seen (FIXME: get it from db)
+			@users_seen = 0
+
+			# Create board with the configuration
+			@board = Board.new config.board
+
+			@chat = PoieticGen::ChatManager.new config.chat
+
+			@last_leave_check_time = Time.now.to_i - LEAVE_CHECK_TIME_MIN
+			@leave_mutex = Mutex.new
+
 			# FIXME put it in db
 			# FIXME : create session in database
 		end
 
-
-		def restart session, params
-			_session_init
-		end
 
 		#
 		# generates an unpredictible user id based on session id & user counter
@@ -267,7 +275,7 @@ module PoieticGen
 			}
 			user = User.first param_request
 			pp user, now
-			raise InvalidSession, "No user found with session_id %s in DB" % @session_id if user.nil?
+			raise RuntimeError, "No user found with session_id %s in DB" % @session_id if user.nil?
 
 			if ( (now >= user.alive_expires_at) or (now >= user.idle_expires_at) ) then
 				# expired lease...
@@ -510,24 +518,6 @@ module PoieticGen
 					rdebug "Leaver updates : Can't update because someone is already working on that"
 				end
 			end
-		end
-
-		private
-
-		def _session_init 
-			@session_id = (0...16).map{ ('a'..'z').to_a[rand(26)] }.join
-			@session_start = Time.now.to_i
-
-			# total count of users seen (FIXME: get it from db)
-			@users_seen = 0
-
-			# Create board with the configuration
-			@board = Board.new @config.board
-
-			@chat = PoieticGen::ChatManager.new @config.chat
-
-			@last_leave_check_time = Time.now.to_i - LEAVE_CHECK_TIME_MIN
-			@leave_mutex = Mutex.new
 		end
 
 	end
