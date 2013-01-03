@@ -20,166 +20,180 @@
 /*                                                                            */
 /******************************************************************************/
 
-"use strict";
+/*jslint browser: true, nomen: true */
+/*global $, jQuery, document, Zone, alert, console */
 
-function Chat( p_session ) {
-    var self = this,
-    _template_received = [
-        '<div class="ui-block-a message-src">',
-        '<div class="ui-body ui-body-a">from: ',
-        "",
-        '</div></div>',
-        '<div class="ui-block-b message-content">',
-        '<div class="ui-body ui-body-a">',
-        "",
-        '</div></div>'
-    ],
-    _template_sent = [
-        '<div class="ui-block-a message-content">',
-        '<div class="ui-body ui-body-b message-dst-content">',
-        "",
-        '</div></div>',
-        '<div class="ui-block-b message-dst">',
-        '<div class="ui-body ui-body-b">to: ',
-        "",
-        '</div></div>'
-    ], _session;
+// FIXME: use the prototype-style object definition
 
-    this._queue = [];
+(function (window, $) {
+	"use strict";
 
-    this.name = "Chat";
+	function Chat(p_session) {
+		var self = this,
 
-    /**
-     * Constructor
-     */
-    this.initialize = function (p_session) {
-        // register chat to session
-        _session = p_session;
-        _session.register(self);
+		// FIXME: move HTML template out of javascript file
+			_template_received = [
+				'<div class="ui-block-a message-src">',
+				'<div class="ui-body ui-body-a">from: ',
+				"",
+				'</div></div>',
+				'<div class="ui-block-b message-content">',
+				'<div class="ui-body ui-body-a">',
+				"",
+				'</div></div>'
+			],
+			_template_sent = [
+				'<div class="ui-block-a message-content">',
+				'<div class="ui-body ui-body-b message-dst-content">',
+				"",
+				'</div></div>',
+				'<div class="ui-block-b message-dst">',
+				'<div class="ui-body ui-body-b">to: ',
+				"",
+				'</div></div>'
+			],
+			_session;
 
-        // initialize list of users for the send message form
-        this.refresh_user_list();
+		this._queue = [];
 
-        // attach submit event
-        $("#send-message-form").submit(function(event){
-            event.preventDefault();
-            var content = $(this).find("#send-message-form-content"),
-            user_dst = $(this).find("#send-message-form-to").val(),
-            user_dst_id = parseInt(user_dst, 10),
-            message;
-            if (null !== user_dst && 0 < user_dst_id && "" !== content.val()) {
-                message = {
-                    content: content.val(),
-                    stamp: new Date(),
-                    user_dst: user_dst_id
-                }
-                self.queue_message( message );
-                self.display_message({
-                    content: content.val(),
-                    user_dst: user_dst_id
-                }, true);
-                // Reset field value.
-                content.val("");
-            } else {
-                alert("You must select an user and write a message.");
-            }
-        });
+		this.name = "Chat";
 
+		/**
+		* Constructor
+		*/
+		this.initialize = function (p_session) {
+			// register chat to session
+			_session = p_session;
+			_session.register(self);
 
-        // when the messages page is shown reset unread messages count
-        $("#session-chat").live("pageshow", function () {
-            $("span.ui-li-count").text(0);
-        });
-    };
+			// initialize list of users for the send message form
+			this.refresh_user_list();
 
-    this.display_message = function (message, is_sent_message) {
-        var html;
-        if (is_sent_message) {
-            html = _template_sent;
-            html[2] = message.content;
-            html[6] = _session.get_user_name(message.user_dst);
-        } else {
-            html = _template_received;
-            html[2] = _session.get_user_name(message.user_src);
-            html[6] = message.content;
-        }
-        $("#message-contener").prepend(html.join(""));
-    };
+			// attach submit event
+			$("#send-message-form").submit(function (event) {
+				event.preventDefault();
+				var content = $(this).find("#send-message-form-content"),
+					user_dst = $(this).find("#send-message-form-to").val(),
+					user_dst_id = parseInt(user_dst, 10),
+					message;
+
+				if (null !== user_dst && 0 < user_dst_id && "" !== content.val()) {
+					message = {
+						content: content.val(),
+						stamp: new Date(),
+						user_dst: user_dst_id
+					};
+
+					self.queue_message(message);
+					self.display_message({
+						content: content.val(),
+						user_dst: user_dst_id
+					}, true);
+
+					// Reset field value.
+					content.val("");
+				} else {
+					alert("You must select an user and write a message.");
+				}
+			});
 
 
-    this.queue_message = function (message) {
-        this._queue.push(message);
-    };
+			// when the messages page is shown reset unread messages count
+			$("#session-chat").live("pageshow", function () {
+				$("span.ui-li-count").text(0);
+			});
+		};
+
+		this.display_message = function (message, is_sent_message) {
+			var html;
+			if (is_sent_message) {
+				html = _template_sent;
+				html[2] = message.content;
+				html[6] = _session.get_user_name(message.user_dst);
+			} else {
+				html = _template_received;
+				html[2] = _session.get_user_name(message.user_src);
+				html[6] = message.content;
+			}
+			$("#message-contener").prepend(html.join(""));
+		};
 
 
-    /**
-     *
-     */
-    this.get_messages = function () {
-        var queue   = self._queue;
-        self._queue = [];
-        return queue;
-    };
+		this.queue_message = function (message) {
+			this._queue.push(message);
+		};
 
 
-    /**
-     *
-     */
-    this.handle_event = function( ev ) {
-        console.log("chat/handle_event : %s", JSON.stringify( ev ));
-        switch (ev.type) {
-            case "join" : // on both join and leave refresh users list
-            case "leave" :
-                this.refresh_user_list();
-                break;
-            default : // all other events are ignored
-                break;
-        }
-    };
+		/**
+		*
+		*/
+		this.get_messages = function () {
+			var queue   = self._queue;
+			self._queue = [];
+			return queue;
+		};
 
 
-    /**
-     *
-     */
-    this.handle_message = function( msg ) {
-        console.log("chat/handle_message : %s", JSON.stringify( msg ));
-        var liCount = $("span.ui-li-count"), count = parseInt($(liCount).text(), 10), link;
-        // refresh unread count and blink for notification only when not on messages page
-        if ("session-chat" !== $.mobile.activePage.attr("id")) {
-            $(liCount).text(count + 1);
-            link = $(liCount).closest("a")
-                .removeClass("ui-btn-up-a").addClass("ui-btn-up-e");
-            setTimeout(function () {
-                $(link).removeClass("ui-btn-up-e").addClass("ui-btn-up-a");
-            }, 100);
-        }
-        if (msg.user_src == _session.user_id) {
-          this.display_message(msg, true);
-        } else {
-          this.display_message(msg, false);
-        }
-    };
+		/**
+		*
+		*/
+		this.handle_event = function (ev) {
+			console.log("chat/handle_event : %s", JSON.stringify(ev));
+			switch (ev.type) {
+			case "join": // on both join and leave refresh users list
+			case "leave":
+				this.refresh_user_list();
+				break;
+			default: // all other events are ignored
+				break;
+			}
+		};
 
 
-    /**
-     * Refresh user list
-     */
-    this.refresh_user_list = function () {
-        console.log("chat/refresh_user_list : %s", JSON.stringify( _session.other_users ));
-        var select = $("#send-message-form-to");
-        select.empty().selectmenu();
-        for (var i=0; i < _session.other_users.length; i++) {
-            select.append('<option value="'
-                + _session.other_users[i].id + '">'
-                + _session.other_users[i].name
-                + '</option>'
-            );
-        }
-        select.selectmenu("refresh");
-    };
+		/**
+		*
+		*/
+		this.handle_message = function (msg) {
+			console.log("chat/handle_message : %s", JSON.stringify(msg));
+			var liCount = $("span.ui-li-count"), count = parseInt($(liCount).text(), 10), link;
+			// refresh unread count and blink for notification only when not on messages page
+			if ("session-chat" !== $.mobile.activePage.attr("id")) {
+				$(liCount).text(count + 1);
+				link = $(liCount).closest("a")
+					.removeClass("ui-btn-up-a").addClass("ui-btn-up-e");
+				setTimeout(function () {
+					$(link).removeClass("ui-btn-up-e").addClass("ui-btn-up-a");
+				}, 100);
+			}
+			if (msg.user_src === _session.user_id) {
+				this.display_message(msg, true);
+			} else {
+				this.display_message(msg, false);
+			}
+		};
 
 
-    // call initialize method
-    this.initialize( p_session );
-}
+		/**
+		* Refresh user list
+		*/
+		this.refresh_user_list = function () {
+			var i,
+				select = $("#send-message-form-to");
+			console.log("chat/refresh_user_list : %s", JSON.stringify(_session.other_users));
+			select.empty().selectmenu();
+			for (i = 0; i < _session.other_users.length; i += 1) {
+				select.append('<option value="'
+					+ _session.other_users[i].id + '">'
+					+ _session.other_users[i].name
+					+ '</option>'
+					);
+			}
+			select.selectmenu("refresh");
+		};
 
+
+		// call initialize method
+		this.initialize(p_session);
+	}
+
+}(window, jQuery));
