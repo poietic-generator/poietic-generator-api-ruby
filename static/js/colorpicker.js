@@ -20,54 +20,63 @@
 /*                                                                            */
 /******************************************************************************/
 
-// vim: set ts=4 sw=4 et:
-"use strict";
+/*jslint browser: true, nomen: true*/
+/*global jQuery, document, console, Color */
 
-function ColorPicker(p_editor) {
-    var self = this,
-    _editor,
-    _color_picker;
+(function (window, $) {
 
-    this.initialize = function ( p_editor ) {
-        _editor = p_editor;
-	// rely on the colojack.js 
-        _color_picker = new Color.Picker({
-            callback: function(hex) {
-			  console.log("colorpicker/initialize/callback: hex = " + hex);
-                p_editor.color_set( "#" + hex );
-            },
-	    hue : Math.floor( Math.random() * 360 ),
-	    sat :  Math.floor( 70 + Math.random() * 30 ),
-	    val : Math.floor( 70 + Math.random() * 30 )
-        });
-        _color_picker.el.style.display = "none";
-        $("#session-zone").live("pagehide", function (event) {
-            self.hide();
-            $("#brush").removeClass( "ui-btn-active" );
-        });
-    };
+	// vim: set ts=4 sw=4 et:
+	"use strict";
 
-    this.hide = function () {
-        $(_color_picker.el).hide();
-    };
+	function ColorPicker(p_editor) {
+		var self = this,
+			_editor,
+			_color_picker;
 
-    this.is_visible = function () {
-        return $(_color_picker.el).is(":visible");
-    };
+		this.initialize = function (p_editor) {
+			_editor = p_editor;
+			// rely on the colojack.js 
+			_color_picker = new Color.Picker({
+				callback: function (hex) {
+					console.log("colorpicker/initialize/callback: hex = " + hex);
+					p_editor.color_set("#" + hex);
+				},
+				hue : Math.floor(Math.random() * 360),
+				sat :  Math.floor(70 + Math.random() * 30),
+				val : Math.floor(70 + Math.random() * 30)
+			});
+			_color_picker.el.style.display = "none";
+			$("#session-zone").live("pagehide", function (event) {
+				self.hide();
+				$("#brush").removeClass("ui-btn-active");
+			});
+		};
 
-    this.show = function () {
-        $(_color_picker.el).show();
-    };
+		this.hide = function () {
+			$(_color_picker.el).hide();
+		};
 
-    this.update_size = function(p_canvas) {
-        var position = $(p_canvas).position();
-        // position
-        _color_picker.el.style.position = "absolute";
-        _color_picker.el.style.top = position.top + "px";
-        _color_picker.el.style.left = position.left + "px";
-        // resize
-        _color_picker.resize($(p_canvas).width() - _color_picker.margin * 2 - _color_picker.hueWidth);
-    };
+		this.is_visible = function () {
+			return $(_color_picker.el).is(":visible");
+		};
 
-    this.initialize(p_editor);
-}
+		this.show = function () {
+			$(_color_picker.el).show();
+		};
+
+		this.update_size = function (p_canvas) {
+			var position = $(p_canvas).position();
+			// position
+			_color_picker.el.style.position = "absolute";
+			_color_picker.el.style.top = position.top + "px";
+			_color_picker.el.style.left = position.left + "px";
+			// resize
+			_color_picker.resize($(p_canvas).width() - _color_picker.margin * 2 - _color_picker.hueWidth);
+		};
+
+		this.initialize(p_editor);
+	}
+
+	window.ColorPicker = ColorPicker;
+}(window, jQuery));
+
