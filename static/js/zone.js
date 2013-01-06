@@ -133,10 +133,9 @@
 					if (_current_patch.changes.length > 0) {
 						prev_record = _current_patch.changes[_current_patch.changes.length - 1];
 					}
-					if ((prev_record !== null) && (prev_record[0] === pos.x)
-							&& (prev_record[1] === pos.y)) {
-						// drop
-					} else {
+
+					if ((prev_record === null) || (prev_record[0] !== pos.x)
+							|| (prev_record[1] !== pos.y)) {
 						_current_patch.changes.push([ pos.x, pos.y, 0 ]);
 					}
 				}
