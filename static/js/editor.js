@@ -385,9 +385,10 @@
 
 				if (bound) {
 					self.pixel_set(local_pos, _color);
-				} else {
-					//FIXME: _color = _board.get_zone(_current_zone).pixel_get( zone_pos );
 				}
+				// else {
+				//FIXME: _color = _board.get_zone(_current_zone).pixel_get( zone_pos );
+				// }
 			}
 		};
 
