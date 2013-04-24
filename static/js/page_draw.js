@@ -20,48 +20,61 @@
 /*                                                                            */
 /******************************************************************************/
 
-var session = null;
-var viewer = null;
-var board = null;
-var editor = null;
-var chat = null;
+// vim: set ts=4 sw=4 et:
 
-// instead of windows.onload
-$(document).ready( function() {
-    $(".logout").bind( "click", function ( event ) {
-        if (!confirm("Leave Poietic Generator?")) {
-            return false;
-        }
-        return true;
-    });
+/*jslint browser: true, nomen: true, continue: true */
+/*global $, jQuery, document, confirm, console, ColorPicker  */
 
-    // initialize zoness
-    session = new DrawSession(
-        function( session ) {
-            //console.log("page_draw/ready: session callback ok");
-            $(".username").text(session.user_name);
 
-            board = new Board( session );
-            editor = new Editor( session, board, 'session-editor' );
-            //var color_picker = new ColorPicker( editor );
-            chat = new Chat( session);
-			viewer = new Viewer( session, board, 'session-viewer', editor );
+(function (window) {
+	"use strict";
 
-            //console.log("page_draw/ready: prepicker");
-            $("#brush").bind( "vclick", function( event ){
-                event.preventDefault();
-                if ( true === editor.is_color_picker_visible() ) {
-                    return editor.hide_color_picker( this );
-                } else {
-                    return editor.show_color_picker( this );
-                }
-            });
-            $("#canvas-container").bind( "vclick", function ( event ) {
-                if ( true === editor.is_color_picker_visible() ) {
-                    editor.hide_color_picker( $("#brush") );
-                }
-            });
-        }
-    );
-});
+	var session = null,
+		viewer = null,
+		board = null,
+		editor = null,
+		chat = null;
 
+	// instead of windows.onload
+	$(document).ready(function () {
+		$(".logout").bind("click", function (event) {
+			if (!confirm("Leave Poietic Generator?")) {
+				return false;
+			}
+			return true;
+		});
+
+		// initialize zoness
+		session = new DrawSession(
+			function(session) {
+				//console.log("page_draw/ready: session callback ok");
+				$(".username").text(session.user_name);
+
+				board = new Board(session);
+				editor = new Editor(session, board, 'session-editor');
+				//var color_picker = new ColorPicker( editor );
+				chat = new Chat(session);
+				viewer = new Viewer(session, board, 'session-viewer', editor);
+
+				//console.log("page_draw/ready: prepicker");
+				$("#brush").bind("vclick", function (event) {
+					var result;
+					event.preventDefault();
+					if (true === editor.is_color_picker_visible()) {
+						result = editor.hide_color_picker(this);
+					} else {
+						result = editor.show_color_picker(this);
+					}
+					return result;
+				});
+
+				$("#canvas-container").bind("vclick", function (event) {
+					if (true === editor.is_color_picker_visible()) {
+						editor.hide_color_picker($("#brush"));
+					}
+				});
+			}
+		);
+	});
+
+}());
