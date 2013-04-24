@@ -275,6 +275,6 @@
 	}
 
 	//FIXME: expose scope objects
-	
+
 }(document, window, jQuery));
 
