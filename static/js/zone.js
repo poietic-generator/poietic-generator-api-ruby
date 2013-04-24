@@ -196,7 +196,7 @@
 		this.patches_push = function (p_patches) {
 			// FIXME: call apply patch for each patches' relative time
 			// FIXME : append aggregate  instead of replacing
-			_input_queue = p_aggregate;
+			_input_queue = p_patches;
 		};
 
 		// constructor
