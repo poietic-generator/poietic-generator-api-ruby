@@ -23,7 +23,7 @@
 // vim: set ts=4 sw=4 et:
 
 /*jslint browser: true, nomen: true, continue: true */
-/*global $, jQuery, document, console, ColorPicker, PATCH_LIFESPAN */
+/*global $, jQuery, document, console, ColorPicker, PATCH_LIFESPAN, ZONE_BACKGROUND_COLOR */
 
 (function (window) {
 	"use strict";
@@ -53,6 +53,7 @@
 			_line_size,
 
 			_current_zone,
+			_canvas_event_fn,
 			_color_picker;
 
 		this.name = "Editor";
@@ -99,14 +100,14 @@
 			self.context = _real_canvas.getContext('2d');
 
 			// plug some event handlers
-			_real_canvas.addEventListener('mousedown', canvas_event, false);
-			_real_canvas.addEventListener('touchstart', canvas_event, false);
+			_real_canvas.addEventListener('mousedown', _canvas_event_fn, false);
+			_real_canvas.addEventListener('touchstart', _canvas_event_fn, false);
 
-			_real_canvas.addEventListener('mouseup', canvas_event, false);
-			_real_canvas.addEventListener('touchstop', canvas_event, false);
+			_real_canvas.addEventListener('mouseup', _canvas_event_fn, false);
+			_real_canvas.addEventListener('touchstop', _canvas_event_fn, false);
 
-			_real_canvas.addEventListener('mousemove', canvas_event, false);
-			_real_canvas.addEventListener('touchmove', canvas_event, false);
+			_real_canvas.addEventListener('mousemove', _canvas_event_fn, false);
+			_real_canvas.addEventListener('touchmove', _canvas_event_fn, false);
 
 			$(window).resize(function () {
 				self.update_size();
@@ -394,77 +395,78 @@
 		/**
 		* change pixel at given position, on canvas only
 		*/
-		this.pixel_draw = function(local_pos, color) {
-			var ctx = self.context;
+		this.pixel_draw = function (local_pos, color) {
+			var ctx = self.context,
 			//console.log("editor/pixel_draw local_pos = %s", local_pos.to_json() );
-			var canvas_pos = local_to_canvas_position( local_pos );
-			var rect = {
-				x : canvas_pos.x + (0.1 * _column_size),
-				y : canvas_pos.y + (0.1 * _column_size),
-				w : _column_size - ( 0.2 * _column_size ),
-				h : _line_size - ( 0.2 * _column_size )
-			};
+			    canvas_pos = local_to_canvas_position(local_pos),
+			    rect = {
+					x : canvas_pos.x + (0.1 * _column_size),
+					y : canvas_pos.y + (0.1 * _column_size),
+					w : _column_size - (0.2 * _column_size),
+					h : _line_size - (0.2 * _column_size)
+				};
 			//console.log("editor/pixel_draw rect = %s", rect.to_json() );
 
 			ctx.fillStyle = ZONE_BACKGROUND_COLOR;
-			ctx.fillRect( rect.x, rect.y, rect.w, rect.h );
+			ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
 
 			ctx.fillStyle = color;
-			ctx.fillRect( rect.x, rect.y, rect.w, rect.h );
-		}
+			ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+		};
 
 
 		/*
 		* Set pixel at given position to given color
 		*/
-		this.pixel_set = function( local_pos, color ) {
+		this.pixel_set = function (local_pos, color) {
 			var zone_pos;
 
-			zone_pos = local_to_zone_position( local_pos );
+			zone_pos = local_to_zone_position(local_pos);
 			//console.log( "editor/pixel_set: zone_pos = %s", zone_pos.to_json() );
 			// record to zone
-			_board.get_zone(_current_zone).pixel_set( zone_pos, color );
+			_board.get_zone(_current_zone).pixel_set(zone_pos, color);
 			// add to patch structure
-			_board.get_zone(_current_zone).patch_record( zone_pos, color );
+			_board.get_zone(_current_zone).patch_record(zone_pos, color);
 			// draw localy
-			self.pixel_draw( local_pos, color );
+			self.pixel_draw(local_pos, color);
 		};
+
 
 		/**
 		* Pick color of pixel
 		*/
-		this.pixel_get = function( local_pos ) {
+		this.pixel_get = function (local_pos) {
 			//FIXME: detect bound zone...
 			//_return zone.pixel_get( pos );
-		}
-
+		};
 
 
 		/**
 		* Change color
 		*/
 
-		this.color_set = function( hexcolor ) {
+		this.color_set = function (hexcolor) {
 			_color = hexcolor;
 			// FIXME:
-			console.log("editor/color_set: requestion patch enqueue")
+			console.log("editor/color_set: requestion patch enqueue");
 			_board.get_zone(_current_zone).patch_enqueue();
-			$("#current_color").css( "background-color",  _color );
-		}
+			$("#current_color").css("background-color",  _color);
+		};
 
 
 		/**
 		* Handle all types on canvas events and dispatch
 		*/
-		var canvas_event = function( event_obj ) {
-			var canvas = _real_canvas;
+		_canvas_event_fn = function (event_obj) {
+			var canvas = _real_canvas,
+				is_func;
 
 			// FIXME verify the same formula is used with touchscreens
 			event_obj.mouseX = event_obj.pageX - canvas.offsetLeft;
 			event_obj.mouseY = event_obj.pageY - canvas.offsetTop;
 
-			var func = self[event_obj.type];
-			if (func) { func( event_obj ); }
+			is_func = self[event_obj.type];
+			if (is_func) { is_func(event_obj); }
 			event_obj.preventDefault();
 			// console.log("clicked at %s,%s", event_obj.mouseX, event_obj.mouseY );
 		};
@@ -473,48 +475,51 @@
 		/**
 		*
 		*/
-		this.handle_stroke = function( stk ) {
+		this.handle_stroke = function (stk) {
 			// console.log("editor/handle_stroke : stroke = %s", JSON.stringify( stk ));
-			var remote_zone = _board.get_zone( stk.zone );
+			var remote_zone = _board.get_zone(stk.zone),
 			// console.log("editor/handle_stroke : remote_zone = %s", JSON.stringify( remote_zone ));
-			var color = stk.color;
+			    color = stk.color,
 			// console.log("editor/handle_stroke : color = %s", JSON.stringify( color ));
-			var cgset = null;
-			var zone_pos = null;
-			var local_pos = null;
-			var rt_zone_pos = null;
-			for (var i=0;i<stk.changes.length;i++) {
+			    cgset = null,
+			    zone_pos = null,
+			    local_pos = null,
+			    rt_zone_pos = null,
+				i;
+
+			for (i = 0; i < stk.changes.length; i += 1) {
 				cgset = stk.changes[i];
 				// console.log("editor/handle_stroke : cgset = %s", JSON.stringify( cgset ));
-				zone_pos = { x: cgset[0], y: cgset[1] }
+				zone_pos = { x: cgset[0], y: cgset[1] };
 				// console.log("editor/handle_stroke : zone_pos = %s", JSON.stringify( zone_pos ));
-				rt_zone_pos = zone_relative_position( remote_zone, zone_pos );
+				rt_zone_pos = zone_relative_position(remote_zone, zone_pos);
 				// console.log("editor/handle_stroke : rt_zone_pos = %s", JSON.stringify( rt_zone_pos ));
-				local_pos = zone_to_local_position( rt_zone_pos );
+
+				local_pos = zone_to_local_position(rt_zone_pos);
 				// console.log("editor/handle_stroke : local_pos = %s", JSON.stringify( local_pos ));
-				self.pixel_draw( local_pos, color );
+				self.pixel_draw(local_pos, color);
 			}
-		}
+		};
 
 
 		/**
 		* Get patches generated by the drawing
 		*/
-		this.get_strokes = function() {
-			var strokes = _board.get_zone(_current_zone).patches_get()
-			console.log("editor/get_strokes: strokes = %s", JSON.stringify(strokes) );
+		this.get_strokes = function () {
+			var strokes = _board.get_zone(_current_zone).patches_get();
+			console.log("editor/get_strokes: strokes = %s", JSON.stringify(strokes));
 			return strokes;
 		};
 
 
 		this.update_color_picker_size = function () {
-			_color_picker.update_size( _real_canvas );
+			_color_picker.update_size(_real_canvas);
 		};
 
 
-		this.hide_color_picker = function ( p_link ) {
+		this.hide_color_picker = function (p_link) {
 			_color_picker.hide();
-			$( p_link ).removeClass( "ui-btn-active" );
+			$(p_link).removeClass("ui-btn-active");
 			return false;
 		};
 
@@ -522,14 +527,15 @@
 			return _color_picker.is_visible();
 		};
 
-		this.show_color_picker = function ( p_link ) {
+		this.show_color_picker = function (p_link) {
 			_color_picker.show();
-			$( p_link ).addClass( "ui-btn-active" );
+			$(p_link).addClass("ui-btn-active");
 			return true;
 		};
 
 		// call constructor
 		this.initialize(p_session, p_board, p_canvas_id);
 	}
+
 }(window));
 
