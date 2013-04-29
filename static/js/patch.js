@@ -23,7 +23,7 @@
 // vim: set ts=4 sw=4 et:
 
 /*jslint browser: true, nomen: true, continue: true */
-/*global $, jQuery, document, console, ColorPicker, PATCH_LIFESPAN, ZONE_BACKGROUND_COLOR */
+/*global $, jQuery, document, console */
 
 (function (window) {
 	"use strict";
