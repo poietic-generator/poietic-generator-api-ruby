@@ -20,33 +20,40 @@
 /*                                                                            */
 /******************************************************************************/
 
-var session = null;
-var viewer = null;
-var board = null;
 
-// instead of windows.onload
-$(document).ready( function() {
-    // initialize zoness
-    session = new ViewSession(
-        function( session ) {
-            //console.log("page_draw/ready: session callback ok");
-            board = new Board( session );
-			viewer = new Viewer( session, board, 'session-viewer', null, { fullsize: true } );
-            //console.log("page_draw/ready: prepicker");
-        }
-    );
+/*jslint browser: true, nomen: true, continue: true */
+/*global $, jQuery, document, console, ViewSession, Board, Viewer */
 
-    $("#view_start").bind( "vclick", function ( event ) {
-        event.preventDefault();
-        $("#view_now").removeClass("ui-btn-active");
-        $(this).addClass("ui-btn-active");
-        session.restart();
-    });
-    $("#view_now").bind( "vclick", function ( event ) {
-        event.preventDefault();
-        $("#view_start").removeClass("ui-btn-active");
-        $(this).addClass("ui-btn-active");
-        session.current();
-    });
-});
+(function ($) {
+	"use strict";
+
+	var session = null,
+		viewer = null,
+		board = null;
+
+	// instead of windows.onload
+	$(document).ready(function () {
+		// initialize zoness
+		session = new ViewSession(function (session) {
+			//console.log("page_draw/ready: session callback ok");
+			board = new Board(session);
+			viewer = new Viewer(session, board, 'session-viewer', null, {fullsize: true});
+			//console.log("page_draw/ready: prepicker");
+		});
+
+		$("#view_start").bind("vclick", function (event) {
+			event.preventDefault();
+			$("#view_now").removeClass("ui-btn-active");
+			$(this).addClass("ui-btn-active");
+			session.restart();
+		});
+		$("#view_now").bind("vclick", function (event) {
+			event.preventDefault();
+			$("#view_start").removeClass("ui-btn-active");
+			$(this).addClass("ui-btn-active");
+			session.current();
+		});
+	});
+
+}(jQuery));
 
