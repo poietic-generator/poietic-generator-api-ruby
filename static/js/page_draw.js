@@ -23,7 +23,7 @@
 // vim: set ts=4 sw=4 et:
 
 /*jslint browser: true, nomen: true, continue: true */
-/*global $, jQuery, document, confirm, console, ColorPicker  */
+/*global $, jQuery, document, confirm, console, ColorPicker, DrawSession, Board, Editor, Chat, Viewer */
 
 
 (function (window) {
@@ -46,7 +46,7 @@
 
 		// initialize zoness
 		session = new DrawSession(
-			function(session) {
+			function (session) {
 				//console.log("page_draw/ready: session callback ok");
 				$(".username").text(session.user_name);
 
