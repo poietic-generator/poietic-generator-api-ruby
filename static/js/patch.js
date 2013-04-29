@@ -20,38 +20,43 @@
 /*                                                                            */
 /******************************************************************************/
 
-var PATCH_LIFESPAN = 500;
+// vim: set ts=4 sw=4 et:
 
-/*
-function PatchQueue() {
-}
-*/
+/*jslint browser: true, nomen: true, continue: true */
+/*global $, jQuery, document, console, ColorPicker, PATCH_LIFESPAN, ZONE_BACKGROUND_COLOR */
 
-function Patch() {
-	var self = this;
-	var color = null;
-	var changes = [];
+(function (window) {
+	"use strict";
 
-	this.set_color = function( new_color ) {
-		color = new_color;
-	};
+	var PATCH_LIFESPAN = 500;
 
-	this.append = function( pos ) {
-		console.log( "patch.append: %s", JSON.stringify( pos ) );
-		changes = changes.concat( [ pos.x, pos.y ] );
-	};
+	function Patch() {
+		var self = this,
+		    color = null,
+		    changes = [];
 
-	this.to_json = function() {
-		return { 
-			'color': color,
-			'changes': changes,
-		};	
-	};
+		this.set_color = function (new_color) {
+			color = new_color;
+		};
 
-	this.from_json = function( patch ) {
-		color = patch.color;
-		changes = patch.changes;
-	};
+		this.append = function (pos) {
+			console.log("patch.append: %s", JSON.stringify(pos));
+			changes = changes.concat([pos.x, pos.y]);
+		};
 
-}
+		this.to_json = function () {
+			return {
+				'color': color,
+				'changes': changes
+			};
+		};
+
+		this.from_json = function (patch) {
+			color = patch.color;
+			changes = patch.changes;
+		};
+
+	}
+
+}(window));
 
