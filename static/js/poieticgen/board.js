@@ -1,6 +1,6 @@
 /******************************************************************************/
 /*                                                                            */
-/*  Poetic Generator Reloaded is a multiplayer and collaborative art          */
+/*  Poietic Generator Reloaded is a multiplayer and collaborative art         */
 /*  experience.                                                               */
 /*                                                                            */
 /*  Copyright (C) 2011 - Gnuside                                              */

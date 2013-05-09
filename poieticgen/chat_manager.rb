@@ -1,9 +1,9 @@
 ##############################################################################
 #                                                                            #
-#  Poetic Generator Reloaded is a multiplayer and collaborative art          #
+#  Poietic Generator Reloaded is a multiplayer and collaborative art         #
 #  experience.                                                               #
 #                                                                            #
-#  Copyright (C) 2011 - Gnuside                                              #
+#  Copyright (C) 2011-2013 - Gnuside                                         #
 #                                                                            #
 #  This program is free software: you can redistribute it and/or modify it   #
 #  under the terms of the GNU Affero General Public License as published by  #
