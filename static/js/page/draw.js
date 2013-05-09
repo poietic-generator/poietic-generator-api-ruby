@@ -26,7 +26,7 @@
 /*global $, jQuery, document, confirm, console, PoieticGen, alert */
 
 
-(function (PoieticGen) {
+(function (PoieticGen, $) {
 	"use strict";
 
 	var session = null,
@@ -90,5 +90,5 @@
 		);
 	});
 
-}(PoieticGen));
+}(PoieticGen, jQuery));
 
