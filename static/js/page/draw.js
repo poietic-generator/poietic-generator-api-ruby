@@ -23,10 +23,10 @@
 // vim: set ts=4 sw=4 et:
 
 /*jslint browser: true, nomen: true, continue: true */
-/*global $, jQuery, document, confirm, console, ColorPicker, DrawSession, Board, Editor, Chat, Viewer */
+/*global $, jQuery, document, confirm, console, PoieticGen */
 
 
-(function (window) {
+(function (PoieticGen) {
 	"use strict";
 
 	var session = null,
@@ -44,17 +44,17 @@
 			return true;
 		});
 
-		// initialize zoness
-		session = new DrawSession(
+		// initialize zones
+		session = new PoieticGen.DrawSession(
 			function (session) {
 				//console.log("page_draw/ready: session callback ok");
 				$(".username").text(session.user_name);
 
-				board = new Board(session);
-				editor = new Editor(session, board, 'session-editor');
+				board = new PoieticGen.Board(session);
+				editor = new PoieticGen.Editor(session, board, 'session-editor');
 				//var color_picker = new ColorPicker( editor );
-				chat = new Chat(session);
-				viewer = new Viewer(session, board, 'session-viewer', editor);
+				chat = new PoieticGen.Chat(session);
+				viewer = new PoieticGen.Viewer(session, board, 'session-viewer', editor);
 
 				//console.log("page_draw/ready: prepicker");
 				$("#brush").bind("vclick", function (event) {
@@ -77,4 +77,5 @@
 		);
 	});
 
-}());
+}(PoieticGen));
+
