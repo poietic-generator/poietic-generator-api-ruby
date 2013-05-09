@@ -21,11 +21,11 @@
 /******************************************************************************/
 
 /*jslint nomen:true*/
-/*global document, window, noconsole, jQuery*/
+/*global document, window, noconsole, jQuery, PoieticGen*/
 
 // vim: set ts=4 sw=4 et:
 
-(function (document, window, $) {
+(function (PoieticGen, $) {
 	"use strict";
 
 	var VIEW_SESSION_URL_JOIN = "/api/session/snapshot",
@@ -173,17 +173,21 @@
 				success: function (response) {
 					console.log('session/update response : ' + JSON.stringify(response));
 					self.treat_status_nok(response);
-					if (response.status[0] !== STATUS_SUCCESS) {
-						self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL * 2);
+					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
+						self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
 					}
 
 					if (!_restart) {
+						console.log('session/update(restart) duration set to :' + response.duration);
 						_duration = response.duration;
 					} else {
+						console.log('session/update(!restart) duration set to :' + _duration);
 						_duration += VIEW_PLAY_UPDATE_INTERVAL * _play_speed;
+
 						if (response.duration < _duration) {
 							_duration = response.duration;
 							_restart = false;
+							console.log('session/update(fix!restart) duration set to :' + _duration);
 						}
 					}
 
@@ -193,7 +197,7 @@
 					self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
 				},
 				error: function (response) {
-					self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL * 2);
+					self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
 				}
 			});
 
@@ -274,7 +278,8 @@
 		this.initialize();
 	}
 
-	//FIXME: expose scope objects
+	// expose scope objects
+	PoieticGen.ViewSession = ViewSession;
 
-}(document, window, jQuery));
+}(PoieticGen, jQuery));
 
