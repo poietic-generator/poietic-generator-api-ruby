@@ -37,9 +37,9 @@
 	* Global view
 	*/
 	function Board(p_session) {
-		//var console = window.noconsole;
+		var console = window.noconsole,
 
-		var self = this,
+		    self = this,
 			realCanvas,
 			context,
 			zones,
@@ -144,9 +144,11 @@
 		*
 		*/
 		this.handle_stroke = function (stk) {
+			var console = window.noconsole,
+				z = zones[stk.zone];
+
 			console.log("board/handle_stroke : stroke = %s", JSON.stringify(stk));
 			console.log("board/handle_stroke : zones = %s", JSON.stringify(zones));
-			var z = zones[stk.zone];
 			if (z) {
 				z.patch_apply(stk);
 			} else {
