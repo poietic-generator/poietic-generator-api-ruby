@@ -4,7 +4,6 @@ require 'bundler/setup'
 
 require 'dm-core'
 require 'dm-validations'
-require 'dm-sqlite-adapter'
 require 'dm-migrations'
 require 'dm-transactions'
 require 'dm-types'
