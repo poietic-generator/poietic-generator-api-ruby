@@ -32,7 +32,8 @@ module PoieticGen
 		property :index, Integer, :required => true
 
 		# position
-		property :position, Csv, :required => true
+		property :position, Json, :required => true
+		# property :position, Csv, :required => true
 	
 		# size attributes
 		property :width, Integer, :required => true
@@ -45,7 +46,8 @@ module PoieticGen
 		property :deleted_at, Integer, :required => true
 		property :deleted, Boolean, :required => true
 
-		property :data, Csv, :required => true
+		property :data, Json, :required => true
+		#property :data, Object, :required => true
 
 	#	attr_reader :index, :position
 
@@ -70,6 +72,8 @@ module PoieticGen
 			super param_create
 
 			begin
+				# FIXME: debug
+				pp self
 				self.save
 			rescue DataMapper::SaveFailureError => e
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
