@@ -85,7 +85,7 @@
 					session.zone_line_count
 				);
 			}
-			console.log("board/initialize: zones = %s", JSON.stringify(zones));
+			console.log("board/initialize: zones = " + JSON.stringify(zones));
 		};
 
 
@@ -106,7 +106,7 @@
 				);
 			} else if (ev.type === 'leave') {
 				z = ev.desc.zone;
-				console.log("board/handle_event: _zones bf delete %s", JSON.stringify(zones));
+				console.log("board/handle_event: _zones bf delete "+ JSON.stringify(zones));
 				delete zones[z.index];
 			} else {
 				console.log("board/handle_event: unknown event");
@@ -118,7 +118,7 @@
 		*
 		*/
 		this.get_zone = function (index) {
-			// console.log("board/get_zone(%s) : %s", index, JSON.stringify( _zones[index] ) );
+			// console.log("board/get_zone("+ index + ") : " + JSON.stringify( _zones[index] ) );
 			return zones[index];
 		};
 
@@ -135,7 +135,7 @@
 					keys.push(parseInt(i, 10));
 				}
 			}
-			// console.log("board/get_zone_list : %s", JSON.stringify( keys ));
+			// console.log("board/get_zone_list : " + JSON.stringify( keys ));
 			return keys;
 		};
 
@@ -147,12 +147,12 @@
 			var console = window.noconsole,
 				z = zones[stk.zone];
 
-			console.log("board/handle_stroke : stroke = %s", JSON.stringify(stk));
-			console.log("board/handle_stroke : zones = %s", JSON.stringify(zones));
+			console.log("board/handle_stroke : stroke = " + JSON.stringify(stk));
+			console.log("board/handle_stroke : zones = " + JSON.stringify(zones));
 			if (z) {
 				z.patch_apply(stk);
 			} else {
-				console.warn("board/handle_stroke: trying to apply stroke for missing zone %s", stk.zone);
+				console.warn("board/handle_stroke: trying to apply stroke for missing zone " + stk.zone);
 			}
 		};
 

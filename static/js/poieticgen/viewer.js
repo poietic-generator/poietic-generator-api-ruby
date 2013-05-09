@@ -87,7 +87,7 @@
 			_session = p_session;
 			_session.register(self);
 
-			//console.log("viewer/initialize : _current_zone = %s", _current_zone);
+			//console.log("viewer/initialize : _current_zone = " + _current_zone);
 
 			self.update_boundaries();
 
@@ -165,7 +165,7 @@
 		* Convert zone to local grid position
 		*/
 		function zone_to_local_position(zone, zone_position) {
-			// console.log("viewer/zone_to_local_position: zone = %s", JSON.stringify(zone));
+			// console.log("viewer/zone_to_local_position: zone = " + JSON.stringify(zone));
 			return {
 				x: zone_position.x + ((zone.position[0] - _boundaries.xmin) * zone.width),
 				y: zone_position.y + ((_boundaries.ymax - zone.position[1]) * zone.height)
@@ -183,7 +183,7 @@
 
 			zones = _board.get_zone_list();
 			for (zone_idx = 0; zone_idx < zones.length; zone_idx += 1) {
-				// console.log("viewer/local_to_target_zone: trying index = %s", zones[zone_idx]);
+				// console.log("viewer/local_to_target_zone: trying index = " + zones[zone_idx]);
 				result_zone = _board.get_zone(zones[zone_idx]);
 				console.log("viewer/local_to_target_zone: result_zone = " + JSON.stringify(result_zone));
 
@@ -303,7 +303,7 @@
 
 			// FIXME: what are expected/known types ?
 			if (func) { func(event_obj); }
-			// console.log("clicked at %s,%s", event_obj.mouseX, event_obj.mouseY);
+			// console.log("clicked at " + event_obj.mouseX + "," + event_obj.mouseY);
 		};
 
 
@@ -412,18 +412,18 @@
 				local_pos = null,
 				rt_zone_pos = null,
 				i;
-			console.log("viewer/handle_stroke : stroke = %s", JSON.stringify(stk));
+			console.log("viewer/handle_stroke : stroke = " + JSON.stringify(stk));
 			remote_zone = _board.get_zone(stk.zone);
-			// console.log("viewer/handle_stroke : remote_zone = %s", JSON.stringify(remote_zone));
+			// console.log("viewer/handle_stroke : remote_zone = " + JSON.stringify(remote_zone));
 			color = stk.color;
-			// console.log("viewer/handle_stroke : color = %s", JSON.stringify(color));
+			// console.log("viewer/handle_stroke : color = " + JSON.stringify(color));
 			for (i = 0; i < stk.changes.length; i += 1) {
 				cgset = stk.changes[i];
-				console.log("viewer/handle_stroke : cgset = %s", JSON.stringify(cgset));
+				console.log("viewer/handle_stroke : cgset = " + JSON.stringify(cgset));
 				zone_pos = { x: cgset[0], y: cgset[1] };
-				console.log("viewer/handle_stroke : zone_pos = %s", JSON.stringify(zone_pos));
+				console.log("viewer/handle_stroke : zone_pos = " + JSON.stringify(zone_pos));
 				local_pos = zone_to_local_position(remote_zone, zone_pos);
-				console.log("viewer/handle_stroke : local_pos = %s", JSON.stringify(local_pos));
+				console.log("viewer/handle_stroke : local_pos = " + JSON.stringify(local_pos));
 				self.pixel_draw(local_pos, color);
 			}
 		};
@@ -491,7 +491,7 @@
 				_boundaries.width = _boundaries.height;
 			}
 
-			console.log("viewer/update_boundaries : boundaries = %s", JSON.stringify(_boundaries));
+			console.log("viewer/update_boundaries : boundaries = " + JSON.stringify(_boundaries));
 			self.column_count = _boundaries.width * _session.zone_column_count;
 			self.line_count = _boundaries.height * _session.zone_line_count;
 		};

@@ -94,10 +94,10 @@
 
 					callback(self);
 
-					//console.log('session/join post-callback ! observers = %s', JSON.stringify( _observers ));
+					//console.log('session/join post-callback ! observers = ' + JSON.stringify( _observers ));
 					// handle other zone events
 					for (i = 0; i < self.other_zones.length; i += 1) {
-						console.log('session/join on zone %s', JSON.stringify(self.other_zones[i]));
+						console.log('session/join on zone ' + JSON.stringify(self.other_zones[i]));
 						self.dispatch_strokes(self.other_zones[i].content);
 					}
 

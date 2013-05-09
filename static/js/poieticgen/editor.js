@@ -80,7 +80,7 @@
 		this.initialize = function (p_session, p_board, p_canvas_id) {
 
 			_current_zone =  p_session.user_zone.index;
-			console.log("editor/initialize : _current_zone = %s", _current_zone);
+			console.log("editor/initialize : _current_zone = " + _current_zone);
 			_board = p_board;
 			_color = '#f00';
 
@@ -176,22 +176,26 @@
 		* Get relative zone position
 		*/
 		function zone_relative_position(remote_zone, remote_zone_position) {
-			// console.log("editor/zone_relative_position : remote_zone = %s", JSON.stringify( remote_zone ));
-			// console.log("editor/zone_relative_position : remote_zone_position = %s", JSON.stringify( remote_zone_position ));
+			// console.log("editor/zone_relative_position : remote_zone = " + JSON.stringify( remote_zone ));
+			// console.log("editor/zone_relative_position : remote_zone_position = " + JSON.stringify( remote_zone_position ));
 
-			var dx = remote_zone.position[0] - _board.get_zone(_current_zone).position[0],
+			var dx, dy, edx, edy, res;
+			
+			dx = remote_zone.position[0] - _board.get_zone(_current_zone).position[0];
 			// y coordinates are inverted, because of the canvas ...
-				dy = _board.get_zone(_current_zone).position[1] - remote_zone.position[1],
-			// console.log("editor/zone_relative_position : dx = %s  dy = %s", dx, dy );
-				edx = dx * self.column_count,
-				edy = dy * self.line_count,
-			// console.log("editor/zone_relative_position : edx = %s  edy = %s", edx, edy );
-				res = {
-					x : edx + remote_zone_position.x,
-					y : edy + remote_zone_position.y
-				};
+			dy = _board.get_zone(_current_zone).position[1] - remote_zone.position[1];
+			// console.log("editor/zone_relative_position : " + JSON.stringify({ dx: dx, dy: dy }));
+			edx = dx * self.column_count;
+			edy = dy * self.line_count;
 
-			// console.log("editor/zone_relative_position : result = %s", JSON.stringify( res ));
+			// console.log("editor/zone_relative_position : " + JSON.stringify({ edx: edx, edy: edy }));
+
+			res = {
+				x : edx + remote_zone_position.x,
+				y : edy + remote_zone_position.y
+			};
+
+			// console.log("editor/zone_relative_position : result = " + JSON.stringify( res ));
 			return res;
 		}
 
@@ -276,12 +280,12 @@
 				color;
 
 			zones = _board.get_zone_list();
-			console.log("editor/update_paint : %s", JSON.stringify(zones));
+			console.log("editor/update_paint : " + JSON.stringify(zones));
 
 			for (zone_idx = 0; zone_idx < zones.length; zone_idx += 1) {
 				remote_zone = _board.get_zone(zones[zone_idx]);
 				if (!remote_zone) { continue; }
-				console.log("editor/update_paint : remote_zone = %s", zone_idx);
+				console.log("editor/update_paint : remote_zone = " + zone_idx);
 
 				for (x = 0; x < self.column_count; x += 1) {
 					for (y = 0; y < self.line_count; y += 1) {
@@ -407,7 +411,7 @@
 		*/
 		this.pixel_draw = function (local_pos, color) {
 			var ctx = self.context,
-			//console.log("editor/pixel_draw local_pos = %s", local_pos.to_json() );
+			//console.log("editor/pixel_draw local_pos = " + local_pos.to_json() );
 			    canvas_pos = local_to_canvas_position(local_pos),
 			    rect = {
 					x : canvas_pos.x + (0.1 * _column_size),
@@ -415,7 +419,7 @@
 					w : _column_size - (0.2 * _column_size),
 					h : _line_size - (0.2 * _column_size)
 				};
-			//console.log("editor/pixel_draw rect = %s", rect.to_json() );
+			//console.log("editor/pixel_draw rect = " + rect.to_json() );
 
 			ctx.fillStyle = PoieticGen.ZONE_BACKGROUND_COLOR;
 			ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
@@ -432,7 +436,7 @@
 			var zone_pos;
 
 			zone_pos = local_to_zone_position(local_pos);
-			//console.log( "editor/pixel_set: zone_pos = %s", zone_pos.to_json() );
+			//console.log( "editor/pixel_set: zone_pos = " + zone_pos.to_json() );
 			// record to zone
 			_board.get_zone(_current_zone).pixel_set(zone_pos, color);
 			// add to patch structure
@@ -478,7 +482,7 @@
 			is_func = self[event_obj.type];
 			if (is_func) { is_func(event_obj); }
 			event_obj.preventDefault();
-			// console.log("clicked at %s,%s", event_obj.mouseX, event_obj.mouseY );
+			// console.log("clicked at " + event_obj.mouseX + "," + event_obj.mouseY );
 		};
 
 
@@ -486,11 +490,11 @@
 		*
 		*/
 		this.handle_stroke = function (stk) {
-			// console.log("editor/handle_stroke : stroke = %s", JSON.stringify( stk ));
+			// console.log("editor/handle_stroke : stroke = " + JSON.stringify( stk ));
 			var remote_zone = _board.get_zone(stk.zone),
-			// console.log("editor/handle_stroke : remote_zone = %s", JSON.stringify( remote_zone ));
+			// console.log("editor/handle_stroke : remote_zone = " + JSON.stringify( remote_zone ));
 			    color = stk.color,
-			// console.log("editor/handle_stroke : color = %s", JSON.stringify( color ));
+			// console.log("editor/handle_stroke : color = " + JSON.stringify( color ));
 			    cgset = null,
 			    zone_pos = null,
 			    local_pos = null,
@@ -499,14 +503,14 @@
 
 			for (i = 0; i < stk.changes.length; i += 1) {
 				cgset = stk.changes[i];
-				// console.log("editor/handle_stroke : cgset = %s", JSON.stringify( cgset ));
+				// console.log("editor/handle_stroke : cgset = " + JSON.stringify( cgset ));
 				zone_pos = { x: cgset[0], y: cgset[1] };
-				// console.log("editor/handle_stroke : zone_pos = %s", JSON.stringify( zone_pos ));
+				// console.log("editor/handle_stroke : zone_pos = " + JSON.stringify( zone_pos ));
 				rt_zone_pos = zone_relative_position(remote_zone, zone_pos);
-				// console.log("editor/handle_stroke : rt_zone_pos = %s", JSON.stringify( rt_zone_pos ));
+				// console.log("editor/handle_stroke : rt_zone_pos = " + JSON.stringify( rt_zone_pos ));
 
 				local_pos = zone_to_local_position(rt_zone_pos);
-				// console.log("editor/handle_stroke : local_pos = %s", JSON.stringify( local_pos ));
+				// console.log("editor/handle_stroke : local_pos = " + JSON.stringify( local_pos ));
 				self.pixel_draw(local_pos, color);
 			}
 		};
@@ -517,7 +521,7 @@
 		*/
 		this.get_strokes = function () {
 			var strokes = _board.get_zone(_current_zone).patches_get();
-			console.log("editor/get_strokes: strokes = %s", JSON.stringify(strokes));
+			console.log("editor/get_strokes: strokes = " + JSON.stringify(strokes));
 			return strokes;
 		};
 

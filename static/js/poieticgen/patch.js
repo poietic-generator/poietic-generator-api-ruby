@@ -40,7 +40,7 @@
 		};
 
 		this.append = function (pos) {
-			console.log("patch.append: %s", JSON.stringify(pos));
+			console.log("patch.append: " + JSON.stringify(pos));
 			changes = changes.concat([pos.x, pos.y]);
 		};
 

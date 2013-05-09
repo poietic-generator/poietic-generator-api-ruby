@@ -111,7 +111,7 @@
 
 					callback(self);
 
-					//console.log('session/join post-callback ! observers = %s', JSON.stringify(_observers));
+					//console.log('session/join post-callback ! observers = ' + JSON.stringify(_observers));
 					var all_zones = this.other_zones.concat([ this.user_zone ]),
 						i;
 					// handle other zone events
@@ -212,8 +212,8 @@
 				}
 			}
 
-			console.log("session/update: strokes_updates = %s", JSON.stringify(strokes_updates));
-			console.log("session/update: messages_updates = %s", JSON.stringify(messages_updates));
+			console.log("session/update: strokes_updates = " + JSON.stringify(strokes_updates));
+			console.log("session/update: messages_updates = " + JSON.stringify(messages_updates));
 
 			req = {
 				strokes_after : _current_stroke_id,
@@ -300,7 +300,7 @@
 
 		this.handle_event = function (ev) {
 			var i;
-			console.log("session/handle_event : %s", JSON.stringify(ev));
+			console.log("session/handle_event : " + JSON.stringify(ev));
 			switch (ev.type) {
 			case "join":
 				this.other_users.push(ev.desc.user);

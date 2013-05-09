@@ -54,8 +54,8 @@
 		this.height = p_height;
 
 
-		// console.log("zone/initialize width = %s", this.width );
-		// console.log("zone/initialize height = %s", this.height );
+		// console.log("zone/initialize width = " + this.width );
+		// console.log("zone/initialize height = " + this.height );
 
 		/**
 		 * Set matrix default color
@@ -74,7 +74,7 @@
 		 */
 		this.pixel_set = function (pos, color) {
 			var idx = Math.floor(pos.y) * self.width + Math.floor(pos.x);
-			// console.log("zone/pixel_set idx = %s", idx );
+			// console.log("zone/pixel_set idx = " + idx );
 			_matrix[idx] = color;
 		};
 
@@ -84,7 +84,7 @@
 		 */
 		this.pixel_get = function (pos) {
 			var idx = Math.floor(pos.y) * self.width + Math.floor(pos.x);
-			// console.log("zone/pixel_get idx = %s", idx );
+			// console.log("zone/pixel_get idx = " + idx );
 			return _matrix[idx];
 		};
 
@@ -140,7 +140,7 @@
 					}
 				}
 			}
-			// console.log( "zone/patch_record: _current_patch = %s", JSON.stringify( _current_patch ) );
+			// console.log( "zone/patch_record: _current_patch = " + JSON.stringify( _current_patch ) );
 		};
 
 
@@ -153,7 +153,7 @@
 				_output_queue.push(_current_patch);
 				_session.dispatch_strokes([ _current_patch ]);
 				_current_patch = null;
-				console.log("zone/patch_enqueue: output queue = %s", JSON.stringify(_output_queue));
+				console.log("zone/patch_enqueue: output queue = " + JSON.stringify(_output_queue));
 			}
 		};
 
