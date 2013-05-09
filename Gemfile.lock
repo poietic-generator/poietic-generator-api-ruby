@@ -45,9 +45,6 @@ GEM
       json (~> 1.6)
       json_pure (~> 1.6)
       multi_json (~> 1.0)
-    dm-sqlite-adapter (1.2.0)
-      dm-do-adapter (~> 1.2.0)
-      do_sqlite3 (~> 0.10.6)
     dm-timestamps (1.2.0)
       dm-core (~> 1.2.0)
     dm-transactions (1.2.0)
@@ -63,8 +60,6 @@ GEM
     dm-validations (1.2.0)
       dm-core (~> 1.2.0)
     do_mysql (0.10.12)
-      data_objects (= 0.10.12)
-    do_sqlite3 (0.10.12)
       data_objects (= 0.10.12)
     eventmachine (1.0.3)
     extlib (0.9.16)
@@ -126,7 +121,6 @@ DEPENDENCIES
   dm-aggregates
   dm-migrations
   dm-mysql-adapter
-  dm-sqlite-adapter
   dm-transactions
   dm-types
   extlib
