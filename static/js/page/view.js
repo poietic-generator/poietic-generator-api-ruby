@@ -22,22 +22,29 @@
 
 
 /*jslint browser: true, nomen: true, continue: true */
-/*global $, jQuery, document, console, ViewSession, Board, Viewer */
+/*global $, jQuery, document, console, PoieticGen */
 
-(function ($) {
+(function (PoieticGen, $) {
 	"use strict";
 
 	var session = null,
 		viewer = null,
 		board = null;
 
+	if (PoieticGen.Zone === undefined) {
+		console.error("PoieticGen.Zone is not defined !");
+	}
+	if (PoieticGen.Viewer === undefined) {
+		console.error("PoieticGen.Viewer is not defined !");
+	}
+
 	// instead of windows.onload
 	$(document).ready(function () {
 		// initialize zoness
-		session = new ViewSession(function (session) {
+		session = new PoieticGen.ViewSession(function (session) {
 			//console.log("page_draw/ready: session callback ok");
-			board = new Board(session);
-			viewer = new Viewer(session, board, 'session-viewer', null, {fullsize: true});
+			board = new PoieticGen.Board(session);
+			viewer = new PoieticGen.Viewer(session, board, 'session-viewer', null, {fullsize: true});
 			//console.log("page_draw/ready: prepicker");
 		});
 
@@ -55,5 +62,5 @@
 		});
 	});
 
-}(jQuery));
+}(PoieticGen, jQuery));
 
