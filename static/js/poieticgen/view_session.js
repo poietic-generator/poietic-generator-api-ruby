@@ -42,11 +42,12 @@
 
 
 	function ViewSession(callback) {
-		var console = noconsole,
+		var console = window.console,
 			self = this,
 			_observers = null,
-			_start_date = 0,
-			_duration = 0,
+			_local_start_date = 0,
+			_server_start_date = 0,
+			_total_duration = 0,
 			_timer = null,
 			_restart = false,
 			_play_speed = 1;
@@ -82,11 +83,11 @@
 					this.zone_column_count = response.zone_column_count;
 					this.zone_line_count = response.zone_line_count;
 
-					_start_date = response.start_date;
+					_server_start_date = response.start_date;
 					if (!_restart) {
-						_duration = response.duration;
+						_total_duration = response.duration;
 					} else {
-						_duration = 0;
+						_total_duration = 0;
 					}
 					// console.log('session/join response mod : ' + JSON.stringify(this) );
 
@@ -159,7 +160,7 @@
 
 			req = {
 				session: "default",
-				since: _start_date + _duration,
+				since: _server_start_date + _total_duration,
 				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed
 			};
 
@@ -178,16 +179,17 @@
 					}
 
 					if (!_restart) {
-						console.log('session/update(restart) duration set to :' + response.duration);
-						_duration = response.duration;
-					} else {
-						console.log('session/update(!restart) duration set to :' + _duration);
-						_duration += VIEW_PLAY_UPDATE_INTERVAL * _play_speed;
+						console.log('session/update(!restart) duration set to :' + response.duration);
 
-						if (response.duration < _duration) {
-							_duration = response.duration;
+						_total_duration = response.duration;
+					} else {
+						console.log('session/update(restart) duration set to :' + _total_duration);
+						_total_duration += VIEW_PLAY_UPDATE_INTERVAL * _play_speed;
+
+						if (response.duration < _total_duration) {
+							_total_duration = response.duration;
 							_restart = false;
-							console.log('session/update(fix!restart) duration set to :' + _duration);
+							console.error('session/update(fix!restart) duration set to :' + _total_duration);
 						}
 					}
 
