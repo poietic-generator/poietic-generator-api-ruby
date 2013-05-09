@@ -21,9 +21,9 @@
 /******************************************************************************/
 
 /*jslint nomen:true*/
-/*global window, noconsole*/
+/*global window, noconsole, PoieticGen */
 
-(function (window) {
+(function (PoieticGen) {
 	// vim: set ts=4 sw=4 et:
 	"use strict";
 
@@ -203,7 +203,8 @@
 		self.matrix_initialize();
 	}
 
-	window.ZONE_BACKGROUND_COLOR = ZONE_BACKGROUND_COLOR;
+	PoieticGen.ZONE_BACKGROUND_COLOR = ZONE_BACKGROUND_COLOR;
+	PoieticGen.Zone = Zone;
 
-}(window));
+}(PoieticGen));
 

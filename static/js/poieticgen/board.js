@@ -21,13 +21,17 @@
 /******************************************************************************/
 
 /*jslint browser: true*/
-/*global $, jQuery, document, Zone, console */
+/*global $, jQuery, document, PoieticGen, console, alert */
 
 // FIXME expose board objects to window
 
-(function () {
+(function (PoieticGen) {
 
 	"use strict";
+	
+	if (PoieticGen.Zone === undefined) {
+		alert("ERROR: PoieticGen.Zone is not defined !");
+	}
 
 	/**
 	* Global view
@@ -61,7 +65,7 @@
 
 			// fill zones with zones from session
 			if (undefined !== session.user_zone) {
-				zones[session.user_zone.index] = new Zone(
+				zones[session.user_zone.index] = new PoieticGen.Zone(
 					session,
 					session.user_zone.index,
 					session.user_zone.position,
@@ -73,7 +77,7 @@
 			for (i = 0; i < p_session.other_zones.length; i += 1) {
 				z = p_session.other_zones[i];
 
-				zones[z.index] = new Zone(
+				zones[z.index] = new PoieticGen.Zone(
 					session,
 					z.index,
 					z.position,
@@ -93,7 +97,7 @@
 			console.log("board/handle_event : " + JSON.stringify(ev));
 			if (ev.type === 'join') {
 				z = ev.desc.zone;
-				zones[z.index] = new Zone(
+				zones[z.index] = new PoieticGen.Zone(
 					session,
 					z.index,
 					z.position,
@@ -160,5 +164,7 @@
 		this.initialize(p_session);
 	}
 
-}());
+	PoieticGen.Board = Board;
+
+}(PoieticGen));
 
