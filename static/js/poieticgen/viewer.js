@@ -21,14 +21,19 @@
 /******************************************************************************/
 
 /*jslint browser: true, nomen: true, continue: true*/
-/*global $, jQuery, document, console, ZONE_BACKGROUND_COLOR */
+/*global $, jQuery, document, console, PoieticGen */
 
-(function (window) {
+(function (PoieticGen) {
 	// vim: set ts=4 sw=4 et:
 	"use strict";
 
 	var POSITION_TYPE_DRAWING = 0,
 		POSITION_TYPE_ZONE = 0;
+
+	// REQUIRED FOR ZONE PREFIX
+	if (PoieticGen.Zone === undefined) {
+		console.error("PoieticGen.Zone is not defined !");
+	}
 
 	function Viewer(p_session, p_board, p_canvas_id, p_editor, options) {
 		//var console = { log: function() {} };
@@ -276,7 +281,7 @@
 				};
 
 			//console.log("viewer/pixel_draw rect = " + rect.to_json());
-			ctx.fillStyle = ZONE_BACKGROUND_COLOR;
+			ctx.fillStyle = PoieticGen.ZONE_BACKGROUND_COLOR;
 			ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
 
 			ctx.fillStyle = color;
@@ -494,5 +499,7 @@
 		this.initialize(p_session, p_board, p_canvas_id, p_editor);
 	}
 
-}(window));
+	PoieticGen.Viewer = Viewer;
+
+}(PoieticGen));
 

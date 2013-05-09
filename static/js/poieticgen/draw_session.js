@@ -23,9 +23,9 @@
 // vim: set ts=4 sw=4 et:
 
 /*jslint browser: true, nomen: true*/
-/*global jQuery, document, noconsole */
+/*global jQuery, document, noconsole, PoieticGen */
 
-(function (window, $) {
+(function (PoieticGen, $) {
 	"use strict";
 
 	var DRAW_SESSION_URL_JOIN = "/api/session/join",
@@ -64,8 +64,9 @@
 				user_name = $.cookie('user_name'),
 				user_session = $.cookie('user_session'),
 				session_opts = [],
-				session_url = null,
-				_observers = [];
+				session_url = null;
+
+			_observers = [];
 
 			if (user_id !== null) {
 				session_opts.push("user_id=" + user_id);
@@ -153,23 +154,29 @@
 		* Treat not ok Status (!STATUS_SUCCESS)
 		*/
 		this.treat_status_nok = function (response) {
-			switch (response.status[0]) {
-			case STATUS_INFORMATION:
-				break;
-			case STATUS_SUCCESS:
-				// ???
-				break;
-			case STATUS_REDIRECTION:
-				// We got redirected for some reason, we do execute ourselfs
-				console.log("STATUS_REDIRECTION --> Got redirected to '" + response.status[2] + "'");
-				document.location.href = response.status[2];
-				break;
-			case STATUS_SERVER_ERROR:
-				// FIXME : We got a server error, we should try to reload the page.
-				break;
-			case STATUS_BAD_REQUEST:
-				// FIXME : OK ???
-				break;
+			var empty;
+			if (response.status === null) {
+				// error on server side
+				empty = "argh";
+			} else {
+				switch (response.status[0]) {
+				case STATUS_INFORMATION:
+					break;
+				case STATUS_SUCCESS:
+					// ???
+					break;
+				case STATUS_REDIRECTION:
+					// We got redirected for some reason, we do execute ourselfs
+					console.log("STATUS_REDIRECTION --> Got redirected to '" + response.status[2] + "'");
+					document.location.href = response.status[2];
+					break;
+				case STATUS_SERVER_ERROR:
+					// FIXME : We got a server error, we should try to reload the page.
+					break;
+				case STATUS_BAD_REQUEST:
+					// FIXME : OK ???
+					break;
+				}
 			}
 			return null;
 		};
@@ -229,11 +236,9 @@
 				context: self,
 				success: function (response) {
 					console.log('session/update response : ' + JSON.stringify(response));
-					self.treat_status_nok(response);
-					if (response.status[0] !== STATUS_SUCCESS) {
+					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
 						self.treat_status_nok(response);
 					} else {
-
 						self.dispatch_events(response.events);
 						self.dispatch_strokes(response.strokes);
 						self.dispatch_messages(response.messages);
@@ -318,5 +323,8 @@
 
 		this.initialize();
 	}
-}(window, jQuery));
+
+	// export
+	PoieticGen.DrawSession = DrawSession;
+}(PoieticGen, jQuery));
 

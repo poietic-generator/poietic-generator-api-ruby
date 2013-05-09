@@ -23,9 +23,9 @@
 // vim: set ts=4 sw=4 et:
 
 /*jslint browser: true, nomen: true, continue: true */
-/*global $, jQuery, document, console, ColorPicker, PATCH_LIFESPAN, ZONE_BACKGROUND_COLOR */
+/*global $, jQuery, document, console, ColorPicker, PoieticGen */
 
-(function (window) {
+(function (PoieticGen) {
 	"use strict";
 
 	var EDITOR_GRID_COLOR = '#444',
@@ -36,6 +36,15 @@
 
 		POSITION_TYPE_DRAWING = 0,
 		POSITION_TYPE_ZONE = 0;
+
+	// REQUIRED FOR ZONE PREFIX
+	if (PoieticGen.Zone === undefined) {
+		console.error("PoieticGen.Zone is not defined !");
+	}
+
+	if (PoieticGen.Patch === undefined) {
+		console.error("PoieticGen.Patch is not defined !");
+	}
 
 	function Editor(p_session, p_board, p_canvas_id) {
 		var console = window.noconsole,
@@ -95,7 +104,7 @@
 			// size of editor's big pixels
 
 			var zone = _board.get_zone(_current_zone);
-			_enqueue_timer = window.setInterval(zone.patch_enqueue, PATCH_LIFESPAN);
+			_enqueue_timer = window.setInterval(zone.patch_enqueue, PoieticGen.PATCH_LIFESPAN);
 
 			self.context = _real_canvas.getContext('2d');
 
@@ -408,7 +417,7 @@
 				};
 			//console.log("editor/pixel_draw rect = %s", rect.to_json() );
 
-			ctx.fillStyle = ZONE_BACKGROUND_COLOR;
+			ctx.fillStyle = PoieticGen.ZONE_BACKGROUND_COLOR;
 			ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
 
 			ctx.fillStyle = color;
@@ -538,5 +547,7 @@
 		this.initialize(p_session, p_board, p_canvas_id);
 	}
 
-}(window));
+	PoieticGen.Editor = Editor;
+
+}(PoieticGen));
 

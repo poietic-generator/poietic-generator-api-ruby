@@ -23,9 +23,9 @@
 // vim: set ts=4 sw=4 et:
 
 /*jslint browser: true, nomen: true, continue: true */
-/*global $, jQuery, document, console */
+/*global $, jQuery, document, console, PoieticGen */
 
-(function (window) {
+(function (PoieticGen) {
 	"use strict";
 
 	var PATCH_LIFESPAN = 500;
@@ -58,5 +58,8 @@
 
 	}
 
-}(window));
+	PoieticGen.PATCH_LIFESPAN = PATCH_LIFESPAN;
+	PoieticGen.Patch = Patch;
+
+}(PoieticGen));
 

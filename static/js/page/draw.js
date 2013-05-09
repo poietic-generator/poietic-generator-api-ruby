@@ -23,7 +23,7 @@
 // vim: set ts=4 sw=4 et:
 
 /*jslint browser: true, nomen: true, continue: true */
-/*global $, jQuery, document, confirm, console, PoieticGen */
+/*global $, jQuery, document, confirm, console, PoieticGen, alert */
 
 
 (function (PoieticGen) {
@@ -34,6 +34,19 @@
 		board = null,
 		editor = null,
 		chat = null;
+
+	if (PoieticGen.Zone === undefined) {
+		console.error("PoieticGen.Zone is not defined !");
+	}
+	if (PoieticGen.Editor === undefined) {
+		console.error("PoieticGen.Editor is not defined !");
+	}
+	if (PoieticGen.Chat === undefined) {
+		console.error("PoieticGen.Chat is not defined !");
+	}
+	if (PoieticGen.Viewer === undefined) {
+		console.error("PoieticGen.Viewer is not defined !");
+	}
 
 	// instead of windows.onload
 	$(document).ready(function () {

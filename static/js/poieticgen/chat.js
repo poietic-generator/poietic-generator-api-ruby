@@ -21,11 +21,11 @@
 /******************************************************************************/
 
 /*jslint browser: true, nomen: true */
-/*global $, jQuery, document, Zone, alert, console */
+/*global $, jQuery, document, Zone, console, alert, PoieticGen */
 
 // FIXME: use the prototype-style object definition
 
-(function (window, $) {
+(function (PoieticGen, $) {
 	"use strict";
 
 	function Chat(p_session) {
@@ -196,4 +196,7 @@
 		this.initialize(p_session);
 	}
 
-}(window, jQuery));
+	PoieticGen.Chat = Chat;
+
+}(PoieticGen, jQuery));
+

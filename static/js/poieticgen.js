@@ -23,11 +23,11 @@
 /*jslint browser: true */
 /*global jQuery */
 
-(function ($) {
+(function (window, $) {
 	"use strict";
 
 	var poieticgen = { };
 
-	window.poieticgen = poieticgen;
-}(jQuery));
+	window.PoieticGen = poieticgen;
+}(window, jQuery));
 

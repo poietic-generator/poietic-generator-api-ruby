@@ -28,7 +28,7 @@
 (function (PoieticGen) {
 
 	"use strict";
-	
+
 	if (PoieticGen.Zone === undefined) {
 		alert("ERROR: PoieticGen.Zone is not defined !");
 	}
