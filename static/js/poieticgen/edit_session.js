@@ -87,7 +87,7 @@
 				type: 'GET',
 				context: self,
 				success: function (response) {
-					console.log('session/join response : ' + JSON.stringify(response));
+					console.log('edit_session/join response : ' + JSON.stringify(response));
 
 					this.user_zone = response.user_zone;
 					this.other_users = response.other_users;
@@ -105,18 +105,18 @@
 					$.cookie('user_id', this.user_id, {path: "/"});
 					$.cookie('user_name', this.user_name, {path: "/"});
 					$.cookie('user_session', this.user_session, {path: "/"});
-					// console.log('session/join response mod : ' + JSON.stringify(this));
+					// console.log('edit_session/join response mod : ' + JSON.stringify(this));
 
 					console.log("gotcha!");
 
 					callback(self);
 
-					//console.log('session/join post-callback ! observers = ' + JSON.stringify(_observers));
+					//console.log('edit_session/join post-callback ! observers = ' + JSON.stringify(_observers));
 					var all_zones = this.other_zones.concat([ this.user_zone ]),
 						i;
 					// handle other zone events
 					for (i = 0; i < all_zones.length; i += 1) {
-						console.log('session/join on zone ' + JSON.stringify(all_zones[i]));
+						console.log('edit_session/join on zone ' + JSON.stringify(all_zones[i]));
 						self.dispatch_strokes(all_zones[i].content);
 					}
 
@@ -124,7 +124,7 @@
 
 					window.setTimeout(self.update, DRAW_SESSION_UPDATE_INTERVAL);
 
-					console.log('session/join end');
+					console.log('edit_session/join end');
 
 				}
 			});
@@ -212,8 +212,8 @@
 				}
 			}
 
-			console.log("session/update: strokes_updates = " + JSON.stringify(strokes_updates));
-			console.log("session/update: messages_updates = " + JSON.stringify(messages_updates));
+			console.log("edit_session/update: strokes_updates = " + JSON.stringify(strokes_updates));
+			console.log("edit_session/update: messages_updates = " + JSON.stringify(messages_updates));
 
 			req = {
 				strokes_after : _current_stroke_id,
@@ -226,7 +226,7 @@
 				update_interval : DRAW_SESSION_UPDATE_INTERVAL / 1000
 			};
 
-			console.log("session/update: req = " + JSON.stringify(req));
+			console.log("edit_session/update: req = " + JSON.stringify(req));
 			self.last_update_time = new Date();
 			$.ajax({
 				url: DRAW_SESSION_URL_UPDATE,
@@ -235,7 +235,7 @@
 				type: 'POST',
 				context: self,
 				success: function (response) {
-					console.log('session/update response : ' + JSON.stringify(response));
+					console.log('edit_session/update response : ' + JSON.stringify(response));
 					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
 						self.treat_status_nok(response);
 					} else {
@@ -300,7 +300,7 @@
 
 		this.handle_event = function (ev) {
 			var i;
-			console.log("session/handle_event : " + JSON.stringify(ev));
+			console.log("edit_session/handle_event : " + JSON.stringify(ev));
 			switch (ev.type) {
 			case "join":
 				this.other_users.push(ev.desc.user);
