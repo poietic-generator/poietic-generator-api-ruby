@@ -342,8 +342,8 @@ module PoieticGen
 					:events => events_collection,
 					:strokes => strokes_collection,
 					:messages => messages_collection,
-					:stamp => (now - @session_start)
-					:timeout => 
+					:stamp => (now - @session_start),
+					:idle_timeout => (user.idle_expires_at - now)
 				}
 
 				rdebug "returning : %s" % result.inspect
