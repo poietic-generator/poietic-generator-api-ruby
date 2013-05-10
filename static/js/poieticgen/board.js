@@ -106,7 +106,7 @@
 				);
 			} else if (ev.type === 'leave') {
 				z = ev.desc.zone;
-				console.log("board/handle_event: _zones bf delete "+ JSON.stringify(zones));
+				console.log("board/handle_event: _zones bf delete " + JSON.stringify(zones));
 				delete zones[z.index];
 			} else {
 				console.log("board/handle_event: unknown event");

@@ -180,7 +180,7 @@
 			// console.log("editor/zone_relative_position : remote_zone_position = " + JSON.stringify( remote_zone_position ));
 
 			var dx, dy, edx, edy, res;
-			
+
 			dx = remote_zone.position[0] - _board.get_zone(_current_zone).position[0];
 			// y coordinates are inverted, because of the canvas ...
 			dy = _board.get_zone(_current_zone).position[1] - remote_zone.position[1];
