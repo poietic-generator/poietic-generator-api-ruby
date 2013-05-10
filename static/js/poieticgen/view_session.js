@@ -78,7 +78,7 @@
 				success: function (response) {
 					var i;
 
-					console.log('session/join response : ' + JSON.stringify(response));
+					console.log('view_session/join response : ' + JSON.stringify(response));
 
 					this.zone_column_count = response.zone_column_count;
 					this.zone_line_count = response.zone_line_count;
@@ -89,22 +89,22 @@
 					} else {
 						_total_duration = 0;
 					}
-					// console.log('session/join response mod : ' + JSON.stringify(this) );
+					// console.log('view_session/join response mod : ' + JSON.stringify(this) );
 
 					self.other_zones = response.zones;
 
 					callback(self);
 
-					//console.log('session/join post-callback ! observers = ' + JSON.stringify( _observers ));
+					//console.log('view_session/join post-callback ! observers = ' + JSON.stringify( _observers ));
 					// handle other zone events
 					for (i = 0; i < self.other_zones.length; i += 1) {
-						console.log('session/join on zone ' + JSON.stringify(self.other_zones[i]));
+						console.log('view_session/join on zone ' + JSON.stringify(self.other_zones[i]));
 						self.dispatch_strokes(self.other_zones[i].content);
 					}
 
 					self.setTimer(self.update, 1);
 
-					console.log('session/join end');
+					console.log('view_session/join end');
 				}
 			});
 		};
@@ -156,7 +156,7 @@
 				}
 			}
 
-			console.log("session/update: strokes_updates = " + JSON.stringify(strokes_updates));
+			console.log("view_session/update: strokes_updates = " + JSON.stringify(strokes_updates));
 
 			req = {
 				session: "default",
@@ -164,7 +164,7 @@
 				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed
 			};
 
-			console.log("session/update: req = " + JSON.stringify(req));
+			console.log("view_session/update: req = " + JSON.stringify(req));
 			$.ajax({
 				url: VIEW_SESSION_URL_UPDATE,
 				dataType: "json",
@@ -172,18 +172,18 @@
 				type: 'GET',
 				context: self,
 				success: function (response) {
-					console.log('session/update response : ' + JSON.stringify(response));
+					console.log('view_session/update response : ' + JSON.stringify(response));
 					self.treat_status_nok(response);
 					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
 						self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
 					}
 
 					if (!_restart) {
-						console.log('session/update(!restart) duration set to :' + response.duration);
+						console.log('view_session/update(!restart) duration set to :' + response.duration);
 
 						_total_duration = response.duration;
 					} else {
-						console.log('session/update(restart) duration set to :' + _total_duration);
+						console.log('view_session/update(restart) duration set to :' + _total_duration);
 						_total_duration += VIEW_PLAY_UPDATE_INTERVAL * _play_speed;
 
 						if (response.duration < _total_duration) {
