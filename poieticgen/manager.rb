@@ -46,7 +46,7 @@ module PoieticGen
 
 		# This constant is the one used to check the leaved user, and generate
 		# events. This check is made in the update_data method. It will be done
-		# at min every LEAVE_CHECK_TIME_MIN days at a user update_data request.
+		# at least every LEAVE_CHECK_TIME_MIN days at a user update_data request.
 		LEAVE_CHECK_TIME_MIN = 1
 
 		def initialize config
@@ -97,8 +97,8 @@ module PoieticGen
 				:name => param_name,
 				:zone => -1,
 				:created_at => now.to_i,
-				:alive_expires_at => (now + @config.user.alive_timeout).to_i,
-				:idle_expires_at => (now + @config.user.max_idle).to_i,
+				:alive_expires_at => (now + @config.user.liveness_timeout).to_i,
+				:idle_expires_at => (now + @config.user.idle_timeout).to_i,
 				:did_expire => false,
 				:last_update_time => now
 			}
@@ -119,7 +119,6 @@ module PoieticGen
 					user = User.first_or_create param_request, param_create
 
 					tdiff = (now.to_i - user.alive_expires_at)
-					require 'pp'
 					pp [ now.to_i, user.alive_expires_at, tdiff ]
 					if ( tdiff > 0  ) then
 						# The event will be generated elsewhere (in update_data).
@@ -136,8 +135,8 @@ module PoieticGen
 				# kill all previous users having the same zone
 
 				# update expiration time
-				user.idle_expires_at = (now + @config.user.max_idle)
-				user.alive_expires_at = (now + @config.user.max_idle)
+				user.idle_expires_at = (now + @config.user.idle_timeout)
+				user.alive_expires_at = (now + @config.user.liveness_timeout)
 				rdebug "Set expiring times at %s" % user.alive_expires_at.to_s
 
 				# reset name if requested
@@ -305,11 +304,12 @@ module PoieticGen
 				self.check_expired_users
 
 
-				user.alive_expires_at = (now + @config.user.alive_timeout)
+				user.alive_expires_at = (now + @config.user.liveness_timeout)
 				if req.strokes.length > 0 then
-					user.idle_expires_at = (now + @config.user.max_idle)
+					user.idle_expires_at = (now + @config.user.idle_timeout)
 				end
 				user.save
+
 				@board.update_data user, req.strokes
 				@chat.update_data user, req.messages
 
@@ -335,6 +335,7 @@ module PoieticGen
 				messages_collection = messages.map{ |e| e.to_hash }
 
 				user.last_update_time = now
+				# FIXME: handle the save
 				user.save
 
 				result = {
@@ -342,6 +343,7 @@ module PoieticGen
 					:strokes => strokes_collection,
 					:messages => messages_collection,
 					:stamp => (now - @session_start)
+					:timeout => 
 				}
 
 				rdebug "returning : %s" % result.inspect
