@@ -45,16 +45,58 @@
 		var console = window.console,
 			self = this,
 			_observers = null,
-			_local_start_date = 0,
-			_server_start_date = 0,
+
+			_server_start_date = 0, // in seconds, since jan, 1, 1970
+			_server_elapsed_time = 0, // in seconds, since server start
+
+			_local_start_date = 0, // date Object
+			_local_start_offset = 0, // seconds between server_start & js_start
+
 			_total_duration = 0,
 			_timer = null,
 			_restart = false,
-			_play_speed = 1;
-
+			_play_speed = 1,
+			_get_elapsed_time_fn,
+			_get_server_date_fn,
+			_set_local_start_date_fn;
 
 		this.zone_column_count = null;
 		this.zone_line_count = null;
+
+
+		/*
+		 * Date utilities 
+		 */
+		_set_local_start_date_fn = function (serverDate, serverElapsed) {
+			var localDateSec;
+				
+			_local_start_date = new Date();
+			_server_start_date = serverDate;
+			localDateSec = Math.floor(_local_start_date.getTime() / 1000);
+			_local_start_offset = localDateSec - serverDate;
+		};
+
+
+		// FIXME: in seconds
+		_get_elapsed_time_fn = function () {
+			var local_time = (new Date()).getTime(),
+				local_elapsed_time = Math.floor((local_time - _local_start_date) / 1000);
+			return local_elapsed_time;
+		};
+
+		_get_server_date_fn = function (offset_seconds) {
+			var server_time,
+				local_time,
+				local_server_diff,
+				local_time_sec,
+				elapsed_time,
+				offset;
+
+			elapsed_time = _get_elapsed_time_fn();
+			server_time = _server_start_date - local_time_sec;
+
+			return (server_time + offset_seconds);
+		};
 
 
 		/**
@@ -83,7 +125,9 @@
 					this.zone_column_count = response.zone_column_count;
 					this.zone_line_count = response.zone_line_count;
 
-					_server_start_date = response.start_date;
+					_setStartDateFn(response.start_date);
+
+					// FIXME: do we need duration ?
 					if (!_restart) {
 						_total_duration = response.duration;
 					} else {
@@ -160,7 +204,7 @@
 
 			req = {
 				session: "default",
-				since: _server_start_date + _total_duration,
+				since: _server_start_date + _total_duration, // FIXME: use local date for offset
 				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed
 			};
 
