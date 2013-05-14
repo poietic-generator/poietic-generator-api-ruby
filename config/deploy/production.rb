@@ -7,7 +7,7 @@ role :app, "play.poietic-generator.net"
 role :db,  "play.poietic-generator.net", :primary => true
 
 set :default_environment, {
-	'PATH' => "/var/lib/gems/1.8/bin:$PATH"
+	'PATH' => "$HOME/.rbenv/shims:$HOME/.rbenv/bin:$PATH"
 }
 
 set :user, "admin"
