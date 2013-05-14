@@ -13,6 +13,7 @@ set :default_environment, {
 set :user, "admin"
 set :use_sudo, false
 
+set :branch, "develop"
 set :deploy_to, "/home/admin/d_poiesis/www/play.poietic-generator.net/beta"
 set :deploy_env, 'testing'
 
