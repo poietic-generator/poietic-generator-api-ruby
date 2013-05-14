@@ -1,6 +1,6 @@
 /******************************************************************************/
 /*                                                                            */
-/*  Poetic Generator Reloaded is a multiplayer and collaborative art          */
+/*  Poietic Generator Reloaded is a multiplayer and collaborative art         */
 /*  experience.                                                               */
 /*                                                                            */
 /*  Copyright (C) 2011 - Gnuside                                              */
@@ -20,28 +20,14 @@
 /*                                                                            */
 /******************************************************************************/
 
-"use strict";
+/*jslint browser: true */
+/*global jQuery */
 
-function setUsernameCookie () {
-    $.cookie(
-        "user_name",
-        $("#credentials").find("input#username").val(),
-        {path: "/"}
-    );
-}
+(function (window, $) {
+	"use strict";
 
-$(document).ready(function() {
-    var user_name = $.cookie('user_name');
-    if (user_name) {
-        $("#username").val(user_name);
-    }
-    $("#credentials").submit(function (event) {
-        event.preventDefault();
-        setUsernameCookie();
-        document.location = $(this).attr("action");
-    });
-    $("#link_play").bind( "vclick", function (event) {
-        setUsernameCookie();
-        return true;
-    });
-});
+	var poieticgen = { };
+
+	window.PoieticGen = poieticgen;
+}(window, jQuery));
+

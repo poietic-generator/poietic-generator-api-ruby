@@ -1,6 +1,6 @@
 /******************************************************************************/
 /*                                                                            */
-/*  Poetic Generator Reloaded is a multiplayer and collaborative art          */
+/*  Poietic Generator Reloaded is a multiplayer and collaborative art         */
 /*  experience.                                                               */
 /*                                                                            */
 /*  Copyright (C) 2011 - Gnuside                                              */
@@ -20,20 +20,28 @@
 /*                                                                            */
 /******************************************************************************/
 
-// vim: set ts=4 sw=4 et:
-"use strict";
+/*jslint browser: true*/
+/*global document, console */
 
-( function() {
-    var names = ["log", "debug", "info", "warn", "error", "assert", "dir", "dirxml", "group", "groupEnd", "time", "timeEnd", "count", "trace", "profile", "profileEnd"];
+(function () {
+	// vim: set ts=4 sw=4 et:
+	"use strict";
 
-    window.noconsole = {};
+	var names = ["log", "debug", "info", "warn",
+		"error", "assert", "dir", "dirxml",
+		"group", "groupEnd", "time", "timeEnd",
+		"count", "trace", "profile", "profileEnd"],
+		i, len, nulfn;
 
-    for (var i = 0, len = names.length; i < len; ++i) {
-        window.noconsole[names[i]] = function(){};
-    }
+	window.noconsole = {};
+	nulfn = function () {};
 
-    if (!("console" in window)) {
-        window.console = window.noconsole;
-    }
-} )();
+	for (i = 0, len = names.length; i < len; i += 1) {
+		window.noconsole[names[i]] = nulfn;
+	}
 
+	if (!(window.hasOwnProperty("console"))) {
+		window.console = window.noconsole;
+	}
+
+}());

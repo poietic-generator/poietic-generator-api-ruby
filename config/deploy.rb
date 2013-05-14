@@ -16,7 +16,10 @@ set :repository,  "http://github.com/Gnuside/poietic-generator.git"
 
 set :scm, :git
 set :scm_verbose, true
+set :branch, "master"
 
+# In most cases you want to use this option, otherwise each deploy will do a full repository clone every time.
+set :deploy_via, :remote_cache
 
 #
 # Define deploy process

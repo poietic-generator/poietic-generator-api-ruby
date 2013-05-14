@@ -1,49 +1,56 @@
+Poietic Generator Reloaded
+==========================
 
-# Poietic Generator Reloaded
+Requirements
+------------
 
-## 1. Requirements
+First, make sure you have a proper ruby & rubygems installation on your system with
+the bundler gem installed.
 
-First, make install ruby and a proper version of rubygems (>=1.7) on your system
+We strongly recommand using a ruby environment wrapper like rbenv.
 
-    sudo apt-get install rubygems1.8
+If not, you can try installing bundler with:
+
+    gem install bundle
 
 Then, install  headers packages required to build some gems
 
     sudo apt-get install libmysqlclient-dev libsqlite3-dev
 
-Also install mandatory gem packages on your system
-
-    sudo gem install bundle 
-    sudo gem install capistrano capistrano-ext
-    sudo gem install thin
-
-And make sure that /var/lib/gems/1.8/bin is in your path. Update your ~/.profile 
-or ~/.bashrc or simply run
-
-    export PATH=$PATH:/var/lib/gems/1.8/bin/
-
 Finally, from the project directory, run the following command to install
 locally into the "vendor/bundle" directory the gems required by this project
 and all their dependencies :
 
-    bundle install --path vendor/bundle
+    bundle install --path vendor/bundle --binstubs
 
 
-## 2. Configuration
+Configuration
+-------------
 
 Copy config/config.ini.example to config/config.ini then edit it to your needs.
 
 Create a tmp directory locally. It will be use by the devel-script to run the service.
 
-## 3. Running (development mode)
+
+Running
+-------
+
+### Production mode
+
+FIXME: 
+
+
+### Development mode
 
 Simply type the following command, from the project directory :
 
     ./devel-run.sh
 
-## 4. Deploying 
 
-### 4.1. Configuring the web server
+Deploying
+---------
+
+### Configuring the web server
 
 Install a reverse proxy server, like nginx :
 
@@ -100,6 +107,21 @@ Restart nginx :
     /etc/init.d/nginx restart
 
 
-### 4.1. Configuring 
+Credits
+-------
 
+![Gnuside](http://www.gnuside.com/wp-content/themes/gnuside-ignition-0.2-1-g0d0a5ed/images/logo-whitebg-128.png)
+
+Got questions? Need help? Tweet at [@gnuside](http://twitter.com/gnuside).
+
+Poietic Generator Reloaded is maintained by [Gnuside, inc](http://gnuside.com)
+
+Original concept & funding by [Olivier Auber](http://twitter.com/OlivierAuber)
+
+
+License
+-------
+
+Poietic Generator Reloaded is Copyright © 2011-2013 Gnuside.
+It is free software, and may be redistributed under the terms specified in the LICENSE file.
 

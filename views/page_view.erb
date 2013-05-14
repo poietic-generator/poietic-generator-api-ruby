@@ -1,12 +1,14 @@
 <%=
     @page.css << "/css/page_view.css"
 
-    @page.js << "/js/view_session.js"
     @page.js << "/js/console.js"
-    @page.js << "/js/viewer.js"
-    @page.js << "/js/board.js"
-    @page.js << "/js/zone.js"
-    @page.js << "/js/page_view.js"
+
+    @page.js << "/js/poieticgen.js"
+    @page.js << "/js/poieticgen/view_session.js"
+    @page.js << "/js/poieticgen/zone.js"
+    @page.js << "/js/poieticgen/viewer.js"
+    @page.js << "/js/poieticgen/board.js"
+    @page.js << "/js/page/view.js"
 
     erb :common_header
 %>

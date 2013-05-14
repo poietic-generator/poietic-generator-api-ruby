@@ -16,10 +16,10 @@
 	%>
 	<%=
 	    # jquery base
-	    @page.js.insert 0, "/js/jquery-1.6.1.min.js"
-	    @page.js << "/js/jquery.mobile-1.0b1.min.js"
+	    @page.js.insert 0, "/js/extern/jquery-1.6.1.min.js"
+	    @page.js << "/js/extern/jquery.mobile-1.0b1.min.js"
 	    # json parser/encoder for old (or mobile) browsers
-	    @page.js << "/js/json2.js"
+	    @page.js << "/js/extern/json2.js"
 	    @page.render_js
 	%>
 

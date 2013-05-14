@@ -1,9 +1,9 @@
 ##############################################################################
 #                                                                            #
-#  Poetic Generator Reloaded is a multiplayer and collaborative art          #
+#  Poietic Generator Reloaded is a multiplayer and collaborative art         #
 #  experience.                                                               #
 #                                                                            #
-#  Copyright (C) 2011 - Gnuside                                              #
+#  Copyright (C) 2011-2013 - Gnuside                                         #
 #                                                                            #
 #  This program is free software: you can redistribute it and/or modify it   #
 #  under the terms of the GNU Affero General Public License as published by  #
@@ -37,6 +37,8 @@ require 'poieticgen/play_request'
 
 module PoieticGen
 
+	class InvalidSession < RuntimeError ; end
+
 	#
 	# manage a pool of users
 	#
@@ -44,7 +46,7 @@ module PoieticGen
 
 		# This constant is the one used to check the leaved user, and generate
 		# events. This check is made in the update_data method. It will be done
-		# at min every LEAVE_CHECK_TIME_MIN days at a user update_data request.
+		# at least every LEAVE_CHECK_TIME_MIN days at a user update_data request.
 		LEAVE_CHECK_TIME_MIN = 1
 
 		def initialize config
@@ -52,26 +54,16 @@ module PoieticGen
 			@debug = true
 			pp config
 			# a 16-char long random string
-			@session_id = (0...16).map{ ('a'..'z').to_a[rand(26)] }.join
-			@session_start = Time.now.to_i
 
-			# @palette = Palette.new
-
-			# total count of users seen (FIXME: get it from db)
-			@users_seen = 0
-
-			# Create board with the configuration
-			@board = Board.new config.board
-
-			@chat = PoieticGen::ChatManager.new config.chat
-
-			@last_leave_check_time = Time.now.to_i - LEAVE_CHECK_TIME_MIN
-			@leave_mutex = Mutex.new
-
+			_session_init
 			# FIXME put it in db
 			# FIXME : create session in database
 		end
 
+
+		def restart session, params
+			_session_init
+		end
 
 		#
 		# generates an unpredictible user id based on session id & user counter
@@ -105,8 +97,8 @@ module PoieticGen
 				:name => param_name,
 				:zone => -1,
 				:created_at => now.to_i,
-				:alive_expires_at => (now + @config.user.alive_timeout).to_i,
-				:idle_expires_at => (now + @config.user.max_idle).to_i,
+				:alive_expires_at => (now + @config.user.liveness_timeout).to_i,
+				:idle_expires_at => (now + @config.user.idle_timeout).to_i,
 				:did_expire => false,
 				:last_update_time => now
 			}
@@ -127,7 +119,6 @@ module PoieticGen
 					user = User.first_or_create param_request, param_create
 
 					tdiff = (now.to_i - user.alive_expires_at)
-					require 'pp'
 					pp [ now.to_i, user.alive_expires_at, tdiff ]
 					if ( tdiff > 0  ) then
 						# The event will be generated elsewhere (in update_data).
@@ -144,8 +135,8 @@ module PoieticGen
 				# kill all previous users having the same zone
 
 				# update expiration time
-				user.idle_expires_at = (now + @config.user.max_idle)
-				user.alive_expires_at = (now + @config.user.max_idle)
+				user.idle_expires_at = (now + @config.user.idle_timeout)
+				user.alive_expires_at = (now + @config.user.liveness_timeout)
 				rdebug "Set expiring times at %s" % user.alive_expires_at.to_s
 
 				# reset name if requested
@@ -275,7 +266,7 @@ module PoieticGen
 			}
 			user = User.first param_request
 			pp user, now
-			raise RuntimeError, "No user found with session_id %s in DB" % @session_id if user.nil?
+			raise InvalidSession, "No user found with session_id %s in DB" % @session_id if user.nil?
 
 			if ( (now >= user.alive_expires_at) or (now >= user.idle_expires_at) ) then
 				# expired lease...
@@ -313,11 +304,12 @@ module PoieticGen
 				self.check_expired_users
 
 
-				user.alive_expires_at = (now + @config.user.alive_timeout)
+				user.alive_expires_at = (now + @config.user.liveness_timeout)
 				if req.strokes.length > 0 then
-					user.idle_expires_at = (now + @config.user.max_idle)
+					user.idle_expires_at = (now + @config.user.idle_timeout)
 				end
 				user.save
+
 				@board.update_data user, req.strokes
 				@chat.update_data user, req.messages
 
@@ -343,13 +335,15 @@ module PoieticGen
 				messages_collection = messages.map{ |e| e.to_hash }
 
 				user.last_update_time = now
+				# FIXME: handle the save
 				user.save
 
 				result = {
 					:events => events_collection,
 					:strokes => strokes_collection,
 					:messages => messages_collection,
-					:stamp => (now - @session_start)
+					:stamp => (now - @session_start),
+					:idle_timeout => (user.idle_expires_at - now)
 				}
 
 				rdebug "returning : %s" % result.inspect
@@ -518,6 +512,24 @@ module PoieticGen
 					rdebug "Leaver updates : Can't update because someone is already working on that"
 				end
 			end
+		end
+
+		private
+
+		def _session_init 
+			@session_id = (0...16).map{ ('a'..'z').to_a[rand(26)] }.join
+			@session_start = Time.now.to_i
+
+			# total count of users seen (FIXME: get it from db)
+			@users_seen = 0
+
+			# Create board with the configuration
+			@board = Board.new @config.board
+
+			@chat = PoieticGen::ChatManager.new @config.chat
+
+			@last_leave_check_time = Time.now.to_i - LEAVE_CHECK_TIME_MIN
+			@leave_mutex = Mutex.new
 		end
 
 	end

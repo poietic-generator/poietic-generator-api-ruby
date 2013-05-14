@@ -1,6 +1,6 @@
 /******************************************************************************/
 /*                                                                            */
-/*  Poetic Generator Reloaded is a multiplayer and collaborative art          */
+/*  Poietic Generator Reloaded is a multiplayer and collaborative art         */
 /*  experience.                                                               */
 /*                                                                            */
 /*  Copyright (C) 2011 - Gnuside                                              */
@@ -19,4 +19,47 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>.     */
 /*                                                                            */
 /******************************************************************************/
+
+// vim: set ts=4 sw=4 et:
+
+/*jslint browser: true, nomen: true, continue: true */
+/*global $, jQuery, document, console, PoieticGen */
+
+(function (PoieticGen) {
+	"use strict";
+
+	var PATCH_LIFESPAN = 500;
+
+	function Patch() {
+		var self = this,
+		    color = null,
+		    changes = [];
+
+		this.set_color = function (new_color) {
+			color = new_color;
+		};
+
+		this.append = function (pos) {
+			console.log("patch.append: " + JSON.stringify(pos));
+			changes = changes.concat([pos.x, pos.y]);
+		};
+
+		this.to_json = function () {
+			return {
+				'color': color,
+				'changes': changes
+			};
+		};
+
+		this.from_json = function (patch) {
+			color = patch.color;
+			changes = patch.changes;
+		};
+
+	}
+
+	PoieticGen.PATCH_LIFESPAN = PATCH_LIFESPAN;
+	PoieticGen.Patch = Patch;
+
+}(PoieticGen));
 

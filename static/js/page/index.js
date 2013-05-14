@@ -1,6 +1,6 @@
 /******************************************************************************/
 /*                                                                            */
-/*  Poetic Generator Reloaded is a multiplayer and collaborative art          */
+/*  Poietic Generator Reloaded is a multiplayer and collaborative art         */
 /*  experience.                                                               */
 /*                                                                            */
 /*  Copyright (C) 2011 - Gnuside                                              */
@@ -20,38 +20,36 @@
 /*                                                                            */
 /******************************************************************************/
 
-var PATCH_LIFESPAN = 500;
+/*jslint browser: true, nomen: true, continue: true */
+/*global $, jQuery, document, console */
 
-/*
-function PatchQueue() {
-}
-*/
+(function ($) {
+	"use strict";
 
-function Patch() {
-	var self = this;
-	var color = null;
-	var changes = [];
+	function setUsernameCookie() {
+		$.cookie(
+			"user_name",
+			$("#credentials").find("input#username").val(),
+			{path: "/"}
+		);
+	}
 
-	this.set_color = function( new_color ) {
-		color = new_color;
-	};
+	$(document).ready(function () {
+		var user_name = $.cookie('user_name');
+		if (user_name) {
+			$("#username").val(user_name);
+		}
 
-	this.append = function( pos ) {
-		console.log( "patch.append: %s", JSON.stringify( pos ) );
-		changes = changes.concat( [ pos.x, pos.y ] );
-	};
+		$("#credentials").submit(function (event) {
+			event.preventDefault();
+			setUsernameCookie();
+			document.location = $(this).attr("action");
+		});
 
-	this.to_json = function() {
-		return { 
-			'color': color,
-			'changes': changes,
-		};	
-	};
+		$("#link_play").bind("vclick", function (event) {
+			setUsernameCookie();
+			return true;
+		});
+	});
 
-	this.from_json = function( patch ) {
-		color = patch.color;
-		changes = patch.changes;
-	};
-
-}
-
+}(jQuery));

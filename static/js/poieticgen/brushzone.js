@@ -1,6 +1,6 @@
 /******************************************************************************/
 /*                                                                            */
-/*  Poetic Generator Reloaded is a multiplayer and collaborative art          */
+/*  Poietic Generator Reloaded is a multiplayer and collaborative art         */
 /*  experience.                                                               */
 /*                                                                            */
 /*  Copyright (C) 2011 - Gnuside                                              */
@@ -19,34 +19,4 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>.     */
 /*                                                                            */
 /******************************************************************************/
-
-var session = null;
-var viewer = null;
-var board = null;
-
-// instead of windows.onload
-$(document).ready( function() {
-    // initialize zoness
-    session = new ViewSession(
-        function( session ) {
-            //console.log("page_draw/ready: session callback ok");
-            board = new Board( session );
-			viewer = new Viewer( session, board, 'session-viewer', null, { fullsize: true } );
-            //console.log("page_draw/ready: prepicker");
-        }
-    );
-
-    $("#view_start").bind( "vclick", function ( event ) {
-        event.preventDefault();
-        $("#view_now").removeClass("ui-btn-active");
-        $(this).addClass("ui-btn-active");
-        session.restart();
-    });
-    $("#view_now").bind( "vclick", function ( event ) {
-        event.preventDefault();
-        $("#view_start").removeClass("ui-btn-active");
-        $(this).addClass("ui-btn-active");
-        session.current();
-    });
-});
 

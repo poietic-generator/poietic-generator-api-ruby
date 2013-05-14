@@ -3,19 +3,23 @@
     @page.css << "/css/colorjack.css"
     @page.css << "/css/message.css"
 
-    @page.js << "/js/jquery.cookie.js"
-    @page.js << "/js/colorjack.js"
-    @page.js << "/js/colorpicker.js"
-    @page.js << "/js/draw_session.js"
-    @page.js << "/js/patch.js"
-    @page.js << "/js/board.js"
-    @page.js << "/js/zone.js"
+    @page.js << "/js/extern/jquery.cookie.js"
+    @page.js << "/js/extern/colorjack.js"
+
     @page.js << "/js/console.js"
-    @page.js << "/js/editor.js"
-    @page.js << "/js/viewer.js"
-    @page.js << "/js/brushzone.js"
-    @page.js << "/js/chat.js"
-    @page.js << "/js/page_draw.js"
+
+    @page.js << "/js/poieticgen.js"
+    @page.js << "/js/poieticgen/colorpicker.js"
+    @page.js << "/js/poieticgen/edit_session.js"
+    @page.js << "/js/poieticgen/patch.js"
+    @page.js << "/js/poieticgen/zone.js"
+    @page.js << "/js/poieticgen/board.js"
+    @page.js << "/js/poieticgen/editor.js"
+    @page.js << "/js/poieticgen/viewer.js"
+    @page.js << "/js/poieticgen/brushzone.js"
+    @page.js << "/js/poieticgen/chat.js"
+
+    @page.js << "/js/page/draw.js"
 
     erb :common_header
 %>

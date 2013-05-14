@@ -1,6 +1,6 @@
 /******************************************************************************/
 /*                                                                            */
-/*  Poetic Generator Reloaded is a multiplayer and collaborative art          */
+/*  Poietic Generator Reloaded is a multiplayer and collaborative art         */
 /*  experience.                                                               */
 /*                                                                            */
 /*  Copyright (C) 2011 - Gnuside                                              */
@@ -20,48 +20,47 @@
 /*                                                                            */
 /******************************************************************************/
 
-var session = null;
-var viewer = null;
-var board = null;
-var editor = null;
-var chat = null;
 
-// instead of windows.onload
-$(document).ready( function() {
-    $(".logout").bind( "click", function ( event ) {
-        if (!confirm("Leave Poietic Generator?")) {
-            return false;
-        }
-        return true;
-    });
+/*jslint browser: true, nomen: true, continue: true */
+/*global $, jQuery, document, console, PoieticGen */
 
-    // initialize zoness
-    session = new DrawSession(
-        function( session ) {
-            //console.log("page_draw/ready: session callback ok");
-            $(".username").text(session.user_name);
+(function (PoieticGen, $) {
+	"use strict";
 
-            board = new Board( session );
-            editor = new Editor( session, board, 'session-editor' );
-            //var color_picker = new ColorPicker( editor );
-            chat = new Chat( session);
-			viewer = new Viewer( session, board, 'session-viewer', editor );
+	var session = null,
+		viewer = null,
+		board = null;
 
-            //console.log("page_draw/ready: prepicker");
-            $("#brush").bind( "vclick", function( event ){
-                event.preventDefault();
-                if ( true === editor.is_color_picker_visible() ) {
-                    return editor.hide_color_picker( this );
-                } else {
-                    return editor.show_color_picker( this );
-                }
-            });
-            $("#canvas-container").bind( "vclick", function ( event ) {
-                if ( true === editor.is_color_picker_visible() ) {
-                    editor.hide_color_picker( $("#brush") );
-                }
-            });
-        }
-    );
-});
+	if (PoieticGen.Zone === undefined) {
+		console.error("PoieticGen.Zone is not defined !");
+	}
+	if (PoieticGen.Viewer === undefined) {
+		console.error("PoieticGen.Viewer is not defined !");
+	}
+
+	// instead of windows.onload
+	$(document).ready(function () {
+		// initialize zoness
+		session = new PoieticGen.ViewSession(function (session) {
+			//console.log("page_draw/ready: session callback ok");
+			board = new PoieticGen.Board(session);
+			viewer = new PoieticGen.Viewer(session, board, 'session-viewer', null, {fullsize: true});
+			//console.log("page_draw/ready: prepicker");
+		});
+
+		$("#view_start").bind("vclick", function (event) {
+			event.preventDefault();
+			$("#view_now").removeClass("ui-btn-active");
+			$(this).addClass("ui-btn-active");
+			session.restart();
+		});
+		$("#view_now").bind("vclick", function (event) {
+			event.preventDefault();
+			$("#view_start").removeClass("ui-btn-active");
+			$(this).addClass("ui-btn-active");
+			session.current();
+		});
+	});
+
+}(PoieticGen, jQuery));
 

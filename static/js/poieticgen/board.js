@@ -1,6 +1,6 @@
 /******************************************************************************/
 /*                                                                            */
-/*  Poetic Generator Reloaded is a multiplayer and collaborative art          */
+/*  Poietic Generator Reloaded is a multiplayer and collaborative art         */
 /*  experience.                                                               */
 /*                                                                            */
 /*  Copyright (C) 2011 - Gnuside                                              */
@@ -21,21 +21,25 @@
 /******************************************************************************/
 
 /*jslint browser: true*/
-/*global $, jQuery, document, Zone, console */
+/*global $, jQuery, document, PoieticGen, console, alert */
 
 // FIXME expose board objects to window
 
-(function () {
+(function (PoieticGen) {
 
 	"use strict";
+
+	if (PoieticGen.Zone === undefined) {
+		alert("ERROR: PoieticGen.Zone is not defined !");
+	}
 
 	/**
 	* Global view
 	*/
 	function Board(p_session) {
-		//var console = window.noconsole;
+		var console = window.noconsole,
 
-		var self = this,
+		    self = this,
 			realCanvas,
 			context,
 			zones,
@@ -61,7 +65,7 @@
 
 			// fill zones with zones from session
 			if (undefined !== session.user_zone) {
-				zones[session.user_zone.index] = new Zone(
+				zones[session.user_zone.index] = new PoieticGen.Zone(
 					session,
 					session.user_zone.index,
 					session.user_zone.position,
@@ -73,7 +77,7 @@
 			for (i = 0; i < p_session.other_zones.length; i += 1) {
 				z = p_session.other_zones[i];
 
-				zones[z.index] = new Zone(
+				zones[z.index] = new PoieticGen.Zone(
 					session,
 					z.index,
 					z.position,
@@ -81,7 +85,7 @@
 					session.zone_line_count
 				);
 			}
-			console.log("board/initialize: zones = %s", JSON.stringify(zones));
+			console.log("board/initialize: zones = " + JSON.stringify(zones));
 		};
 
 
@@ -93,7 +97,7 @@
 			console.log("board/handle_event : " + JSON.stringify(ev));
 			if (ev.type === 'join') {
 				z = ev.desc.zone;
-				zones[z.index] = new Zone(
+				zones[z.index] = new PoieticGen.Zone(
 					session,
 					z.index,
 					z.position,
@@ -102,7 +106,7 @@
 				);
 			} else if (ev.type === 'leave') {
 				z = ev.desc.zone;
-				console.log("board/handle_event: _zones bf delete %s", JSON.stringify(zones));
+				console.log("board/handle_event: _zones bf delete " + JSON.stringify(zones));
 				delete zones[z.index];
 			} else {
 				console.log("board/handle_event: unknown event");
@@ -114,7 +118,7 @@
 		*
 		*/
 		this.get_zone = function (index) {
-			// console.log("board/get_zone(%s) : %s", index, JSON.stringify( _zones[index] ) );
+			// console.log("board/get_zone("+ index + ") : " + JSON.stringify( _zones[index] ) );
 			return zones[index];
 		};
 
@@ -131,7 +135,7 @@
 					keys.push(parseInt(i, 10));
 				}
 			}
-			// console.log("board/get_zone_list : %s", JSON.stringify( keys ));
+			// console.log("board/get_zone_list : " + JSON.stringify( keys ));
 			return keys;
 		};
 
@@ -140,13 +144,15 @@
 		*
 		*/
 		this.handle_stroke = function (stk) {
-			console.log("board/handle_stroke : stroke = %s", JSON.stringify(stk));
-			console.log("board/handle_stroke : zones = %s", JSON.stringify(zones));
-			var z = zones[stk.zone];
+			var console = window.noconsole,
+				z = zones[stk.zone];
+
+			console.log("board/handle_stroke : stroke = " + JSON.stringify(stk));
+			console.log("board/handle_stroke : zones = " + JSON.stringify(zones));
 			if (z) {
 				z.patch_apply(stk);
 			} else {
-				console.warn("board/handle_stroke: trying to apply stroke for missing zone %s", stk.zone);
+				console.warn("board/handle_stroke: trying to apply stroke for missing zone " + stk.zone);
 			}
 		};
 
@@ -160,5 +166,7 @@
 		this.initialize(p_session);
 	}
 
-}());
+	PoieticGen.Board = Board;
+
+}(PoieticGen));
 

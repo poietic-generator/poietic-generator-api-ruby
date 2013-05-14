@@ -1,6 +1,6 @@
 /******************************************************************************/
 /*                                                                            */
-/*  Poetic Generator Reloaded is a multiplayer and collaborative art          */
+/*  Poietic Generator Reloaded is a multiplayer and collaborative art         */
 /*  experience.                                                               */
 /*                                                                            */
 /*  Copyright (C) 2011 - Gnuside                                              */
@@ -21,11 +21,11 @@
 /******************************************************************************/
 
 /*jslint browser: true, nomen: true */
-/*global $, jQuery, document, Zone, alert, console */
+/*global $, jQuery, document, Zone, console, alert, PoieticGen */
 
 // FIXME: use the prototype-style object definition
 
-(function (window, $) {
+(function (PoieticGen, $) {
 	"use strict";
 
 	function Chat(p_session) {
@@ -138,7 +138,7 @@
 		*
 		*/
 		this.handle_event = function (ev) {
-			console.log("chat/handle_event : %s", JSON.stringify(ev));
+			console.log("chat/handle_event : " + JSON.stringify(ev));
 			switch (ev.type) {
 			case "join": // on both join and leave refresh users list
 			case "leave":
@@ -154,7 +154,7 @@
 		*
 		*/
 		this.handle_message = function (msg) {
-			console.log("chat/handle_message : %s", JSON.stringify(msg));
+			console.log("chat/handle_message : " + JSON.stringify(msg));
 			var liCount = $("span.ui-li-count"), count = parseInt($(liCount).text(), 10), link;
 			// refresh unread count and blink for notification only when not on messages page
 			if ("session-chat" !== $.mobile.activePage.attr("id")) {
@@ -179,7 +179,7 @@
 		this.refresh_user_list = function () {
 			var i,
 				select = $("#send-message-form-to");
-			console.log("chat/refresh_user_list : %s", JSON.stringify(_session.other_users));
+			console.log("chat/refresh_user_list : " + JSON.stringify(_session.other_users));
 			select.empty().selectmenu();
 			for (i = 0; i < _session.other_users.length; i += 1) {
 				select.append('<option value="'
@@ -196,4 +196,7 @@
 		this.initialize(p_session);
 	}
 
-}(window, jQuery));
+	PoieticGen.Chat = Chat;
+
+}(PoieticGen, jQuery));
+

@@ -1,9 +1,9 @@
 ##############################################################################
 #                                                                            #
-#  Poetic Generator Reloaded is a multiplayer and collaborative art          #
+#  Poietic Generator Reloaded is a multiplayer and collaborative art         #
 #  experience.                                                               #
 #                                                                            #
-#  Copyright (C) 2011 - Gnuside                                              #
+#  Copyright (C) 2011-2013 - Gnuside                                         #
 #                                                                            #
 #  This program is free software: you can redistribute it and/or modify it   #
 #  under the terms of the GNU Affero General Public License as published by  #
@@ -97,7 +97,8 @@ module PoieticGen
 
 			set :config, config
 			set :manager, (PoieticGen::Manager.new config)
-			DataMapper::Logger.new(STDERR, :info)
+			#DataMapper::Logger.new(STDERR, :info)
+			DataMapper::Logger.new(STDERR, :debug)
 			hash = config.database.get_hash
 			pp "db hash :", hash
 			DataMapper.setup(:default, hash)
@@ -124,6 +125,14 @@ module PoieticGen
 			erb :page_index
 		end
 
+		#
+		# Restart session
+		#
+		get '/restart' do
+			session[SESSION_USER] ||= nil
+			settings.manager.restart session, params
+			redirect '/'
+		end
 
 		#
 		#
@@ -210,6 +219,9 @@ module PoieticGen
 			rescue ArgumentError => e
 				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_BAD_REQUEST, "Invalid content" ]
+
+			rescue PoieticGen::InvalidSession => e
+				status = [ STATUS_REDIRECTION, "Session has expired !", "/"]
 
 			rescue Exception => e
 				# handle non-JSON parsing errors

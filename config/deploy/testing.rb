@@ -7,12 +7,13 @@ role :app, "beta.poietic-generator.net"
 role :db,  "beta.poietic-generator.net", :primary => true
 
 set :default_environment, {
-	'PATH' => "/var/lib/gems/1.8/bin:$PATH"
+	'PATH' => "$HOME/.rbenv/shims:$HOME/.rbenv/bin:$PATH"
 }
 
 set :user, "admin"
 set :use_sudo, false
 
+set :branch, "develop"
 set :deploy_to, "/home/admin/d_poiesis/www/play.poietic-generator.net/beta"
 set :deploy_env, 'testing'
 
