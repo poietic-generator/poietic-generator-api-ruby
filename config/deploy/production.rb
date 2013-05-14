@@ -15,6 +15,7 @@ set :use_sudo, false
 
 set :deploy_to, "/home/admin/d_poiesis/www/play.poietic-generator.net/play"
 set :deploy_env, 'production'
+set :branch, "develop"
 
 # limit number of releases on server
 set :keep_releases, 5
