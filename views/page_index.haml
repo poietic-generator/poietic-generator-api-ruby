@@ -3,25 +3,29 @@
 - @page.css << "/css/page_index.css"
 - @page.js << "/js/extern/jquery.cookie.js"
 - @page.js << "/js/page/index.js"
+
 #page{"data-role" => "page"}
   #header
     %h1
       Poietic Generator
-      %em Reloaded
   #content{"data-role" => "content"}
+    #credits
+      %p
+        Copyleft - 2011-2013 - 
+        %a(href="http://www.gnuside.com") GNUSIDE
+      %p
+        %a{:href => "http://poietic-generator.net/"} Original concept
+        by Olivier Auber
     #index-menu
-      %img{:src => "poietic-generator.net.gif"}/
+      %img{:src => "/poietic-generator.net.gif"}/
       %br/
-      %form#credentials{:action => "/page/draw", "data-ajax" => "false", :method => "post"}
-        %label{:for => "username"} Username
-        %input#username{:name => "username", :type => "text", :value => "anonymous"}/
-      %a#link_play{"data-ajax" => "false", "data-inline" => "true", "data-role" => "button", :href => "/page/draw"} Play
-      %a#link_view{"data-ajax" => "false", "data-inline" => "true", "data-role" => "button", :href => "/page/view"} View
+      %form#credentials{:action => "/page/list", "data-ajax" => "false", :method => "post"}
+        %div.ui-field-contain.ui-body.ui-br(data-role="fieldcontain")
+          %label{:for => "username"} Username
+          %input#username(name="username" type="text" value="anonymous")/
+      //%a#link_choose{"data-ajax" => "false", "data-theme" => "b", "data-inline" => "true", "data-role" => "button", :href => "/page/list"} 
+      %button(type="submit" data-theme="b" name="submit" value="submit-value")
+        Join a session
+      //%a#link_play{"data-ajax" => "false", "data-inline" => "true", "data-role" => "button", :href => "/page/draw"} Play
+      //%a#link_view{"data-ajax" => "false", "data-inline" => "true", "data-role" => "button", :href => "/page/view"} View
     .spacer
-  #footer
-    %p
-      Copyleft - 2011-2013 - 
-      %a(href="http://www.gnuside.com") Gnuside
-    %p
-      %a{:href => "http://poietic-generator.net/"} Original concept
-      by Olivier Auber

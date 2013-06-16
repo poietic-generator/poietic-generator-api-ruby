@@ -120,9 +120,7 @@ module PoieticGen
 		#
 		#
 		get '/' do
-			session[SESSION_USER] ||= nil
-			@page = Page.new "Index"
-			haml :page_index
+			redirect '/page/index'
 		end
 
 		#
@@ -134,6 +132,11 @@ module PoieticGen
 			redirect '/'
 		end
 
+		get '/page/index' do
+			session[SESSION_USER] ||= nil
+			@page = Page.new "Index"
+			haml :page_index
+		end
 		#
 		#
 		#
@@ -174,6 +177,11 @@ module PoieticGen
 		get '/page/admin' do 
 			@page = Page.new "Admin"
 			haml :page_admin
+		end
+
+		get '/page/list' do
+			@page = Page.new "List"
+			haml :page_list
 		end
 
 		#
