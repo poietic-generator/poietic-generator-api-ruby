@@ -122,7 +122,7 @@ module PoieticGen
 		get '/' do
 			session[SESSION_USER] ||= nil
 			@page = Page.new "Index"
-			erb :page_index
+			haml :page_index
 		end
 
 		#
@@ -139,7 +139,7 @@ module PoieticGen
 		#
 		get '/page/draw' do
 			@page = Page.new "Session"
-			erb :page_draw
+			haml :page_draw
 		end
 
 
@@ -148,7 +148,7 @@ module PoieticGen
 		#
 		get '/page/view' do
 			@page = Page.new "View"
-			erb :page_view
+			haml :page_view
 		end
 
 
@@ -158,7 +158,7 @@ module PoieticGen
 		#
 		get '/view/standalone' do
 			@page = Page.new "View"
-			erb :page_view_standalone
+			haml :page_view_standalone
 		end
 
 
@@ -171,6 +171,10 @@ module PoieticGen
 			redirect '/'
 		end
 
+		get '/page/admin' do 
+			@page = Page.new "Admin"
+			haml :page_admin
+		end
 
 		#
 		# notify server about the intention of joining the session
