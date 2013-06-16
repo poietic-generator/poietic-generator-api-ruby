@@ -1,0 +1,27 @@
+- # vim: set ts=2 sw=2 et:
+- @page.css << "/css/base.css"
+- @page.css << "/css/page_index.css"
+- @page.js << "/js/extern/jquery.cookie.js"
+- @page.js << "/js/page/index.js"
+#page{"data-role" => "page"}
+  #header
+    %h1
+      Poietic Generator
+      %em Reloaded
+  #content{"data-role" => "content"}
+    #index-menu
+      %img{:src => "poietic-generator.net.gif"}/
+      %br/
+      %form#credentials{:action => "/page/draw", "data-ajax" => "false", :method => "post"}
+        %label{:for => "username"} Username
+        %input#username{:name => "username", :type => "text", :value => "anonymous"}/
+      %a#link_play{"data-ajax" => "false", "data-inline" => "true", "data-role" => "button", :href => "/page/draw"} Play
+      %a#link_view{"data-ajax" => "false", "data-inline" => "true", "data-role" => "button", :href => "/page/view"} View
+    .spacer
+  #footer
+    %p
+      Copyleft - 2011-2013 - 
+      %a(href="http://www.gnuside.com") Gnuside
+    %p
+      %a{:href => "http://poietic-generator.net/"} Original concept
+      by Olivier Auber

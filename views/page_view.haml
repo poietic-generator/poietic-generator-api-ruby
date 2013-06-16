@@ -1,0 +1,23 @@
+- # vim: set ts=2 sw=2 et:
+- @page.css << "/css/page_view.css"
+- @page.js << "/js/console.js"
+- @page.js << "/js/poieticgen.js"
+- @page.js << "/js/poieticgen/view_session.js"
+- @page.js << "/js/poieticgen/zone.js"
+- @page.js << "/js/poieticgen/viewer.js"
+- @page.js << "/js/poieticgen/board.js"
+- @page.js << "/js/page/view.js"
+
+%div{"data-fullscreen" => "true", "data-role" => "page"}
+  %div{"data-id" => "head", "data-position" => "fixed", "data-role" => "header"}
+    %h1.username Poietic Generator's view
+    %a.ui-btn-right.logout{"data-ajax" => "false", :href => "/"} Back
+    %div{"data-role" => "navbar"}
+      %ul
+        %li
+          %a#view_start{:href => "#"} History
+        %li
+          %a#view_now.ui-btn-active{:href => "#"} Live
+  %div{"data-role" => "content"}
+    .viewer
+      %canvas#session-viewer

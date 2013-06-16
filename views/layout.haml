@@ -1,0 +1,22 @@
+- # vim: set ts=2 sw=2 et:
+!!!
+%html
+	%head
+		%meta{:content => "yes", :name => "apple-mobile-web-app-capable"}/
+		%meta{:content => "black", :name => "apple-mobile-web-app-status-bar-style"}/
+		%meta{:content => "YES", :name => "apple-touch-fullscreen"}/
+		/ <meta name="viewport" content="width=device-width, initial-scale=0.6666, minimum-scale=0.6666, maximum-scale=1"/>
+		%meta{:content => "user-scalable=no,height=device-height,width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0", :name => "viewport"}/
+	/ <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+	- @page.css.insert 0, "/css/minimal.css"
+	- @page.css.insert 1, "/css/jquery.mobile-1.0b1.min.css"
+	= @page.render_css
+	// FIXME: use requireJS or similar
+	// jquery base
+	- @page.js.insert 0, "/js/extern/jquery-1.6.1.min.js"
+	- @page.js << "/js/extern/jquery.mobile-1.0b1.min.js"
+	//# json parser/encoder for old (or mobile) browsers
+	- @page.js << "/js/extern/json2.js"
+	= @page.render_js
+	%body
+		= yield
