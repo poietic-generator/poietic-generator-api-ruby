@@ -1,13 +1,10 @@
-<%=
+<%
     @page.css << "/css/base.css"
     @page.css << "/css/page_index.css"
 
     @page.js << "/js/extern/jquery.cookie.js"
     @page.js << "/js/page/index.js"
-
-	erb :common_header
 %>
-
 <div id="page" data-role="page">
     <div id="header">
         <h1>Poietic Generator <em>Reloaded</em></h1>
@@ -20,7 +17,7 @@
                 <input type="text" id="username" name="username" value="anonymous" />
             </form>
             <a href="/page/draw" data-ajax="false" data-role="button" data-inline="true" id="link_play">Play</a>
-	    <!-- <a href="/page/view" data-ajax="false" data-role="button" data-inline="true" id="link_view">View</a> -->
+	    <a href="/page/view" data-ajax="false" data-role="button" data-inline="true" id="link_view">View</a>
         </div>
         <div class="spacer"></div>
     </div>
@@ -31,5 +28,3 @@
         </p>
     </div>
 </div>
-
-<%= erb :common_footer %>
