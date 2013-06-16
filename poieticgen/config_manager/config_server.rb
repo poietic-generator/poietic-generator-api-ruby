@@ -28,18 +28,30 @@ module PoieticGen ; class ConfigManager
 		attr_reader :root_url
 		attr_reader :port
 		attr_reader :pidfile
+		attr_reader :admin_username
+		attr_reader :admin_password
 
 		def initialize hash
 			raise MissingField, "Server.ssl" unless hash.include? "ssl"
 			@ssl = ConfigManager.parse_bool hash["ssl"], "Server.ssl"
+
 			raise MissingField, "Server.virtualhost" unless hash.include? "virtualhost"
 			@virtualhost = hash["virtualhost"]
+
 			raise MissingField, "Server.root" unless hash.include? "root"
 			@root = hash["root"]
+
 			raise MissingField, "Server.port" unless hash.include? "port"
 			@port = ConfigManager.parse_int hash["port"], "Server.port"
+
 			raise MissingField, "Server.pidfile" unless hash.include? "pidfile"
 			@pidfile = hash["pidfile"]
+
+			raise MissingField, "Server.admin_username" unless hash.include? "admin_username"
+			@pidfile = hash["admin_username"]
+
+			raise MissingField, "Server.admin_password" unless hash.include? "admin_password"
+			@pidfile = hash["admin_password"]
 		end
 	end
 
