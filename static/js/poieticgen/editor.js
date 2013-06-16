@@ -63,6 +63,7 @@
 
 			_current_zone,
 			_canvas_event_fn,
+			_document_event_fn,
 			_color_picker;
 
 		this.name = "Editor";
@@ -109,11 +110,15 @@
 			self.context = _real_canvas.getContext('2d');
 
 			// plug some event handlers
+
 			_real_canvas.addEventListener('mousedown', _canvas_event_fn, false);
 			_real_canvas.addEventListener('touchstart', _canvas_event_fn, false);
 
 			_real_canvas.addEventListener('mouseup', _canvas_event_fn, false);
 			_real_canvas.addEventListener('touchstop', _canvas_event_fn, false);
+
+			document.addEventListener('mouseup', _document_event_fn, false);
+			document.addEventListener('touchstop', _document_event_fn, false);
 
 			_real_canvas.addEventListener('mousemove', _canvas_event_fn, false);
 			_real_canvas.addEventListener('touchmove', _canvas_event_fn, false);
@@ -469,19 +474,32 @@
 
 
 		/**
-		* Handle all types on canvas events and dispatch
+		* Handle all types of root docment events and dispatch
+		*/
+		_document_event_fn = function (event_obj) {
+			// disable pencil move if mouse/touch is release outside canvas
+			if (_pencil_move.enable) {
+				console.log('document : mouse is up outside !');
+				_pencil_move.enable = false;
+			}
+		};
+
+		/**
+		* Handle all types of canvas events and dispatch
 		*/
 		_canvas_event_fn = function (event_obj) {
 			var canvas = _real_canvas,
 				is_func;
 
+			console.log('canvas : mouse is up inside !');
+			event_obj.preventDefault();
+			event_obj.stopPropagation();
 			// FIXME verify the same formula is used with touchscreens
 			event_obj.mouseX = event_obj.pageX - canvas.offsetLeft;
 			event_obj.mouseY = event_obj.pageY - canvas.offsetTop;
 
 			is_func = self[event_obj.type];
 			if (is_func) { is_func(event_obj); }
-			event_obj.preventDefault();
 			// console.log("clicked at " + event_obj.mouseX + "," + event_obj.mouseY );
 		};
 
