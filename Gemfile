@@ -7,7 +7,15 @@ gem "sinatra-reloader"
 gem "capistrano"
 gem "capistrano-ext"
 
-#gem "shotgun"
+group :development do
+	gem "shotgun"
+	gem "html2haml"
+end
+
+group :production do
+	gem "unicorn"
+end
+
 gem "haml"
 gem "json"
 gem "datamapper"
@@ -19,5 +27,5 @@ gem "dm-types"
 gem "inifile" #, "~> 0.3"
 gem "extlib"
 gem "rdebug"
-gem "thin"
-gem "unicorn"
+#gem "thin"
+
