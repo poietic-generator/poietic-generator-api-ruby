@@ -125,7 +125,7 @@
 					this.zone_column_count = response.zone_column_count;
 					this.zone_line_count = response.zone_line_count;
 
-					_setStartDateFn(response.start_date);
+					_set_local_start_date_fn(response.start_date);
 
 					// FIXME: do we need duration ?
 					if (!_restart) {
