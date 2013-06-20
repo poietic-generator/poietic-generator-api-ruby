@@ -88,6 +88,9 @@ module PoieticGen
 		end
 
 		configure do
+			# FIXME: Add compass assets management (the following line) in the future
+			# Compass.add_project_configuration(File.join(Sinatra::Application.root, 'config', 'compass.config'))
+
 			begin
 				config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
 				FileUtils.mkdir_p File.dirname config.server.pidfile
@@ -95,18 +98,18 @@ module PoieticGen
 					fh.puts Process.pid
 				end
 
-			set :config, config
-			set :manager, (PoieticGen::Manager.new config)
-			#DataMapper::Logger.new(STDERR, :info)
-			DataMapper::Logger.new(STDERR, :debug)
-			hash = config.database.get_hash
-			pp "db hash :", hash
-			DataMapper.setup(:default, hash)
+				set :config, config
+				set :manager, (PoieticGen::Manager.new config)
+				#DataMapper::Logger.new(STDERR, :info)
+				DataMapper::Logger.new(STDERR, :debug)
+				hash = config.database.get_hash
+				pp "db hash :", hash
+				DataMapper.setup(:default, hash)
 
-			# raise exception on save failure (globally across all models)
-			DataMapper::Model.raise_on_save_failure = true
+				# raise exception on save failure (globally across all models)
+				DataMapper::Model.raise_on_save_failure = true
 
-			DataMapper.auto_upgrade!
+				DataMapper.auto_upgrade!
 
 			rescue PoieticGen::ConfigManager::ConfigurationError => e
 				STDERR.puts "ERROR: %s" % e.message
