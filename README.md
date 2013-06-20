@@ -21,7 +21,7 @@ Finally, from the project directory, run the following command to install
 locally into the "vendor/bundle" directory the gems required by this project
 and all their dependencies :
 
-    bundle install --path vendor/bundle --binstubs
+    bundle install --path vendor/bundle
 
 
 Configuration
