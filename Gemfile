@@ -17,6 +17,8 @@ group :production do
 end
 
 gem "haml"
+gem "sass"
+gem "compass"
 gem "json"
 gem "datamapper"
 gem "dm-migrations"
