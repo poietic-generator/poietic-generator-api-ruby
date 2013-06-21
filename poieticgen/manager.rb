@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ##############################################################################
 #                                                                            #
 #  Poietic Generator Reloaded is a multiplayer and collaborative art         #
@@ -389,6 +390,18 @@ module PoieticGen
 					raise RuntimeError, "Invalide date, other than -1 and 0 is not supported"
 				end
 
+				event_max = begin
+								e = Event.first(:order => [ :id.desc ])
+								if e.nil? then 0
+								else e.id
+								end
+							end
+				stroke_max = begin
+								 s = Stroke.first(:order => [ :id.desc ])
+								 if s.nil? then 0
+								 else s.id
+								 end
+							 end
 
 				# return snapshot params (user, zone), start_time, and
 				# duration of the session since then.
@@ -397,6 +410,8 @@ module PoieticGen
 					:zones => zones,
 					:zone_column_count => @config.board.width,
 					:zone_line_count => @config.board.height,
+					:event_id => event_max,
+					:stroke_id => stroke_max,
 					:start_date => @session_start,
 					:duration => (now_i - @session_start)
 				}
@@ -425,10 +440,10 @@ module PoieticGen
 			# This allow to make the request fit in an already elapsed time.
 			if now_i <= (req.since + req.duration) then
 				# client requests a date in the future
-				duration = now_i - req.since
+				duration = now_i
 			else
 				# client requests a past date
-				duration = req.duration
+				duration = req.since + req.duration 
 			end
 
 			Event.transaction do
@@ -438,18 +453,16 @@ module PoieticGen
 				rdebug "req.since = %d ; req.duration = %d" % [req.since, req.duration]
 
 				evt_req = Event.all(
-					:timestamp.gte => Time.at(req.since - 1),
-					:timestamp.lte => Time.at(req.since + duration - 1)
+					:id.gt => req.events_after
 				)
 
-				pp evt_req
+				# pp evt_req
 
 				srk_req = Stroke.all(
-					:timestamp.gte => Time.at(req.since - 1),
-					:timestamp.lte => Time.at(req.since + duration - 1)
+					:id.gt => req.strokes_after
 				)
 
-				pp srk_req
+				# pp srk_req
 
 				events_collection = evt_req.map{ |e| e.to_hash @board}
 				strokes_collection = srk_req.map{ |s| s.to_hash req.since}
@@ -457,7 +470,7 @@ module PoieticGen
 				result = {
 					:events => events_collection,
 					:strokes => strokes_collection,
-					:duration => ((req.since + duration - 2) - @session_start)
+					:duration => duration
 				}
 
 				rdebug "returning : %s" % result.inspect

@@ -27,10 +27,16 @@ module PoieticGen
 		DURATION = 'duration'
 		SESSION = 'session'
 
+		STROKES_AFTER = 'strokes_after'
+		EVENTS_AFTER = 'events_after'
+
 		private
 
 		def initialize hash
 			@hash = hash
+			@enable_strokes = false
+			@enable_events = false
+			@enable_messages = false
 			@debug = true
 		end
 
@@ -46,6 +52,10 @@ module PoieticGen
 					rdebug "duration : %s" % val.inspect
 				when SESSION then
 					rdebug "session : %s" % val.inspect
+				when STROKES_AFTER then
+					@enable_strokes = true
+				when EVENTS_AFTER then
+					@enable_events = true
 				else
 					raise RuntimeError, "unknow request field '%s'" % key
 				end
@@ -76,6 +86,13 @@ module PoieticGen
 			return @hash[SESSION]
 		end
 
+		def events_after
+			return @hash[EVENTS_AFTER].to_i
+		end
+
+		def strokes_after
+			return @hash[STROKES_AFTER].to_i
+		end
 	end
 
 end
