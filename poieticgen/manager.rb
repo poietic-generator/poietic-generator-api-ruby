@@ -466,8 +466,8 @@ module PoieticGen
 				pp srk_req
 
 				events_collection = evt_req.map{ |e| e.to_hash @board}
-				strokes_collection = srk_req.map{ |s| prev = Stroke.first(1, :id => s.id - 1);
-				s.to_hash (if prev.empty? then now else prev[0].timestamp end) }
+				strokes_collection = srk_req.map{ |s| prev = srk_req.first(1, :id => s.id - 1);
+					s.to_hash (if prev.empty? then now else prev[0].timestamp end) }
 
 				result = {
 					:events => events_collection,
