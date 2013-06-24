@@ -448,6 +448,7 @@ module PoieticGen
 
 			Event.transaction do
 
+				now = Time.now.to_i
 				self.check_expired_users
 
 				rdebug "req.since = %d ; req.duration = %d" % [req.since, req.duration]
@@ -456,16 +457,17 @@ module PoieticGen
 					:id.gt => req.events_after
 				)
 
-				# pp evt_req
+				pp evt_req
 
 				srk_req = Stroke.all(
 					:id.gt => req.strokes_after
 				)
 
-				# pp srk_req
+				pp srk_req
 
 				events_collection = evt_req.map{ |e| e.to_hash @board}
-				strokes_collection = srk_req.map{ |s| s.to_hash req.since}
+				strokes_collection = srk_req.map{ |s| prev = Stroke.first(1, :id => s.id - 1);
+				s.to_hash (if prev.empty? then now else prev[0].timestamp end) }
 
 				result = {
 					:events => events_collection,
