@@ -54,7 +54,6 @@
 			_local_start_date = 0, // date Object
 			_local_start_offset = 0, // seconds between server_start & js_start
 
-			_total_duration = 0,
 			_timer = null,
 			_restart = false,
 			_play_speed = 1,
@@ -131,7 +130,6 @@
 
 					_current_event_id = response.event_id;
 					_current_stroke_id = response.stroke_id;
-					_total_duration = response.start_date + response.duration; // Now
 					// console.log('view_session/join response mod : ' + JSON.stringify(this) );
 
 					self.other_zones = response.zones;
@@ -207,7 +205,6 @@
 			        strokes_after : _current_stroke_id,
 				events_after : _current_event_id,
 				
-				since: _total_duration, // FIXME: use local date for offset
 				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed
 			};
 
@@ -223,22 +220,6 @@
 					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
 						self.treat_status_nok(response);
 					} else {
-
-						if (!_restart) {
-							console.log('view_session/update(!restart) duration set to :' + response.duration);
-
-							_total_duration = response.duration;
-						} else {
-							console.log('view_session/update(restart) duration set to :' + _total_duration);
-							_total_duration += VIEW_PLAY_UPDATE_INTERVAL * _play_speed;
-
-							if (response.duration < _total_duration) {
-								_total_duration = response.duration;
-								_restart = false;
-								console.error('session/update(fix!restart) duration set to :' + _total_duration);
-							}
-						}
-
 						self.dispatch_events(response.events);
 						self.dispatch_strokes(response.strokes);
 					}

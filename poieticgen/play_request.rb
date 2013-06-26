@@ -23,7 +23,6 @@
 module PoieticGen
 	class PlayRequest
 
-		SINCE = 'since'
 		DURATION = 'duration'
 		SESSION = 'session'
 
@@ -36,7 +35,6 @@ module PoieticGen
 			@hash = hash
 			@enable_strokes = false
 			@enable_events = false
-			@enable_messages = false
 			@debug = true
 		end
 
@@ -46,8 +44,6 @@ module PoieticGen
 			# mandatory fields firstvalidate user input first
 			hash.each do |key, val|
 				case key
-				when SINCE then
-					rdebug "since : %s" % val.inspect
 				when DURATION then
 					rdebug "duration : %s" % val.inspect
 				when SESSION then
@@ -62,9 +58,10 @@ module PoieticGen
 			end
 
 			[
-				SINCE,
 				DURATION,
-				SESSION
+				SESSION,
+				STROKES_AFTER,
+				EVENTS_AFTER
 			].each do |field|
 				unless hash.include? field then
 					raise ArgumentError, ("The '%s' field is missing" % field)
@@ -73,10 +70,6 @@ module PoieticGen
 			PlayRequest.new hash
 		end
 
-
-		def since
-			return @hash[SINCE].to_i
-		end
 
 		def duration
 			return @hash[DURATION].to_i
