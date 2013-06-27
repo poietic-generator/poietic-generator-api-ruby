@@ -32,6 +32,7 @@ require 'poieticgen/event'
 require 'poieticgen/chat_manager'
 require 'poieticgen/message'
 require 'poieticgen/stroke'
+require 'poieticgen/snapshot'
 require 'poieticgen/update_request'
 require 'poieticgen/snapshot_request'
 require 'poieticgen/play_request'
@@ -49,10 +50,12 @@ module PoieticGen
 		# events. This check is made in the update_data method. It will be done
 		# at least every LEAVE_CHECK_TIME_MIN days at a user update_data request.
 		LEAVE_CHECK_TIME_MIN = 1
+		STROKE_COUNT_BETWEEN_BOARD_SNAPSHOTS = 5
 
 		def initialize config
 			@config = config
 			@debug = true
+			@@stroke_count = 0
 			pp config
 			# a 16-char long random string
 
@@ -306,12 +309,25 @@ module PoieticGen
 
 
 				user.alive_expires_at = (now + @config.user.liveness_timeout)
-				if req.strokes.length > 0 then
+				if not req.strokes.empty? then
 					user.idle_expires_at = (now + @config.user.idle_timeout)
 				end
 				user.save
 
+				@@stroke_count += req.strokes.length
+
+				pp req.strokes
+
+				STDOUT.puts "stroke_count %d" % [@@stroke_count]
+
 				@board.update_data user, req.strokes
+				if @@stroke_count >= STROKE_COUNT_BETWEEN_BOARD_SNAPSHOTS then
+					last_stroke = Stroke.first(:order => [ :id.desc ])
+					if not last_stroke.nil? then
+						@board.save last_stroke.id, @session_id
+						@@stroke_count = 0
+					end
+				end
 				@chat.update_data user, req.messages
 
 				# rdebug "drawings: (since %s)" % req.strokes_after
@@ -371,7 +387,7 @@ module PoieticGen
 				# to distinguish old sessions/old users
 
 				now_i = Time.now.to_i - 1
-				absolute_time = now_i - req.date
+				
 				# we take a snapshot one second in the past to be sure we will get
 				# a complete second.
 				if req.date == -1 then
@@ -383,54 +399,91 @@ module PoieticGen
 					)
 					users = users_db.map{ |u| u.to_hash }
 					zones = users_db.map{ |u| @board[u.zone].to_desc_hash }
-				elsif req.date == 0 then
-					# get the beginning state.
-					users = []
-					zones = []
-				else
-					# TODO: zones snapshots
-					users = []
-					zones = {}
 
-					# raise RuntimeError, "Invalide date, other than -1 and 0 is not supported"
-				end
-
-				if req.date > 0 then
 					event_max = begin
-						e = Event.first(
-							:timestamp.gt => absolute_time,
-							:order => [ :id.asc ]
-						)
-						pp e
+						e = Event.first(:order => [ :id.desc ])
 						if e.nil? then 0
 						else e.id
 						end
 					end
 
 					stroke_max = begin
-						s = Stroke.first(
-							:timestamp.gt => absolute_time,
-							:order => [ :id.asc ]
-						)
-						pp s
+						s = Stroke.first(:order => [ :id.desc ])
 						if s.nil? then 0
 						else s.id
 						end
 					end
 				else
 
-					event_max = begin
-								e = Event.first(:order => [ :id.desc ])
-								if e.nil? then 0
-								else e.id
-								end
+					# retrieve stroke_max and event_max
+
+					if req.date == 0 then
+						# get the first state.
+
+						stroke_max = begin
+							first_stroke = Stroke.first(:order => [ :id.asc ])
+							if first_stroke.nil? then 0 else first_stroke.id end
+						end
+
+						event_max = begin
+							first_event = Event.first(:order => [ :id.asc ])
+							if first_event.nil? then 0 else first_event.id end
+						end
+					else
+						if req.date > 0 then
+							# get the state from the beginning.
+					
+							first_stroke = Stroke.first(:order => [ :id.asc ])
+							absolute_time = if first_stroke.nil? then 0
+								else (first_stroke.timestamp + req.date) end
+						else
+							# get the state from now.
+
+							absolute_time = now_i - (req.date + 1)
+						end
+
+						event_max = begin
+							e = Event.first(
+								:timestamp.gt => absolute_time,
+								:order => [ :id.asc ]
+							)
+							pp e
+							if e.nil? then 0
+							else e.id
 							end
-					stroke_max = begin
-								 s = Stroke.first(:order => [ :id.desc ])
-								 if s.nil? then 0
-								 else s.id
-								 end
-							 end
+						end
+
+						stroke_max = begin
+							s = Stroke.first(
+								:timestamp.gt => absolute_time,
+								:order => [ :id.asc ]
+							)
+							pp s
+							if s.nil? then 0
+							else s.id
+							end
+						end
+					end
+
+					# retrieve users and zones
+
+					snap = Snapshot.first(
+						:stroke.lte => stroke_max,
+						:order => [ :stroke.asc ]
+					)
+
+					if not snap.nil? then
+						# get the state
+						users_db = User.all(
+							:session => snap.session,
+							:did_expire.not => true
+						)
+						users = users_db.map{ |u| u.to_hash }
+						zones = users_db.map{ |u| snap.data[u.zone] }
+					else # TODO: does it work without any user?
+						users = {}
+						zones = {}
+					end
 				end
 
 				# return snapshot params (user, zone), start_time, and

@@ -20,107 +20,41 @@
 #                                                                            #
 ##############################################################################
 
-require 'poieticgen/update_request'
 require 'poieticgen/zone'
-require 'poieticgen/user'
-
-require 'poieticgen/allocation/spiral'
-require 'poieticgen/allocation/random'
-
-require 'monitor'
 
 module PoieticGen
 
-	#
-	# A class that manages the global drawing
-	#
-	class Board
+	class Snapshot
+		include DataMapper::Resource
 
-		attr_reader :config
+		property :id,	Serial
+		property :session, Integer, :required => true
+		property :stroke, Integer, :required => true
+		property :data, Json, :required => true
 
-		ALLOCATORS = {
-			"spiral" => PoieticGen::Allocation::Spiral,
-			"random" => PoieticGen::Allocation::Random,
-		}
+		def initialize zones, last_stroke, session_id
+                	json = {
+				:session => session_id,
+				:stroke => last_stroke,
+				:data => zones.map{ |z| z.to_desc_hash }
+                	}
+                	super json
 
-
-		def initialize config
-			@debug = true
-			rdebug "using allocator %s" % config.allocator
-			@config = config
-			@allocator = ALLOCATORS[config.allocator].new config
-			pp @allocator
-			@monitor = Monitor.new
-		end
-
-
-		#
-		# Get access to zone with given index
-		#
-		def [] idx
-			return @allocator[idx]
-		end
-
-		def include? idx
-			@monitor.synchronize do
-				val = @allocator[idx]
-				return (not val.nil?)
+			begin
+				pp self
+				self.save
+			rescue DataMapper::SaveFailureError => e
+				rdebug "Saving failure : %s" % e.resource.errors.inspect
+				raise e
 			end
 		end
 
-
-		#
-		# make the user join the board
-		#
-		def join user
-			zone = nil
-			@monitor.synchronize do
-				zone = @allocator.allocate
-				zone.user_id = user.id
-				user.zone = zone.index
-				zone.save
-				user.save
+		def to_desc_hash
+			res = nil
+			Zone.transaction do
+				res = self.data
 			end
-			return zone
-		end
-
-
-		#
-		# disconnect user from the board
-		#
-		def leave user
-			@monitor.synchronize do
-				# reset zone
-				@allocator[user.zone].reset
-				# unallocate it
-				@allocator.free user.zone
-			end
-		end
-
-
-		def update_data user, drawing
-			@monitor.synchronize do
-				zone = @allocator[user.zone]
-				unless zone.nil? then
-					zone.apply user, drawing
-				else
-					#FIXME: return an error to the user ?
-				end
-			end
-		end
-
-		def save last_stroke, session_id
-
-			users = User.all(:session => session_id)
-			zones = []
-
-			users.each do |user|
-				zones.push(@allocator[user.zone])
-			end
-
-			Snapshot.new zones, last_stroke, session_id
+			return res
 		end
 	end
-
 end
-
