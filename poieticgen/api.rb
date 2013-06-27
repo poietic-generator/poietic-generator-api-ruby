@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ##############################################################################
 #                                                                            #
 #  Poietic Generator Reloaded is a multiplayer and collaborative art         #
@@ -288,7 +289,9 @@ module PoieticGen
 			end
 		end
 
-
+		#
+		# play a scene in view
+		#
 		get '/api/session/play' do
 			begin
 				result = {}

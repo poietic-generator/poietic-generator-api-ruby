@@ -44,6 +44,8 @@
 	function ViewSession(callback) {
 		var console = window.console,
 			self = this,
+			_current_stroke_id = 0,
+			_current_event_id = 0,
 			_observers = null,
 
 			_server_start_date = 0, // in seconds, since jan, 1, 1970
@@ -52,7 +54,6 @@
 			_local_start_date = 0, // date Object
 			_local_start_offset = 0, // seconds between server_start & js_start
 
-			_total_duration = 0,
 			_timer = null,
 			_restart = false,
 			_play_speed = 1,
@@ -127,12 +128,8 @@
 
 					_set_local_start_date_fn(response.start_date);
 
-					// FIXME: do we need duration ?
-					if (!_restart) {
-						_total_duration = response.duration;
-					} else {
-						_total_duration = 0;
-					}
+					_current_event_id = response.event_id;
+					_current_stroke_id = response.stroke_id;
 					// console.log('view_session/join response mod : ' + JSON.stringify(this) );
 
 					self.other_zones = response.zones;
@@ -187,7 +184,7 @@
 
 			var strokes_updates = [], req, i;
 
-			// assign real values if objets are present
+			// assign real values if objects are present
 			if (_observers.length < 1) {
 				self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
 				return null;
@@ -204,7 +201,10 @@
 
 			req = {
 				session: "default",
-				since: _server_start_date + _total_duration, // FIXME: use local date for offset
+				
+			        strokes_after : _current_stroke_id,
+				events_after : _current_event_id,
+				
 				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed
 			};
 
@@ -217,29 +217,12 @@
 				context: self,
 				success: function (response) {
 					console.log('view_session/update response : ' + JSON.stringify(response));
-					self.treat_status_nok(response);
 					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
-						self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
-					}
-
-					if (!_restart) {
-						console.log('view_session/update(!restart) duration set to :' + response.duration);
-
-						_total_duration = response.duration;
+						self.treat_status_nok(response);
 					} else {
-						console.log('view_session/update(restart) duration set to :' + _total_duration);
-						_total_duration += VIEW_PLAY_UPDATE_INTERVAL * _play_speed;
-
-						if (response.duration < _total_duration) {
-							_total_duration = response.duration;
-							_restart = false;
-							console.error('session/update(fix!restart) duration set to :' + _total_duration);
-						}
+						self.dispatch_events(response.events);
+						self.dispatch_strokes(response.strokes);
 					}
-
-					self.dispatch_events(response.events);
-					self.dispatch_strokes(response.strokes);
-
 					self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
 				},
 				error: function (response) {
@@ -253,6 +236,9 @@
 		this.dispatch_events = function (events) {
 			var i, o;
 			for (i = 0; i < events.length; i += 1) {
+			        if ((events[i].id) || (_current_event_id < events[i].id)) {
+					_current_event_id = events[i].id;
+				}
 				for (o = 0; o < _observers.length; o += 1) {
 					if (_observers[o].handle_event) {
 						_observers[o].handle_event(events[i]);
@@ -264,6 +250,9 @@
 		this.dispatch_strokes = function (strokes) {
 			var i, o;
 			for (i = 0; i < strokes.length; i += 1) {
+			        if ((strokes[i].id) || (_current_stroke_id < strokes[i].id)) {
+					_current_stroke_id = strokes[i].id;
+				}
 				for (o = 0; o < _observers.length; o += 1) {
 					if (_observers[o].handle_stroke) {
 						_observers[o].handle_stroke(strokes[i]);

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ##############################################################################
 #                                                                            #
 #  Poietic Generator Reloaded is a multiplayer and collaborative art         #
@@ -370,6 +371,7 @@ module PoieticGen
 				# to distinguish old sessions/old users
 
 				now_i = Time.now.to_i - 1
+				absolute_time = now_i - req.date
 				# we take a snapshot one second in the past to be sure we will get
 				# a complete second.
 				if req.date == -1 then
@@ -386,17 +388,60 @@ module PoieticGen
 					users = []
 					zones = []
 				else
-					raise RuntimeError, "Invalide date, other than -1 and 0 is not supported"
+					# TODO: zones snapshots
+					users = []
+					zones = {}
+
+					# raise RuntimeError, "Invalide date, other than -1 and 0 is not supported"
 				end
 
+				if req.date > 0 then
+					event_max = begin
+						e = Event.first(
+							:timestamp.gt => absolute_time,
+							:order => [ :id.asc ]
+						)
+						pp e
+						if e.nil? then 0
+						else e.id
+						end
+					end
+
+					stroke_max = begin
+						s = Stroke.first(
+							:timestamp.gt => absolute_time,
+							:order => [ :id.asc ]
+						)
+						pp s
+						if s.nil? then 0
+						else s.id
+						end
+					end
+				else
+
+					event_max = begin
+								e = Event.first(:order => [ :id.desc ])
+								if e.nil? then 0
+								else e.id
+								end
+							end
+					stroke_max = begin
+								 s = Stroke.first(:order => [ :id.desc ])
+								 if s.nil? then 0
+								 else s.id
+								 end
+							 end
+				end
 
 				# return snapshot params (user, zone), start_time, and
 				# duration of the session since then.
 				result = {
-					:users => users,
+					:users => users, # TODO: unused by the viewer
 					:zones => zones,
 					:zone_column_count => @config.board.width,
 					:zone_line_count => @config.board.height,
+					:event_id => event_max,
+					:stroke_id => stroke_max,
 					:start_date => @session_start,
 					:duration => (now_i - @session_start)
 				}
@@ -407,6 +452,9 @@ module PoieticGen
 			return result
 		end
 
+		#
+		# Get strokes and events for a non-user viewer.
+		#
 		def play session, params
 
 			rdebug "call with %s" % params.inspect
@@ -417,47 +465,53 @@ module PoieticGen
 			# TODO : ignore session_id because it is unknow for the viewer for now
 			#raise RuntimeError, "Invalid session" if req.session != @session_id
 
-			# request structure :
-			# req.since : date from where we want the params
-			# req.duration : amount of time we want.
-
-
-			# This allow to make the request fit in an already elapsed time.
-			if now_i <= (req.since + req.duration) then
-				# client requests a date in the future
-				duration = now_i - req.since
-			else
-				# client requests a past date
-				duration = req.duration
-			end
-
 			Event.transaction do
 
 				self.check_expired_users
 
-				rdebug "req.since = %d ; req.duration = %d" % [req.since, req.duration]
+				rdebug "req.events_after = %d ; req.strokes_after = %d" % [req.events_after, req.strokes_after]
 
-				evt_req = Event.all(
-					:timestamp.gte => Time.at(req.since - 1),
-					:timestamp.lte => Time.at(req.since + duration - 1)
+				# Get events and strokes between req.events/strokes_after and req.duration
+
+				first_e = Event.first(
+					:id.gt => req.events_after
 				)
 
-				pp evt_req
+				if first_e.nil? then
+					events_collection = []
+				else
+					evt_req = Event.all(
+						:id.gt => req.events_after,
+						:timestamp.lt => first_e.timestamp + req.duration
+					)
 
-				srk_req = Stroke.all(
-					:timestamp.gte => Time.at(req.since - 1),
-					:timestamp.lte => Time.at(req.since + duration - 1)
+					pp evt_req
+
+					events_collection = evt_req.map{ |e| e.to_hash @board}
+				end
+
+				first_s = Stroke.first(
+					:id.gt => req.strokes_after
 				)
 
-				pp srk_req
+				if first_s.nil? then
+					strokes_collection = []
+				else
+					srk_req = Stroke.all(
+						:id.gt => req.strokes_after,
+						:timestamp.lt => first_s.timestamp + req.duration
+					)
 
-				events_collection = evt_req.map{ |e| e.to_hash @board}
-				strokes_collection = srk_req.map{ |s| s.to_hash req.since}
+					pp srk_req
+
+					strokes_collection = srk_req.map{ |s| prev = srk_req.get(s.id - 1);
+					s.to_hash (if prev.nil? then now_i else prev.timestamp end) }
+
+				end
 
 				result = {
 					:events => events_collection,
-					:strokes => strokes_collection,
-					:duration => ((req.since + duration - 2) - @session_start)
+					:strokes => strokes_collection
 				}
 
 				rdebug "returning : %s" % result.inspect

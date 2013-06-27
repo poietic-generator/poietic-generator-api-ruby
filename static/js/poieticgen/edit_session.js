@@ -197,7 +197,7 @@
 				return null;
 			}
 
-			// assign real values if objets are present
+			// assign real values if objects are present
 			if (_observers.length < 1) {
 				window.setTimeout(self.update, DRAW_SESSION_UPDATE_INTERVAL);
 				return null;
