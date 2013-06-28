@@ -467,12 +467,10 @@ module PoieticGen
 					pp snap
 
 					if not snap.nil? then
-						# get the state
+						# get the session associated to the snapshot
 						users_db = User.all(
 							:session => snap.session
 						)
-						users = users_db.map{ |u| u.to_hash }
-						zones = users_db.map{ |u| snap.data[u.zone] }
 
 						# TODO: Send a zone with cumulated changes instead of zones + strokes
 						strokes = Stroke.all(
@@ -480,24 +478,26 @@ module PoieticGen
 							:id.lte => stroke_max
 						)
 
-						if not strokes.nil? then
-							strokes = strokes.map{ |s| s.to_hash s.timestamp }
-						else
-							strokes = {}
-						end
-
 						# TODO: events
 
-					else # TODO: does it work without any user?
-						users = {}
-						zones = {}
-						strokes = {}
+					else
+						# get the first session (before the first snapshot)
+						first_user = User.first(
+							:order => [ :id.asc ]
+						)
+
+						users_db = User.all(
+							:session => first_user.session
+						)
+
+						strokes = Stroke.all(
+							:id.lte => stroke_max
+						)
 					end
 
-					
-
-					# TODO: add strokes between the snapshot and stroke_max
-
+					users = users_db.map{ |u| u.to_hash }
+					zones = users_db.map{ |u| snap.data[u.zone] }
+					strokes = strokes.map{ |s| s.to_hash s.timestamp } # strokes with diffstamp = 0
 
 					STDOUT.puts "users and zones"
 					pp users
@@ -561,6 +561,7 @@ module PoieticGen
 
 					pp evt_req
 
+					# FIXME: is it really the current board? If we play an old scene, maybe not.
 					events_collection = evt_req.map{ |e| e.to_hash @board}
 				end
 
