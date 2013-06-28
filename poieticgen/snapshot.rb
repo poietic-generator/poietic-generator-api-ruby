@@ -51,9 +51,9 @@ module PoieticGen
 			end
 		end
 
-		def to_desc_hash
+		def to_hash
 			res = nil
-			Zone.transaction do
+			Snapshot.transaction do
 				res = self.data
 			end
 			return res

@@ -142,6 +142,9 @@
 						console.log('view_session/join on zone ' + JSON.stringify(self.other_zones[i]));
 						self.dispatch_strokes(self.other_zones[i].content);
 					}
+					
+					// handle remaining strokes if there are some
+					self.dispatch_strokes(response.strokes)
 
 					self.setTimer(self.update, 1);
 

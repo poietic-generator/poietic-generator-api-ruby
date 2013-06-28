@@ -384,6 +384,7 @@ module PoieticGen
 					)
 					users = users_db.map{ |u| u.to_hash }
 					zones = users_db.map{ |u| @board[u.zone].to_desc_hash }
+					strokes = {}
 
 					event_max = begin
 						e = Event.first(:order => [ :id.desc ])
@@ -456,9 +457,10 @@ module PoieticGen
 
 					# retrieve users and zones
 
+					# The first snap before stroke_max
 					snap = Snapshot.first(
 						:stroke.lte => stroke_max,
-						:order => [ :stroke.asc ]
+						:order => [ :stroke.desc ]
 					)
 
 					STDOUT.puts "snap"
@@ -471,13 +473,36 @@ module PoieticGen
 						)
 						users = users_db.map{ |u| u.to_hash }
 						zones = users_db.map{ |u| snap.data[u.zone] }
+
+						# TODO: Send a zone with cumulated changes instead of zones + strokes
+						strokes = Stroke.all(
+							:id.gt => snap.stroke,
+							:id.lte => stroke_max
+						)
+
+						if not strokes.nil? then
+							strokes = strokes.map{ |s| s.to_hash s.timestamp }
+						else
+							strokes = {}
+						end
+
+						# TODO: events
+
 					else # TODO: does it work without any user?
 						users = {}
 						zones = {}
+						strokes = {}
 					end
+
+					
+
+					# TODO: add strokes between the snapshot and stroke_max
+
+
 					STDOUT.puts "users and zones"
 					pp users
 					pp zones
+					pp strokes
 
 				end
 
@@ -491,7 +516,8 @@ module PoieticGen
 					:event_id => event_max,
 					:stroke_id => stroke_max,
 					:start_date => @session_start,
-					:duration => (now_i - @session_start)
+					:duration => (now_i - @session_start),
+					:strokes => strokes
 				}
 
 				rdebug "returning : %s" % result.inspect
