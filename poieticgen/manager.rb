@@ -472,6 +472,8 @@ module PoieticGen
 							:session => snap.session
 						)
 
+						zones = users_db.map{ |u| snap.data[u.zone] }
+
 						# TODO: Send a zone with cumulated changes instead of zones + strokes
 						strokes = Stroke.all(
 							:id.gt => snap.stroke,
@@ -489,6 +491,8 @@ module PoieticGen
 						users_db = User.all(
 							:session => first_user.session
 						)
+						
+						zones = {} # TODO
 
 						strokes = Stroke.all(
 							:id.lte => stroke_max
@@ -496,7 +500,6 @@ module PoieticGen
 					end
 
 					users = users_db.map{ |u| u.to_hash }
-					zones = users_db.map{ |u| snap.data[u.zone] }
 					strokes = strokes.map{ |s| s.to_hash s.timestamp } # strokes with diffstamp = 0
 
 					STDOUT.puts "users and zones"

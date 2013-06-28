@@ -55,7 +55,6 @@
 			_local_start_offset = 0, // seconds between server_start & js_start
 
 			_timer = null,
-			_restart = false,
 			_play_speed = 1,
 			_get_elapsed_time_fn,
 			_get_server_date_fn,
@@ -103,10 +102,9 @@
 		/**
 		 * Semi-Constructor
 		 */
-		this.initialize = function () {
+		this.initialize = function (date) {
 
 			_observers = [];
-			var date = (_restart) ? 0 : -1;
 
 			// get session info from
 			$.ajax({
@@ -296,9 +294,8 @@
 		 */
 		this.current = function () {
 			console.log("view_session/current");
-			_restart = false;
 			this.clearTimer();
-			this.initialize();
+			this.initialize(-1);
 			this.dispatch_reset(this);
 		};
 
@@ -307,13 +304,12 @@
 		 */
 		this.restart = function () {
 			console.log("view_session/restart");
-			_restart = true;
 			this.clearTimer();
-			this.initialize();
+			this.initialize(0);
 			this.dispatch_reset(this);
 		};
 
-		this.initialize();
+		this.initialize(-1);
 	}
 
 	// expose scope objects
