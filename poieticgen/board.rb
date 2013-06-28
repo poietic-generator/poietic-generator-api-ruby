@@ -36,6 +36,8 @@ module PoieticGen
 	#
 	class Board
 
+		STROKE_COUNT_BETWEEN_QFRAMES = 5
+
 		attr_reader :config
 
 		ALLOCATORS = {
@@ -51,6 +53,7 @@ module PoieticGen
 			@allocator = ALLOCATORS[config.allocator].new config
 			pp @allocator
 			@monitor = Monitor.new
+			@stroke_count = 0
 		end
 
 
@@ -105,6 +108,20 @@ module PoieticGen
 					zone.apply user, drawing
 				else
 					#FIXME: return an error to the user ?
+				end
+				
+				# Save board periodically
+
+				@stroke_count += drawing.length
+
+				STDOUT.puts "stroke_count %d" % [@stroke_count]
+
+				if @stroke_count >= STROKE_COUNT_BETWEEN_QFRAMES then
+					last_stroke = Stroke.first(:order => [ :id.desc ])
+					if not last_stroke.nil? then
+						self.save last_stroke.id, user.session
+						@stroke_count = 0
+					end
 				end
 			end
 		end

@@ -28,12 +28,14 @@ module PoieticGen
 		include DataMapper::Resource
 
 		property :id,	Serial
-		property :session, Integer, :required => true
+		property :session, String, :required => true
 		property :stroke, Integer, :required => true
 		property :data, Json, :required => true
 
 		def initialize zones, last_stroke, session_id
-                	json = {
+			@debug = true
+			
+			json = {
 				:session => session_id,
 				:stroke => last_stroke,
 				:data => zones.map{ |z| z.to_desc_hash }

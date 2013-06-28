@@ -50,12 +50,10 @@ module PoieticGen
 		# events. This check is made in the update_data method. It will be done
 		# at least every LEAVE_CHECK_TIME_MIN days at a user update_data request.
 		LEAVE_CHECK_TIME_MIN = 1
-		STROKE_COUNT_BETWEEN_BOARD_SNAPSHOTS = 5
 
 		def initialize config
 			@config = config
 			@debug = true
-			@@stroke_count = 0
 			pp config
 			# a 16-char long random string
 
@@ -314,20 +312,7 @@ module PoieticGen
 				end
 				user.save
 
-				@@stroke_count += req.strokes.length
-
-				pp req.strokes
-
-				STDOUT.puts "stroke_count %d" % [@@stroke_count]
-
 				@board.update_data user, req.strokes
-				if @@stroke_count >= STROKE_COUNT_BETWEEN_BOARD_SNAPSHOTS then
-					last_stroke = Stroke.first(:order => [ :id.desc ])
-					if not last_stroke.nil? then
-						@board.save last_stroke.id, @session_id
-						@@stroke_count = 0
-					end
-				end
 				@chat.update_data user, req.messages
 
 				# rdebug "drawings: (since %s)" % req.strokes_after
@@ -439,13 +424,15 @@ module PoieticGen
 						else
 							# get the state from now.
 
-							absolute_time = now_i - (req.date + 1)
+							absolute_time = now_i + req.date + 1
 						end
+
+						STDOUT.puts "abs_time %d (now %d, date %d)" % [absolute_time, now_i, req.date]
 
 						event_max = begin
 							e = Event.first(
-								:timestamp.gt => absolute_time,
-								:order => [ :id.asc ]
+								:timestamp.lte => absolute_time,
+								:order => [ :id.desc ]
 							)
 							pp e
 							if e.nil? then 0
@@ -455,8 +442,8 @@ module PoieticGen
 
 						stroke_max = begin
 							s = Stroke.first(
-								:timestamp.gt => absolute_time,
-								:order => [ :id.asc ]
+								:timestamp.lte => absolute_time,
+								:order => [ :id.desc ]
 							)
 							pp s
 							if s.nil? then 0
@@ -465,6 +452,8 @@ module PoieticGen
 						end
 					end
 
+					STDOUT.puts "stroke_max %d event_max %d" % [stroke_max, event_max]
+
 					# retrieve users and zones
 
 					snap = Snapshot.first(
@@ -472,11 +461,13 @@ module PoieticGen
 						:order => [ :stroke.asc ]
 					)
 
+					STDOUT.puts "snap"
+					pp snap
+
 					if not snap.nil? then
 						# get the state
 						users_db = User.all(
-							:session => snap.session,
-							:did_expire.not => true
+							:session => snap.session
 						)
 						users = users_db.map{ |u| u.to_hash }
 						zones = users_db.map{ |u| snap.data[u.zone] }
@@ -484,6 +475,10 @@ module PoieticGen
 						users = {}
 						zones = {}
 					end
+					STDOUT.puts "users and zones"
+					pp users
+					pp zones
+
 				end
 
 				# return snapshot params (user, zone), start_time, and
