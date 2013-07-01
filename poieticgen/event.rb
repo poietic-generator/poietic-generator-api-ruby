@@ -52,18 +52,24 @@ module PoieticGen
 			})
 			event.save
 		end
+		
+		def zone_index
+			return JSON.parse( self.desc )['zone'];
+		end
+		
+		def zone_user
+			return JSON.parse( self.desc )['user'];
+		end
+		
+		def to_hash zone
+			user = User.first( :id => self.zone_user )
 
-		def to_hash board
-			desc = JSON.parse( self.desc )
-			user = User.first( :id => desc['user'] )
-
-			rdebug "Event/to_hash desc"
-			pp desc
+			rdebug "Event/to_hash user"
 			pp user
 
 			res_desc = {
 				:user => user.to_hash,
-			  :zone => board[desc['zone']].to_desc_hash
+				:zone => (zone.to_desc_hash Zone::DESCRIPTION_MINIMAL)
 			}
 			res = {
 				:id => self.id,
@@ -73,6 +79,7 @@ module PoieticGen
 			}
 			return res
 		end
+		
 	end
 
 end

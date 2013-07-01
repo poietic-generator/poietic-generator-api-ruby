@@ -103,25 +103,30 @@ module PoieticGen
 
 		def update_data user, drawing
 			@monitor.synchronize do
+				# Save board periodically
+				# before the update because the first snapshot
+				# must starts at stroke_id = 0
+				
+				if @stroke_count == 0 then
+					last_stroke = Stroke.first(:order => [ :id.desc ])
+					if not last_stroke.nil? then
+						if not SnapshotBoard.first(:stroke => last_stroke.id) then
+							self.save last_stroke.id, user.session
+						end
+					end
+				end
+				
+				@stroke_count = (@stroke_count + drawing.length) % STROKE_COUNT_BETWEEN_QFRAMES;
+
+				STDOUT.puts "stroke_count %d" % [@stroke_count]
+				
+				# Update the zone
+			
 				zone = @allocator[user.zone]
 				unless zone.nil? then
 					zone.apply user, drawing
 				else
 					#FIXME: return an error to the user ?
-				end
-				
-				# Save board periodically
-
-				@stroke_count += drawing.length
-
-				STDOUT.puts "stroke_count %d" % [@stroke_count]
-
-				if @stroke_count >= STROKE_COUNT_BETWEEN_QFRAMES then
-					last_stroke = Stroke.first(:order => [ :id.desc ])
-					if not last_stroke.nil? then
-						self.save last_stroke.id, user.session
-						@stroke_count = 0
-					end
 				end
 			end
 		end
@@ -135,7 +140,69 @@ module PoieticGen
 				zones.push(@allocator[user.zone])
 			end
 
-			Snapshot.new zones, last_stroke, session_id
+			SnapshotBoard.new zones, last_stroke, session_id
+		end
+		
+		#
+		# Get the board state at stroke_id
+		#
+		def self.load_board stroke_id, event_id
+			
+			if stroke_id < 0 then
+				stroke_id = 0
+			end
+		
+			# The first snap before stroke_max
+			snap = SnapshotBoard.first(
+				:stroke.lte => stroke_id,
+				:order => [ :stroke.desc ]
+			)
+			
+			if snap.nil? then
+				# FIXME: the first snapshot isn't the first state of the game
+				snap = SnapshotBoard.first(
+					:order => [ :stroke.asc ]
+				)
+			
+				if snap.nil? then
+					raise RuntimeError, "No snapshot found for stroke %d" % stroke_id
+				end
+			end
+			
+			# get the session associated to the snapshot
+			users_db = User.all(
+				:session => snap.session
+			)
+
+			zones = users_db.map{ |u| Zone.new snap.data[u.zone] }
+
+			strokes_db = Stroke.all(
+				:id.gt => snap.stroke,
+				:id.lte => stroke_id
+			)
+		
+			events_db = Event.all(
+				:id.gt => snap.event,
+				:id.lte => event_id
+			)
+			
+			users = users_db.map{ |u| u.to_hash }
+			strokes = strokes_db.map{ |s| s.to_hash s.timestamp } # strokes with diffstamp = 0 (not important)
+			events = events_db.map{ |e| e.to_hash zones[e.zone_index] }
+			# TODO: apply events
+			
+			# Apply strokes
+			zones.each do |zone|
+				zone.apply_local strokes.select{ |s| s.zone == zone.index }
+			end
+
+			STDOUT.puts "users, zones, strokes and events"
+			pp users
+			pp zones
+			pp strokes
+			pp events
+			
+			return users, zones
 		end
 	end
 

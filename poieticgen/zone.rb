@@ -51,6 +51,10 @@ module PoieticGen
 
 	#	attr_reader :index, :position
 
+
+		DESCRIPTION_MINIMAL = 1
+		DESCRIPTION_FULL = 2
+		
 		def position
 			super.map{|x| x.to_i}
 		end
@@ -137,15 +141,40 @@ module PoieticGen
 				end
 			end
 		end
+		
+		#
+		# Apply a list of strokes without saving it into the db
+		#
+		def apply_local drawing
+			Zone.transaction do
+				# save patch into database
+				return if drawing.nil?
 
-		def to_desc_hash
+				rdebug drawing.inspect if drawing.length != 0
+
+				drawing.each do |patch|
+
+					color = patch['color']
+					changes = patch['changes']
+
+					changes.each do |x,y,t_offset|
+						idx = _xy2idx(x,y)
+						self.data[idx] = color
+					end
+				end
+			end
+		end
+
+		def to_desc_hash type
 			res = nil
 			Zone.transaction do
 				res = {
 					:index => self.index,
 					:position => self.position,
 					:user => self.user_id,
-					:content => self.to_patches_hash
+					:content => if type == DESCRIPTION_FULL
+					            then self.to_patches_hash
+					            else [] end
 				}
 			end
 			return res

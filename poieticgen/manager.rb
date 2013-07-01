@@ -26,13 +26,14 @@ require 'time'
 require 'pp'
 
 require 'poieticgen/board'
+require 'poieticgen/zone'
 require 'poieticgen/palette'
 require 'poieticgen/user'
 require 'poieticgen/event'
 require 'poieticgen/chat_manager'
 require 'poieticgen/message'
 require 'poieticgen/stroke'
-require 'poieticgen/snapshot'
+require 'poieticgen/snapshot_board'
 require 'poieticgen/update_request'
 require 'poieticgen/snapshot_request'
 require 'poieticgen/play_request'
@@ -195,7 +196,7 @@ module PoieticGen
 				other_users = users_db.map{ |u| u.to_hash }
 				other_zones = users_db.map{ |u|
 					puts "requesting zone for %s" % u.inspect
-					@board[u.zone].to_desc_hash
+					@board[u.zone].to_desc_hash Zone::DESCRIPTION_FULL
 				}
 				msg_history_req = Message.all(:user_dst => user.id) + Message.all(:user_src => user.id)
 				msg_history = msg_history_req.map{ |msg| msg.to_hash }
@@ -205,7 +206,7 @@ module PoieticGen
 				result = { :user_id => user.id,
 					:user_session => user.session,
 					:user_name => user.name,
-					:user_zone => zone.to_desc_hash,
+					:user_zone => (zone.to_desc_hash Zone::DESCRIPTION_FULL),
 					:other_users => other_users,
 					:other_zones => other_zones,
 					:zone_column_count => @config.board.width,
@@ -327,7 +328,7 @@ module PoieticGen
 				events = Event.all(
 					:id.gt => req.events_after
 				)
-				events_collection = events.map{ |e| e.to_hash @board }
+				events_collection = events.map{ |e| e.to_hash @board[e.zone_index] }
 
 				# rdebug "chat: (since %s)" % req.messages_after
 				messages = Message.all(
@@ -372,6 +373,7 @@ module PoieticGen
 				# to distinguish old sessions/old users
 
 				now_i = Time.now.to_i - 1
+				strokes = {}
 				
 				# we take a snapshot one second in the past to be sure we will get
 				# a complete second.
@@ -383,8 +385,7 @@ module PoieticGen
 						:did_expire.not => true
 					)
 					users = users_db.map{ |u| u.to_hash }
-					zones = users_db.map{ |u| @board[u.zone].to_desc_hash }
-					strokes = {}
+					zones = users_db.map{ |u| @board[u.zone].to_desc_hash Zone::DESCRIPTION_FULL }
 
 					event_max = begin
 						e = Event.first(:order => [ :id.desc ])
@@ -456,57 +457,8 @@ module PoieticGen
 					STDOUT.puts "stroke_max %d event_max %d" % [stroke_max, event_max]
 
 					# retrieve users and zones
-
-					# The first snap before stroke_max
-					snap = Snapshot.first(
-						:stroke.lte => stroke_max,
-						:order => [ :stroke.desc ]
-					)
-
-					STDOUT.puts "snap"
-					pp snap
-
-					if not snap.nil? then
-						# get the session associated to the snapshot
-						users_db = User.all(
-							:session => snap.session
-						)
-
-						zones = users_db.map{ |u| snap.data[u.zone] }
-
-						# TODO: Send a zone with cumulated changes instead of zones + strokes
-						strokes = Stroke.all(
-							:id.gt => snap.stroke,
-							:id.lte => stroke_max
-						)
-
-						# TODO: events
-
-					else
-						# get the first session (before the first snapshot)
-						first_user = User.first(
-							:order => [ :id.asc ]
-						)
-
-						users_db = User.all(
-							:session => first_user.session
-						)
-						
-						zones = {} # TODO
-
-						strokes = Stroke.all(
-							:id.lte => stroke_max
-						)
-					end
-
-					users = users_db.map{ |u| u.to_hash }
-					strokes = strokes.map{ |s| s.to_hash s.timestamp } # strokes with diffstamp = 0
-
-					STDOUT.puts "users and zones"
-					pp users
-					pp zones
-					pp strokes
-
+					
+					users, zones = Board.load_board stroke_max, event_max
 				end
 
 				# return snapshot params (user, zone), start_time, and
@@ -564,8 +516,9 @@ module PoieticGen
 
 					pp evt_req
 
-					# FIXME: is it really the current board? If we play an old scene, maybe not.
-					events_collection = evt_req.map{ |e| e.to_hash @board}
+					users, zones = Board.load_board req.strokes_after, req.events_after
+					# FIXME: load_board load some useless data for what we want
+					events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index]}
 				end
 
 				first_s = Stroke.first(

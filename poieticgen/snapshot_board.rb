@@ -24,12 +24,12 @@ require 'poieticgen/zone'
 
 module PoieticGen
 
-	class Snapshot
+	class SnapshotBoard
 		include DataMapper::Resource
 
 		property :id,	Serial
 		property :session, String, :required => true
-		property :stroke, Integer, :required => true
+		property :stroke, Integer, :required => true, :unique => true
 		property :data, Json, :required => true
 
 		def initialize zones, last_stroke, session_id
@@ -38,14 +38,15 @@ module PoieticGen
 			json = {
 				:session => session_id,
 				:stroke => last_stroke,
-				:data => zones.map{ |z| z.to_desc_hash }
-                	}
-                	super json
+				:data => zones.map{ |z| z.to_desc_hash Zone::DESCRIPTION_FULL }
+			}
+			super json
 
 			begin
 				pp self
 				self.save
 			rescue DataMapper::SaveFailureError => e
+				# TODO: ignore if dupplicate entry for stroke
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e
 			end
@@ -53,10 +54,11 @@ module PoieticGen
 
 		def to_hash
 			res = nil
-			Snapshot.transaction do
+			SnapshotBoard.transaction do
 				res = self.data
 			end
 			return res
 		end
+		
 	end
 end
