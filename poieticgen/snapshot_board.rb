@@ -30,6 +30,7 @@ module PoieticGen
 		property :id,	Serial
 		property :session, String, :required => true
 		property :stroke, Integer, :required => true, :unique => true
+		property :event, Integer, :required => true
 		property :data, Json, :required => true
 
 		def initialize zones, last_stroke, session_id
@@ -46,6 +47,7 @@ module PoieticGen
 				pp self
 				self.save
 			rescue DataMapper::SaveFailureError => e
+				pp e
 				# TODO: ignore if dupplicate entry for stroke
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e

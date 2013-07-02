@@ -373,7 +373,6 @@ module PoieticGen
 				# to distinguish old sessions/old users
 
 				now_i = Time.now.to_i - 1
-				strokes = {}
 				
 				# we take a snapshot one second in the past to be sure we will get
 				# a complete second.
@@ -458,7 +457,9 @@ module PoieticGen
 
 					# retrieve users and zones
 					
-					users, zones = Board.load_board stroke_max, event_max
+					users, zones = @board.load_board stroke_max, event_max
+					
+					zones = zones.map{ |z| z.to_desc_hash Zone::DESCRIPTION_FULL }
 				end
 
 				# return snapshot params (user, zone), start_time, and
@@ -472,7 +473,6 @@ module PoieticGen
 					:stroke_id => stroke_max,
 					:start_date => @session_start,
 					:duration => (now_i - @session_start),
-					:strokes => strokes
 				}
 
 				rdebug "returning : %s" % result.inspect
@@ -516,7 +516,7 @@ module PoieticGen
 
 					pp evt_req
 
-					users, zones = Board.load_board req.strokes_after, req.events_after
+					users, zones = @board.load_board req.strokes_after, req.events_after
 					# FIXME: load_board load some useless data for what we want
 					events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index]}
 				end

@@ -146,7 +146,7 @@ module PoieticGen
 		#
 		# Get the board state at stroke_id
 		#
-		def self.load_board stroke_id, event_id
+		def load_board stroke_id, event_id
 			
 			if stroke_id < 0 then
 				stroke_id = 0
@@ -174,7 +174,9 @@ module PoieticGen
 				:session => snap.session
 			)
 
-			zones = users_db.map{ |u| Zone.new snap.data[u.zone] }
+			zones = users_db.map{ |u|
+				Zone.from_hash snap.data[u.zone], @config.width, @config.height, u.id
+			}
 
 			strokes_db = Stroke.all(
 				:id.gt => snap.stroke,
@@ -193,7 +195,7 @@ module PoieticGen
 			
 			# Apply strokes
 			zones.each do |zone|
-				zone.apply_local strokes.select{ |s| s.zone == zone.index }
+				zone.apply_local strokes.select{ |s| s["zone"] == zone.index }
 			end
 
 			STDOUT.puts "users, zones, strokes and events"

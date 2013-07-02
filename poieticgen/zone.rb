@@ -85,6 +85,30 @@ module PoieticGen
 			end
 			rdebug "zone created!"
 		end
+		
+		def self.from_hash hash, width, height, user_id
+			pp hash["index"]
+			pp hash["position"]
+			zone = Zone.new hash["index"], hash["position"], width, height
+			zone.user_id = user_id
+			
+			hash["content"].each do |patch|
+				color = patch["color"]
+				patch["changes"].each do |x,y,zero|
+					zone.set_color x, y, color
+				end
+			end
+			
+			return zone
+		end
+		
+		def set_color x, y, color
+			if x >= 0 and x < self.width and
+			   y >= 0 and y < self.height
+			then
+				self.data[_xy2idx(x,y)] = color
+			end
+		end
 
 		def reset
 			self.data = Array.new( width * height, '#000');
