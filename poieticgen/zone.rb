@@ -74,11 +74,13 @@ module PoieticGen
 				:deleted => false
 			}
 			super param_create
-
+		end
+		
+		def save
 			begin
 				# FIXME: debug
 				pp self
-				self.save
+				super
 			rescue DataMapper::SaveFailureError => e
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e

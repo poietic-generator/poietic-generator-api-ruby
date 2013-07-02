@@ -161,6 +161,8 @@ module PoieticGen ; module Allocation
 					(self.index_to_position next_index),
 					@config.width,
 					@config.height
+				
+				zone.save
 
 				rdebug "Spiral/allocate zone : ", zone.inspect
 				@zones[next_index] = zone

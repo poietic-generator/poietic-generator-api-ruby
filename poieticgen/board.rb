@@ -102,6 +102,8 @@ module PoieticGen
 
 
 		def update_data user, drawing
+			return if drawing.empty?
+		
 			@monitor.synchronize do
 				# Save board periodically
 				# before the update because the first snapshot
@@ -109,9 +111,10 @@ module PoieticGen
 				
 				if @stroke_count == 0 then
 					last_stroke = Stroke.first(:order => [ :id.desc ])
-					if not last_stroke.nil? then
-						if not SnapshotBoard.first(:stroke => last_stroke.id) then
-							self.save last_stroke.id, user.session
+					last_event = Event.first(:order => [ :id.desc ])
+					if not last_stroke.nil? and not last_event.nil? then
+						if SnapshotBoard.first(:stroke => last_stroke.id).nil? then
+							self.save last_stroke.id, last_event.id, user.session
 						end
 					end
 				end
@@ -131,7 +134,7 @@ module PoieticGen
 			end
 		end
 
-		def save last_stroke, session_id
+		def save last_stroke, last_event, session_id
 
 			users = User.all(:session => session_id)
 			zones = []
@@ -140,11 +143,12 @@ module PoieticGen
 				zones.push(@allocator[user.zone])
 			end
 
-			SnapshotBoard.new zones, last_stroke, session_id
+			SnapshotBoard.new zones, last_stroke, last_event, session_id
 		end
 		
 		#
-		# Get the board state at stroke_id
+		# Get the board state at stroke_id.
+		# FIXME: load_board is not static because it depends on @config.
 		#
 		def load_board stroke_id, event_id
 			

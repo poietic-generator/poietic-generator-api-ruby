@@ -33,12 +33,13 @@ module PoieticGen
 		property :event, Integer, :required => true
 		property :data, Json, :required => true
 
-		def initialize zones, last_stroke, session_id
+		def initialize zones, last_stroke, last_event, session_id
 			@debug = true
 			
 			json = {
 				:session => session_id,
 				:stroke => last_stroke,
+				:event => last_event,
 				:data => zones.map{ |z| z.to_desc_hash Zone::DESCRIPTION_FULL }
 			}
 			super json
