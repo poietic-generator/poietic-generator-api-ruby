@@ -52,7 +52,9 @@
 			_boundaries,
 
 			_editor = null,
-			_canvas_event_fn;
+			_canvas_event_fn,
+			
+			_timer = null;
 
 		this.name = "Viewer";
 		this.column_count = null;
@@ -393,11 +395,23 @@
 			if (0 >= stk.diffstamp) {
 				this.draw_stroke(stk);
 			} else {
-				window.setTimeout(function () {
+				_timer = window.setTimeout(function () {
 					self.draw_stroke(stk);
 				}, stk.diffstamp * 1000);
 			}
 		};
+		
+		/**
+		* Throw strokes
+		*
+		* Remove strokes not yet painted
+		*/
+		this.throw_strokes = function () {
+			if (null !== _timer) {
+				window.clearTimeout(_timer);
+				_timer = null;
+			}
+		}
 
 
 		/**

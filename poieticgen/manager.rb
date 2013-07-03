@@ -528,6 +528,8 @@ module PoieticGen
 				first_s = Stroke.first(
 					:id.gt => req.strokes_after
 				)
+				
+				wait = 0
 
 				if first_s.nil? then
 					strokes_collection = []
@@ -535,16 +537,26 @@ module PoieticGen
 				else
 					srk_req = Stroke.all(
 						:id.gt => req.strokes_after,
-						:timestamp.lt => first_s.timestamp + req.duration
+						:timestamp.lte => first_s.timestamp + req.duration
 					)
 
 					pp srk_req
+					
+					# Time the viewer must wait before the next request
+					if not srk_req.nil? then
+						next_stroke = Stroke.first(
+							:id => srk_req.last.id + 1
+						)
+						if not next_stroke.nil? then
+							wait = next_stroke.timestamp - srk_req.last.timestamp
+						end
+					end
 
 					strokes_collection = srk_req.map{ |s| prev = srk_req.get(s.id - 1);
-					s.to_hash (if prev.nil? then now_i else prev.timestamp end) }
+					s.to_hash (if prev.nil? then s.timestamp else prev.timestamp end) }
 
 					first_stroke_ever = Stroke.first(:order => [ :id.asc ])
-					timestamp = if first_stroke_ever.nil?
+					timestamp = if first_stroke_ever.nil? or srk_req.empty?
 					            then 0
 					            else srk_req.first.timestamp - first_stroke_ever.timestamp end
 				end
@@ -552,7 +564,8 @@ module PoieticGen
 				result = {
 					:events => events_collection,
 					:strokes => strokes_collection,
-					:timestamp => timestamp
+					:timestamp => timestamp,
+					:wait => wait,
 				}
 
 				rdebug "returning : %s" % result.inspect

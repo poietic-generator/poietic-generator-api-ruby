@@ -109,13 +109,17 @@
 			self.join_view_session(date);
 			
 			if (date != -1) {
+				$(".slider").show();
 				
 				$(".ui-slider").bind("vmouseup", function (event) {
 					date = $('#history_slider').val();
 					console.log('User history change: ' + date);
+					self.clear_observers();
 					self.clearTimer();
 					self.join_view_session(date);
 				});
+			} else {
+				$(".slider").hide();
 			}
 		};
 		
@@ -247,7 +251,11 @@
 						$('#history_slider').slider('refresh');
 					}
 					
-					self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
+					if (response.wait > 0) {
+						self.setTimer(self.update, response.wait * 1000);
+					} else {
+						self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
+					}
 				},
 				error: function (response) {
 					self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
@@ -281,6 +289,15 @@
 					if (_observers[o].handle_stroke) {
 						_observers[o].handle_stroke(strokes[i]);
 					}
+				}
+			}
+		};
+		
+		this.clear_observers = function (events) {
+			var o;
+			for (o = 0; o < _observers.length; o += 1) {
+				if (_observers[o].throw_strokes) {
+					_observers[o].throw_strokes();
 				}
 			}
 		};
