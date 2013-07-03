@@ -109,8 +109,11 @@
 			self.join_view_session(date);
 			
 			if (date != -1) {
-				$('#history_slider').mouseup(function () {
+				
+				$(".ui-slider").bind("vmouseup", function (event) {
 					date = $('#history_slider').val();
+					console.log('User history change: ' + date);
+					self.clearTimer();
 					self.join_view_session(date);
 				});
 			}
