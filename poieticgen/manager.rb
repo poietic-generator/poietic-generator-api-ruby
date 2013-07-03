@@ -373,6 +373,7 @@ module PoieticGen
 				# to distinguish old sessions/old users
 
 				now_i = Time.now.to_i - 1
+				date_range = -1
 				
 				# we take a snapshot one second in the past to be sure we will get
 				# a complete second.
@@ -400,6 +401,10 @@ module PoieticGen
 						end
 					end
 				else
+					# retrieve the total duration of the game
+
+					first_stroke = Stroke.first(:order => [ :id.asc ])
+					date_range = if first_stroke.nil? then 0 else (now_i - first_stroke.timestamp) end
 
 					# retrieve stroke_max and event_max
 
@@ -407,7 +412,6 @@ module PoieticGen
 						# get the first state.
 
 						stroke_max = begin
-							first_stroke = Stroke.first(:order => [ :id.asc ])
 							if first_stroke.nil? then 0 else first_stroke.id end
 						end
 
@@ -418,8 +422,7 @@ module PoieticGen
 					else
 						if req.date > 0 then
 							# get the state from the beginning.
-					
-							first_stroke = Stroke.first(:order => [ :id.asc ])
+
 							absolute_time = if first_stroke.nil? then 0
 								else (first_stroke.timestamp + req.date) end
 						else
@@ -473,6 +476,7 @@ module PoieticGen
 					:stroke_id => stroke_max,
 					:start_date => @session_start,
 					:duration => (now_i - @session_start),
+					:date_range => date_range,
 				}
 
 				rdebug "returning : %s" % result.inspect
@@ -527,6 +531,7 @@ module PoieticGen
 
 				if first_s.nil? then
 					strokes_collection = []
+					timestamp = -1 #FIXME
 				else
 					srk_req = Stroke.all(
 						:id.gt => req.strokes_after,
@@ -538,11 +543,16 @@ module PoieticGen
 					strokes_collection = srk_req.map{ |s| prev = srk_req.get(s.id - 1);
 					s.to_hash (if prev.nil? then now_i else prev.timestamp end) }
 
+					first_stroke_ever = Stroke.first(:order => [ :id.asc ])
+					timestamp = if first_stroke_ever.nil?
+					            then 0
+					            else srk_req.first.timestamp - first_stroke_ever.timestamp end
 				end
 
 				result = {
 					:events => events_collection,
-					:strokes => strokes_collection
+					:strokes => strokes_collection,
+					:timestamp => timestamp
 				}
 
 				rdebug "returning : %s" % result.inspect

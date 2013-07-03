@@ -106,6 +106,17 @@
 
 			_observers = [];
 
+			self.join_view_session(date);
+			
+			if (date != -1) {
+				$('#history_slider').mouseup(function () {
+					date = $('#history_slider').val();
+					self.join_view_session(date);
+				});
+			}
+		};
+		
+		this.join_view_session = function(date) {
 			// get session info from
 			$.ajax({
 				url: VIEW_SESSION_URL_JOIN,
@@ -139,6 +150,13 @@
 					for (i = 0; i < self.other_zones.length; i += 1) {
 						console.log('view_session/join on zone ' + JSON.stringify(self.other_zones[i]));
 						self.dispatch_strokes(self.other_zones[i].content);
+					}
+					
+					if (date != -1) {
+						var history_slider = $('#history_slider')
+						history_slider.attr('min', 0);
+						history_slider.attr('max', response.date_range);
+						history_slider.slider('refresh');
 					}
 
 					self.setTimer(self.update, 1);
@@ -221,6 +239,11 @@
 						self.dispatch_events(response.events);
 						self.dispatch_strokes(response.strokes);
 					}
+					if (response.timestamp >= 0) {
+						$('#history_slider').attr('value', response.timestamp);
+						$('#history_slider').slider('refresh');
+					}
+					
 					self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
 				},
 				error: function (response) {
