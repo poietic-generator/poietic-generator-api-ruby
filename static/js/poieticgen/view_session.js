@@ -38,7 +38,10 @@
 		STATUS_SUCCESS = 2,
 		STATUS_REDIRECTION = 3,
 		STATUS_SERVER_ERROR = 4,
-		STATUS_BAD_REQUEST = 5;
+		STATUS_BAD_REQUEST = 5,
+		
+		REAL_TIME_VIEW = 0,
+		HISTORY_VIEW = 1;
 
 
 	function ViewSession(callback) {
@@ -46,19 +49,24 @@
 			self = this,
 			_current_stroke_id = 0,
 			_current_event_id = 0,
+			_init_stroke_id = 0,
 			_observers = null,
+			_slider = null,
 
-			_server_start_date = 0, // in seconds, since jan, 1, 1970
-			_server_elapsed_time = 0, // in seconds, since server start
+			// _server_start_date = 0, // in seconds, since jan, 1, 1970
+			// _server_elapsed_time = 0, // in seconds, since server start
 
 			_local_start_date = 0, // date Object
-			_local_start_offset = 0, // seconds between server_start & js_start
+			// _local_start_offset = 0, // seconds between server_start & js_start
 
 			_timer = null,
 			_play_speed = 1,
 			_get_elapsed_time_fn,
-			_get_server_date_fn,
-			_set_local_start_date_fn;
+			// _get_server_date_fn,
+			// _set_local_start_date_fn,
+			_play_now = true,
+			_view_type = HISTORY_VIEW,
+			_last_update_timestamp = 0;
 
 		this.zone_column_count = null;
 		this.zone_line_count = null;
@@ -67,24 +75,23 @@
 		/*
 		 * Date utilities 
 		 */
-		_set_local_start_date_fn = function (serverDate, serverElapsed) {
+		/* _set_local_start_date_fn = function (serverDate, serverElapsed) {
 			var localDateSec;
 				
 			_local_start_date = new Date();
-			_server_start_date = serverDate;
+			//_server_start_date = serverDate;
 			localDateSec = Math.floor(_local_start_date.getTime() / 1000);
 			_local_start_offset = localDateSec - serverDate;
-		};
+		}; */
 
 
 		// FIXME: in seconds
 		_get_elapsed_time_fn = function () {
-			var local_time = (new Date()).getTime(),
-				local_elapsed_time = Math.floor((local_time - _local_start_date) / 1000);
-			return local_elapsed_time;
+			var local_time = (new Date()).getTime();
+			return Math.floor((local_time - _local_start_date.getTime()) / 1000);
 		};
 
-		_get_server_date_fn = function (offset_seconds) {
+		/* _get_server_date_fn = function (offset_seconds) {
 			var server_time,
 				local_time,
 				local_server_diff,
@@ -96,7 +103,7 @@
 			server_time = _server_start_date - local_time_sec;
 
 			return (server_time + offset_seconds);
-		};
+		}; */
 
 
 		/**
@@ -108,22 +115,33 @@
 
 			self.join_view_session(date);
 			
-			if (date != -1) {
+			self.dispatch_interval(1);
+			
+			if (_view_type == HISTORY_VIEW) {
 				$(".slider").show();
 				
 				$(".ui-slider").bind("vmouseup", function (event) {
-					date = $('#history_slider').val();
+					date = _slider.value();
 					console.log('User history change: ' + date);
 					self.clear_observers();
 					self.clearTimer();
 					self.join_view_session(date);
 				});
+				
+				_slider.start_animation();
 			} else {
 				$(".slider").hide();
 			}
 		};
 		
 		this.join_view_session = function(date) {
+			_play_now = true;
+			if (date != -1) {
+				_view_type = HISTORY_VIEW;
+			} else {
+				_view_type = REAL_TIME_VIEW;
+			}
+		
 			// get session info from
 			$.ajax({
 				url: VIEW_SESSION_URL_JOIN,
@@ -142,10 +160,11 @@
 					this.zone_column_count = response.zone_column_count;
 					this.zone_line_count = response.zone_line_count;
 
-					_set_local_start_date_fn(response.start_date);
+					// _set_local_start_date_fn(response.start_date);
+					_local_start_date = new Date();
 
 					_current_event_id = response.event_id;
-					_current_stroke_id = response.stroke_id;
+					_current_stroke_id = _init_stroke_id = response.stroke_id;
 					// console.log('view_session/join response mod : ' + JSON.stringify(this) );
 
 					self.other_zones = response.zones;
@@ -160,10 +179,7 @@
 					}
 					
 					if (date != -1) {
-						var history_slider = $('#history_slider')
-						history_slider.attr('min', 0);
-						history_slider.attr('max', response.date_range);
-						history_slider.slider('refresh');
+						_slider.set_range(0, response.date_range);
 					}
 
 					self.setTimer(self.update, 1);
@@ -172,6 +188,10 @@
 				}
 			});
 		};
+		
+		this.set_slider = function (slider) {
+			_slider = slider;
+		}
 
 
 		/**
@@ -205,7 +225,7 @@
 		 */
 		this.update = function () {
 
-			var strokes_updates = [], req, i;
+			var req;
 
 			// assign real values if objects are present
 			if (_observers.length < 1) {
@@ -213,25 +233,17 @@
 				return null;
 			}
 
-			strokes_updates = [];
-			for (i = 0; i < _observers.length; i += 1) {
-				if (_observers[i].get_strokes) {
-					strokes_updates = strokes_updates.concat(strokes_updates, _observers[i].get_strokes());
-				}
-			}
-
-			console.log("view_session/update: strokes_updates = " + JSON.stringify(strokes_updates));
-
 			req = {
 				session: "default",
 				
 			        strokes_after : _current_stroke_id,
 				events_after : _current_event_id,
 				
-				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed
+				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed,
+				since_stroke : _init_stroke_id
 			};
 
-			console.log("view_session/update: req = " + JSON.stringify(req));
+			// console.log("view_session/update: req = " + JSON.stringify(req));
 			$.ajax({
 				url: VIEW_SESSION_URL_UPDATE,
 				dataType: "json",
@@ -239,23 +251,49 @@
 				type: 'GET',
 				context: self,
 				success: function (response) {
-					console.log('view_session/update response : ' + JSON.stringify(response));
+					
 					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
 						self.treat_status_nok(response);
 					} else {
-						self.dispatch_events(response.events);
+						if (response.strokes.length > 0) {
+							var i, seconds;
+						
+							if (_play_now == true) {
+								// We want the first stroke now and the others synchronized
+								seconds = response.strokes[0].diffstamp;
+								
+								// Search min diffstamp
+								for (i = 1; i < response.strokes.length; i += 1) {
+									if (seconds > response.strokes[i].diffstamp) {
+										seconds = response.strokes[i].diffstamp;
+									}
+								}
+							
+
+							} else {
+								// diffstamps are relative to the local start date
+								seconds = _get_elapsed_time_fn();
+							}
+							
+							// console.log('view_session/update seconds : ' + seconds);
+							
+							for (i = 0; i < response.strokes.length; i += 1) {
+								response.strokes[i].diffstamp -= seconds;
+							}
+						}
+						// console.log('view_session/update response : ' + JSON.stringify(response));
+						
+						_last_update_timestamp = response.timestamp;
+						
+						// self.dispatch_events(response.events);
 						self.dispatch_strokes(response.strokes);
-					}
-					if (response.timestamp >= 0) {
-						$('#history_slider').attr('value', response.timestamp);
-						$('#history_slider').slider('refresh');
+						
+						if (_view_type == HISTORY_VIEW) {
+							_play_now = false; // Keep strokes' diffstamps for next updates
+						}
 					}
 					
-					if (response.wait > 0) {
-						self.setTimer(self.update, response.wait * 1000);
-					} else {
-						self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
-					}
+					self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
 				},
 				error: function (response) {
 					self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
@@ -263,6 +301,10 @@
 			});
 
 		};
+		
+		this.last_update_timestamp = function () {
+			return _last_update_timestamp;
+		}
 
 
 		this.dispatch_events = function (events) {
@@ -289,6 +331,15 @@
 					if (_observers[o].handle_stroke) {
 						_observers[o].handle_stroke(strokes[i]);
 					}
+				}
+			}
+		};
+		
+		this.dispatch_interval = function (interval) {
+			var o;
+			for (o = 0; o < _observers.length; o += 1) {
+				if (_observers[o].update_interval) {
+					_observers[o].update_interval(interval);
 				}
 			}
 		};

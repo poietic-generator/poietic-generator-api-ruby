@@ -206,7 +206,7 @@
 		*/
 		this.update_paint = function () {
 
-			var console = window.noconsole,
+			var console = window.console,
 				remote_zone,
 				zones,
 				rt_zone_pos,
@@ -392,6 +392,7 @@
 		* Draw strokes with a relative apparition time
 		*/
 		this.handle_stroke = function (stk) {
+			window.console.log("viewer/handle_stroke : stroke = " + stk.diffstamp);
 			if (0 >= stk.diffstamp) {
 				this.draw_stroke(stk);
 			} else {
@@ -418,7 +419,7 @@
 		* Draw stroke
 		*/
 		this.draw_stroke = function (stk) {
-			var console = window.noconsole,
+			var console = window.console,
 				remote_zone,
 				color,
 				cgset = null,
@@ -426,18 +427,18 @@
 				local_pos = null,
 				rt_zone_pos = null,
 				i;
-			console.log("viewer/handle_stroke : stroke = " + JSON.stringify(stk));
+			console.log("viewer/draw_stroke : stroke = " + JSON.stringify(stk));
 			remote_zone = _board.get_zone(stk.zone);
 			// console.log("viewer/handle_stroke : remote_zone = " + JSON.stringify(remote_zone));
 			color = stk.color;
 			// console.log("viewer/handle_stroke : color = " + JSON.stringify(color));
 			for (i = 0; i < stk.changes.length; i += 1) {
 				cgset = stk.changes[i];
-				console.log("viewer/handle_stroke : cgset = " + JSON.stringify(cgset));
+				console.log("viewer/draw_stroke : cgset = " + JSON.stringify(cgset));
 				zone_pos = { x: cgset[0], y: cgset[1] };
-				console.log("viewer/handle_stroke : zone_pos = " + JSON.stringify(zone_pos));
+				console.log("viewer/draw_stroke : zone_pos = " + JSON.stringify(zone_pos));
 				local_pos = zone_to_local_position(remote_zone, zone_pos);
-				console.log("viewer/handle_stroke : local_pos = " + JSON.stringify(local_pos));
+				console.log("viewer/draw_stroke : local_pos = " + JSON.stringify(local_pos));
 				self.pixel_draw(local_pos, color);
 			}
 		};

@@ -28,6 +28,8 @@ module PoieticGen
 
 		STROKES_AFTER = 'strokes_after'
 		EVENTS_AFTER = 'events_after'
+		
+		SINCE_STROKE = 'since_stroke'
 
 		private
 
@@ -52,6 +54,8 @@ module PoieticGen
 					@enable_strokes = true
 				when EVENTS_AFTER then
 					@enable_events = true
+				when SINCE_STROKE then
+					rdebug "since_stroke : %s" % val.inspect
 				else
 					raise RuntimeError, "unknow request field '%s'" % key
 				end
@@ -61,7 +65,8 @@ module PoieticGen
 				DURATION,
 				SESSION,
 				STROKES_AFTER,
-				EVENTS_AFTER
+				EVENTS_AFTER,
+				SINCE_STROKE
 			].each do |field|
 				unless hash.include? field then
 					raise ArgumentError, ("The '%s' field is missing" % field)
@@ -85,6 +90,10 @@ module PoieticGen
 
 		def strokes_after
 			return @hash[STROKES_AFTER].to_i
+		end
+		
+		def since_stroke
+			return @hash[SINCE_STROKE].to_i
 		end
 	end
 

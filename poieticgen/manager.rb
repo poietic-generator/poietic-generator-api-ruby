@@ -507,7 +507,8 @@ module PoieticGen
 				# Get events and strokes between req.events/strokes_after and req.duration
 
 				first_e = Event.first(
-					:id.gt => req.events_after
+					:id.gt => req.events_after,
+					:order => [ :id.asc ]
 				)
 
 				if first_e.nil? then
@@ -515,21 +516,28 @@ module PoieticGen
 				else
 					evt_req = Event.all(
 						:id.gt => req.events_after,
-						:timestamp.lt => first_e.timestamp + req.duration
+						:timestamp.lte => first_e.timestamp + req.duration,
+						:order => [ :id.asc ]
 					)
 
+					STDOUT.puts "Events %d" % (first_e.timestamp + req.duration)
 					pp evt_req
 
 					users, zones = @board.load_board req.strokes_after, req.events_after
 					# FIXME: load_board load some useless data for what we want
-					events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index]}
+					events_collection = evt_req.map{ |e|
+						if e.zone_index < zones.length then 
+							e.to_hash zones[e.zone_index]
+						else
+							[] # TODO: throw error?
+						end
+					}
 				end
 
 				first_s = Stroke.first(
-					:id.gt => req.strokes_after
+					:id.gt => req.strokes_after,
+					:order => [ :id.asc ]
 				)
-				
-				wait = 0
 
 				if first_s.nil? then
 					strokes_collection = []
@@ -537,24 +545,24 @@ module PoieticGen
 				else
 					srk_req = Stroke.all(
 						:id.gt => req.strokes_after,
-						:timestamp.lte => first_s.timestamp + req.duration
+						:timestamp.lte => first_s.timestamp + req.duration,
+						:order => [ :id.asc ]
 					)
-
-					pp srk_req
 					
-					# Time the viewer must wait before the next request
-					if not srk_req.nil? then
-						next_stroke = Stroke.first(
-							:id => srk_req.last.id + 1
-						)
-						if not next_stroke.nil? then
-							wait = next_stroke.timestamp - srk_req.last.timestamp
-						end
+					# This stroke is used to compute diffstamps
+					since_stroke = Stroke.get(req.since_stroke);
+
+					if since_stroke.nil? then
+						strokes_collection = [] # FIXME: this is a bad request by the user -> throw an error?
+						STDERR.puts "The 'since_stroke' field in user request is invalid (%d)" % req.since_stroke
+					else
+						strokes_collection = srk_req.map{ |s|
+							s.to_hash since_stroke.timestamp
+						}
 					end
-
-					strokes_collection = srk_req.map{ |s| prev = srk_req.get(s.id - 1);
-					s.to_hash (if prev.nil? then s.timestamp else prev.timestamp end) }
-
+					
+					pp strokes_collection
+					
 					first_stroke_ever = Stroke.first(:order => [ :id.asc ])
 					timestamp = if first_stroke_ever.nil? or srk_req.empty?
 					            then 0
@@ -565,7 +573,6 @@ module PoieticGen
 					:events => events_collection,
 					:strokes => strokes_collection,
 					:timestamp => timestamp,
-					:wait => wait,
 				}
 
 				rdebug "returning : %s" % result.inspect
