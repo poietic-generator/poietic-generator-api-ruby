@@ -53,8 +53,8 @@
 
 			_editor = null,
 			_canvas_event_fn,
-			
-			_timer_strokes = new Array();
+
+			_timer_strokes = [];
 
 		this.name = "Viewer";
 		this.column_count = null;
@@ -70,6 +70,7 @@
 		*/
 		this.initialize = function (p_session, p_board, p_canvas_id, p_editor) {
 			_editor = p_editor;
+			_timer_strokes = [];
 
 			_boundaries = {
 				xmin: 0,
@@ -401,20 +402,18 @@
 				}, stk.diffstamp * 1000));
 			}
 		};
-		
+
 		/**
 		* Throw strokes
 		*
 		* Remove strokes not yet painted
 		*/
 		this.throw_strokes = function () {
-			var timer;
-		
-			while ((timer = _timer_strokes.pop()) != null) {
-				window.clearTimeout(timer);
+			while (_timer_strokes.length > 0) {
+				window.clearTimeout(_timer_strokes.pop());
 				window.console.log("clear");
 			}
-		}
+		};
 
 
 		/**
