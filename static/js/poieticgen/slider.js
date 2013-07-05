@@ -31,7 +31,7 @@
 
 		var self = this,
 			_slider = null,
-			_timer = null,
+			_timer_strokes = new Array(),
 			_viewer = p_viewer,
 			_session = p_session,
 			_animation_interval = 1,
@@ -45,7 +45,7 @@
 		*/
 		this.initialize = function (p_session, p_viewer, element) {
 			_slider = element;
-			_timer = null;
+			_timer_strokes = new Array();
 			_viewer = p_viewer;
 			_session = p_session;
 			_session.register(self);
@@ -59,6 +59,7 @@
 		* Change slider position
 		*/
 		this.set_value = function (v) {
+			window.console.log("slider/set_value : value = " + v);
 			_slider.attr('value', v);
 			_slider.slider('refresh');
 		};
@@ -95,6 +96,7 @@
 		
 		this.start_animation = function () {
 			_timer_animation = window.setTimeout(function () {
+				window.console.log("slider/start_animation : value = " + self.value());
 				self.set_value(self.value() + 1);
 				self.start_animation();
 			}, _animation_interval * 1000);
@@ -112,14 +114,19 @@
 		* Handle stroke
 		*/
 		this.handle_stroke = function (stk) {
-			window.console.log("slider/handle_stroke : stroke = " + stk.diffstamp);
+			if (_session.last_update_timestamp() < 0) {
+				return;
+			}
+		
+			window.console.log("slider/handle_stroke : stroke = " + JSON.stringify(stk) + " timestamp = " + _session.last_update_timestamp());
 			if (0 >= stk.diffstamp) {
 				self.set_value(_session.last_update_timestamp());
 			} else {
 				var timestamp = _session.last_update_timestamp(); // not sure if this is really useful
-				_timer = window.setTimeout(function () {
+				_timer_strokes.push(window.setTimeout(function () {
+					window.console.log("slider/handle_stroke : timeout, value = " + timestamp);
 					self.set_value(timestamp);
-				}, stk.diffstamp * 1000);
+				}, stk.diffstamp * 1000));
 			}
 		};
 		
@@ -133,9 +140,11 @@
 		* Remove strokes not yet painted
 		*/
 		this.throw_strokes = function () {
-			if (null !== _timer) {
-				window.clearTimeout(_timer);
-				_timer = null;
+			var timer;
+		
+			while ((timer = _timer_strokes.pop()) != null) {
+				window.clearTimeout(timer);
+				window.console.log("clear");
 			}
 		}
 

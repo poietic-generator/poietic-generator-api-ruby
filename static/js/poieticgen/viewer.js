@@ -54,7 +54,7 @@
 			_editor = null,
 			_canvas_event_fn,
 			
-			_timer = null;
+			_timer_strokes = new Array();
 
 		this.name = "Viewer";
 		this.column_count = null;
@@ -392,13 +392,13 @@
 		* Draw strokes with a relative apparition time
 		*/
 		this.handle_stroke = function (stk) {
-			window.console.log("viewer/handle_stroke : stroke = " + stk.diffstamp);
+			window.noconsole.log("viewer/handle_stroke : stroke = " + JSON.stringify(stk));
 			if (0 >= stk.diffstamp) {
 				this.draw_stroke(stk);
 			} else {
-				_timer = window.setTimeout(function () {
+				_timer_strokes.push(window.setTimeout(function () {
 					self.draw_stroke(stk);
-				}, stk.diffstamp * 1000);
+				}, stk.diffstamp * 1000));
 			}
 		};
 		
@@ -408,9 +408,11 @@
 		* Remove strokes not yet painted
 		*/
 		this.throw_strokes = function () {
-			if (null !== _timer) {
-				window.clearTimeout(_timer);
-				_timer = null;
+			var timer;
+		
+			while ((timer = _timer_strokes.pop()) != null) {
+				window.clearTimeout(timer);
+				window.console.log("clear");
 			}
 		}
 
@@ -419,7 +421,7 @@
 		* Draw stroke
 		*/
 		this.draw_stroke = function (stk) {
-			var console = window.console,
+			var console = window.noconsole,
 				remote_zone,
 				color,
 				cgset = null,

@@ -64,8 +64,7 @@
 			_get_elapsed_time_fn,
 			// _get_server_date_fn,
 			// _set_local_start_date_fn,
-			_play_now = true,
-			_view_type = HISTORY_VIEW,
+			_view_type = REAL_TIME_VIEW,
 			_last_update_timestamp = 0;
 
 		this.zone_column_count = null;
@@ -125,6 +124,7 @@
 					console.log('User history change: ' + date);
 					self.clear_observers();
 					self.clearTimer();
+					_last_update_timestamp = date;
 					self.join_view_session(date);
 				});
 				
@@ -135,7 +135,7 @@
 		};
 		
 		this.join_view_session = function(date) {
-			_play_now = true;
+
 			if (date != -1) {
 				_view_type = HISTORY_VIEW;
 			} else {
@@ -178,11 +178,11 @@
 						self.dispatch_strokes(self.other_zones[i].content);
 					}
 					
-					if (date != -1) {
+					if (_view_type == HISTORY_VIEW) {
 						_slider.set_range(0, response.date_range);
 					}
 
-					self.setTimer(self.update, 1);
+					self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
 
 					console.log('view_session/join end');
 				}
@@ -243,7 +243,7 @@
 				since_stroke : _init_stroke_id
 			};
 
-			// console.log("view_session/update: req = " + JSON.stringify(req));
+			console.log("view_session/update: req = " + JSON.stringify(req));
 			$.ajax({
 				url: VIEW_SESSION_URL_UPDATE,
 				dataType: "json",
@@ -256,16 +256,16 @@
 						self.treat_status_nok(response);
 					} else {
 						if (response.strokes.length > 0) {
-							var i, seconds;
+							var i, seconds = 0;
 						
-							if (_play_now == true) {
+							if (_view_type == REAL_TIME_VIEW) {
 								// We want the first stroke now and the others synchronized
-								seconds = response.strokes[0].diffstamp;
+								seconds = parseInt(response.strokes[0].diffstamp);
 								
 								// Search min diffstamp
 								for (i = 1; i < response.strokes.length; i += 1) {
-									if (seconds > response.strokes[i].diffstamp) {
-										seconds = response.strokes[i].diffstamp;
+									if (seconds > parseInt(response.strokes[i].diffstamp)) {
+										seconds = parseInt(response.strokes[i].diffstamp);
 									}
 								}
 							
@@ -287,10 +287,6 @@
 						
 						// self.dispatch_events(response.events);
 						self.dispatch_strokes(response.strokes);
-						
-						if (_view_type == HISTORY_VIEW) {
-							_play_now = false; // Keep strokes' diffstamps for next updates
-						}
 					}
 					
 					self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
