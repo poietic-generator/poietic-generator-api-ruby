@@ -89,12 +89,22 @@
 			_slider.attr('max', max);
 			_slider.slider('refresh');
 		};
+		
+		this.minimum = function () {
+			return parseInt(_slider.attr('min'), 10);
+		}
+		
+		this.maximum = function () {
+			return parseInt(_slider.attr('max'), 10);
+		}
 
 		this.set_animation_interval = function (interval) {
 			_animation_interval = interval;
 		};
 
 		this.start_animation = function () {
+			self.stop_animation();
+		
 			_timer_animation = window.setTimeout(function () {
 				window.console.log("slider/start_animation : value = " + self.value());
 				self.set_value(self.value() + 1);
