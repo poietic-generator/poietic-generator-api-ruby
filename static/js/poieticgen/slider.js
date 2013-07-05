@@ -108,6 +108,7 @@
 			_timer_animation = window.setTimeout(function () {
 				window.console.log("slider/start_animation : value = " + self.value());
 				self.set_value(self.value() + 1);
+				_timer_animation = null;
 				self.start_animation();
 			}, _animation_interval * 1000);
 		};

@@ -25,6 +25,7 @@ module PoieticGen
 
 		DATE = 'date'
 		SESSION = 'session'
+		ID = 'id'
 
 		private
 
@@ -43,6 +44,8 @@ module PoieticGen
 					rdebug "date : %s" % val.inspect
 				when SESSION then
 					rdebug "session : %s" % val.inspect
+				when ID then
+					rdebug "id : %s" % val.inspect
 				else
 					raise RuntimeError, "unknow request field '%s'" % key
 				end
@@ -50,7 +53,8 @@ module PoieticGen
 
 			[
 				DATE,
-				SESSION
+				SESSION,
+				ID
 			].each do |field|
 				unless hash.include? field then
 					raise ArgumentError, ("The '%s' field is missing" % field)
@@ -66,6 +70,10 @@ module PoieticGen
 
 		def date
 			return @hash[DATE].to_i
+		end
+		
+		def id
+			return @hash[ID].to_i
 		end
 
 	end

@@ -65,7 +65,9 @@
 			// _get_server_date_fn,
 			// _set_local_start_date_fn,
 			_view_type = REAL_TIME_VIEW,
-			_last_update_timestamp = 0;
+			_last_update_timestamp = 0,
+			_join_view_session_id = 0,
+			_update_view_session_id = 0;
 
 		this.zone_column_count = null;
 		this.zone_line_count = null;
@@ -84,7 +86,6 @@
 		}; */
 
 
-		// FIXME: in seconds
 		_get_elapsed_time_fn = function () {
 			var local_time = (new Date()).getTime();
 			return Math.floor((local_time - _local_start_date.getTime()) / 1000);
@@ -111,6 +112,8 @@
 		this.initialize = function (date) {
 
 			_observers = [];
+			_join_view_session_id = 0;
+			_update_view_session_id = 0;
 
 			self.join_view_session(date);
 
@@ -123,7 +126,7 @@
 					_view_type = HISTORY_VIEW;
 					date = _slider.value();
 					console.log('User history change: ' + date);
-					self.clearTimer();
+					self.clear_timer();
 					self.clear_observers();
 					_last_update_timestamp = date;
 					self.join_view_session(date);
@@ -143,12 +146,15 @@
 				_view_type = REAL_TIME_VIEW;
 			}
 
+			_join_view_session_id += 1;
+
 			// get session info from
 			$.ajax({
 				url: VIEW_SESSION_URL_JOIN,
 				data: {
 					date: date,
-					session: "default"
+					session: "default",
+					id: _join_view_session_id
 				},
 				dataType: "json",
 				type: 'GET',
@@ -156,12 +162,16 @@
 				success: function (response) {
 					var i;
 
+					// Ensure that this response is associated to the last join request
+					if (response.id !== _join_view_session_id) {
+						return;
+					}
+
 					console.log('view_session/join response : ' + JSON.stringify(response));
 
 					this.zone_column_count = response.zone_column_count;
 					this.zone_line_count = response.zone_line_count;
 
-					// _set_local_start_date_fn(response.start_date);
 					_local_start_date = new Date();
 
 					_current_event_id = response.event_id;
@@ -183,7 +193,7 @@
 						_slider.set_range(0, response.date_range);
 					}
 
-					self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
+					self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
 
 					console.log('view_session/join end');
 				}
@@ -230,9 +240,11 @@
 
 			// assign real values if objects are present
 			if (_observers.length < 1) {
-				self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
+				self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
 				return null;
 			}
+
+			_update_view_session_id += 1;
 
 			req = {
 				session: "default",
@@ -241,7 +253,8 @@
 				events_after : _current_event_id,
 
 				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed,
-				since_stroke : _init_stroke_id
+				since_stroke : _init_stroke_id,
+				id : _update_view_session_id,
 			};
 
 			console.log("view_session/update: req = " + JSON.stringify(req));
@@ -256,6 +269,10 @@
 					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
 						self.treat_status_nok(response);
 					} else {
+						if (_update_view_session_id !== response.id) {
+							return;
+						}
+
 						if (response.strokes.length > 0) {
 							var i, seconds = 0, diffstamp;
 
@@ -276,16 +293,16 @@
 								seconds = _get_elapsed_time_fn();
 							}
 
-							// console.log('view_session/update seconds : ' + seconds);
+							console.log('view_session/update seconds : ' + seconds);
 
 							for (i = 0; i < response.strokes.length; i += 1) {
 								response.strokes[i].diffstamp -= seconds;
 							}
 						}
-						// console.log('view_session/update response : ' + JSON.stringify(response));
+						console.log('view_session/update response : ' + JSON.stringify(response));
 
 						if (_view_type === HISTORY_VIEW) {
-							_last_update_timestamp = response.timestamp;
+							_last_update_timestamp = parseInt(response.timestamp, 10);
 							if (_last_update_timestamp >= _slider.maximum() - 1) {
 								_view_type = REAL_TIME_VIEW;
 								console.log('view_session/update real time!');
@@ -296,10 +313,10 @@
 						self.dispatch_strokes(response.strokes);
 					}
 
-					self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
+					self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
 				},
 				error: function (response) {
-					self.setTimer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
+					self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
 				}
 			});
 
@@ -360,7 +377,7 @@
 			var o;
 			for (o = 0; o < _observers.length; o += 1) {
 				if (_observers[o].handle_reset) {
-					_observers[o].handle_reset();
+					_observers[o].handle_reset(self);
 				}
 			}
 		};
@@ -370,15 +387,15 @@
 		};
 
 
-		this.clearTimer = function () {
+		this.clear_timer = function () {
 			if (null !== _timer) {
 				window.clearTimeout(_timer);
 				_timer = null;
 			}
 		};
 
-		this.setTimer = function (fn, interval) {
-			this.clearTimer();
+		this.set_timer = function (fn, interval) {
+			self.clear_timer();
 			_timer = window.setTimeout(fn, interval);
 		};
 
@@ -388,9 +405,9 @@
 		 */
 		this.current = function () {
 			console.log("view_session/current");
-			this.clearTimer();
-			this.initialize(-1);
-			this.dispatch_reset(this);
+			self.clear_timer();
+			self.initialize(-1);
+			self.dispatch_reset();
 		};
 
 		/**
@@ -398,9 +415,9 @@
 		 */
 		this.restart = function () {
 			console.log("view_session/restart");
-			this.clearTimer();
-			this.initialize(0);
-			this.dispatch_reset(this);
+			self.clear_timer();
+			self.initialize(361677);
+			self.dispatch_reset();
 		};
 
 		this.initialize(-1);

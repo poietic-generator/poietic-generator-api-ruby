@@ -477,6 +477,7 @@ module PoieticGen
 					:start_date => @session_start,
 					:duration => (now_i - @session_start),
 					:date_range => date_range,
+					:id => req.id
 				}
 
 				rdebug "returning : %s" % result.inspect
@@ -573,6 +574,7 @@ module PoieticGen
 					:events => events_collection,
 					:strokes => strokes_collection,
 					:timestamp => timestamp,
+					:id => req.id,
 				}
 
 				rdebug "returning : %s" % result.inspect

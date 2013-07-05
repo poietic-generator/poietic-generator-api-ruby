@@ -20,8 +20,6 @@
 #                                                                            #
 ##############################################################################
 
-require 'monitor'
-
 module PoieticGen
 	class Zone
 		include DataMapper::Resource
