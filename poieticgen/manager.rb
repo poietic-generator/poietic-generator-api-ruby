@@ -507,6 +507,10 @@ module PoieticGen
 
 				# Get events and strokes between req.events/strokes_after and req.duration
 
+				strokes_collection = []
+				events_collection = []
+				timestamp = -1
+
 				if req.view_mode == PlayRequest::REAL_TIME_VIEW then
 					evt_req = Event.all(
 						:id.gt => req.events_after
@@ -530,44 +534,21 @@ module PoieticGen
 						s.to_hash first_stroke.timestamp
 					}
 					
-					timestamp = -1
 				elsif req.view_mode == PlayRequest::HISTORY_VIEW then
-					first_e = Event.first(
-						:id.gt => req.events_after,
-						:order => [ :id.asc ]
-					)
-
-					if first_e.nil? then
-						events_collection = []
-					else
-				
-						evt_req = Event.all(
-							:id.gt => req.events_after,
-							:timestamp.lte => first_e.timestamp + req.duration,
-							:order => [ :id.asc ]
-						)
-
-						STDOUT.puts "Events %d" % (first_e.timestamp + req.duration)
-						pp evt_req
-
-						users, zones = @board.load_board req.strokes_after, evt_req.last.id
-						# FIXME: load_board loads some useless data for what we want
-						
-						events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index] }
-					end
-
+					
 					first_s = Stroke.first(
 						:id.gt => req.strokes_after,
 						:order => [ :id.asc ]
 					)
 
 					if first_s.nil? then
-						strokes_collection = []
-						timestamp = -1 #FIXME
+						max_timestamp = -1
 					else
+						max_timestamp = first_s.timestamp + req.duration
+					
 						srk_req = Stroke.all(
 							:id.gt => req.strokes_after,
-							:timestamp.lte => first_s.timestamp + req.duration,
+							:timestamp.lte => max_timestamp,
 							:order => [ :id.asc ]
 						)
 					
@@ -590,6 +571,36 @@ module PoieticGen
 							    then 0
 							    else srk_req.first.timestamp - first_stroke_ever.timestamp end
 					end
+					
+					first_e = Event.first(
+						:id.gt => req.events_after,
+						:order => [ :id.asc ]
+					)
+
+					if not first_e.nil? then
+					
+						if max_timestamp < 0 then
+							max_timestamp = first_e.timestamp + req.duration
+						end
+				
+						evt_req = Event.all(
+							:id.gt => req.events_after,
+							:timestamp.lte => max_timestamp,
+							:order => [ :id.asc ]
+						)
+
+						STDOUT.puts "Events"
+						pp evt_req
+
+						if not evt_req.empty? then
+							users, zones = @board.load_board req.strokes_after, evt_req.last.id
+							# FIXME: load_board loads some useless data for what we want
+						
+							events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index] }
+						end
+					end
+
+					
 				else
 					raise RuntimeError, "Unknown view mode %d" % req.view_mode
 				end

@@ -156,7 +156,7 @@ module PoieticGen
 				stroke_id = 0
 			end
 		
-			# The first snap before stroke_max
+			# The first snap before stroke_id
 			snap = SnapshotBoard.first(
 				:stroke.lte => stroke_id,
 				:order => [ :stroke.desc ]
@@ -189,7 +189,7 @@ module PoieticGen
 			)
 			
 			# Create zones from snapshot
-			zones = snap.data.map{ |d|
+			zones_snap = snap.data.map{ |d|
 				Zone.from_hash d, @config.width, @config.height
 			}
 			
@@ -197,12 +197,14 @@ module PoieticGen
 			allocator = ALLOCATORS[@config.allocator].new @config
 			zone_indexes = Hash.new
 			
-			zones.each do |zone|
+			zones_snap.each do |zone|
 				allocator.insert zone
 				zone_indexes[zone.user_id] = zone.index
 			end
 			
+			STDOUT.puts "Allocator snapshot"
 			pp allocator
+			pp zone_indexes
 			
 			# Add/Remove zones since the snapshot
 			events_db.each do |event|
@@ -219,13 +221,14 @@ module PoieticGen
 					allocator[zone_index].reset
 					# unallocate it
 					allocator.free zone_index
-					zone_indexes.delete(user_id)
 				else
 					raise RuntimeError, "Unknown event type %s" % event["type"]
 				end
 			end
 			
+			STDOUT.puts "Allocator after events"
 			pp allocator
+			pp zone_indexes
 			
 			users = users_db.map{ |u| u.to_hash } # FIXME: All users in the session are returned
 			strokes = strokes_db.map{ |s| s.to_hash s.timestamp } # strokes with diffstamp = 0 (not important)
