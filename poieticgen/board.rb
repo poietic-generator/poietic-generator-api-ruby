@@ -208,21 +208,21 @@ module PoieticGen
 			
 			# Add/Remove zones since the snapshot
 			events_db.each do |event|
-				zone_index = event["desc"]["zone"].to_i
-				user_id = event["desc"]["user"].to_i
+				zone_index = event.zone_index
+				user_id = event.zone_user
 				
-				STDOUT.puts "%s user_id = %d, zone_index = %d" % [ event["type"], user_id, zone_index ]
-				if event["type"] == "join" then
+				STDOUT.puts "%s user_id = %d, zone_index = %d" % [ event.type, user_id, zone_index ]
+				if event.type == "join" then
 					zone = allocator.allocate_at zone_index
 					zone.user_id = user_id
-					zone_indexes[user_id] = zone.index
-				elsif event["type"] == "leave" then
+					zone_indexes[user_id] = zone_index
+				elsif event.type == "leave" then
 					# reset zone
 					allocator[zone_index].reset
 					# unallocate it
 					allocator.free zone_index
 				else
-					raise RuntimeError, "Unknown event type %s" % event["type"]
+					raise RuntimeError, "Unknown event type %s" % event.type
 				end
 			end
 			
@@ -237,7 +237,9 @@ module PoieticGen
 			# Apply strokes
 			zone_indexes.each do |user_id,zone_index|
 				zone = allocator[zone_index]
-				zone.apply_local strokes.select{ |s| s["zone"] == zone.index }
+				if zone.user_id != nil then
+					zone.apply_local strokes.select{ |s| s["zone"] == zone.index }
+				end
 				zones[zone_index] = zone
 			end
 
