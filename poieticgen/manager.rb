@@ -507,67 +507,91 @@ module PoieticGen
 
 				# Get events and strokes between req.events/strokes_after and req.duration
 
-				first_e = Event.first(
-					:id.gt => req.events_after,
-					:order => [ :id.asc ]
-				)
-
-				if first_e.nil? then
-					events_collection = []
-				else
+				if req.view_mode == PlayRequest::REAL_TIME_VIEW then
 					evt_req = Event.all(
-						:id.gt => req.events_after,
-						:timestamp.lte => first_e.timestamp + req.duration,
-						:order => [ :id.asc ]
+						:id.gt => req.events_after
 					)
 
-					STDOUT.puts "Events %d" % (first_e.timestamp + req.duration)
 					pp evt_req
-
-					users, zones = @board.load_board req.strokes_after, req.events_after
-					# FIXME: load_board load some useless data for what we want
+				
 					events_collection = evt_req.map{ |e|
-						if e.zone_index < zones.length then 
-							e.to_hash zones[e.zone_index]
-						else
-							[] # TODO: throw error?
-						end
+						e.to_hash @board[e.zone_index]
 					}
-				end
-
-				first_s = Stroke.first(
-					:id.gt => req.strokes_after,
-					:order => [ :id.asc ]
-				)
-
-				if first_s.nil? then
-					strokes_collection = []
-					timestamp = -1 #FIXME
-				else
+					
 					srk_req = Stroke.all(
-						:id.gt => req.strokes_after,
-						:timestamp.lte => first_s.timestamp + req.duration,
+						:id.gt => req.strokes_after
+					)
+
+					pp srk_req
+					
+					first_stroke = srk_req.first
+				
+					strokes_collection = srk_req.map{ |s|
+						s.to_hash first_stroke.timestamp
+					}
+					
+					timestamp = -1
+				elsif req.view_mode == PlayRequest::HISTORY_VIEW then
+					first_e = Event.first(
+						:id.gt => req.events_after,
 						:order => [ :id.asc ]
 					)
-					
-					# This stroke is used to compute diffstamps
-					since_stroke = Stroke.get(req.since_stroke);
 
-					if since_stroke.nil? then
-						strokes_collection = [] # FIXME: this is a bad request by the user -> throw an error?
-						STDERR.puts "The 'since_stroke' field in user request is invalid (%d)" % req.since_stroke
+					if first_e.nil? then
+						events_collection = []
 					else
-						strokes_collection = srk_req.map{ |s|
-							s.to_hash since_stroke.timestamp
-						}
+				
+						evt_req = Event.all(
+							:id.gt => req.events_after,
+							:timestamp.lte => first_e.timestamp + req.duration,
+							:order => [ :id.asc ]
+						)
+
+						STDOUT.puts "Events %d" % (first_e.timestamp + req.duration)
+						pp evt_req
+
+						users, zones = @board.load_board req.strokes_after, evt_req.last.id
+						# FIXME: load_board loads some useless data for what we want
+						
+						events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index] }
 					end
+
+					first_s = Stroke.first(
+						:id.gt => req.strokes_after,
+						:order => [ :id.asc ]
+					)
+
+					if first_s.nil? then
+						strokes_collection = []
+						timestamp = -1 #FIXME
+					else
+						srk_req = Stroke.all(
+							:id.gt => req.strokes_after,
+							:timestamp.lte => first_s.timestamp + req.duration,
+							:order => [ :id.asc ]
+						)
 					
-					pp strokes_collection
+						# This stroke is used to compute diffstamps
+						since_stroke = Stroke.get(req.since_stroke);
+
+						if since_stroke.nil? then
+							strokes_collection = [] # FIXME: this is a bad request by the user -> throw an error?
+							STDERR.puts "The 'since_stroke' field in user request is invalid (%d)" % req.since_stroke
+						else
+							strokes_collection = srk_req.map{ |s|
+								s.to_hash since_stroke.timestamp
+							}
+						end
 					
-					first_stroke_ever = Stroke.first(:order => [ :id.asc ])
-					timestamp = if first_stroke_ever.nil? or srk_req.empty?
-					            then 0
-					            else srk_req.first.timestamp - first_stroke_ever.timestamp end
+						pp strokes_collection
+					
+						first_stroke_ever = Stroke.first(:order => [ :id.asc ])
+						timestamp = if first_stroke_ever.nil? or srk_req.empty?
+							    then 0
+							    else srk_req.first.timestamp - first_stroke_ever.timestamp end
+					end
+				else
+					raise RuntimeError, "Unknown view mode %d" % req.view_mode
 				end
 
 				result = {

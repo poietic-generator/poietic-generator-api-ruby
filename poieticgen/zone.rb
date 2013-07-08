@@ -86,11 +86,11 @@ module PoieticGen
 			rdebug "zone created!"
 		end
 		
-		def self.from_hash hash, width, height, user_id
+		def self.from_hash hash, width, height
 			pp hash["index"]
 			pp hash["position"]
 			zone = Zone.new hash["index"], hash["position"], width, height
-			zone.user_id = user_id
+			zone.user_id = hash["user"]
 			
 			hash["content"].each do |patch|
 				color = patch["color"]

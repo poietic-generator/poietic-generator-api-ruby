@@ -155,19 +155,32 @@ module PoieticGen ; module Allocation
 		#
 		def allocate
 			@monitor.synchronize do
-				next_index = _next_index()
-
-				zone = Zone.new next_index, 
-					(self.index_to_position next_index),
-					@config.width,
-					@config.height
-				
-				zone.save
-
-				rdebug "Spiral/allocate zone : ", zone.inspect
-				@zones[next_index] = zone
-				return zone
+				return allocate_at _next_index()
 			end
+		end
+		
+		def allocate_at index
+			zone = Zone.new index, 
+				(self.index_to_position index),
+				@config.width,
+				@config.height
+
+			rdebug "Spiral/allocate zone : ", zone.inspect
+			insert zone
+			
+			return zone
+		end
+		
+		def insert zone
+			if zone.index > @zones.size then
+				# Insert free zones before if needed
+				for index in @zones.size..zone.index-1 do
+					zone = allocate_at index
+					zone.user_id = nil
+				end
+			end
+				
+			@zones[zone.index] = zone
 		end
 
 		#

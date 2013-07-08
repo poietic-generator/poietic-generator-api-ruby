@@ -177,11 +177,7 @@ module PoieticGen
 			users_db = User.all(
 				:session => snap.session
 			)
-
-			zones = users_db.map{ |u|
-				Zone.from_hash snap.data[u.zone], @config.width, @config.height, u.id
-			}
-
+			
 			strokes_db = Stroke.all(
 				:id.gt => snap.stroke,
 				:id.lte => stroke_id
@@ -192,21 +188,60 @@ module PoieticGen
 				:id.lte => event_id
 			)
 			
-			users = users_db.map{ |u| u.to_hash }
+			# Create zones from snapshot
+			zones = snap.data.map{ |d|
+				Zone.from_hash d, @config.width, @config.height
+			}
+			
+			# Put zones from snapshot in allocator
+			allocator = ALLOCATORS[@config.allocator].new @config
+			zone_indexes = Hash.new
+			
+			zones.each do |zone|
+				allocator.insert zone
+				zone_indexes[zone.user_id] = zone.index
+			end
+			
+			pp allocator
+			
+			# Add/Remove zones since the snapshot
+			events_db.each do |event|
+				zone_index = event["desc"]["zone"].to_i
+				user_id = event["desc"]["user"].to_i
+				
+				STDOUT.puts "%s user_id = %d, zone_index = %d" % [ event["type"], user_id, zone_index ]
+				if event["type"] == "join" then
+					zone = allocator.allocate_at zone_index
+					zone.user_id = user_id
+					zone_indexes[user_id] = zone.index
+				elsif event["type"] == "leave" then
+					# reset zone
+					allocator[zone_index].reset
+					# unallocate it
+					allocator.free zone_index
+					zone_indexes.delete(user_id)
+				else
+					raise RuntimeError, "Unknown event type %s" % event["type"]
+				end
+			end
+			
+			pp allocator
+			
+			users = users_db.map{ |u| u.to_hash } # FIXME: All users in the session are returned
 			strokes = strokes_db.map{ |s| s.to_hash s.timestamp } # strokes with diffstamp = 0 (not important)
-			events = events_db.map{ |e| e.to_hash zones[e.zone_index] }
-			# TODO: apply events
+			zones = []
 			
 			# Apply strokes
-			zones.each do |zone|
+			zone_indexes.each do |user_id,zone_index|
+				zone = allocator[zone_index]
 				zone.apply_local strokes.select{ |s| s["zone"] == zone.index }
+				zones[zone_index] = zone
 			end
 
-			STDOUT.puts "users, zones, strokes and events"
+			STDOUT.puts "users, zones and strokes"
 			pp users
 			pp zones
 			pp strokes
-			pp events
 			
 			return users, zones
 		end

@@ -255,6 +255,7 @@
 				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed,
 				since_stroke : _init_stroke_id,
 				id : _update_view_session_id,
+				view_mode : _view_type
 			};
 
 			console.log("view_session/update: req = " + JSON.stringify(req));
@@ -303,13 +304,13 @@
 
 						if (_view_type === HISTORY_VIEW) {
 							_last_update_timestamp = parseInt(response.timestamp, 10);
-							if (_last_update_timestamp >= _slider.maximum() - 1) {
+							if (_last_update_timestamp < 0 || _last_update_timestamp >= _slider.maximum() - 1) {
 								_view_type = REAL_TIME_VIEW;
 								console.log('view_session/update real time!');
 							}
 						}
 
-						// self.dispatch_events(response.events);
+						self.dispatch_events(response.events);
 						self.dispatch_strokes(response.strokes);
 					}
 
@@ -406,6 +407,7 @@
 		this.current = function () {
 			console.log("view_session/current");
 			self.clear_timer();
+			self.clear_observers();
 			self.initialize(-1);
 			self.dispatch_reset();
 		};
@@ -416,7 +418,8 @@
 		this.restart = function () {
 			console.log("view_session/restart");
 			self.clear_timer();
-			self.initialize(361677);
+			self.clear_observers();
+			self.initialize(0);
 			self.dispatch_reset();
 		};
 

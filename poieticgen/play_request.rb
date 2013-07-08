@@ -31,6 +31,10 @@ module PoieticGen
 		
 		SINCE_STROKE = 'since_stroke'
 		ID = 'id'
+		VIEW_MODE = 'view_mode'
+		
+		REAL_TIME_VIEW = 0
+		HISTORY_VIEW = 1
 
 		private
 
@@ -59,6 +63,8 @@ module PoieticGen
 					rdebug "since_stroke : %s" % val.inspect
 				when ID then
 					rdebug "id : %s" % val.inspect
+				when VIEW_MODE then
+					rdebug "view_mode : %s" % val.inspect
 				else
 					raise RuntimeError, "unknow request field '%s'" % key
 				end
@@ -70,7 +76,8 @@ module PoieticGen
 				STROKES_AFTER,
 				EVENTS_AFTER,
 				SINCE_STROKE,
-				ID
+				ID,
+				VIEW_MODE
 			].each do |field|
 				unless hash.include? field then
 					raise ArgumentError, ("The '%s' field is missing" % field)
@@ -102,6 +109,10 @@ module PoieticGen
 		
 		def id
 			return @hash[ID].to_i
+		end
+		
+		def view_mode
+			return @hash[VIEW_MODE].to_i
 		end
 	end
 
