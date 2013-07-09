@@ -101,8 +101,8 @@ module PoieticGen
 
 				set :config, config
 				set :manager, (PoieticGen::Manager.new config)
-				#DataMapper::Logger.new(STDERR, :info)
-				DataMapper::Logger.new(STDERR, :debug)
+				DataMapper::Logger.new(STDERR, :info)
+				#DataMapper::Logger.new(STDERR, :debug)
 				hash = config.database.get_hash
 				pp "db hash :", hash
 				DataMapper.setup(:default, hash)

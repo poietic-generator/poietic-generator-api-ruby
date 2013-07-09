@@ -123,9 +123,13 @@
 				$(".slider").show();
 
 				$(".ui-slider").bind("vmouseup", function (event) {
-					_view_type = HISTORY_VIEW;
 					date = _slider.value();
 					console.log('User history change: ' + date);
+					if (date >= _slider.maximum()) {
+						_view_type = REAL_TIME_VIEW;
+					} else {
+						_view_type = HISTORY_VIEW;
+					}
 					self.clear_timer();
 					self.clear_observers();
 					_last_update_timestamp = date;
@@ -308,6 +312,7 @@
 								_view_type = REAL_TIME_VIEW;
 								console.log('view_session/update real time!');
 							}
+							_slider.set_maximum(_slider.maximum + VIEW_SESSION_UPDATE_INTERVAL);
 						}
 
 						self.dispatch_events(response.events);
@@ -370,6 +375,9 @@
 			for (o = 0; o < _observers.length; o += 1) {
 				if (_observers[o].throw_strokes) {
 					_observers[o].throw_strokes();
+				}
+				if (_observers[o].throw_events) {
+					_observers[o].throw_events();
 				}
 			}
 		};

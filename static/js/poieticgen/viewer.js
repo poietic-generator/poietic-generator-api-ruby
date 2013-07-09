@@ -54,7 +54,8 @@
 			_editor = null,
 			_canvas_event_fn,
 
-			_timer_strokes = [];
+			_timer_strokes = [],
+			_timer_events = [];
 
 		this.name = "Viewer";
 		this.column_count = null;
@@ -71,6 +72,7 @@
 		this.initialize = function (p_session, p_board, p_canvas_id, p_editor) {
 			_editor = p_editor;
 			_timer_strokes = [];
+			_timer_events = [];
 
 			_boundaries = {
 				xmin: 0,
@@ -395,7 +397,7 @@
 		this.handle_stroke = function (stk) {
 			window.noconsole.log("viewer/handle_stroke : stroke = " + JSON.stringify(stk));
 			if (0 >= stk.diffstamp) {
-				this.draw_stroke(stk);
+				self.draw_stroke(stk);
 			} else {
 				_timer_strokes.push(window.setTimeout(function () {
 					self.draw_stroke(stk);
@@ -449,19 +451,33 @@
 		* Handle user-related (join/leave) events
 		*/
 		this.handle_event = function (ev) {
-			var console = window.noconsole,
-				zones,
-				remote_zone,
-				x,
-				y,
-				w,
-				h;
+			var console = window.noconsole;
 
 			console.log("viewer/handle_event : " + JSON.stringify(ev));
 
-			self.update_boundaries();
-			self.update_size();
-			self.update_paint();
+			if (0 >= ev.diffstamp) {
+				self.update_boundaries();
+				self.update_size();
+				self.update_paint();
+			} else {
+				_timer_events.push(window.setTimeout(function () {
+					self.update_boundaries();
+					self.update_size();
+					self.update_paint();
+				}, ev.diffstamp * 1000));
+			}
+		};
+
+		/**
+		* Throw events
+		*
+		* Remove events not yet handled
+		*/
+		this.throw_events = function () {
+			while (_timer_events.length > 0) {
+				window.clearTimeout(_timer_events.pop());
+				window.console.log("clear");
+			}
 		};
 
 

@@ -321,14 +321,16 @@ module PoieticGen
 					:id.gt => req.strokes_after,
 					:zone.not => user.zone
 				)
+				
+				ref_stamp = user.last_update_time - req.update_interval
 
-				strokes_collection = strokes.map{ |d| d.to_hash(user.last_update_time - req.update_interval) }
+				strokes_collection = strokes.map{ |d| d.to_hash ref_stamp }
 
 				# rdebug "events: (since %s)" % req.events_after
 				events = Event.all(
 					:id.gt => req.events_after
 				)
-				events_collection = events.map{ |e| e.to_hash @board[e.zone_index] }
+				events_collection = events.map{ |e| e.to_hash @board[e.zone_index], ref_stamp }
 
 				# rdebug "chat: (since %s)" % req.messages_after
 				messages = Message.all(
@@ -345,7 +347,7 @@ module PoieticGen
 					:events => events_collection,
 					:strokes => strokes_collection,
 					:messages => messages_collection,
-					:stamp => (now - @session_start),
+					:stamp => (now - @session_start), # FIXME: unused by the client
 					:idle_timeout => (user.idle_expires_at - now)
 				}
 
@@ -517,9 +519,11 @@ module PoieticGen
 					)
 
 					pp evt_req
-				
+					
+					first_event = evt_req.first
+					
 					events_collection = evt_req.map{ |e|
-						e.to_hash @board[e.zone_index]
+						e.to_hash @board[e.zone_index], first_event.timestamp
 					}
 					
 					srk_req = Stroke.all(
@@ -536,6 +540,15 @@ module PoieticGen
 					
 				elsif req.view_mode == PlayRequest::HISTORY_VIEW then
 					
+					STDOUT.puts "HISTORY_VIEW: strokes_after=%d, events_after=%d" % [req.strokes_after, req.events_after]
+					
+					# This stroke is used to compute diffstamps
+					since_stroke = Stroke.get(req.since_stroke);
+					
+					if since_stroke.nil? then
+						raise RuntimeError, "The 'since_stroke' field in user request is invalid (%d)" % req.since_stroke
+					end
+					
 					first_s = Stroke.first(
 						:id.gt => req.strokes_after,
 						:order => [ :id.asc ]
@@ -551,20 +564,10 @@ module PoieticGen
 							:timestamp.lte => max_timestamp,
 							:order => [ :id.asc ]
 						)
-					
-						# This stroke is used to compute diffstamps
-						since_stroke = Stroke.get(req.since_stroke);
 
-						if since_stroke.nil? then
-							strokes_collection = [] # FIXME: this is a bad request by the user -> throw an error?
-							STDERR.puts "The 'since_stroke' field in user request is invalid (%d)" % req.since_stroke
-						else
-							strokes_collection = srk_req.map{ |s|
-								s.to_hash since_stroke.timestamp
-							}
-						end
-					
-						pp strokes_collection
+						strokes_collection = srk_req.map{ |s|
+							s.to_hash since_stroke.timestamp
+						}
 					
 						first_stroke_ever = Stroke.first(:order => [ :id.asc ])
 						timestamp = if first_stroke_ever.nil? or srk_req.empty?
@@ -589,14 +592,25 @@ module PoieticGen
 							:order => [ :id.asc ]
 						)
 
-						STDOUT.puts "Events"
-						pp evt_req
-
 						if not evt_req.empty? then
+							STDOUT.puts "first stroke"
+							pp first_s
+						
+							STDOUT.puts "Max timestamp=%d" % max_timestamp
+						
+							STDOUT.puts "Strokes"
+							pp srk_req
+						
+							STDOUT.puts "first event"
+							pp first_e
+
+							STDOUT.puts "Events"
+							pp evt_req
+						
 							users, zones = @board.load_board req.strokes_after, evt_req.last.id
 							# FIXME: load_board loads some useless data for what we want
 						
-							events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index] }
+							events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index], since_stroke.timestamp }
 						end
 					end
 

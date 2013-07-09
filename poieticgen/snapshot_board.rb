@@ -31,6 +31,7 @@ module PoieticGen
 		property :session, String, :required => true
 		property :stroke, Integer, :required => true, :unique => true
 		property :event, Integer, :required => true
+		property :timestamp, Integer, :required => true
 		property :data, Json, :required => true
 
 		def initialize zones, last_stroke, last_event, session_id
@@ -40,6 +41,7 @@ module PoieticGen
 				:session => session_id,
 				:stroke => last_stroke,
 				:event => last_event,
+				:timestamp => Time.now.to_i,
 				:data => zones.map{ |z| z.to_desc_hash Zone::DESCRIPTION_FULL }
 			}
 			super json

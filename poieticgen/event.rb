@@ -61,7 +61,7 @@ module PoieticGen
 			return JSON.parse( self.desc )['user'];
 		end
 		
-		def to_hash zone
+		def to_hash zone, ref
 			user = User.first( :id => self.zone_user )
 
 			rdebug "Event/to_hash user"
@@ -75,7 +75,7 @@ module PoieticGen
 				:id => self.id,
 				:type => self.type,
 				:desc => res_desc,
-				:stamp => self.timestamp
+				:diffstamp => self.timestamp - ref
 			}
 			return res
 		end

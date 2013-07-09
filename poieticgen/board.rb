@@ -173,25 +173,40 @@ module PoieticGen
 				end
 			end
 			
+			STDOUT.puts "snap"
+			pp snap
+			
 			# get the session associated to the snapshot
 			users_db = User.all(
 				:session => snap.session
 			)
 			
+			STDOUT.puts "users_db"
+			pp users_db
+			
 			strokes_db = Stroke.all(
 				:id.gt => snap.stroke,
 				:id.lte => stroke_id
 			)
+			
+			STDOUT.puts "strokes_db"
+			pp strokes_db
 		
 			events_db = Event.all(
 				:id.gt => snap.event,
 				:id.lte => event_id
 			)
 			
+			STDOUT.puts "events_db %d < id <= %d" % [ snap.event, event_id ]
+			pp events_db
+			
 			# Create zones from snapshot
 			zones_snap = snap.data.map{ |d|
 				Zone.from_hash d, @config.width, @config.height
 			}
+			
+			STDOUT.puts "zones_snap"
+			pp zones_snap
 			
 			# Put zones from snapshot in allocator
 			allocator = ALLOCATORS[@config.allocator].new @config
