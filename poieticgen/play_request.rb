@@ -27,7 +27,6 @@ module PoieticGen
 		SESSION = 'session'
 
 		STROKES_AFTER = 'strokes_after'
-		EVENTS_AFTER = 'events_after'
 		
 		SINCE_STROKE = 'since_stroke'
 		ID = 'id'
@@ -41,7 +40,6 @@ module PoieticGen
 		def initialize hash
 			@hash = hash
 			@enable_strokes = false
-			@enable_events = false
 			@debug = true
 		end
 
@@ -57,8 +55,6 @@ module PoieticGen
 					rdebug "session : %s" % val.inspect
 				when STROKES_AFTER then
 					@enable_strokes = true
-				when EVENTS_AFTER then
-					@enable_events = true
 				when SINCE_STROKE then
 					rdebug "since_stroke : %s" % val.inspect
 				when ID then
@@ -74,7 +70,6 @@ module PoieticGen
 				DURATION,
 				SESSION,
 				STROKES_AFTER,
-				EVENTS_AFTER,
 				SINCE_STROKE,
 				ID,
 				VIEW_MODE
@@ -93,10 +88,6 @@ module PoieticGen
 
 		def session
 			return @hash[SESSION]
-		end
-
-		def events_after
-			return @hash[EVENTS_AFTER].to_i
 		end
 
 		def strokes_after

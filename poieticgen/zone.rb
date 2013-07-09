@@ -137,19 +137,10 @@ module PoieticGen
 					timestamp = patch['diff'].to_i + ref
 
 					# add patch into database
-					param_create = {
-						:color => color,
-						:changes => JSON.generate(changes).to_s,
-						:timestamp => timestamp,
-						:zone => user.zone
-					}
-					begin
-						patch = Stroke.create param_create
-						patch.save
-					rescue DataMapper::SaveFailureError => e
-						rdebug "Saving failure : %s" % e.resource.errors.inspect
-						raise e
-					end
+					Stroke.create_stroke color,
+						JSON.generate(changes).to_s,
+						timestamp,
+						user.zone
 
 					changes.each do |x,y,t_offset|
 						idx = _xy2idx(x,y)

@@ -27,11 +27,30 @@ module PoieticGen
 	class Stroke
 		include DataMapper::Resource
 
-		property :id,	Serial
+		property :id,	Integer, :key => true
 		property :zone, Integer, :required => true
 		property :color, String, :required => true
 		property :changes, Text, :required => true, :lazy => false
 		property :timestamp, Integer, :required => true
+
+		def self.create_stroke color, changes, timestamp, zone
+			param_create = {
+				:id => Manager.fresh_timeline_identifier,
+				:color => color,
+				:changes => changes,
+				:timestamp => timestamp,
+				:zone => zone
+			}
+			
+			patch = Stroke.create param_create
+			
+			begin
+				patch.save
+			rescue DataMapper::SaveFailureError => e
+				rdebug "Saving failure : %s" % e.resource.errors.inspect
+				raise e
+			end
+		end
 
 		def to_hash ref
 			res = {

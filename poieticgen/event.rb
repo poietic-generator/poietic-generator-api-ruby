@@ -29,7 +29,7 @@ module PoieticGen
 
 		@debug = true
 
-		property :id,	Serial
+		property :id,	Integer, :key => true
 		property :type,	String, :required => true
 		property :desc, String, :required => true
 		property :timestamp, Integer, :required => true
@@ -37,20 +37,35 @@ module PoieticGen
 
 		def self.create_join uid, uzone
 			event = Event.create({
+				:id => Manager.fresh_timeline_identifier,
 				:type => 'join',
 				:desc => JSON.generate({ :user => uid, :zone => uzone }),
 				:timestamp => Time.now.to_i
 			})
-			event.save
+			
+			begin
+				event.save
+			rescue DataMapper::SaveFailureError => e
+				rdebug "Saving failure : %s" % e.resource.errors.inspect
+				raise e
+			end
+			
 		end
 
 		def self.create_leave uid, leave_time, uzone
 			event = Event.create({
+				:id => Manager.fresh_timeline_identifier,
 				:type => 'leave',
 				:desc => JSON.generate({ :user => uid, :zone => uzone }),
 				:timestamp => leave_time
 			})
-			event.save
+			
+			begin
+				event.save
+			rescue DataMapper::SaveFailureError => e
+				rdebug "Saving failure : %s" % e.resource.errors.inspect
+				raise e
+			end
 		end
 		
 		def zone_index

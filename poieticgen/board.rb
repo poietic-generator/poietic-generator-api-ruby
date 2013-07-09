@@ -110,12 +110,9 @@ module PoieticGen
 				# must starts at stroke_id = 0
 				
 				if @stroke_count == 0 then
-					last_stroke = Stroke.first(:order => [ :id.desc ])
-					last_event = Event.first(:order => [ :id.desc ])
-					if not last_stroke.nil? and not last_event.nil? then
-						if SnapshotBoard.first(:stroke => last_stroke.id).nil? then
-							self.save last_stroke.id, last_event.id, user.session
-						end
+					last_stroke_id = Manager.get_timeline_id
+					if SnapshotBoard.first(:stroke => last_stroke_id).nil? then
+						self.save last_stroke_id, user.session
 					end
 				end
 				
@@ -134,7 +131,7 @@ module PoieticGen
 			end
 		end
 
-		def save last_stroke, last_event, session_id
+		def save last_stroke, session_id
 
 			users = User.all(:session => session_id)
 			zones = []
@@ -143,14 +140,14 @@ module PoieticGen
 				zones.push(@allocator[user.zone])
 			end
 
-			SnapshotBoard.new zones, last_stroke, last_event, session_id
+			SnapshotBoard.new zones, last_stroke, session_id
 		end
 		
 		#
 		# Get the board state at stroke_id.
 		# FIXME: load_board is not static because it depends on @config.
 		#
-		def load_board stroke_id, event_id
+		def load_board stroke_id
 			
 			if stroke_id < 0 then
 				stroke_id = 0
@@ -193,11 +190,11 @@ module PoieticGen
 			pp strokes_db
 		
 			events_db = Event.all(
-				:id.gt => snap.event,
-				:id.lte => event_id
+				:id.gt => snap.stroke,
+				:id.lte => stroke_id
 			)
 			
-			STDOUT.puts "events_db %d < id <= %d" % [ snap.event, event_id ]
+			STDOUT.puts "events_db"
 			pp events_db
 			
 			# Create zones from snapshot

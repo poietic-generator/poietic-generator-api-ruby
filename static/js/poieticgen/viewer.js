@@ -52,10 +52,7 @@
 			_boundaries,
 
 			_editor = null,
-			_canvas_event_fn,
-
-			_timer_strokes = [],
-			_timer_events = [];
+			_canvas_event_fn;
 
 		this.name = "Viewer";
 		this.column_count = null;
@@ -71,8 +68,6 @@
 		*/
 		this.initialize = function (p_session, p_board, p_canvas_id, p_editor) {
 			_editor = p_editor;
-			_timer_strokes = [];
-			_timer_events = [];
 
 			_boundaries = {
 				xmin: 0,
@@ -396,25 +391,7 @@
 		*/
 		this.handle_stroke = function (stk) {
 			window.noconsole.log("viewer/handle_stroke : stroke = " + JSON.stringify(stk));
-			if (0 >= stk.diffstamp) {
-				self.draw_stroke(stk);
-			} else {
-				_timer_strokes.push(window.setTimeout(function () {
-					self.draw_stroke(stk);
-				}, stk.diffstamp * 1000));
-			}
-		};
-
-		/**
-		* Throw strokes
-		*
-		* Remove strokes not yet painted
-		*/
-		this.throw_strokes = function () {
-			while (_timer_strokes.length > 0) {
-				window.clearTimeout(_timer_strokes.pop());
-				window.console.log("clear");
-			}
+			self.draw_stroke(stk);
 		};
 
 
@@ -455,29 +432,9 @@
 
 			console.log("viewer/handle_event : " + JSON.stringify(ev));
 
-			if (0 >= ev.diffstamp) {
-				self.update_boundaries();
-				self.update_size();
-				self.update_paint();
-			} else {
-				_timer_events.push(window.setTimeout(function () {
-					self.update_boundaries();
-					self.update_size();
-					self.update_paint();
-				}, ev.diffstamp * 1000));
-			}
-		};
-
-		/**
-		* Throw events
-		*
-		* Remove events not yet handled
-		*/
-		this.throw_events = function () {
-			while (_timer_events.length > 0) {
-				window.clearTimeout(_timer_events.pop());
-				window.console.log("clear");
-			}
+			self.update_boundaries();
+			self.update_size();
+			self.update_paint();
 		};
 
 

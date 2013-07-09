@@ -31,7 +31,6 @@
 
 		var self = this,
 			_slider = null,
-			_timer_strokes = [],
 			_viewer = p_viewer,
 			_session = p_session,
 			_animation_interval = 1,
@@ -45,13 +44,14 @@
 		*/
 		this.initialize = function (p_session, p_viewer, element) {
 			_slider = element;
-			_timer_strokes = [];
 			_viewer = p_viewer;
 			_session = p_session;
 			_session.register(self);
 			_session.set_slider(self);
 			_animation_interval = 1;
 			_timer_animation = null;
+			self.set_range(0, 100);
+			self.set_value(0);
 		};
 
 
@@ -60,8 +60,10 @@
 		*/
 		this.set_value = function (v) {
 			window.console.log("slider/set_value : value = " + v);
-			_slider.attr('value', v);
-			_slider.slider('refresh');
+			if (v >= self.minimum() && v <= self.maximum()) {
+				_slider.attr('value', v);
+				_slider.slider('refresh');
+			}
 		};
 
 		/**
@@ -89,14 +91,14 @@
 			_slider.attr('max', max);
 			_slider.slider('refresh');
 		};
-		
+
 		this.minimum = function () {
 			return parseInt(_slider.attr('min'), 10);
-		}
-		
+		};
+
 		this.maximum = function () {
 			return parseInt(_slider.attr('max'), 10);
-		}
+		};
 
 		this.set_animation_interval = function (interval) {
 			_animation_interval = interval;
@@ -104,7 +106,7 @@
 
 		this.start_animation = function () {
 			self.stop_animation();
-		
+
 			_timer_animation = window.setTimeout(function () {
 				window.console.log("slider/start_animation : value = " + self.value());
 				self.set_value(self.value() + 1);
@@ -125,36 +127,12 @@
 		* Handle stroke
 		*/
 		this.handle_stroke = function (stk) {
-			if (_session.last_update_timestamp() < 0) {
-				return;
-			}
-
-			window.console.log("slider/handle_stroke : stroke = " + JSON.stringify(stk) + " timestamp = " + _session.last_update_timestamp());
-			if (0 >= stk.diffstamp) {
-				self.set_value(_session.last_update_timestamp());
-			} else {
-				var timestamp = _session.last_update_timestamp(); // not sure if this is really useful
-				_timer_strokes.push(window.setTimeout(function () {
-					window.console.log("slider/handle_stroke : timeout, value = " + timestamp);
-					self.set_value(timestamp);
-				}, stk.diffstamp * 1000));
-			}
+			//window.console.log("slider/handle_stroke : timeout, value = " + stk.timestamp);
+			//self.set_value(stk.timestamp); // TODO
 		};
 
 		this.update_interval = function (interval) {
 			self.set_animation_interval(interval);
-		};
-
-		/**
-		* Throw strokes
-		*
-		* Remove strokes not yet painted
-		*/
-		this.throw_strokes = function () {
-			while (_timer_strokes.length > 0) {
-				window.clearTimeout(_timer_strokes.pop());
-				window.console.log("clear");
-			}
 		};
 
 		// call constructor

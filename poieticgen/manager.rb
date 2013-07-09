@@ -61,6 +61,7 @@ module PoieticGen
 			_session_init
 			# FIXME put it in db
 			# FIXME : create session in database
+			_timeline_init
 		end
 
 
@@ -162,20 +163,9 @@ module PoieticGen
 
 				# return JSON for userid
 				if is_new then
-					event = Event.create_join user.id, user.zone
+					Event.create_join user.id, user.zone
 				end
-				event_max = begin
-								e = Event.first(:order => [ :id.desc ])
-								if e.nil? then 0
-								else e.id
-								end
-							end
-				stroke_max = begin
-								 s = Stroke.first(:order => [ :id.desc ])
-								 if s.nil? then 0
-								 else s.id
-								 end
-							 end
+
 				message_max = begin
 								  m = Message.first(:order => [ :id.desc ])
 								  if m.nil? then 0
@@ -211,8 +201,7 @@ module PoieticGen
 					:other_zones => other_zones,
 					:zone_column_count => @config.board.width,
 					:zone_line_count => @config.board.height,
-					:event_id => event_max,
-					:stroke_id => stroke_max,
+					:stroke_id => @@timeline_id,
 					:message_id => message_max,
 					:msg_history => msg_history
 				}
@@ -326,9 +315,9 @@ module PoieticGen
 
 				strokes_collection = strokes.map{ |d| d.to_hash ref_stamp }
 
-				# rdebug "events: (since %s)" % req.events_after
+				# rdebug "events: (since %s)" % req.strokes_after
 				events = Event.all(
-					:id.gt => req.events_after
+					:id.gt => req.strokes_after
 				)
 				events_collection = events.map{ |e| e.to_hash @board[e.zone_index], ref_stamp }
 
@@ -462,7 +451,7 @@ module PoieticGen
 
 					# retrieve users and zones
 					
-					users, zones = @board.load_board stroke_max, event_max
+					users, zones = @board.load_board [event_max, stroke_max].max
 					
 					zones = zones.map{ |z| z.to_desc_hash Zone::DESCRIPTION_FULL }
 				end
@@ -474,8 +463,7 @@ module PoieticGen
 					:zones => zones,
 					:zone_column_count => @config.board.width,
 					:zone_line_count => @config.board.height,
-					:event_id => event_max,
-					:stroke_id => stroke_max,
+					:stroke_id => [stroke_max, event_max].max,
 					:start_date => @session_start,
 					:duration => (now_i - @session_start),
 					:date_range => date_range,
@@ -505,17 +493,17 @@ module PoieticGen
 
 				self.check_expired_users
 
-				rdebug "req.events_after = %d ; req.strokes_after = %d" % [req.events_after, req.strokes_after]
+				rdebug "req.strokes_after = %d" % req.strokes_after
 
 				# Get events and strokes between req.events/strokes_after and req.duration
 
 				strokes_collection = []
 				events_collection = []
-				timestamp = -1
+				timestamp = 0
 
 				if req.view_mode == PlayRequest::REAL_TIME_VIEW then
 					evt_req = Event.all(
-						:id.gt => req.events_after
+						:id.gt => req.strokes_after
 					)
 
 					pp evt_req
@@ -540,7 +528,7 @@ module PoieticGen
 					
 				elsif req.view_mode == PlayRequest::HISTORY_VIEW then
 					
-					STDOUT.puts "HISTORY_VIEW: strokes_after=%d, events_after=%d" % [req.strokes_after, req.events_after]
+					STDOUT.puts "HISTORY_VIEW: strokes_after=%d" % req.strokes_after
 					
 					# This stroke is used to compute diffstamps
 					since_stroke = Stroke.get(req.since_stroke);
@@ -557,7 +545,8 @@ module PoieticGen
 					if first_s.nil? then
 						max_timestamp = -1
 					else
-						max_timestamp = first_s.timestamp + req.duration
+						min_timestamp = first_s.timestamp
+						max_timestamp = min_timestamp + req.duration
 					
 						srk_req = Stroke.all(
 							:id.gt => req.strokes_after,
@@ -568,26 +557,22 @@ module PoieticGen
 						strokes_collection = srk_req.map{ |s|
 							s.to_hash since_stroke.timestamp
 						}
-					
-						first_stroke_ever = Stroke.first(:order => [ :id.asc ])
-						timestamp = if first_stroke_ever.nil? or srk_req.empty?
-							    then 0
-							    else srk_req.first.timestamp - first_stroke_ever.timestamp end
 					end
 					
 					first_e = Event.first(
-						:id.gt => req.events_after,
+						:id.gt => req.strokes_after,
 						:order => [ :id.asc ]
 					)
 
 					if not first_e.nil? then
 					
 						if max_timestamp < 0 then
-							max_timestamp = first_e.timestamp + req.duration
+							min_timestamp = first_e.timestamp
+							max_timestamp = min_timestamp + req.duration
 						end
 				
 						evt_req = Event.all(
-							:id.gt => req.events_after,
+							:id.gt => req.strokes_after,
 							:timestamp.lte => max_timestamp,
 							:order => [ :id.asc ]
 						)
@@ -607,11 +592,18 @@ module PoieticGen
 							STDOUT.puts "Events"
 							pp evt_req
 						
-							users, zones = @board.load_board req.strokes_after, evt_req.last.id
+							users, zones = @board.load_board [req.strokes_after, evt_req.last.id].max
 							# FIXME: load_board loads some useless data for what we want
 						
 							events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index], since_stroke.timestamp }
 						end
+						
+						first_event_ever = Event.first(:order => [ :id.asc ])
+						timestamp = if first_event_ever.nil?
+							    then 0
+							    else
+							    	min_timestamp - first_event_ever.timestamp
+							    end
 					end
 
 					
@@ -679,6 +671,16 @@ module PoieticGen
 				end
 			end
 		end
+		
+		def self.get_timeline_id
+			return @@timeline_id
+		end
+		
+		def self.fresh_timeline_identifier
+			@@timeline_id += 1
+					
+			return @@timeline_id
+		end
 
 		private
 
@@ -696,6 +698,23 @@ module PoieticGen
 
 			@last_leave_check_time = Time.now.to_i - LEAVE_CHECK_TIME_MIN
 			@leave_mutex = Mutex.new
+		end
+		
+		#
+		# Initialize the timeline id
+		#
+		def _timeline_init
+			User.transaction do
+				last_stroke = Stroke.first(:order => [ :id.desc ])
+				last_event = Event.first(:order => [ :id.desc ])
+		
+				last_stroke_id = if last_stroke.nil? then -1 else last_stroke.id end
+				last_event_id = if last_event.nil? then -1 else last_event.id end
+		
+				@@timeline_id = [last_stroke_id, last_event_id].max
+			
+				STDOUT.puts "timeline init = %d" % @@timeline_id
+			end
 		end
 
 	end

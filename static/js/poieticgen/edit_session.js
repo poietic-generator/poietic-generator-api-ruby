@@ -46,8 +46,8 @@
 			self = this,
 			_current_stroke_id = 0,
 			_current_message_id = 0,
-			_current_event_id = 0,
-			_observers = null;
+			_observers = null,
+			_dispatch_strokes_body;
 
 		this.user_id = null;
 		this.zone_column_count = null;
@@ -98,7 +98,6 @@
 					this.zone_column_count = response.zone_column_count;
 					this.zone_line_count = response.zone_line_count;
 
-					_current_event_id = response.event_id;
 					_current_stroke_id = response.stroke_id;
 					_current_message_id = response.message_id;
 
@@ -218,7 +217,6 @@
 			req = {
 				strokes_after : _current_stroke_id,
 				messages_after : _current_message_id,
-				events_after : _current_event_id,
 
 				strokes : strokes_updates,
 				messages : messages_updates,
@@ -258,14 +256,24 @@
 			var i, o;
 
 			for (i = 0; i < events.length; i += 1) {
-				if ((events[i].id) || (_current_event_id < events[i].id)) {
-					_current_event_id = events[i].id;
+				if ((events[i].id) || (_current_stroke_id < events[i].id)) {
+					_current_stroke_id = events[i].id;
 				}
 				for (o = 0; o < _observers.length; o += 1) {
 					if (_observers[o].handle_event) {
 						_observers[o].handle_event(events[i]);
 					}
 				}
+			}
+		};
+
+		_dispatch_strokes_body = function (stroke, observer) {
+			if (0 >= stroke.diffstamp) {
+				observer.handle_stroke(stroke);
+			} else {
+				window.setTimeout(function () {
+					observer.handle_stroke(stroke);
+				}, stroke.diffstamp * 1000);
 			}
 		};
 
@@ -277,7 +285,7 @@
 				}
 				for (o = 0; o < _observers.length; o += 1) {
 					if (_observers[o].handle_stroke) {
-						_observers[o].handle_stroke(strokes[i]);
+						_dispatch_strokes_body(strokes[i], _observers[o]);
 					}
 				}
 			}

@@ -70,19 +70,19 @@ module PoieticGen
 					@enable_events = true
 				when MESSAGES then
 					if val.length != 0 then
-					  rdebug "messages : %s" % val.inspect
-          end
+						rdebug "messages : %s" % val.inspect
+          				end
 				when STROKES then
-				  if val.length != 0 then
-					  rdebug "strokes : %s" % val.inspect
-          end
-        when UPDATE_INTERVAL then
-          begin
-            rdebug "update_interval : %d" % val.to_i
-          rescue Exception => e
-            rdebug e
-            raise ArgumentError, ("%s with invalid value : " % UPDATE_INTERVAL)
-          end
+				  	if val.length != 0 then
+						rdebug "strokes : %s" % val.inspect
+         				end
+				when UPDATE_INTERVAL then
+				  	begin
+				    		rdebug "update_interval : %d" % val.to_i
+				  	rescue Exception => e
+				    		rdebug e
+				    		raise ArgumentError, ("%s with invalid value : " % UPDATE_INTERVAL)
+					end
 				else
 					raise RuntimeError, "unknow request field '%s'" % key
 				end

@@ -48,7 +48,6 @@
 		var console = window.console,
 			self = this,
 			_current_stroke_id = 0,
-			_current_event_id = 0,
 			_init_stroke_id = 0,
 			_observers = null,
 			_slider = null,
@@ -67,7 +66,12 @@
 			_view_type = REAL_TIME_VIEW,
 			_last_update_timestamp = 0,
 			_join_view_session_id = 0,
-			_update_view_session_id = 0;
+			_update_view_session_id = 0,
+
+			_dispatch_events_body,
+			_dispatch_strokes_body,
+			_timer_strokes = [],
+			_timer_events = [];
 
 		this.zone_column_count = null;
 		this.zone_line_count = null;
@@ -114,6 +118,8 @@
 			_observers = [];
 			_join_view_session_id = 0;
 			_update_view_session_id = 0;
+			_timer_strokes = [];
+			_timer_events = [];
 
 			self.join_view_session(date);
 
@@ -130,8 +136,7 @@
 					} else {
 						_view_type = HISTORY_VIEW;
 					}
-					self.clear_timer();
-					self.clear_observers();
+					self.clear_all_timers();
 					_last_update_timestamp = date;
 					self.join_view_session(date);
 				});
@@ -178,7 +183,6 @@
 
 					_local_start_date = new Date();
 
-					_current_event_id = response.event_id;
 					_current_stroke_id = _init_stroke_id = response.stroke_id;
 					// console.log('view_session/join response mod : ' + JSON.stringify(this) );
 
@@ -254,7 +258,6 @@
 				session: "default",
 
 				strokes_after : _current_stroke_id,
-				events_after : _current_event_id,
 
 				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed,
 				since_stroke : _init_stroke_id,
@@ -333,17 +336,38 @@
 		};
 
 
+		_dispatch_events_body = function (event, observer) {
+			if (0 >= event.diffstamp) {
+				observer.handle_event(event);
+			} else {
+				_timer_events.push(window.setTimeout(function () {
+					observer.handle_event(event);
+				}, event.diffstamp * 1000));
+			}
+		};
+
 		this.dispatch_events = function (events) {
 			var i, o;
 			for (i = 0; i < events.length; i += 1) {
-				if ((events[i].id) || (_current_event_id < events[i].id)) {
-					_current_event_id = events[i].id;
+				if ((events[i].id) || (_current_stroke_id < events[i].id)) {
+					_current_stroke_id = events[i].id;
 				}
 				for (o = 0; o < _observers.length; o += 1) {
 					if (_observers[o].handle_event) {
-						_observers[o].handle_event(events[i]);
+						_dispatch_events_body(events[i], _observers[o]);
 					}
 				}
+			}
+		};
+
+		_dispatch_strokes_body = function (stroke, observer) {
+			if (0 >= stroke.diffstamp) {
+				observer.handle_stroke(stroke);
+			} else {
+				// FIXME: make an event queue instead of raising setTimeout everywhere
+				_timer_strokes.push(window.setTimeout(function () {
+					observer.handle_stroke(stroke);
+				}, stroke.diffstamp * 1000));
 			}
 		};
 
@@ -355,7 +379,7 @@
 				}
 				for (o = 0; o < _observers.length; o += 1) {
 					if (_observers[o].handle_stroke) {
-						_observers[o].handle_stroke(strokes[i]);
+						_dispatch_strokes_body(strokes[i], _observers[o]);
 					}
 				}
 			}
@@ -366,18 +390,6 @@
 			for (o = 0; o < _observers.length; o += 1) {
 				if (_observers[o].update_interval) {
 					_observers[o].update_interval(interval);
-				}
-			}
-		};
-
-		this.clear_observers = function (events) {
-			var o;
-			for (o = 0; o < _observers.length; o += 1) {
-				if (_observers[o].throw_strokes) {
-					_observers[o].throw_strokes();
-				}
-				if (_observers[o].throw_events) {
-					_observers[o].throw_events();
 				}
 			}
 		};
@@ -395,12 +407,32 @@
 			_observers.push(p_observer);
 		};
 
+		this.clear_strokes_timers = function () {
+			while (_timer_strokes.length > 0) {
+				window.clearTimeout(_timer_strokes.pop());
+				window.console.log("clear strokes");
+			}
+		};
+
+		this.clear_events_timers = function () {
+			while (_timer_events.length > 0) {
+				window.clearTimeout(_timer_events.pop());
+				window.console.log("clear events");
+			}
+		};
+
 
 		this.clear_timer = function () {
 			if (null !== _timer) {
 				window.clearTimeout(_timer);
 				_timer = null;
 			}
+		};
+
+		this.clear_all_timers = function () {
+			self.clear_timer();
+			self.clear_strokes_timers();
+			self.clear_events_timers();
 		};
 
 		this.set_timer = function (fn, interval) {
@@ -414,8 +446,7 @@
 		 */
 		this.current = function () {
 			console.log("view_session/current");
-			self.clear_timer();
-			self.clear_observers();
+			self.clear_all_timers();
 			self.initialize(-1);
 			self.dispatch_reset();
 		};
@@ -425,8 +456,7 @@
 		 */
 		this.restart = function () {
 			console.log("view_session/restart");
-			self.clear_timer();
-			self.clear_observers();
+			self.clear_all_timers();
 			self.initialize(0);
 			self.dispatch_reset();
 		};
