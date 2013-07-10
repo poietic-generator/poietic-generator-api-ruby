@@ -34,6 +34,7 @@ require 'poieticgen/chat_manager'
 require 'poieticgen/message'
 require 'poieticgen/stroke'
 require 'poieticgen/snapshot_board'
+require 'poieticgen/timeline'
 require 'poieticgen/update_request'
 require 'poieticgen/snapshot_request'
 require 'poieticgen/play_request'
@@ -61,7 +62,6 @@ module PoieticGen
 			_session_init
 			# FIXME put it in db
 			# FIXME : create session in database
-			_timeline_init
 		end
 
 
@@ -166,13 +166,6 @@ module PoieticGen
 					Event.create_join user.id, user.zone
 				end
 
-				message_max = begin
-								  m = Message.first(:order => [ :id.desc ])
-								  if m.nil? then 0
-								  else m.id
-								  end
-							  end
-
 				# clean-up users first
 				self.check_expired_users
 
@@ -201,8 +194,7 @@ module PoieticGen
 					:other_zones => other_zones,
 					:zone_column_count => @config.board.width,
 					:zone_line_count => @config.board.height,
-					:stroke_id => @@timeline_id,
-					:message_id => message_max,
+					:timeline_id => Timeline.last_id,
 					:msg_history => msg_history
 				}
 			end
@@ -304,10 +296,13 @@ module PoieticGen
 
 				@board.update_data user, req.strokes
 				@chat.update_data user, req.messages
+				
+				timelines = Timeline.all(
+					:id.gt => req.timeline_after
+				)
 
-				# rdebug "drawings: (since %s)" % req.strokes_after
-				strokes = Stroke.all(
-					:id.gt => req.strokes_after,
+				# rdebug "drawings: (since %s)" % req.timeline_after
+				strokes = timelines.strokes.all(
 					:zone.not => user.zone
 				)
 				
@@ -315,15 +310,12 @@ module PoieticGen
 
 				strokes_collection = strokes.map{ |d| d.to_hash ref_stamp }
 
-				# rdebug "events: (since %s)" % req.strokes_after
-				events = Event.all(
-					:id.gt => req.strokes_after
-				)
+				# rdebug "events: (since %s)" % req.timeline_after
+				events = timelines.events
 				events_collection = events.map{ |e| e.to_hash @board[e.zone_index], ref_stamp }
 
-				# rdebug "chat: (since %s)" % req.messages_after
-				messages = Message.all(
-					:id.gt => req.messages_after,
+				# rdebug "chat: (since %s)" % req.timeline_after
+				messages = timelines.messages.all(
 					:user_dst => user.id
 				)
 				messages_collection = messages.map{ |e| e.to_hash }
@@ -377,45 +369,27 @@ module PoieticGen
 					)
 					users = users_db.map{ |u| u.to_hash }
 					zones = users_db.map{ |u| @board[u.zone].to_desc_hash Zone::DESCRIPTION_FULL }
-
-					event_max = begin
-						e = Event.first(:order => [ :id.desc ])
-						if e.nil? then 0
-						else e.id
-						end
-					end
-
-					stroke_max = begin
-						s = Stroke.first(:order => [ :id.desc ])
-						if s.nil? then 0
-						else s.id
-						end
-					end
+					
+					timeline_id = Timeline.last_id
 				else
 					# retrieve the total duration of the game
 
-					first_stroke = Stroke.first(:order => [ :id.asc ])
-					date_range = if first_stroke.nil? then 0 else (now_i - first_stroke.timestamp) end
+					first_timeline = Timeline.first(:order => [ :id.asc ])
+					pp first_timeline
+					date_range = if first_timeline.nil? then 0 else (now_i - first_timeline.timestamp) end
 
 					# retrieve stroke_max and event_max
 
 					if req.date == 0 then
 						# get the first state.
 
-						stroke_max = begin
-							if first_stroke.nil? then 0 else first_stroke.id end
-						end
-
-						event_max = begin
-							first_event = Event.first(:order => [ :id.asc ])
-							if first_event.nil? then 0 else first_event.id end
-						end
+						timeline_id = if first_timeline.nil? then 0 else first_timeline.id end
 					else
 						if req.date > 0 then
 							# get the state from the beginning.
 
-							absolute_time = if first_stroke.nil? then 0
-								else (first_stroke.timestamp + req.date) end
+							absolute_time = if first_timeline.nil? then 0
+								else (first_timeline.timestamp + req.date) end
 						else
 							# get the state from now.
 
@@ -424,34 +398,20 @@ module PoieticGen
 
 						STDOUT.puts "abs_time %d (now %d, date %d)" % [absolute_time, now_i, req.date]
 
-						event_max = begin
-							e = Event.first(
+						timeline_id = begin
+							t = Timeline.first(
 								:timestamp.lte => absolute_time,
 								:order => [ :id.desc ]
 							)
-							pp e
-							if e.nil? then 0
-							else e.id
-							end
-						end
-
-						stroke_max = begin
-							s = Stroke.first(
-								:timestamp.lte => absolute_time,
-								:order => [ :id.desc ]
-							)
-							pp s
-							if s.nil? then 0
-							else s.id
-							end
+							if t.nil? then 0 else t.id end
 						end
 					end
 
-					STDOUT.puts "stroke_max %d event_max %d" % [stroke_max, event_max]
+					STDOUT.puts "timeline_id %d" % timeline_id
 
 					# retrieve users and zones
 					
-					users, zones = @board.load_board [event_max, stroke_max].max
+					users, zones = @board.load_board timeline_id
 					
 					zones = zones.map{ |z| z.to_desc_hash Zone::DESCRIPTION_FULL }
 				end
@@ -463,7 +423,7 @@ module PoieticGen
 					:zones => zones,
 					:zone_column_count => @config.board.width,
 					:zone_line_count => @config.board.height,
-					:stroke_id => [stroke_max, event_max].max,
+					:timeline_id => timeline_id,
 					:start_date => @session_start,
 					:duration => (now_i - @session_start),
 					:date_range => date_range,
@@ -493,120 +453,102 @@ module PoieticGen
 
 				self.check_expired_users
 
-				rdebug "req.strokes_after = %d" % req.strokes_after
+				rdebug "req.timeline_after = %d" % req.timeline_after
 
-				# Get events and strokes between req.events/strokes_after and req.duration
+				# Get events and strokes between req.timeline_after and req.duration
 
 				strokes_collection = []
 				events_collection = []
 				timestamp = 0
 
 				if req.view_mode == PlayRequest::REAL_TIME_VIEW then
-					evt_req = Event.all(
-						:id.gt => req.strokes_after
-					)
+					timelines = Timeline.all(
+						:id.gt => req.timeline_after
+					)	
+				
+					evt_req = timelines.events
 
 					pp evt_req
 					
-					first_event = evt_req.first
-					
-					events_collection = evt_req.map{ |e|
-						e.to_hash @board[e.zone_index], first_event.timestamp
-					}
-					
-					srk_req = Stroke.all(
-						:id.gt => req.strokes_after
-					)
+					srk_req = timelines.strokes
 
 					pp srk_req
 					
-					first_stroke = srk_req.first
+					first_timeline = timelines.first(
+						:order => [ :id.asc ]
+					)
+					
+					events_collection = evt_req.map{ |e|
+						e.to_hash @board[e.zone_index], first_timeline.timestamp
+					}
 				
 					strokes_collection = srk_req.map{ |s|
-						s.to_hash first_stroke.timestamp
+						s.to_hash first_timeline.timestamp
 					}
 					
 				elsif req.view_mode == PlayRequest::HISTORY_VIEW then
 					
-					STDOUT.puts "HISTORY_VIEW: strokes_after=%d" % req.strokes_after
+					STDOUT.puts "HISTORY_VIEW"
 					
 					# This stroke is used to compute diffstamps
-					since_stroke = Stroke.get(req.since_stroke);
+					since = Timeline.get(req.since);
 					
-					if since_stroke.nil? then
-						raise RuntimeError, "The 'since_stroke' field in user request is invalid (%d)" % req.since_stroke
+					if since.nil? then
+						raise RuntimeError, "The 'since' field in user request is invalid (%d)" % req.since
 					end
 					
-					first_s = Stroke.first(
-						:id.gt => req.strokes_after,
+					first_t = Timeline.first(
+						:id.gt => req.timeline_after,
 						:order => [ :id.asc ]
 					)
 
-					if first_s.nil? then
+					if first_t.nil? then
 						max_timestamp = -1
+						min_timestamp = -1
 					else
-						min_timestamp = first_s.timestamp
+						min_timestamp = first_t.timestamp
 						max_timestamp = min_timestamp + req.duration
-					
-						srk_req = Stroke.all(
-							:id.gt => req.strokes_after,
+						
+						timelines = Timeline.all(
+							:id.gt => req.timeline_after,
 							:timestamp.lte => max_timestamp,
 							:order => [ :id.asc ]
 						)
+					
+						srk_req = timelines.strokes
 
 						strokes_collection = srk_req.map{ |s|
-							s.to_hash since_stroke.timestamp
+							s.to_hash since.timestamp
 						}
-					end
-					
-					first_e = Event.first(
-						:id.gt => req.strokes_after,
-						:order => [ :id.asc ]
-					)
-
-					if not first_e.nil? then
-					
-						if max_timestamp < 0 then
-							min_timestamp = first_e.timestamp
-							max_timestamp = min_timestamp + req.duration
-						end
-				
-						evt_req = Event.all(
-							:id.gt => req.strokes_after,
-							:timestamp.lte => max_timestamp,
-							:order => [ :id.asc ]
-						)
+						
+						evt_req = timelines.events
 
 						if not evt_req.empty? then
-							STDOUT.puts "first stroke"
-							pp first_s
+							STDOUT.puts "first timeline"
+							pp first_t
 						
 							STDOUT.puts "Max timestamp=%d" % max_timestamp
 						
 							STDOUT.puts "Strokes"
 							pp srk_req
-						
-							STDOUT.puts "first event"
-							pp first_e
 
 							STDOUT.puts "Events"
 							pp evt_req
 						
-							users, zones = @board.load_board [req.strokes_after, evt_req.last.id].max
+							users, zones = @board.load_board req.timeline_after
 							# FIXME: load_board loads some useless data for what we want
+							# FIXME: zones seems to be wrong
 						
-							events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index], since_stroke.timestamp }
+							events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index], since.timestamp }
 						end
-						
-						first_event_ever = Event.first(:order => [ :id.asc ])
-						timestamp = if first_event_ever.nil?
-							    then 0
-							    else
-							    	min_timestamp - first_event_ever.timestamp
-							    end
 					end
-
 					
+					first_timeline_ever = Timeline.first(:order => [ :id.asc ])
+					timestamp = if first_timeline_ever.nil? or min_timestamp < 0
+						    then 0
+						    else
+						    	min_timestamp - first_timeline_ever.timestamp
+						    end
 				else
 					raise RuntimeError, "Unknown view mode %d" % req.view_mode
 				end
@@ -614,7 +556,7 @@ module PoieticGen
 				result = {
 					:events => events_collection,
 					:strokes => strokes_collection,
-					:timestamp => timestamp,
+					:timestamp => timestamp, # relative to the start of the game
 					:id => req.id,
 				}
 
@@ -671,16 +613,6 @@ module PoieticGen
 				end
 			end
 		end
-		
-		def self.get_timeline_id
-			return @@timeline_id
-		end
-		
-		def self.fresh_timeline_identifier
-			@@timeline_id += 1
-					
-			return @@timeline_id
-		end
 
 		private
 
@@ -698,23 +630,6 @@ module PoieticGen
 
 			@last_leave_check_time = Time.now.to_i - LEAVE_CHECK_TIME_MIN
 			@leave_mutex = Mutex.new
-		end
-		
-		#
-		# Initialize the timeline id
-		#
-		def _timeline_init
-			User.transaction do
-				last_stroke = Stroke.first(:order => [ :id.desc ])
-				last_event = Event.first(:order => [ :id.desc ])
-		
-				last_stroke_id = if last_stroke.nil? then -1 else last_stroke.id end
-				last_event_id = if last_event.nil? then -1 else last_event.id end
-		
-				@@timeline_id = [last_stroke_id, last_event_id].max
-			
-				STDOUT.puts "timeline init = %d" % @@timeline_id
-			end
 		end
 
 	end

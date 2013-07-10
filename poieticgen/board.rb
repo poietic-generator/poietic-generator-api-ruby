@@ -23,6 +23,7 @@
 require 'poieticgen/update_request'
 require 'poieticgen/zone'
 require 'poieticgen/user'
+require 'poieticgen/timeline'
 
 require 'poieticgen/allocation/spiral'
 require 'poieticgen/allocation/random'
@@ -110,9 +111,9 @@ module PoieticGen
 				# must starts at stroke_id = 0
 				
 				if @stroke_count == 0 then
-					last_stroke_id = Manager.get_timeline_id
-					if SnapshotBoard.first(:stroke => last_stroke_id).nil? then
-						self.save last_stroke_id, user.session
+					last_timeline_id = Timeline.last_id
+					if SnapshotBoard.first(:timeline => last_timeline_id).nil? then
+						self.save last_timeline_id, user.session
 					end
 				end
 				
@@ -131,7 +132,7 @@ module PoieticGen
 			end
 		end
 
-		def save last_stroke, session_id
+		def save last_timeline, session_id
 
 			users = User.all(:session => session_id)
 			zones = []
@@ -140,33 +141,34 @@ module PoieticGen
 				zones.push(@allocator[user.zone])
 			end
 
-			SnapshotBoard.new zones, last_stroke, session_id
+			SnapshotBoard.new zones, last_timeline, session_id
 		end
 		
 		#
-		# Get the board state at stroke_id.
+		# Get the board state at timeline_id.
 		# FIXME: load_board is not static because it depends on @config.
 		#
-		def load_board stroke_id
+		def load_board timeline_id
 			
-			if stroke_id < 0 then
-				stroke_id = 0
+			if timeline_id < 0 then
+				timeline_id = 0
 			end
 		
-			# The first snap before stroke_id
+			# The first snap before timeline_id
 			snap = SnapshotBoard.first(
-				:stroke.lte => stroke_id,
-				:order => [ :stroke.desc ]
+				:timeline.lte => timeline_id,
+				:order => [ :timeline.desc ]
 			)
 			
 			if snap.nil? then
-				# FIXME: the first snapshot isn't the first state of the game
+				# FIXME: the first snapshot isn't the first state of the game (but almost)
 				snap = SnapshotBoard.first(
-					:order => [ :stroke.asc ]
+					:order => [ :timeline.asc ]
 				)
 			
 				if snap.nil? then
-					raise RuntimeError, "No snapshot found for stroke %d" % stroke_id
+					# FIXME: start from an empty board
+					raise RuntimeError, "No snapshot found for timeline %d" % timeline_id
 				end
 			end
 			
@@ -181,18 +183,17 @@ module PoieticGen
 			STDOUT.puts "users_db"
 			pp users_db
 			
-			strokes_db = Stroke.all(
-				:id.gt => snap.stroke,
-				:id.lte => stroke_id
+			timelines = Timeline.all(
+				:id.gt => snap.timeline,
+				:id.lte => timeline_id
 			)
+			
+			strokes_db = timelines.strokes
 			
 			STDOUT.puts "strokes_db"
 			pp strokes_db
 		
-			events_db = Event.all(
-				:id.gt => snap.stroke,
-				:id.lte => stroke_id
-			)
+			events_db = timelines.events
 			
 			STDOUT.puts "events_db"
 			pp events_db

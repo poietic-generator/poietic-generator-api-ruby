@@ -21,28 +21,31 @@
 ##############################################################################
 
 require 'poieticgen/zone'
+require 'poieticgen/timeline'
 
 module PoieticGen
 
 	class Stroke
 		include DataMapper::Resource
 
-		property :id,	Integer, :key => true
+		property :id,	Serial
 		property :zone, Integer, :required => true
 		property :color, String, :required => true
 		property :changes, Text, :required => true, :lazy => false
 		property :timestamp, Integer, :required => true
+		
+		belongs_to :timeline, :key => true
 
 		def self.create_stroke color, changes, timestamp, zone
 			param_create = {
-				:id => Manager.fresh_timeline_identifier,
 				:color => color,
 				:changes => changes,
 				:timestamp => timestamp,
-				:zone => zone
+				:zone => zone,
+				:timeline => Timeline.new
 			}
 			
-			patch = Stroke.create param_create
+			patch = create param_create
 			
 			begin
 				patch.save
@@ -54,7 +57,7 @@ module PoieticGen
 
 		def to_hash ref
 			res = {
-				:id => self.id,
+				:id => self.timeline.id,
 				:zone => self.zone,
 				:color => self.color,
 				:changes => JSON.parse( self.changes ),

@@ -20,84 +20,30 @@
 #                                                                            #
 ##############################################################################
 
-require 'dm-core'
-require 'json'
+require 'poieticgen/zone'
 
 module PoieticGen
-	class Event
+
+	class Timeline
 		include DataMapper::Resource
 
-		@debug = true
-
 		property :id,	Serial
-		property :type,	String, :required => true
-		property :desc, String, :required => true
-		property :timestamp, Integer, :required => true
+		property :timestamp, Integer
 
-		belongs_to :timeline, :key => true
-
-		def self.create_join uid, uzone
-			event = Event.create({
-				:type => 'join',
-				:desc => JSON.generate({ :user => uid, :zone => uzone }),
-				:timestamp => Time.now.to_i,
-				:timeline => Timeline.new
+		has 1, :event
+		has 1, :stroke
+		has 1, :message
+		
+		def initialize
+			super({
+				:timestamp => Time.now.to_i
 			})
-		
-			begin
-				event.save
-			rescue DataMapper::SaveFailureError => e
-				STDOUT.puts "Error"
-				pp e.resource.errors
-				rdebug "Saving failure : %s" % e.resource.errors.inspect
-				raise e
-			end
-			
 		end
 
-		def self.create_leave uid, leave_time, uzone
-			event = Event.create({
-				:type => 'leave',
-				:desc => JSON.generate({ :user => uid, :zone => uzone }),
-				:timestamp => leave_time,
-				:timeline => Timeline.new
-			})
-			
-			begin
-				event.save
-			rescue DataMapper::SaveFailureError => e
-				rdebug "Saving failure : %s" % e.resource.errors.inspect
-				raise e
-			end
+		def self.last_id
+			last_timeline = first(:order => [ :id.desc ])
+			if last_timeline.nil? then 0 else last_timeline.id end
 		end
-		
-		def zone_index
-			return JSON.parse( self.desc )['zone'];
-		end
-		
-		def zone_user
-			return JSON.parse( self.desc )['user'];
-		end
-		
-		def to_hash zone, ref
-			user = User.first( :id => self.zone_user )
 
-			rdebug "Event/to_hash user"
-			pp user
-
-			res_desc = {
-				:user => user.to_hash,
-				:zone => (zone.to_desc_hash Zone::DESCRIPTION_MINIMAL)
-			}
-			res = {
-				:id => self.timeline.id,
-				:type => self.type,
-				:desc => res_desc,
-				:diffstamp => self.timestamp - ref
-			}
-			return res
-		end
-		
 	end
-
 end

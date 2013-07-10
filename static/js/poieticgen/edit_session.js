@@ -44,9 +44,8 @@
 	function DrawSession(callback) {
 		var console = noconsole,
 			self = this,
-			_current_stroke_id = 0,
-			_current_message_id = 0,
-			_observers = null,
+			_current_timeline_id = 0,
+			_game = null,
 			_dispatch_strokes_body;
 
 		this.user_id = null;
@@ -66,7 +65,7 @@
 				session_opts = [],
 				session_url = null;
 
-			_observers = [];
+			_game = new PoieticGen.Game();
 
 			if (user_id !== null) {
 				session_opts.push("user_id=" + user_id);
@@ -98,8 +97,7 @@
 					this.zone_column_count = response.zone_column_count;
 					this.zone_line_count = response.zone_line_count;
 
-					_current_stroke_id = response.stroke_id;
-					_current_message_id = response.message_id;
+					_current_timeline_id = response.timeline_id;
 
 					$.cookie('user_id', this.user_id, {path: "/"});
 					$.cookie('user_name', this.user_name, {path: "/"});
@@ -110,7 +108,7 @@
 
 					callback(self);
 
-					//console.log('edit_session/join post-callback ! observers = ' + JSON.stringify(_observers));
+					//console.log('edit_session/join post-callback ! observers = ' + JSON.stringify(_game.observers()));
 					var all_zones = this.other_zones.concat([ this.user_zone ]),
 						i;
 					// handle other zone events
@@ -188,7 +186,8 @@
 			var strokes_updates = [],
 				messages_updates = [],
 				req,
-				i;
+				i,
+				observers = _game.observers();
 
 			// skip if no user id assigned
 			if (!self.user_id) {
@@ -197,17 +196,17 @@
 			}
 
 			// assign real values if objects are present
-			if (_observers.length < 1) {
+			if (observers.length < 1) {
 				window.setTimeout(self.update, DRAW_SESSION_UPDATE_INTERVAL);
 				return null;
 			}
 
-			for (i = 0; i < _observers.length; i += 1) {
-				if (_observers[i].get_messages) {
-					messages_updates = messages_updates.concat(messages_updates, _observers[i].get_messages());
+			for (i = 0; i < observers.length; i += 1) {
+				if (observers[i].get_messages) {
+					messages_updates = messages_updates.concat(messages_updates, observers[i].get_messages());
 				}
-				if (_observers[i].get_strokes) {
-					strokes_updates = strokes_updates.concat(strokes_updates, _observers[i].get_strokes());
+				if (observers[i].get_strokes) {
+					strokes_updates = strokes_updates.concat(strokes_updates, observers[i].get_strokes());
 				}
 			}
 
@@ -215,8 +214,7 @@
 			console.log("edit_session/update: messages_updates = " + JSON.stringify(messages_updates));
 
 			req = {
-				strokes_after : _current_stroke_id,
-				messages_after : _current_message_id,
+				timeline_after : _current_timeline_id,
 
 				strokes : strokes_updates,
 				messages : messages_updates,
@@ -252,57 +250,35 @@
 		};
 
 
-		this.dispatch_events = function (events) {
-			var i, o;
+		this.dispatch = function (events) {
+			var i;
 
 			for (i = 0; i < events.length; i += 1) {
-				if ((events[i].id) || (_current_stroke_id < events[i].id)) {
-					_current_stroke_id = events[i].id;
+				if ((events[i].id) || (_current_timeline_id < events[i].id)) {
+					_current_timeline_id = events[i].id;
 				}
-				for (o = 0; o < _observers.length; o += 1) {
-					if (_observers[o].handle_event) {
-						_observers[o].handle_event(events[i]);
-					}
+				// Make absolute times
+				if (events[i].diffstamp) {
+					events[i].timestamp = events[i].diffstamp + self.last_update_time.getTime() / 1000;
+				} else {
+					events[i].timestamp = self.last_update_time.getTime() / 1000;
 				}
 			}
 		};
 
-		_dispatch_strokes_body = function (stroke, observer) {
-			if (0 >= stroke.diffstamp) {
-				observer.handle_stroke(stroke);
-			} else {
-				window.setTimeout(function () {
-					observer.handle_stroke(stroke);
-				}, stroke.diffstamp * 1000);
-			}
+		this.dispatch_events = function (events) {
+			self.dispatch(events);
+			_game.dispatch_events(events);
 		};
 
 		this.dispatch_strokes = function (strokes) {
-			var i, o;
-			for (i = 0; i < strokes.length; i += 1) {
-				if ((strokes[i].id) || (_current_stroke_id < strokes[i].id)) {
-					_current_stroke_id = strokes[i].id;
-				}
-				for (o = 0; o < _observers.length; o += 1) {
-					if (_observers[o].handle_stroke) {
-						_dispatch_strokes_body(strokes[i], _observers[o]);
-					}
-				}
-			}
+			self.dispatch(strokes);
+			_game.dispatch_strokes(strokes);
 		};
 
 		this.dispatch_messages = function (messages) {
-			var i, o;
-			for (i = 0; i < messages.length; i += 1) {
-				if ((messages[i].id) || (_current_message_id < messages[i].id)) {
-					_current_message_id = messages[i].id;
-				}
-				for (o = 0; o < _observers.length; o += 1) {
-					if (_observers[o].handle_message) {
-						_observers[o].handle_message(messages[i]);
-					}
-				}
-			}
+			self.dispatch(messages);
+			_game.dispatch_messages(messages);
 		};
 
 
@@ -326,7 +302,7 @@
 		};
 
 		this.register = function (p_observer) {
-			_observers.push(p_observer);
+			_game.register(p_observer);
 		};
 
 		this.initialize();

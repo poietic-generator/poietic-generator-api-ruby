@@ -47,10 +47,10 @@
 	function ViewSession(callback) {
 		var console = window.console,
 			self = this,
-			_current_stroke_id = 0,
-			_init_stroke_id = 0,
-			_observers = null,
+			_current_timeline_id = 0,
+			_init_timeline_id = 0,
 			_slider = null,
+			_game = null,
 
 			// _server_start_date = 0, // in seconds, since jan, 1, 1970
 			// _server_elapsed_time = 0, // in seconds, since server start
@@ -115,11 +115,12 @@
 		 */
 		this.initialize = function (date) {
 
-			_observers = [];
 			_join_view_session_id = 0;
 			_update_view_session_id = 0;
 			_timer_strokes = [];
 			_timer_events = [];
+
+			_game = new PoieticGen.Game();
 
 			self.join_view_session(date);
 
@@ -183,14 +184,14 @@
 
 					_local_start_date = new Date();
 
-					_current_stroke_id = _init_stroke_id = response.stroke_id;
+					_current_timeline_id = _init_timeline_id = response.timeline_id;
 					// console.log('view_session/join response mod : ' + JSON.stringify(this) );
 
 					self.other_zones = response.zones;
 
 					callback(self);
 
-					//console.log('view_session/join post-callback ! observers = ' + JSON.stringify( _observers ));
+					//console.log('view_session/join post-callback ! observers = ' + JSON.stringify( _game.observers() ));
 					// handle other zone events
 					for (i = 0; i < self.other_zones.length; i += 1) {
 						console.log('view_session/join on zone ' + JSON.stringify(self.other_zones[i]));
@@ -247,7 +248,7 @@
 			var req;
 
 			// assign real values if objects are present
-			if (_observers.length < 1) {
+			if (_game.observers().length < 1) {
 				self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
 				return null;
 			}
@@ -257,10 +258,10 @@
 			req = {
 				session: "default",
 
-				strokes_after : _current_stroke_id,
+				timeline_after : _current_timeline_id,
 
 				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed,
-				since_stroke : _init_stroke_id,
+				since : _init_timeline_id,
 				id : _update_view_session_id,
 				view_mode : _view_type
 			};
@@ -280,9 +281,9 @@
 						if (_update_view_session_id !== response.id) {
 							return;
 						}
+						var i, seconds = 0, diffstamp;
 
 						if (response.strokes.length > 0) {
-							var i, seconds = 0, diffstamp;
 
 							if (_view_type === REAL_TIME_VIEW) {
 								// We want the first stroke now and the others synchronized
@@ -335,92 +336,54 @@
 			return _last_update_timestamp;
 		};
 
+		this.dispatch = function (events) {
+			var i;
 
-		_dispatch_events_body = function (event, observer) {
-			if (0 >= event.diffstamp) {
-				observer.handle_event(event);
-			} else {
-				_timer_events.push(window.setTimeout(function () {
-					observer.handle_event(event);
-				}, event.diffstamp * 1000));
+			// Retrieve the new timeline_id
+			for (i = 0; i < events.length; i += 1) {
+				if (_current_timeline_id < events[i].id) {
+					_current_timeline_id = events[i].id;
+				}
+				// Make absolute times
+				if (events[i].diffstamp) {
+					events[i].timestamp = events[i].diffstamp + _local_start_date.getTime() / 1000;
+				} else {
+					events[i].timestamp = _local_start_date.getTime() / 1000;
+				}
 			}
 		};
 
 		this.dispatch_events = function (events) {
-			var i, o;
-			for (i = 0; i < events.length; i += 1) {
-				if ((events[i].id) || (_current_stroke_id < events[i].id)) {
-					_current_stroke_id = events[i].id;
-				}
-				for (o = 0; o < _observers.length; o += 1) {
-					if (_observers[o].handle_event) {
-						_dispatch_events_body(events[i], _observers[o]);
-					}
-				}
-			}
-		};
-
-		_dispatch_strokes_body = function (stroke, observer) {
-			if (0 >= stroke.diffstamp) {
-				observer.handle_stroke(stroke);
-			} else {
-				// FIXME: make an event queue instead of raising setTimeout everywhere
-				_timer_strokes.push(window.setTimeout(function () {
-					observer.handle_stroke(stroke);
-				}, stroke.diffstamp * 1000));
-			}
+			self.dispatch(events);
+			_game.dispatch_events(events);
 		};
 
 		this.dispatch_strokes = function (strokes) {
-			var i, o;
-			for (i = 0; i < strokes.length; i += 1) {
-				if ((strokes[i].id) || (_current_stroke_id < strokes[i].id)) {
-					_current_stroke_id = strokes[i].id;
-				}
-				for (o = 0; o < _observers.length; o += 1) {
-					if (_observers[o].handle_stroke) {
-						_dispatch_strokes_body(strokes[i], _observers[o]);
-					}
-				}
-			}
+			self.dispatch(strokes);
+			_game.dispatch_strokes(strokes);
 		};
 
 		this.dispatch_interval = function (interval) {
-			var o;
-			for (o = 0; o < _observers.length; o += 1) {
-				if (_observers[o].update_interval) {
-					_observers[o].update_interval(interval);
+			var o, observers = _game.observers();
+			for (o = 0; o < observers.length; o += 1) {
+				if (observers[o].update_interval) {
+					observers[o].update_interval(interval);
 				}
 			}
 		};
 
 		this.dispatch_reset = function () {
-			var o;
-			for (o = 0; o < _observers.length; o += 1) {
-				if (_observers[o].handle_reset) {
-					_observers[o].handle_reset(self);
+			var o, observers = _game.observers();
+			for (o = 0; o < observers.length; o += 1) {
+				if (observers[o].handle_reset) {
+					observers[o].handle_reset(self);
 				}
 			}
 		};
 
 		this.register = function (p_observer) {
-			_observers.push(p_observer);
+			_game.register(p_observer);
 		};
-
-		this.clear_strokes_timers = function () {
-			while (_timer_strokes.length > 0) {
-				window.clearTimeout(_timer_strokes.pop());
-				window.console.log("clear strokes");
-			}
-		};
-
-		this.clear_events_timers = function () {
-			while (_timer_events.length > 0) {
-				window.clearTimeout(_timer_events.pop());
-				window.console.log("clear events");
-			}
-		};
-
 
 		this.clear_timer = function () {
 			if (null !== _timer) {
@@ -431,8 +394,7 @@
 
 		this.clear_all_timers = function () {
 			self.clear_timer();
-			self.clear_strokes_timers();
-			self.clear_events_timers();
+			_game.clear();
 		};
 
 		this.set_timer = function (fn, interval) {

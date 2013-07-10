@@ -29,27 +29,25 @@ module PoieticGen
 
 		property :id,	Serial
 		property :session, String, :required => true
-		property :stroke, Integer, :required => true, :unique => true
+		property :timeline, Integer, :required => true, :unique => true
 		property :timestamp, Integer, :required => true
 		property :data, Json, :required => true
 
-		def initialize zones, last_stroke, session_id
+		def initialize zones, last_timeline, session_id
 			@debug = true
 			
 			json = {
 				:session => session_id,
-				:stroke => last_stroke,
+				:timeline => last_timeline,
 				:timestamp => Time.now.to_i,
 				:data => zones.map{ |z| z.to_desc_hash Zone::DESCRIPTION_FULL }
 			}
 			super json
 
 			begin
-				pp self
 				self.save
+				pp self
 			rescue DataMapper::SaveFailureError => e
-				pp e
-				# TODO: ignore if dupplicate entry for stroke
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e
 			end

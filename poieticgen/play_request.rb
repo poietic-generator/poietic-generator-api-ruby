@@ -26,9 +26,9 @@ module PoieticGen
 		DURATION = 'duration'
 		SESSION = 'session'
 
-		STROKES_AFTER = 'strokes_after'
+		TIMELINE_AFTER = 'timeline_after'
 		
-		SINCE_STROKE = 'since_stroke'
+		SINCE = 'since'
 		ID = 'id'
 		VIEW_MODE = 'view_mode'
 		
@@ -39,7 +39,6 @@ module PoieticGen
 
 		def initialize hash
 			@hash = hash
-			@enable_strokes = false
 			@debug = true
 		end
 
@@ -53,10 +52,10 @@ module PoieticGen
 					rdebug "duration : %s" % val.inspect
 				when SESSION then
 					rdebug "session : %s" % val.inspect
-				when STROKES_AFTER then
-					@enable_strokes = true
-				when SINCE_STROKE then
-					rdebug "since_stroke : %s" % val.inspect
+				when TIMELINE_AFTER then
+					rdebug "timeline_after : %s" % val.inspect
+				when SINCE then
+					rdebug "since : %s" % val.inspect
 				when ID then
 					rdebug "id : %s" % val.inspect
 				when VIEW_MODE then
@@ -69,8 +68,8 @@ module PoieticGen
 			[
 				DURATION,
 				SESSION,
-				STROKES_AFTER,
-				SINCE_STROKE,
+				TIMELINE_AFTER,
+				SINCE,
 				ID,
 				VIEW_MODE
 			].each do |field|
@@ -90,12 +89,12 @@ module PoieticGen
 			return @hash[SESSION]
 		end
 
-		def strokes_after
-			return @hash[STROKES_AFTER].to_i
+		def timeline_after
+			return @hash[TIMELINE_AFTER].to_i
 		end
 		
-		def since_stroke
-			return @hash[SINCE_STROKE].to_i
+		def since
+			return @hash[SINCE].to_i
 		end
 		
 		def id
