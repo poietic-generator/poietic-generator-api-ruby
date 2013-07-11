@@ -20,61 +20,56 @@
 #                                                                            #
 ##############################################################################
 
-module PoieticGen ; module Allocation
+require 'poieticgen/zone'
 
-	class Generic
+module PoieticGen
 
-		#
-		# return a zone, somewhere...
-		#
-		def allocate
-			raise NotImplementedError
+	class ZoneSnapshot
+		include DataMapper::Resource
+		
+		property :id,	Serial
+
+		# the position, from center
+		property :index, Integer, :required => true
+
+		# position
+		property :position, Json, :required => true
+		# property :position, Csv, :required => true
+	
+		# size attributes
+		property :width, Integer, :required => true
+		property :height, Integer, :required => true
+
+		# user 
+		property :user_id, Integer
+		
+		property :data, Json, :required => true
+		#property :data, Object, :required => true
+		
+		has n, :board_snapshots, :through => Resource
+
+		def initialize json
+			@debug = true
+			
+			super json
+
+			begin
+				self.save
+				pp self
+			rescue DataMapper::SaveFailureError => e
+				pp e.resource.errors.inspect
+				rdebug "Saving failure : %s" % e.resource.errors.inspect
+				raise e
+			end
 		end
 
-		#
-		# free zone at given index
-		#
-		def free idx
-			raise NotImplementedError
-		end
-
-		#
-		# get position for given index
-		#
-		def idx_to_pos idx
-			raise NotImplementedError
-		end
-
-		#
-		# get zone at given index
-		#
-		def [] index
-			raise NotImplementedError
-		end
-
-		#
-		# get all zones
-		#
-		def zones
-			raise NotImplementedError
+		def to_hash
+			res = nil
+			ZoneSnapshot.transaction do
+				res = self.data
+			end
+			return res
 		end
 		
-		#
-		# replace zones
-		#
-		def set_zones zones
-			raise NotImplementedError
-		end
-
-		# 
-		# get index for given position
-		# (or raise something if not allocated)
-		#
-		def pos_to_idx x, y
-			raise NotImplementedError
-		end
-
 	end
-
-end ; end
-
+end

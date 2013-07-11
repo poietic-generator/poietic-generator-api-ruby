@@ -24,6 +24,7 @@ require 'poieticgen/update_request'
 require 'poieticgen/zone'
 require 'poieticgen/user'
 require 'poieticgen/timeline'
+require 'poieticgen/board_snapshot'
 
 require 'poieticgen/allocation/spiral'
 require 'poieticgen/allocation/random'
@@ -112,7 +113,7 @@ module PoieticGen
 				
 				if @stroke_count == 0 then
 					last_timeline_id = Timeline.last_id
-					if SnapshotBoard.first(:timeline => last_timeline_id).nil? then
+					if BoardSnapshot.first(:timeline => last_timeline_id).nil? then
 						self.save last_timeline_id, user.session
 					end
 				end
@@ -133,15 +134,7 @@ module PoieticGen
 		end
 
 		def save last_timeline, session_id
-
-			users = User.all(:session => session_id)
-			zones = []
-
-			users.each do |user|
-				zones.push(@allocator[user.zone])
-			end
-
-			SnapshotBoard.new zones, last_timeline, session_id
+			BoardSnapshot.new @allocator.zones, last_timeline, session_id
 		end
 		
 		#
@@ -155,14 +148,14 @@ module PoieticGen
 			end
 		
 			# The first snap before timeline_id
-			snap = SnapshotBoard.first(
+			snap = BoardSnapshot.first(
 				:timeline.lte => timeline_id,
 				:order => [ :timeline.desc ]
 			)
 			
 			if snap.nil? then
 				# FIXME: the first snapshot isn't the first state of the game (but almost)
-				snap = SnapshotBoard.first(
+				snap = BoardSnapshot.first(
 					:order => [ :timeline.asc ]
 				)
 			
@@ -185,7 +178,8 @@ module PoieticGen
 			
 			timelines = Timeline.all(
 				:id.gt => snap.timeline,
-				:id.lte => timeline_id
+				:id.lte => timeline_id,
+				:order => [ :id.asc ]
 			)
 			
 			strokes_db = timelines.strokes
@@ -199,25 +193,21 @@ module PoieticGen
 			pp events_db
 			
 			# Create zones from snapshot
-			zones_snap = snap.data.map{ |d|
-				Zone.from_hash d, @config.width, @config.height
-			}
+			zones_snap = {}
+			
+			snap.zone_snapshots.each do |zs|
+				zones_snap[zs.index] = Zone.from_snapshot zs
+			end
 			
 			STDOUT.puts "zones_snap"
 			pp zones_snap
 			
 			# Put zones from snapshot in allocator
 			allocator = ALLOCATORS[@config.allocator].new @config
-			zone_indexes = Hash.new
-			
-			zones_snap.each do |zone|
-				allocator.insert zone
-				zone_indexes[zone.user_id] = zone.index
-			end
+			allocator.set_zones zones_snap
 			
 			STDOUT.puts "Allocator snapshot"
 			pp allocator
-			pp zone_indexes
 			
 			# Add/Remove zones since the snapshot
 			events_db.each do |event|
@@ -226,9 +216,8 @@ module PoieticGen
 				
 				STDOUT.puts "%s user_id = %d, zone_index = %d" % [ event.type, user_id, zone_index ]
 				if event.type == "join" then
-					zone = allocator.allocate_at zone_index
+					zone = allocator.allocate
 					zone.user_id = user_id
-					zone_indexes[user_id] = zone_index
 				elsif event.type == "leave" then
 					# reset zone
 					allocator[zone_index].reset
@@ -241,19 +230,16 @@ module PoieticGen
 			
 			STDOUT.puts "Allocator after events"
 			pp allocator
-			pp zone_indexes
 			
 			users = users_db.map{ |u| u.to_hash } # FIXME: All users in the session are returned
 			strokes = strokes_db.map{ |s| s.to_hash s.timestamp } # strokes with diffstamp = 0 (not important)
-			zones = []
+			zones = allocator.zones
 			
 			# Apply strokes
-			zone_indexes.each do |user_id,zone_index|
-				zone = allocator[zone_index]
+			zones.each do |index,zone|
 				if zone.user_id != nil then
 					zone.apply_local strokes.select{ |s| s["zone"] == zone.index }
 				end
-				zones[zone_index] = zone
 			end
 
 			STDOUT.puts "users, zones and strokes"

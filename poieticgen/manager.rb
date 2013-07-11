@@ -33,7 +33,6 @@ require 'poieticgen/event'
 require 'poieticgen/chat_manager'
 require 'poieticgen/message'
 require 'poieticgen/stroke'
-require 'poieticgen/snapshot_board'
 require 'poieticgen/timeline'
 require 'poieticgen/update_request'
 require 'poieticgen/snapshot_request'
@@ -413,7 +412,7 @@ module PoieticGen
 					
 					users, zones = @board.load_board timeline_id
 					
-					zones = zones.map{ |z| z.to_desc_hash Zone::DESCRIPTION_FULL }
+					zones = zones.map{ |i,z| z.to_desc_hash Zone::DESCRIPTION_FULL }
 				end
 
 				# return snapshot params (user, zone), start_time, and

@@ -21,17 +21,18 @@
 ##############################################################################
 
 require 'poieticgen/zone'
+require 'poieticgen/zone_snapshot'
 
 module PoieticGen
-
-	class SnapshotBoard
+	
+	class BoardSnapshot
 		include DataMapper::Resource
-
+		
 		property :id,	Serial
 		property :session, String, :required => true
 		property :timeline, Integer, :required => true, :unique => true
-		property :timestamp, Integer, :required => true
-		property :data, Json, :required => true
+		
+		has n, :zone_snapshots, :through => Resource
 
 		def initialize zones, last_timeline, session_id
 			@debug = true
@@ -39,10 +40,14 @@ module PoieticGen
 			json = {
 				:session => session_id,
 				:timeline => last_timeline,
-				:timestamp => Time.now.to_i,
-				:data => zones.map{ |z| z.to_desc_hash Zone::DESCRIPTION_FULL }
+				:zone_snapshots => []
+				
 			}
 			super json
+
+			zones.each do |index, zone|
+				self.zone_snapshots<< zone.snapshot
+			end
 
 			begin
 				self.save
@@ -51,14 +56,6 @@ module PoieticGen
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e
 			end
-		end
-
-		def to_hash
-			res = nil
-			SnapshotBoard.transaction do
-				res = self.data
-			end
-			return res
 		end
 		
 	end

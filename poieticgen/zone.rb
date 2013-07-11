@@ -21,9 +21,10 @@
 ##############################################################################
 
 module PoieticGen
+
 	class Zone
 		include DataMapper::Resource
-
+		
 		property :id,	Serial
 
 		# the position, from center
@@ -38,14 +39,14 @@ module PoieticGen
 		property :height, Integer, :required => true
 
 		# user 
-		property :user_id, Integer 
+		property :user_id, Integer
+		
+		property :data, Json, :required => true
+		#property :data, Object, :required => true
 
 		property :created_at, Integer, :required => true
 		property :deleted_at, Integer, :required => true
 		property :deleted, Boolean, :required => true
-
-		property :data, Json, :required => true
-		#property :data, Object, :required => true
 
 	#	attr_reader :index, :position
 
@@ -72,6 +73,8 @@ module PoieticGen
 				:deleted => false
 			}
 			super param_create
+			
+			@last_snapshot = nil
 		end
 		
 		def save
@@ -86,28 +89,14 @@ module PoieticGen
 			rdebug "zone created!"
 		end
 		
-		def self.from_hash hash, width, height
-			pp hash["index"]
-			pp hash["position"]
-			zone = Zone.new hash["index"], hash["position"], width, height
-			zone.user_id = hash["user"]
-			
-			hash["content"].each do |patch|
-				color = patch["color"]
-				patch["changes"].each do |x,y,zero|
-					zone.set_color x, y, color
-				end
-			end
+		def self.from_snapshot snapshot
+			pp snapshot.index
+			pp snapshot.position
+			zone = Zone.new snapshot.index, snapshot.position, snapshot.width, snapshot.height
+			zone.user_id = snapshot.user_id
+			zone.data = snapshot.data
 			
 			return zone
-		end
-		
-		def set_color x, y, color
-			if x >= 0 and x < self.width and
-			   y >= 0 and y < self.height
-			then
-				self.data[_xy2idx(x,y)] = color
-			end
 		end
 
 		def reset
@@ -225,6 +214,11 @@ module PoieticGen
 			end
 			return result
 		end
+		
+		def snapshot
+			# TODO: use the last snapshot
+			return _take_snapshot
+		end
 
 		private
 
@@ -236,6 +230,17 @@ module PoieticGen
 			x = idx % self.width
 			y = idx / self.width
 			return x,y
+		end
+		
+		def _take_snapshot
+			ZoneSnapshot.new ({
+				:index => self.index,
+				:position => self.position,
+				:width => self.width,
+				:height => self.height,
+				:user_id => self.user_id,
+				:data => self.data
+			})
 		end
 	end
 end
