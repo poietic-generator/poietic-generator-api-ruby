@@ -34,15 +34,19 @@ module PoieticGen
 		has 1, :stroke
 		has 1, :message
 		
-		def self.create_now
+		belongs_to :session
+		
+		def self.create_now session
 			create({
-				:timestamp => Time.now.to_i
+				:timestamp => Time.now.to_i,
+				:session => session
 			})
 		end
 		
-		def self.create_with_time timestamp
+		def self.create_with_time timestamp, session
 			create({
-				:timestamp => timestamp
+				:timestamp => timestamp,
+				:session => session
 			})
 		end
 

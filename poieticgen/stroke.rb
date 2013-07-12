@@ -35,12 +35,12 @@ module PoieticGen
 		
 		belongs_to :timeline, :key => true
 
-		def self.create_stroke color, changes, timestamp, zone
+		def self.create_stroke color, changes, timestamp, zone, session
 			param_create = {
 				:color => color,
 				:changes => changes,
 				:zone => zone,
-				:timeline => (Timeline.create_with_time timestamp)
+				:timeline => (Timeline.create_with_time timestamp, session)
 			}
 			
 			patch = create param_create

@@ -25,6 +25,7 @@ require 'poieticgen/zone'
 require 'poieticgen/user'
 require 'poieticgen/timeline'
 require 'poieticgen/board_snapshot'
+require 'poieticgen/session'
 
 require 'poieticgen/allocation/spiral'
 require 'poieticgen/allocation/random'
@@ -129,10 +130,10 @@ module PoieticGen
 			end
 		end
 
-		def save session_id
+		def save session
 			last_timeline_id = Timeline.last_id
 			if BoardSnapshot.first(:timeline => last_timeline_id).nil? then
-				BoardSnapshot.new @allocator.zones, last_timeline_id, session_id
+				BoardSnapshot.new @allocator.zones, last_timeline_id, session
 			end
 		end
 		
@@ -145,8 +146,13 @@ module PoieticGen
 			if timeline_id < 0 then
 				timeline_id = 0
 			end
-		
-			snap = _get_snapshot timeline_id
+			
+			last_event = Timeline.get(timeline_id)
+			if last_event.nil? then
+				raise RuntimeError, "Invalid timeline_id %d" % timeline_id
+			end
+
+			snap = _get_snapshot timeline_id last_event.session
 			
 			STDOUT.puts "snap"
 			pp snap
@@ -170,7 +176,7 @@ module PoieticGen
 			
 			# get the session associated to the snapshot
 			users_db = User.all(
-				:session => snap.session
+				:session => last_event.session.id
 			)
 			
 			# get events since the snapshot
@@ -232,10 +238,11 @@ module PoieticGen
 		
 		private
 
-		def _get_snapshot timeline_id
+		def _get_snapshot timeline_id, session
 			# The first snap before timeline_id
 			snap = BoardSnapshot.first(
 				:timeline.lte => timeline_id,
+				:session => session.id,
 				:order => [ :timeline.desc ]
 			)
 			

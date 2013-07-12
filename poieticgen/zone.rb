@@ -110,7 +110,7 @@ module PoieticGen
 			end
 		end
 
-		def apply user, drawing
+		def apply user, drawing, session
 			Zone.transaction do
 				# save patch into database
 				return if drawing.nil?
@@ -130,7 +130,8 @@ module PoieticGen
 					Stroke.create_stroke color,
 						JSON.generate(changes).to_s,
 						timestamp,
-						user.zone
+						user.zone,
+						session
 
 					changes.each do |x,y,t_offset|
 						idx = _xy2idx(x,y)

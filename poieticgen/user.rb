@@ -21,6 +21,7 @@
 ##############################################################################
 
 require 'dm-core'
+require 'poieticgen/session'
 
 module PoieticGen
 
@@ -29,7 +30,6 @@ module PoieticGen
 		include DataMapper::Resource
 
 		property :id,	Serial
-		property :session,	String, :required => true
 		property :name,	String, :required => true
 		property :zone, Integer, :required => true
 		property :created_at, Integer, :required => true
@@ -37,6 +37,8 @@ module PoieticGen
 		property :idle_expires_at, Integer, :required => true
 		property :did_expire, Boolean, :required => true
 		property :last_update_time, Integer, :required => true
+		
+		belongs_to :session
 
 		def to_hash
 			res = {

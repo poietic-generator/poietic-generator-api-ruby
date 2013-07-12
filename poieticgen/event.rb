@@ -35,11 +35,11 @@ module PoieticGen
 
 		belongs_to :timeline, :key => true
 
-		def self.create_join uid, uzone
+		def self.create_join uid, uzone, session
 			event = Event.create({
 				:type => 'join',
 				:desc => JSON.generate({ :user => uid, :zone => uzone }),
-				:timeline => Timeline.create_now
+				:timeline => (Timeline.create_now session)
 			})
 		
 			begin
@@ -53,11 +53,11 @@ module PoieticGen
 			
 		end
 
-		def self.create_leave uid, leave_time, uzone
+		def self.create_leave uid, leave_time, uzone, session
 			event = Event.create({
 				:type => 'leave',
 				:desc => JSON.generate({ :user => uid, :zone => uzone }),
-				:timeline => (Timeline.create_with_time leave_time)
+				:timeline => (Timeline.create_with_time leave_time, session)
 			})
 			
 			begin
