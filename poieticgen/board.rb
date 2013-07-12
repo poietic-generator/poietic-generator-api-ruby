@@ -107,20 +107,6 @@ module PoieticGen
 			return if drawing.empty?
 		
 			@monitor.synchronize do
-				# Save board periodically
-				# before the update because the first snapshot
-				# must starts at stroke_id = 0
-				
-				if @stroke_count == 0 then
-					last_timeline_id = Timeline.last_id
-					if BoardSnapshot.first(:timeline => last_timeline_id).nil? then
-						self.save last_timeline_id, user.session
-					end
-				end
-				
-				@stroke_count = (@stroke_count + drawing.length) % STROKE_COUNT_BETWEEN_QFRAMES;
-
-				STDOUT.puts "stroke_count %d" % [@stroke_count]
 				
 				# Update the zone
 			
@@ -130,11 +116,24 @@ module PoieticGen
 				else
 					#FIXME: return an error to the user ?
 				end
+				
+				# Save board periodically
+				
+				if @stroke_count == 0 then
+					self.save user.session
+				end
+				
+				@stroke_count = (@stroke_count + drawing.length) % STROKE_COUNT_BETWEEN_QFRAMES;
+
+				STDOUT.puts "stroke_count %d" % [@stroke_count]
 			end
 		end
 
-		def save last_timeline, session_id
-			BoardSnapshot.new @allocator.zones, last_timeline, session_id
+		def save session_id
+			last_timeline_id = Timeline.last_id
+			if BoardSnapshot.first(:timeline => last_timeline_id).nil? then
+				BoardSnapshot.new @allocator.zones, last_timeline_id, session_id
+			end
 		end
 		
 		#
@@ -176,7 +175,7 @@ module PoieticGen
 			
 			# get events since the snapshot
 			timelines = Timeline.all(
-				:id.gte => snap.timeline,
+				:id.gt => snap.timeline,
 				:id.lte => timeline_id,
 				:order => [ :id.asc ]
 			)
@@ -241,15 +240,8 @@ module PoieticGen
 			)
 			
 			if snap.nil? then
-				# FIXME: the first snapshot isn't the first state of the game (but almost)
-				snap = BoardSnapshot.first(
-					:order => [ :timeline.asc ]
-				)
-			
-				if snap.nil? then
-					# FIXME: start from an empty board
-					raise RuntimeError, "No snapshot found for timeline %d" % timeline_id
-				end
+				# Impossible case because there is at least one snapshot
+				raise RuntimeError, "No snapshot found for timeline %d" % timeline_id
 			end
 			
 			return snap

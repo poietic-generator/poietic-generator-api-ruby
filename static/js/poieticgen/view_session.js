@@ -138,6 +138,7 @@
 						_view_type = HISTORY_VIEW;
 					}
 					self.clear_all_timers();
+					self.dispatch_reset();
 					_last_update_timestamp = date;
 					self.join_view_session(date);
 				});

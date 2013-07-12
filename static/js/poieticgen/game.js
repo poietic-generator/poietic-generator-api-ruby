@@ -95,7 +95,7 @@
 			}
 			
 			if (_events.length > 0) {
-				interval = _events[0].event.timestamp - ((new Date()).getTime() / 1000);
+				interval = _events[0].event.timestamp * 1000 - (new Date()).getTime();
 			} else {
 				interval = GAME_UPDATE_INTERVAL;
 			}

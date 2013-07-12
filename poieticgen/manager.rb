@@ -492,64 +492,61 @@ module PoieticGen
 					# This stroke is used to compute diffstamps
 					since = Timeline.get(req.since);
 					
-					if since.nil? then
-						raise RuntimeError, "The 'since' field in user request is invalid (%d)" % req.since
-					end
+					if not since.nil? then
 					
-					first_t = Timeline.first(
-						:id.gt => req.timeline_after,
-						:order => [ :id.asc ]
-					)
-
-					if first_t.nil? then
-						max_timestamp = -1
-						min_timestamp = -1
-					else
-						min_timestamp = first_t.timestamp
-						max_timestamp = min_timestamp + req.duration
-						
-						timelines = Timeline.all(
+						first_t = Timeline.first(
 							:id.gt => req.timeline_after,
-							:timestamp.lte => max_timestamp,
 							:order => [ :id.asc ]
 						)
+
+						if first_t.nil? then
+							max_timestamp = -1
+							min_timestamp = -1
+						else
+							min_timestamp = first_t.timestamp
+							max_timestamp = min_timestamp + req.duration
+						
+							timelines = Timeline.all(
+								:id.gt => req.timeline_after,
+								:timestamp.lte => max_timestamp,
+								:order => [ :id.asc ]
+							)
 					
-						srk_req = timelines.strokes
+							srk_req = timelines.strokes
 
-						strokes_collection = srk_req.map{ |s|
-							s.to_hash since.timestamp
-						}
+							strokes_collection = srk_req.map{ |s|
+								s.to_hash since.timestamp
+							}
 						
-						evt_req = timelines.events
+							evt_req = timelines.events
 
-						if not evt_req.empty? then
-							STDOUT.puts "first timeline"
-							pp first_t
+							if not evt_req.empty? then
+								STDOUT.puts "first timeline"
+								pp first_t
 						
-							STDOUT.puts "Max timestamp=%d" % max_timestamp
+								STDOUT.puts "Max timestamp=%d" % max_timestamp
 						
-							STDOUT.puts "Strokes"
-							pp srk_req
+								STDOUT.puts "Strokes"
+								pp srk_req
 
-							STDOUT.puts "Events"
-							pp evt_req
-							
-							pp timelines.last
+								STDOUT.puts "Events"
+								pp evt_req
 						
-							users, zones = @board.load_board req.timeline_after
-							# FIXME: load_board loads some useless data for what we want
-							# FIXME: zones seems to be wrong
+								users, zones = @board.load_board timelines.last.id
+								# FIXME: load_board loads some useless data for what we want
+								# FIXME: zones seems to be wrong
 						
-							events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index], since.timestamp }
+								events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index], since.timestamp }
+							end
 						end
-					end
 					
-					first_timeline_ever = Timeline.first(:order => [ :id.asc ])
-					timestamp = if first_timeline_ever.nil? or min_timestamp < 0
-						    then 0
-						    else
-						    	min_timestamp - first_timeline_ever.timestamp
-						    end
+						first_timeline_ever = Timeline.first(:order => [ :id.asc ])
+						timestamp = if first_timeline_ever.nil? or min_timestamp < 0
+							    then 0
+							    else
+							    	min_timestamp - first_timeline_ever.timestamp
+							    end
+					end
 				else
 					raise RuntimeError, "Unknown view mode %d" % req.view_mode
 				end
@@ -626,6 +623,10 @@ module PoieticGen
 
 			# Create board with the configuration
 			@board = Board.new @config.board
+			# Take the initial snapshot of the board
+			if BoardSnapshot.get(0).nil? then
+				@board.save @session_id
+			end
 
 			@chat = PoieticGen::ChatManager.new @config.chat
 
