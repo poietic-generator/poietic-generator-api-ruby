@@ -20,63 +20,56 @@
 #                                                                            #
 ##############################################################################
 
+require 'poieticgen/zone'
+
 module PoieticGen
-	class SnapshotRequest
 
-		DATE = 'date'
-		SESSION = 'session'
-		ID = 'id'
+	class ZoneSnapshot
+		include DataMapper::Resource
+		
+		property :id,	Serial
 
-		private
+		# the position, from center
+		property :index, Integer, :required => true
 
-		def initialize hash
-			@hash = hash
+		# position
+		property :position, Json, :required => true
+		# property :position, Csv, :required => true
+	
+		# size attributes
+		property :width, Integer, :required => true
+		property :height, Integer, :required => true
+
+		# user 
+		property :user_id, Integer
+		
+		property :data, Json, :required => true
+		#property :data, Object, :required => true
+		
+		has n, :board_snapshots, :through => Resource
+
+		def initialize json
 			@debug = true
-		end
+			
+			super json
 
-		public
-
-		def self.parse hash
-			# mandatory fields firstvalidate user input first
-			hash.each do |key, val|
-				case key
-				when DATE then
-					rdebug "date : %s" % val.inspect
-				when SESSION then
-					rdebug "session : %s" % val.inspect
-				when ID then
-					rdebug "id : %s" % val.inspect
-				else
-					raise RuntimeError, "unknow request field '%s'" % key
-				end
+			begin
+				self.save
+				pp self
+			rescue DataMapper::SaveFailureError => e
+				pp e.resource.errors.inspect
+				rdebug "Saving failure : %s" % e.resource.errors.inspect
+				raise e
 			end
+		end
 
-			[
-				DATE,
-				SESSION,
-				ID
-			].each do |field|
-				unless hash.include? field then
-					raise ArgumentError, ("The '%s' field is missing" % field)
-				end
+		def to_hash
+			res = nil
+			ZoneSnapshot.transaction do
+				res = self.data
 			end
-			SnapshotRequest.new hash
-		end
-
-
-		def session
-			return @hash[SESSION]
-		end
-
-		def date
-			return @hash[DATE].to_i
+			return res
 		end
 		
-		def id
-			return @hash[ID].to_i
-		end
-
 	end
-
 end
-

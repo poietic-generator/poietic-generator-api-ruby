@@ -20,63 +20,36 @@
 #                                                                            #
 ##############################################################################
 
+require 'poieticgen/zone'
+
 module PoieticGen
-	class SnapshotRequest
 
-		DATE = 'date'
-		SESSION = 'session'
-		ID = 'id'
+	class Timeline
+		include DataMapper::Resource
 
-		private
+		property :id,	Serial
+		property :timestamp, Integer
 
-		def initialize hash
-			@hash = hash
-			@debug = true
-		end
-
-		public
-
-		def self.parse hash
-			# mandatory fields firstvalidate user input first
-			hash.each do |key, val|
-				case key
-				when DATE then
-					rdebug "date : %s" % val.inspect
-				when SESSION then
-					rdebug "session : %s" % val.inspect
-				when ID then
-					rdebug "id : %s" % val.inspect
-				else
-					raise RuntimeError, "unknow request field '%s'" % key
-				end
-			end
-
-			[
-				DATE,
-				SESSION,
-				ID
-			].each do |field|
-				unless hash.include? field then
-					raise ArgumentError, ("The '%s' field is missing" % field)
-				end
-			end
-			SnapshotRequest.new hash
-		end
-
-
-		def session
-			return @hash[SESSION]
-		end
-
-		def date
-			return @hash[DATE].to_i
+		has 1, :event
+		has 1, :stroke
+		has 1, :message
+		
+		def self.create_now
+			create({
+				:timestamp => Time.now.to_i
+			})
 		end
 		
-		def id
-			return @hash[ID].to_i
+		def self.create_with_time timestamp
+			create({
+				:timestamp => timestamp
+			})
+		end
+
+		def self.last_id
+			last_timeline = first(:order => [ :id.desc ])
+			if last_timeline.nil? then 0 else last_timeline.id end
 		end
 
 	end
-
 end
-

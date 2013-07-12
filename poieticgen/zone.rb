@@ -20,12 +20,11 @@
 #                                                                            #
 ##############################################################################
 
-require 'monitor'
-
 module PoieticGen
+
 	class Zone
 		include DataMapper::Resource
-
+		
 		property :id,	Serial
 
 		# the position, from center
@@ -40,17 +39,21 @@ module PoieticGen
 		property :height, Integer, :required => true
 
 		# user 
-		property :user_id, Integer 
+		property :user_id, Integer
+		
+		property :data, Json, :required => true
+		#property :data, Object, :required => true
 
 		property :created_at, Integer, :required => true
 		property :deleted_at, Integer, :required => true
 		property :deleted, Boolean, :required => true
 
-		property :data, Json, :required => true
-		#property :data, Object, :required => true
-
 	#	attr_reader :index, :position
 
+
+		DESCRIPTION_MINIMAL = 1
+		DESCRIPTION_FULL = 2
+		
 		def position
 			super.map{|x| x.to_i}
 		end
@@ -70,16 +73,31 @@ module PoieticGen
 				:deleted => false
 			}
 			super param_create
-
+			
+			@last_snapshot = nil
+			@is_snapshoted = false
+		end
+		
+		def save
 			begin
 				# FIXME: debug
 				pp self
-				self.save
+				super
 			rescue DataMapper::SaveFailureError => e
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e
 			end
 			rdebug "zone created!"
+		end
+		
+		def self.from_snapshot snapshot
+			pp snapshot.index
+			pp snapshot.position
+			zone = Zone.new snapshot.index, snapshot.position, snapshot.width, snapshot.height
+			zone.user_id = snapshot.user_id
+			zone.data = snapshot.data
+			
+			return zone
 		end
 
 		def reset
@@ -109,25 +127,18 @@ module PoieticGen
 					timestamp = patch['diff'].to_i + ref
 
 					# add patch into database
-					param_create = {
-						:color => color,
-						:changes => JSON.generate(changes).to_s,
-						:timestamp => timestamp,
-						:zone => user.zone
-					}
-					begin
-						patch = Stroke.create param_create
-						patch.save
-					rescue DataMapper::SaveFailureError => e
-						rdebug "Saving failure : %s" % e.resource.errors.inspect
-						raise e
-					end
+					Stroke.create_stroke color,
+						JSON.generate(changes).to_s,
+						timestamp,
+						user.zone
 
 					changes.each do |x,y,t_offset|
 						idx = _xy2idx(x,y)
 						self.data[idx] = color
 					end
 				end
+				
+				@is_snapshoted = false
 
 				begin
 					self.save
@@ -137,15 +148,40 @@ module PoieticGen
 				end
 			end
 		end
+		
+		#
+		# Apply a list of strokes without saving it into the db
+		#
+		def apply_local drawing
+			Zone.transaction do
+				# save patch into database
+				return if drawing.nil?
 
-		def to_desc_hash
+				rdebug drawing.inspect if drawing.length != 0
+
+				drawing.each do |patch|
+
+					color = patch['color']
+					changes = patch['changes']
+
+					changes.each do |x,y,t_offset|
+						idx = _xy2idx(x,y)
+						self.data[idx] = color
+					end
+				end
+			end
+		end
+
+		def to_desc_hash type
 			res = nil
 			Zone.transaction do
 				res = {
 					:index => self.index,
 					:position => self.position,
 					:user => self.user_id,
-					:content => self.to_patches_hash
+					:content => if type == DESCRIPTION_FULL
+					            then self.to_patches_hash
+					            else [] end
 				}
 			end
 			return res
@@ -174,12 +210,20 @@ module PoieticGen
 						:zone => self.index,
 						:color => color,
 						:changes => where,
-						:stamp => nil
+						:diffstamp => nil
 					}
 					result.push patch
 				end
 			end
 			return result
+		end
+		
+		def snapshot
+			if not @is_snapshoted then
+				@last_snapshot = _take_snapshot
+			end
+			
+			return @last_snapshot
 		end
 
 		private
@@ -192,6 +236,17 @@ module PoieticGen
 			x = idx % self.width
 			y = idx / self.width
 			return x,y
+		end
+		
+		def _take_snapshot
+			ZoneSnapshot.new ({
+				:index => self.index,
+				:position => self.position,
+				:width => self.width,
+				:height => self.height,
+				:user_id => self.user_id,
+				:data => self.data
+			})
 		end
 	end
 end

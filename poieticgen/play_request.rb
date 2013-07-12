@@ -26,15 +26,19 @@ module PoieticGen
 		DURATION = 'duration'
 		SESSION = 'session'
 
-		STROKES_AFTER = 'strokes_after'
-		EVENTS_AFTER = 'events_after'
+		TIMELINE_AFTER = 'timeline_after'
+		
+		SINCE = 'since'
+		ID = 'id'
+		VIEW_MODE = 'view_mode'
+		
+		REAL_TIME_VIEW = 0
+		HISTORY_VIEW = 1
 
 		private
 
 		def initialize hash
 			@hash = hash
-			@enable_strokes = false
-			@enable_events = false
 			@debug = true
 		end
 
@@ -48,10 +52,14 @@ module PoieticGen
 					rdebug "duration : %s" % val.inspect
 				when SESSION then
 					rdebug "session : %s" % val.inspect
-				when STROKES_AFTER then
-					@enable_strokes = true
-				when EVENTS_AFTER then
-					@enable_events = true
+				when TIMELINE_AFTER then
+					rdebug "timeline_after : %s" % val.inspect
+				when SINCE then
+					rdebug "since : %s" % val.inspect
+				when ID then
+					rdebug "id : %s" % val.inspect
+				when VIEW_MODE then
+					rdebug "view_mode : %s" % val.inspect
 				else
 					raise RuntimeError, "unknow request field '%s'" % key
 				end
@@ -60,8 +68,10 @@ module PoieticGen
 			[
 				DURATION,
 				SESSION,
-				STROKES_AFTER,
-				EVENTS_AFTER
+				TIMELINE_AFTER,
+				SINCE,
+				ID,
+				VIEW_MODE
 			].each do |field|
 				unless hash.include? field then
 					raise ArgumentError, ("The '%s' field is missing" % field)
@@ -79,12 +89,20 @@ module PoieticGen
 			return @hash[SESSION]
 		end
 
-		def events_after
-			return @hash[EVENTS_AFTER].to_i
+		def timeline_after
+			return @hash[TIMELINE_AFTER].to_i
 		end
-
-		def strokes_after
-			return @hash[STROKES_AFTER].to_i
+		
+		def since
+			return @hash[SINCE].to_i
+		end
+		
+		def id
+			return @hash[ID].to_i
+		end
+		
+		def view_mode
+			return @hash[VIEW_MODE].to_i
 		end
 	end
 

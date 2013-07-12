@@ -100,9 +100,8 @@ module PoieticGen
 				end
 
 				set :config, config
-				set :manager, (PoieticGen::Manager.new config)
-				#DataMapper::Logger.new(STDERR, :info)
-				DataMapper::Logger.new(STDERR, :debug)
+				DataMapper::Logger.new(STDERR, :info)
+				#DataMapper::Logger.new(STDERR, :debug)
 				hash = config.database.get_hash
 				pp "db hash :", hash
 				DataMapper.setup(:default, hash)
@@ -111,6 +110,8 @@ module PoieticGen
 				DataMapper::Model.raise_on_save_failure = true
 
 				DataMapper.auto_upgrade!
+				
+				set :manager, (PoieticGen::Manager.new config)
 
 			rescue PoieticGen::ConfigManager::ConfigurationError => e
 				STDERR.puts "ERROR: %s" % e.message

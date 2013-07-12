@@ -5,7 +5,9 @@
 - @page.js << "/js/poieticgen/view_session.js"
 - @page.js << "/js/poieticgen/zone.js"
 - @page.js << "/js/poieticgen/viewer.js"
+- @page.js << "/js/poieticgen/slider.js"
 - @page.js << "/js/poieticgen/board.js"
+- @page.js << "/js/poieticgen/game.js"
 - @page.js << "/js/page/view.js"
 
 %div{"data-fullscreen" => "true", "data-role" => "page"}
@@ -21,3 +23,6 @@
   %div{"data-role" => "content"}
     .viewer
       %canvas#session-viewer
+  %div.slider{"data-role" => "fieldcontain"}
+    %input{"type" => "range", "name" => "history_slider", "id" => "history_slider", "data-highlight" => "true"}/
+

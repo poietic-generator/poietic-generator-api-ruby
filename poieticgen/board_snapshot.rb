@@ -20,63 +20,43 @@
 #                                                                            #
 ##############################################################################
 
+require 'poieticgen/zone'
+require 'poieticgen/zone_snapshot'
+
 module PoieticGen
-	class SnapshotRequest
+	
+	class BoardSnapshot
+		include DataMapper::Resource
+		
+		property :id,	Serial
+		property :session, String, :required => true
+		property :timeline, Integer, :required => true, :unique => true
+		
+		has n, :zone_snapshots, :through => Resource
 
-		DATE = 'date'
-		SESSION = 'session'
-		ID = 'id'
-
-		private
-
-		def initialize hash
-			@hash = hash
+		def initialize zones, last_timeline, session_id
 			@debug = true
-		end
+			
+			json = {
+				:session => session_id,
+				:timeline => last_timeline,
+				:zone_snapshots => []
+				
+			}
+			super json
 
-		public
-
-		def self.parse hash
-			# mandatory fields firstvalidate user input first
-			hash.each do |key, val|
-				case key
-				when DATE then
-					rdebug "date : %s" % val.inspect
-				when SESSION then
-					rdebug "session : %s" % val.inspect
-				when ID then
-					rdebug "id : %s" % val.inspect
-				else
-					raise RuntimeError, "unknow request field '%s'" % key
-				end
+			zones.each do |index, zone|
+				self.zone_snapshots<< zone.snapshot
 			end
 
-			[
-				DATE,
-				SESSION,
-				ID
-			].each do |field|
-				unless hash.include? field then
-					raise ArgumentError, ("The '%s' field is missing" % field)
-				end
+			begin
+				self.save
+				pp self
+			rescue DataMapper::SaveFailureError => e
+				rdebug "Saving failure : %s" % e.resource.errors.inspect
+				raise e
 			end
-			SnapshotRequest.new hash
-		end
-
-
-		def session
-			return @hash[SESSION]
-		end
-
-		def date
-			return @hash[DATE].to_i
 		end
 		
-		def id
-			return @hash[ID].to_i
-		end
-
 	end
-
 end
-

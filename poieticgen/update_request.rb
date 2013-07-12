@@ -26,13 +26,9 @@ module PoieticGen
 		MESSAGES = 'messages'
 		STROKES = 'strokes'
 
-		MESSAGES_AFTER = 'messages_after'
-		STROKES_AFTER = 'strokes_after'
-		EVENTS_AFTER = 'events_after'
+		TIMELINE_AFTER = 'timeline_after'
 
-		MESSAGES_BEFORE = 'messages_before'
-		STROKES_BEFORE = 'strokes_before'
-		EVENTS_BEFORE = 'events_before'
+		TIMELINE_BEFORE = 'timeline_before'
 
 		MESSAGES_DST = 'user_dst'
 		MESSAGES_CONTENT = 'content'
@@ -44,9 +40,7 @@ module PoieticGen
 
 		def initialize hash
 			@hash = hash
-			@enable_strokes = false
-			@enable_events = false
-			@enable_messages = false
+			@enable_timeline = false # FIXME: unused
 			@debug = true
 		end
 
@@ -56,39 +50,32 @@ module PoieticGen
 			# mandatory fields firstvalidate user input first
 			hash.each do |key, val|
 				case key
-				when STROKES_AFTER then
-					@enable_strokes = true
-				when STROKES_BEFORE then
-					@enable_strokes = true
-				when MESSAGES_AFTER then
-					@enable_messages = true
-				when MESSAGES_BEFORE then
-					@enable_messages = true
-				when EVENTS_AFTER then
-					@enable_events = true
-				when EVENTS_BEFORE then
-					@enable_events = true
+				when TIMELINE_AFTER then
+					@enable_timeline = true
+				when TIMELINE_BEFORE then
+					@enable_timeline = true
 				when MESSAGES then
 					if val.length != 0 then
-					  rdebug "messages : %s" % val.inspect
-          end
+						rdebug "messages : %s" % val.inspect
+          				end
 				when STROKES then
-				  if val.length != 0 then
-					  rdebug "strokes : %s" % val.inspect
-          end
-        when UPDATE_INTERVAL then
-          begin
-            rdebug "update_interval : %d" % val.to_i
-          rescue Exception => e
-            rdebug e
-            raise ArgumentError, ("%s with invalid value : " % UPDATE_INTERVAL)
-          end
+				  	if val.length != 0 then
+						rdebug "strokes : %s" % val.inspect
+         				end
+				when UPDATE_INTERVAL then
+				  	begin
+				    		rdebug "update_interval : %d" % val.to_i
+				  	rescue Exception => e
+				    		rdebug e
+				    		raise ArgumentError, ("%s with invalid value : " % UPDATE_INTERVAL)
+					end
 				else
 					raise RuntimeError, "unknow request field '%s'" % key
 				end
 			end
 
 			[
+				TIMELINE_AFTER,
 				STROKES,
 				MESSAGES,
 				UPDATE_INTERVAL
@@ -122,21 +109,13 @@ module PoieticGen
 			return @hash[MESSAGES]
 		end
 
-		def messages_after
-			return @hash[MESSAGES_AFTER].to_i
-		end
-
-		def strokes_after
-			return @hash[STROKES_AFTER].to_i
-		end
-
-		def events_after
-			return @hash[EVENTS_AFTER].to_i
+		def timeline_after
+			return @hash[TIMELINE_AFTER].to_i
 		end
 
 		def update_interval
 		  return @hash[UPDATE_INTERVAL].to_i
-    end
+    		end
 
 	end
 end

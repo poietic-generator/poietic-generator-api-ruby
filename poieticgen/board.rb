@@ -23,6 +23,8 @@
 require 'poieticgen/update_request'
 require 'poieticgen/zone'
 require 'poieticgen/user'
+require 'poieticgen/timeline'
+require 'poieticgen/board_snapshot'
 
 require 'poieticgen/allocation/spiral'
 require 'poieticgen/allocation/random'
@@ -35,6 +37,8 @@ module PoieticGen
 	# A class that manages the global drawing
 	#
 	class Board
+
+		STROKE_COUNT_BETWEEN_QFRAMES = 5
 
 		attr_reader :config
 
@@ -51,6 +55,7 @@ module PoieticGen
 			@allocator = ALLOCATORS[config.allocator].new config
 			pp @allocator
 			@monitor = Monitor.new
+			@stroke_count = 0
 		end
 
 
@@ -99,7 +104,26 @@ module PoieticGen
 
 
 		def update_data user, drawing
+			return if drawing.empty?
+		
 			@monitor.synchronize do
+				# Save board periodically
+				# before the update because the first snapshot
+				# must starts at stroke_id = 0
+				
+				if @stroke_count == 0 then
+					last_timeline_id = Timeline.last_id
+					if BoardSnapshot.first(:timeline => last_timeline_id).nil? then
+						self.save last_timeline_id, user.session
+					end
+				end
+				
+				@stroke_count = (@stroke_count + drawing.length) % STROKE_COUNT_BETWEEN_QFRAMES;
+
+				STDOUT.puts "stroke_count %d" % [@stroke_count]
+				
+				# Update the zone
+			
 				zone = @allocator[user.zone]
 				unless zone.nil? then
 					zone.apply user, drawing
@@ -107,6 +131,128 @@ module PoieticGen
 					#FIXME: return an error to the user ?
 				end
 			end
+		end
+
+		def save last_timeline, session_id
+			BoardSnapshot.new @allocator.zones, last_timeline, session_id
+		end
+		
+		#
+		# Get the board state at timeline_id.
+		# FIXME: load_board is not static because it depends on @config.
+		#
+		def load_board timeline_id
+			
+			if timeline_id < 0 then
+				timeline_id = 0
+			end
+		
+			snap = _get_snapshot timeline_id
+			
+			STDOUT.puts "snap"
+			pp snap
+			
+			# Create zones from snapshot
+			zones_snap = {}
+			
+			snap.zone_snapshots.each do |zs|
+				zones_snap[zs.index] = Zone.from_snapshot zs
+			end
+			
+			STDOUT.puts "zones_snap"
+			pp zones_snap
+			
+			# Put zones from snapshot in allocator
+			allocator = ALLOCATORS[@config.allocator].new @config
+			allocator.set_zones zones_snap
+			
+			STDOUT.puts "Allocator snapshot"
+			pp allocator
+			
+			# get the session associated to the snapshot
+			users_db = User.all(
+				:session => snap.session
+			)
+			
+			# get events since the snapshot
+			timelines = Timeline.all(
+				:id.gte => snap.timeline,
+				:id.lte => timeline_id,
+				:order => [ :id.asc ]
+			)
+			
+			STDOUT.puts "users_db"
+			pp users_db
+			
+			STDOUT.puts "strokes_db"
+			pp timelines.strokes
+			
+			STDOUT.puts "events_db"
+			pp timelines.events
+			
+			# Add/Remove zones since the snapshot
+			timelines.events.each do |event|
+				zone_index = event.zone_index
+				user_id = event.zone_user
+				
+				STDOUT.puts "%s user_id = %d, zone_index = %d" % [ event.type, user_id, zone_index ]
+				if event.type == "join" then
+					zone = allocator.allocate
+					zone.user_id = user_id
+				elsif event.type == "leave" then
+					# reset zone
+					allocator[zone_index].reset
+					# unallocate it
+					allocator.free zone_index
+				else
+					raise RuntimeError, "Unknown event type %s" % event.type
+				end
+			end
+			
+			STDOUT.puts "Allocator after events"
+			pp allocator
+			
+			users = users_db.map{ |u| u.to_hash } # FIXME: All users in the session are returned
+			strokes = timelines.strokes.map{ |s| s.to_hash s.timeline.timestamp } # strokes with diffstamp = 0 (not important)
+			zones = allocator.zones
+			
+			# Apply strokes
+			zones.each do |index,zone|
+				if zone.user_id != nil then
+					zone.apply_local strokes.select{ |s| s["zone"] == zone.index }
+				end
+			end
+
+			STDOUT.puts "users, zones and strokes"
+			pp users
+			pp zones
+			pp strokes
+			
+			return users, zones
+		end
+		
+		private
+
+		def _get_snapshot timeline_id
+			# The first snap before timeline_id
+			snap = BoardSnapshot.first(
+				:timeline.lte => timeline_id,
+				:order => [ :timeline.desc ]
+			)
+			
+			if snap.nil? then
+				# FIXME: the first snapshot isn't the first state of the game (but almost)
+				snap = BoardSnapshot.first(
+					:order => [ :timeline.asc ]
+				)
+			
+				if snap.nil? then
+					# FIXME: start from an empty board
+					raise RuntimeError, "No snapshot found for timeline %d" % timeline_id
+				end
+			end
+			
+			return snap
 		end
 	end
 

@@ -32,13 +32,14 @@ module PoieticGen
 		property :id,	Serial
 		property :user_src,	Integer, :required => true
 		property :user_dst,	Integer, :required => true
-		property :content, Text, :required => true
+		property :content,	Text, :required => true
 		property :stamp,	Time, :required => true
 
+		belongs_to :timeline, :key => true
 
 		def to_hash
 			res = {
-				:id => self.id,
+				:id => self.timeline.id,
 				:user_src => self.user_src,
 				:user_dst => self.user_dst,
 				:content => self.content,
@@ -53,7 +54,8 @@ module PoieticGen
 					:user_src => src,
 					:user_dst => dst,
 					:content => content,
-					:stamp => stamp
+					:stamp => stamp,
+					:timeline => (Timeline.create_with_time stamp)
 				})
 				msg.save
 				rdebug msg.inspect

@@ -102,6 +102,19 @@ module PoieticGen ; module Allocation
 			return res
 		end
 
+		#
+		# get all zones
+		#
+		def zones
+			return @zones
+		end
+		
+		#
+		# replace zones
+		#
+		def set_zones zones
+			@zones = zones
+		end
 
 		#
 		# return index to position
@@ -155,15 +168,16 @@ module PoieticGen ; module Allocation
 		#
 		def allocate
 			@monitor.synchronize do
-				next_index = _next_index()
-
-				zone = Zone.new next_index, 
-					(self.index_to_position next_index),
-					@config.width,
-					@config.height
+				index = _next_index()
+			
+				zone = Zone.new index, 
+				(self.index_to_position index),
+				@config.width,
+				@config.height
 
 				rdebug "Spiral/allocate zone : ", zone.inspect
-				@zones[next_index] = zone
+				@zones[index] = zone
+				
 				return zone
 			end
 		end

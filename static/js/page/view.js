@@ -29,7 +29,8 @@
 
 	var session = null,
 		viewer = null,
-		board = null;
+		board = null,
+		slider = null;
 
 	if (PoieticGen.Zone === undefined) {
 		console.error("PoieticGen.Zone is not defined !");
@@ -45,6 +46,7 @@
 			//console.log("page_draw/ready: session callback ok");
 			board = new PoieticGen.Board(session);
 			viewer = new PoieticGen.Viewer(session, board, 'session-viewer', null, {fullsize: true});
+			slider = new PoieticGen.Slider(session, viewer, $("#history_slider"));
 			//console.log("page_draw/ready: prepicker");
 		});
 
