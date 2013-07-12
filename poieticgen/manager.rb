@@ -533,6 +533,8 @@ module PoieticGen
 
 							STDOUT.puts "Events"
 							pp evt_req
+							
+							pp timelines.last
 						
 							users, zones = @board.load_board req.timeline_after
 							# FIXME: load_board loads some useless data for what we want

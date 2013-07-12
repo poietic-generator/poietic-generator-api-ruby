@@ -147,50 +147,10 @@ module PoieticGen
 				timeline_id = 0
 			end
 		
-			# The first snap before timeline_id
-			snap = BoardSnapshot.first(
-				:timeline.lte => timeline_id,
-				:order => [ :timeline.desc ]
-			)
-			
-			if snap.nil? then
-				# FIXME: the first snapshot isn't the first state of the game (but almost)
-				snap = BoardSnapshot.first(
-					:order => [ :timeline.asc ]
-				)
-			
-				if snap.nil? then
-					# FIXME: start from an empty board
-					raise RuntimeError, "No snapshot found for timeline %d" % timeline_id
-				end
-			end
+			snap = _get_snapshot timeline_id
 			
 			STDOUT.puts "snap"
 			pp snap
-			
-			# get the session associated to the snapshot
-			users_db = User.all(
-				:session => snap.session
-			)
-			
-			STDOUT.puts "users_db"
-			pp users_db
-			
-			timelines = Timeline.all(
-				:id.gt => snap.timeline,
-				:id.lte => timeline_id,
-				:order => [ :id.asc ]
-			)
-			
-			strokes_db = timelines.strokes
-			
-			STDOUT.puts "strokes_db"
-			pp strokes_db
-		
-			events_db = timelines.events
-			
-			STDOUT.puts "events_db"
-			pp events_db
 			
 			# Create zones from snapshot
 			zones_snap = {}
@@ -209,8 +169,29 @@ module PoieticGen
 			STDOUT.puts "Allocator snapshot"
 			pp allocator
 			
+			# get the session associated to the snapshot
+			users_db = User.all(
+				:session => snap.session
+			)
+			
+			# get events since the snapshot
+			timelines = Timeline.all(
+				:id.gte => snap.timeline,
+				:id.lte => timeline_id,
+				:order => [ :id.asc ]
+			)
+			
+			STDOUT.puts "users_db"
+			pp users_db
+			
+			STDOUT.puts "strokes_db"
+			pp timelines.strokes
+			
+			STDOUT.puts "events_db"
+			pp timelines.events
+			
 			# Add/Remove zones since the snapshot
-			events_db.each do |event|
+			timelines.events.each do |event|
 				zone_index = event.zone_index
 				user_id = event.zone_user
 				
@@ -232,7 +213,7 @@ module PoieticGen
 			pp allocator
 			
 			users = users_db.map{ |u| u.to_hash } # FIXME: All users in the session are returned
-			strokes = strokes_db.map{ |s| s.to_hash s.timestamp } # strokes with diffstamp = 0 (not important)
+			strokes = timelines.strokes.map{ |s| s.to_hash s.timeline.timestamp } # strokes with diffstamp = 0 (not important)
 			zones = allocator.zones
 			
 			# Apply strokes
@@ -248,6 +229,30 @@ module PoieticGen
 			pp strokes
 			
 			return users, zones
+		end
+		
+		private
+
+		def _get_snapshot timeline_id
+			# The first snap before timeline_id
+			snap = BoardSnapshot.first(
+				:timeline.lte => timeline_id,
+				:order => [ :timeline.desc ]
+			)
+			
+			if snap.nil? then
+				# FIXME: the first snapshot isn't the first state of the game (but almost)
+				snap = BoardSnapshot.first(
+					:order => [ :timeline.asc ]
+				)
+			
+				if snap.nil? then
+					# FIXME: start from an empty board
+					raise RuntimeError, "No snapshot found for timeline %d" % timeline_id
+				end
+			end
+			
+			return snap
 		end
 	end
 

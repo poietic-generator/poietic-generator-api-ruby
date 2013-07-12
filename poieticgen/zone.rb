@@ -75,6 +75,7 @@ module PoieticGen
 			super param_create
 			
 			@last_snapshot = nil
+			@is_snapshoted = false
 		end
 		
 		def save
@@ -136,6 +137,8 @@ module PoieticGen
 						self.data[idx] = color
 					end
 				end
+				
+				@is_snapshoted = false
 
 				begin
 					self.save
@@ -207,7 +210,7 @@ module PoieticGen
 						:zone => self.index,
 						:color => color,
 						:changes => where,
-						:stamp => nil
+						:diffstamp => nil
 					}
 					result.push patch
 				end
@@ -216,8 +219,11 @@ module PoieticGen
 		end
 		
 		def snapshot
-			# TODO: use the last snapshot
-			return _take_snapshot
+			if not @is_snapshoted then
+				@last_snapshot = _take_snapshot
+			end
+			
+			return @last_snapshot
 		end
 
 		private

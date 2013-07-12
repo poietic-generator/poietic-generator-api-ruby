@@ -32,7 +32,6 @@ module PoieticGen
 		property :zone, Integer, :required => true
 		property :color, String, :required => true
 		property :changes, Text, :required => true, :lazy => false
-		property :timestamp, Integer, :required => true
 		
 		belongs_to :timeline, :key => true
 
@@ -40,9 +39,8 @@ module PoieticGen
 			param_create = {
 				:color => color,
 				:changes => changes,
-				:timestamp => timestamp,
 				:zone => zone,
-				:timeline => Timeline.new
+				:timeline => (Timeline.create_with_time timestamp)
 			}
 			
 			patch = create param_create
@@ -61,7 +59,7 @@ module PoieticGen
 				:zone => self.zone,
 				:color => self.color,
 				:changes => JSON.parse( self.changes ),
-				:diffstamp => self.timestamp - ref
+				:diffstamp => self.timeline.timestamp - ref
 			}
 			return res
 		end

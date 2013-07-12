@@ -46,9 +46,9 @@
 				to_remove_count = 0, interval;
 
 			_events.sort(function (a, b) {
-				if (a.event.timeline_id < b.event.timeline_id) {
+				if (a.event.id < b.event.id) {
 					return -1;
-				} if (a.event.timeline_id > b.event.timeline_id) {
+				} if (a.event.id > b.event.id) {
 					return 1;
 				}
 				return 0;
@@ -63,7 +63,7 @@
 				if (event.timestamp <= (new Date()).getTime() / 1000) {
 					type = event_desc.type;
 
-					console.log("now " + event.timestamp + " timeline " + event.timeline_id);
+					console.log("now " + event.timestamp + " timeline " + event.id);
 
 					for (o = 0; o < _observers.length; o += 1) {
 						if (type === EVENT_EVENT) {

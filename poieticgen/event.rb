@@ -32,7 +32,6 @@ module PoieticGen
 		property :id,	Serial
 		property :type,	String, :required => true
 		property :desc, String, :required => true
-		property :timestamp, Integer, :required => true
 
 		belongs_to :timeline, :key => true
 
@@ -40,8 +39,7 @@ module PoieticGen
 			event = Event.create({
 				:type => 'join',
 				:desc => JSON.generate({ :user => uid, :zone => uzone }),
-				:timestamp => Time.now.to_i,
-				:timeline => Timeline.new
+				:timeline => Timeline.create_now
 			})
 		
 			begin
@@ -59,8 +57,7 @@ module PoieticGen
 			event = Event.create({
 				:type => 'leave',
 				:desc => JSON.generate({ :user => uid, :zone => uzone }),
-				:timestamp => leave_time,
-				:timeline => Timeline.new
+				:timeline => (Timeline.create_with_time leave_time)
 			})
 			
 			begin
@@ -89,11 +86,12 @@ module PoieticGen
 				:user => user.to_hash,
 				:zone => (zone.to_desc_hash Zone::DESCRIPTION_MINIMAL)
 			}
+
 			res = {
 				:id => self.timeline.id,
 				:type => self.type,
 				:desc => res_desc,
-				:diffstamp => self.timestamp - ref
+				:diffstamp => self.timeline.timestamp - ref
 			}
 			return res
 		end

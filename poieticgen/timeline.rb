@@ -34,9 +34,15 @@ module PoieticGen
 		has 1, :stroke
 		has 1, :message
 		
-		def initialize
-			super({
+		def self.create_now
+			create({
 				:timestamp => Time.now.to_i
+			})
+		end
+		
+		def self.create_with_time timestamp
+			create({
+				:timestamp => timestamp
 			})
 		end
 

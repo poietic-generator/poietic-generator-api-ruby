@@ -55,7 +55,7 @@ module PoieticGen
 					:user_dst => dst,
 					:content => content,
 					:stamp => stamp,
-					:timeline => Timeline.new
+					:timeline => (Timeline.create_with_time stamp)
 				})
 				msg.save
 				rdebug msg.inspect
