@@ -33,7 +33,6 @@ module PoieticGen
 		property :user_src,	Integer, :required => true
 		property :user_dst,	Integer, :required => true
 		property :content,	Text, :required => true
-		property :stamp,	Time, :required => true
 
 		belongs_to :timeline, :key => true
 
@@ -43,19 +42,18 @@ module PoieticGen
 				:user_src => self.user_src,
 				:user_dst => self.user_dst,
 				:content => self.content,
-				:stamp => self.stamp
+				:stamp => self.timeline.timestamp
 			}
 			return res
 		end
 
-		def self.post src, dst, stamp, content
+		def self.post src, dst, timestamp, content
 			begin
 				msg = Message.create({
 					:user_src => src,
 					:user_dst => dst,
 					:content => content,
-					:stamp => stamp,
-					:timeline => (Timeline.create_with_time stamp)
+					:timeline => (Timeline.create_with_time timestamp)
 				})
 				msg.save
 				rdebug msg.inspect

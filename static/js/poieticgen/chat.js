@@ -80,7 +80,7 @@
 				if (null !== user_dst && 0 < user_dst_id && "" !== content.val()) {
 					message = {
 						content: content.val(),
-						stamp: new Date(),
+						stamp: (new Date()).getTime() / 1000,
 						user_dst: user_dst_id
 					};
 
