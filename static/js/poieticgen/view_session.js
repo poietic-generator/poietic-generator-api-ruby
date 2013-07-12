@@ -125,27 +125,6 @@
 			self.join_view_session(date);
 
 			self.dispatch_interval(1);
-
-			if (_view_type === HISTORY_VIEW) {
-				$(".slider").show();
-
-				$(".ui-slider").bind("vmouseup", function (event) {
-					date = _slider.value();
-					console.log('User history change: ' + date);
-					if (date >= _slider.maximum()) {
-						_view_type = REAL_TIME_VIEW;
-					} else {
-						_view_type = HISTORY_VIEW;
-					}
-					self.clear_all_timers();
-					_last_update_timestamp = date;
-					self.join_view_session(date);
-				});
-
-				_slider.start_animation();
-			} else {
-				$(".slider").hide();
-			}
 		};
 
 		this.join_view_session = function (date) {
@@ -199,7 +178,22 @@
 					}
 
 					if (_view_type === HISTORY_VIEW) {
-						_slider.set_range(0, response.date_range);
+						_slider.set_range(_local_start_date.getTime() - response.date_range, _local_start_date.getTime());
+						
+						_slider.mouseup(function (event) {
+							date = _slider.value();
+							console.log('User history change: ' + date);
+							if (date >= _slider.maximum()) {
+								_view_type = REAL_TIME_VIEW;
+							} else {
+								_view_type = HISTORY_VIEW;
+							}
+							self.clear_all_timers();
+							_last_update_timestamp = date;
+							self.join_view_session(date);
+						});
+
+						_slider.start_animation();
 					}
 
 					self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
@@ -316,7 +310,7 @@
 								_view_type = REAL_TIME_VIEW;
 								console.log('view_session/update real time!');
 							}
-							_slider.set_maximum(_slider.maximum + VIEW_SESSION_UPDATE_INTERVAL);
+							_slider.set_maximum(_slider.maximum() + VIEW_PLAY_UPDATE_INTERVAL);
 						}
 
 						self.dispatch_events(response.events);
