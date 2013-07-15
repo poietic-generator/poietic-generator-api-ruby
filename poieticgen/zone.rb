@@ -110,7 +110,7 @@ module PoieticGen
 			end
 		end
 
-		def apply user, drawing, session
+		def apply user, drawing
 			Zone.transaction do
 				# save patch into database
 				return if drawing.nil?
@@ -131,7 +131,7 @@ module PoieticGen
 						JSON.generate(changes).to_s,
 						timestamp,
 						user.zone,
-						session
+						user.session
 
 					changes.each do |x,y,t_offset|
 						idx = _xy2idx(x,y)

@@ -152,7 +152,8 @@ module PoieticGen
 				raise RuntimeError, "Invalid timeline_id %d" % timeline_id
 			end
 
-			snap = _get_snapshot timeline_id last_event.session
+			session = last_event.session
+			snap = _get_snapshot timeline_id, session
 			
 			STDOUT.puts "snap"
 			pp snap
@@ -175,12 +176,10 @@ module PoieticGen
 			pp allocator
 			
 			# get the session associated to the snapshot
-			users_db = User.all(
-				:session => last_event.session.id
-			)
+			users_db = session.users
 			
 			# get events since the snapshot
-			timelines = Timeline.all(
+			timelines = session.timelines.all(
 				:id.gt => snap.timeline,
 				:id.lte => timeline_id,
 				:order => [ :id.asc ]
@@ -240,9 +239,8 @@ module PoieticGen
 
 		def _get_snapshot timeline_id, session
 			# The first snap before timeline_id
-			snap = BoardSnapshot.first(
+			snap = session.board_snapshots.first(
 				:timeline.lte => timeline_id,
-				:session => session.id,
 				:order => [ :timeline.desc ]
 			)
 			

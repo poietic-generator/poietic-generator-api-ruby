@@ -262,7 +262,7 @@ module PoieticGen
 				result = {}
 				# verify session expiration..
 				status = [ STATUS_SUCCESS ]
-        result = settings.manager.snapshot session, params
+				result = settings.manager.snapshot session, params
 
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors

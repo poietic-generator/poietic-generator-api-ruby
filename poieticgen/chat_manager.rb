@@ -29,9 +29,9 @@ module PoieticGen
       @users = []
     end
 
-    def update_data user, data, session
+    def update_data user, data
       data.each do | msg |
-        PoieticGen::Message.post user.id, msg["user_dst"], msg["stamp"].to_i, msg["content"], session
+        PoieticGen::Message.post user.id, msg["user_dst"], msg["stamp"].to_i, msg["content"], user.session
       end
     end
 

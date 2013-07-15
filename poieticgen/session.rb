@@ -27,11 +27,19 @@ module PoieticGen
 	class Session
 		include DataMapper::Resource
 
-		property :id,	Serial
+		property :id,        Serial
+		property :timestamp, Integer
+		property :token,     String
 
 		has n, :board_snapshots
 		has n, :timelines
 		has n, :users
 
+		def initialize
+			super({
+				:token => (0...16).map{ ('a'..'z').to_a[rand(26)] }.join,
+				:timestamp => Time.now.to_i			
+			})
+		end
 	end
 end
