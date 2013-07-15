@@ -368,6 +368,7 @@ module PoieticGen
 					zones = users_db.map{ |u| @board[u.zone].to_desc_hash Zone::DESCRIPTION_FULL }
 					
 					timeline_id = Timeline.last_id
+					diffstamp = 0
 				else
 					# retrieve the total duration of the game
 
@@ -381,6 +382,7 @@ module PoieticGen
 						# get the first state.
 
 						timeline_id = if first_timeline.nil? then 0 else first_timeline.id end
+						diffstamp = 0
 					else
 						if req.date > 0 then
 							# get the state from the beginning.
@@ -395,13 +397,13 @@ module PoieticGen
 
 						STDOUT.puts "abs_time %d (now %d, date %d)" % [absolute_time, now_i, req.date]
 
-						timeline_id = begin
-							t = Timeline.first(
-								:timestamp.lte => absolute_time,
-								:order => [ :id.desc ]
-							)
-							if t.nil? then 0 else t.id end
-						end
+						t = Timeline.first(
+							:timestamp.lte => absolute_time,
+							:order => [ :id.desc ]
+						)
+
+						timeline_id = if t.nil? then 0 else t.id end
+						diffstamp = if t.nil? then 0 else absolute_time - t.timestamp end
 					end
 
 					STDOUT.puts "timeline_id %d" % timeline_id
@@ -421,9 +423,8 @@ module PoieticGen
 					:zone_column_count => @config.board.width,
 					:zone_line_count => @config.board.height,
 					:timeline_id => timeline_id,
-					:start_date => @session.timestamp,
-					:duration => (now_i - @session.timestamp),
 					:date_range => date_range,
+					:diffstamp => diffstamp, # time between the found timeline and the requested date
 					:id => req.id
 				}
 

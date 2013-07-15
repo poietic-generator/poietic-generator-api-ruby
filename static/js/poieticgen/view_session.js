@@ -44,7 +44,7 @@
 		HISTORY_VIEW = 1;
 
 
-	function ViewSession(callback) {
+	function ViewSession(callback, p_slider) {
 		var console = window.console,
 			self = this,
 			_current_timeline_id = 0,
@@ -65,13 +65,12 @@
 			// _set_local_start_date_fn,
 			_view_type = REAL_TIME_VIEW,
 			_last_update_timestamp = 0,
+			_last_join_diffstamp = 0,
 			_join_view_session_id = 0,
 			_update_view_session_id = 0,
 
 			_dispatch_events_body,
-			_dispatch_strokes_body,
-			_timer_strokes = [],
-			_timer_events = [];
+			_dispatch_strokes_body;
 
 		this.zone_column_count = null;
 		this.zone_line_count = null;
@@ -113,18 +112,30 @@
 		/**
 		 * Semi-Constructor
 		 */
-		this.initialize = function (date) {
+		this.initialize = function (date, slider) {
 
 			_join_view_session_id = 0;
 			_update_view_session_id = 0;
-			_timer_strokes = [];
-			_timer_events = [];
-
 			_game = new PoieticGen.Game();
+			_slider = slider;
+			_slider.update_interval(1);
+
+			self.register(_slider);
 
 			self.join_view_session(date);
 
-			self.dispatch_interval(1);
+			_slider.mouseup(function (event) {
+				date = _slider.value();
+				console.log('User history change: ' + date);
+				if (date >= _slider.maximum()) {
+					_view_type = REAL_TIME_VIEW;
+				} else {
+					_view_type = HISTORY_VIEW;
+				}
+				self.clear_all_timers();
+				_last_update_timestamp = date;
+				self.join_view_session(date);
+			});
 		};
 
 		this.join_view_session = function (date) {
@@ -162,6 +173,7 @@
 					this.zone_line_count = response.zone_line_count;
 
 					_local_start_date = new Date();
+					_last_join_diffstamp = response.diffstamp;
 
 					_current_timeline_id = _init_timeline_id = response.timeline_id;
 					// console.log('view_session/join response mod : ' + JSON.stringify(this) );
@@ -173,25 +185,12 @@
 					//console.log('view_session/join post-callback ! observers = ' + JSON.stringify( _game.observers() ));
 					// handle other zone events
 					for (i = 0; i < self.other_zones.length; i += 1) {
-						console.log('view_session/join on zone ' + JSON.stringify(self.other_zones[i]));
+						//console.log('view_session/join on zone ' + JSON.stringify(self.other_zones[i]));
 						self.dispatch_strokes(self.other_zones[i].content);
 					}
 
 					if (_view_type === HISTORY_VIEW) {
-						_slider.set_range(_local_start_date.getTime() - response.date_range, _local_start_date.getTime());
-						
-						_slider.mouseup(function (event) {
-							date = _slider.value();
-							console.log('User history change: ' + date);
-							if (date >= _slider.maximum()) {
-								_view_type = REAL_TIME_VIEW;
-							} else {
-								_view_type = HISTORY_VIEW;
-							}
-							self.clear_all_timers();
-							_last_update_timestamp = date;
-							self.join_view_session(date);
-						});
+						_slider.set_range((_local_start_date.getTime() / 1000) - response.date_range, _local_start_date.getTime() / 1000);
 
 						_slider.start_animation();
 					}
@@ -201,10 +200,6 @@
 					console.log('view_session/join end');
 				}
 			});
-		};
-
-		this.set_slider = function (slider) {
-			_slider = slider;
 		};
 
 
@@ -275,34 +270,7 @@
 						if (_update_view_session_id !== response.id) {
 							return;
 						}
-						var i, seconds = 0, diffstamp;
 
-						if (response.strokes.length > 0) {
-
-							if (_view_type === REAL_TIME_VIEW) {
-								// We want the first stroke now and the others synchronized
-								seconds = parseInt(response.strokes[0].diffstamp, 10);
-
-								// Search min diffstamp
-								for (i = 1; i < response.strokes.length; i += 1) {
-									diffstamp = parseInt(response.strokes[i].diffstamp, 10);
-									if (seconds > diffstamp) {
-										seconds = diffstamp;
-									}
-								}
-
-							} else {
-								// diffstamps are relative to the local start date
-								seconds = _get_elapsed_time_fn();
-							}
-
-							console.log('view_session/update seconds : ' + seconds);
-
-							for (i = 0; i < response.strokes.length; i += 1) {
-								response.strokes[i].diffstamp -= seconds;
-							}
-						}
-						console.log('view_session/update response : ' + JSON.stringify(response));
 
 						if (_view_type === HISTORY_VIEW) {
 							_last_update_timestamp = parseInt(response.timestamp, 10);
@@ -310,7 +278,7 @@
 								_view_type = REAL_TIME_VIEW;
 								console.log('view_session/update real time!');
 							}
-							_slider.set_maximum(_slider.maximum() + VIEW_PLAY_UPDATE_INTERVAL);
+							_slider.set_maximum((new Date()).getTime() / 1000);
 						}
 
 						self.dispatch_events(response.events);
@@ -330,7 +298,48 @@
 			return _last_update_timestamp;
 		};
 
-		this.dispatch = function (events) {
+		this.adjust_time = function (events) {
+			var i, seconds = 0, evt_diffstamp;
+
+			if (events.length < 1) {
+				return events;
+			}
+
+			if (_view_type === REAL_TIME_VIEW) {
+				// We want the first stroke now and the others synchronized
+				seconds = parseInt(events[0].diffstamp, 10);
+
+				// Search min diffstamp
+				for (i = 1; i < events.length; i += 1) {
+					evt_diffstamp = parseInt(events[i].diffstamp, 10);
+					if (seconds > evt_diffstamp) {
+						seconds = evt_diffstamp;
+					}
+				}
+
+			} else {
+				// diffstamps are relative to the local start date
+				seconds = _get_elapsed_time_fn() - _last_join_diffstamp;
+			}
+
+			//console.log('view_session/update seconds : ' + seconds);
+
+			for (i = 0; i < events.length; i += 1) {
+				// Make absolute times
+				if (events[i].diffstamp) {
+					events[i].diffstamp -= seconds;
+					events[i].timestamp = parseInt(events[i].diffstamp, 10) + _local_start_date.getTime() / 1000;
+				} else {
+					events[i].timestamp = _local_start_date.getTime() / 1000;
+				}
+			}
+
+			//console.log('view_session/update adjust_time : ' + JSON.stringify(events));
+
+			return events;
+		};
+
+		this.update_current_timeline = function (events) {
 			var i;
 
 			// Retrieve the new timeline_id
@@ -338,32 +347,19 @@
 				if (events[i].id || _current_timeline_id < events[i].id) {
 					_current_timeline_id = events[i].id;
 				}
-				// Make absolute times
-				if (events[i].diffstamp) {
-					events[i].timestamp = events[i].diffstamp + _local_start_date.getTime() / 1000;
-				} else {
-					events[i].timestamp = _local_start_date.getTime() / 1000;
-				}
 			}
 		};
 
 		this.dispatch_events = function (events) {
-			self.dispatch(events);
+			events = self.adjust_time(events);
+			self.update_current_timeline(events);
 			_game.dispatch_events(events);
 		};
 
 		this.dispatch_strokes = function (strokes) {
-			self.dispatch(strokes);
+			strokes = self.adjust_time(strokes);
+			self.update_current_timeline(strokes);
 			_game.dispatch_strokes(strokes);
-		};
-
-		this.dispatch_interval = function (interval) {
-			var o, observers = _game.observers();
-			for (o = 0; o < observers.length; o += 1) {
-				if (observers[o].update_interval) {
-					observers[o].update_interval(interval);
-				}
-			}
 		};
 
 		this.dispatch_reset = function () {
@@ -403,7 +399,7 @@
 		this.current = function () {
 			console.log("view_session/current");
 			self.clear_all_timers();
-			self.initialize(-1);
+			self.join_view_session(-1);
 			self.dispatch_reset();
 		};
 
@@ -413,11 +409,11 @@
 		this.restart = function () {
 			console.log("view_session/restart");
 			self.clear_all_timers();
-			self.initialize(0);
+			self.join_view_session(0);
 			self.dispatch_reset();
 		};
 
-		this.initialize(-1);
+		this.initialize(-1, p_slider);
 	}
 
 	// expose scope objects

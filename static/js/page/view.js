@@ -41,27 +41,30 @@
 
 	// instead of windows.onload
 	$(document).ready(function () {
+		slider = new PoieticGen.Slider($("#history_slider"));
+	
 		// initialize zoness
 		session = new PoieticGen.ViewSession(function (session) {
 			//console.log("page_draw/ready: session callback ok");
 			board = new PoieticGen.Board(session);
 			viewer = new PoieticGen.Viewer(session, board, 'session-viewer', null, {fullsize: true});
-			slider = new PoieticGen.Slider(session, viewer, $("#history_slider"));
 			//console.log("page_draw/ready: prepicker");
-		});
+		}, slider);
+		
+		slider.hide();
 
 		$("#view_start").bind("vclick", function (event) {
 			event.preventDefault();
 			$("#view_now").removeClass("ui-btn-active");
 			$(this).addClass("ui-btn-active");
-			$(".slider").show();
+			slider.show();
 			session.restart();
 		});
 		$("#view_now").bind("vclick", function (event) {
 			event.preventDefault();
 			$("#view_start").removeClass("ui-btn-active");
 			$(this).addClass("ui-btn-active");
-			$(".slider").hide();
+			slider.hide();
 			session.current();
 		});
 	});
