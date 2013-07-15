@@ -100,8 +100,8 @@ module PoieticGen
 				end
 
 				set :config, config
-				DataMapper::Logger.new(STDERR, :info)
-				#DataMapper::Logger.new(STDERR, :debug)
+				#DataMapper::Logger.new(STDERR, :info)
+				DataMapper::Logger.new(STDERR, :debug)
 				hash = config.database.get_hash
 				pp "db hash :", hash
 				DataMapper.setup(:default, hash)
@@ -262,7 +262,7 @@ module PoieticGen
 				result = {}
 				# verify session expiration..
 				status = [ STATUS_SUCCESS ]
-        result = settings.manager.snapshot session, params
+				result = settings.manager.snapshot session, params
 
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors
