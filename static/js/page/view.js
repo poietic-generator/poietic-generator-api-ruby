@@ -54,12 +54,14 @@
 			event.preventDefault();
 			$("#view_now").removeClass("ui-btn-active");
 			$(this).addClass("ui-btn-active");
+			$(".slider").show();
 			session.restart();
 		});
 		$("#view_now").bind("vclick", function (event) {
 			event.preventDefault();
 			$("#view_start").removeClass("ui-btn-active");
 			$(this).addClass("ui-btn-active");
+			$(".slider").hide();
 			session.current();
 		});
 	});

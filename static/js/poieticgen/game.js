@@ -48,7 +48,8 @@
 			_events.sort(function (a, b) {
 				if (a.event.id < b.event.id) {
 					return -1;
-				} if (a.event.id > b.event.id) {
+				}
+				if (a.event.id > b.event.id) {
 					return 1;
 				}
 				return 0;
@@ -57,7 +58,7 @@
 			for (e = 0; e < _events.length; e += 1) {
 				event_desc = _events[e];
 				event = event_desc.event;
-				
+
 				console.log("game.run sorted events: " + JSON.stringify(event));
 
 				if (event.timestamp <= (new Date()).getTime() / 1000) {
@@ -89,17 +90,17 @@
 					break;
 				}
 			}
-			
+
 			if (to_remove_count > 0) {
 				_events.splice(0, to_remove_count);
 			}
-			
+
 			if (_events.length > 0) {
 				interval = _events[0].event.timestamp * 1000 - (new Date()).getTime();
 			} else {
 				interval = GAME_UPDATE_INTERVAL;
 			}
-			
+
 			window.setTimeout(self.run, interval);
 		};
 
@@ -159,7 +160,7 @@
 				}
 			}
 		};
-		
+
 		self.run();
 	}
 

@@ -50,8 +50,7 @@
 			_session.set_slider(self);
 			_animation_interval = 1;
 			_timer_animation = null;
-			self.set_range(0, 100);
-			self.set_value(0);
+			_slider.attr('value', 0);
 		};
 
 
@@ -122,13 +121,24 @@
 			}
 		};
 
+		this.show = function () {
+			$(".slider").show();
+		};
+
+		this.hide = function () {
+			$(".slider").hide();
+		};
+
+		this.mouseup = function (callback) {
+			$(".ui-slider").bind("vmouseup", callback);
+		};
+
 
 		/**
 		* Handle stroke
 		*/
 		this.handle_stroke = function (stk) {
-			//window.console.log("slider/handle_stroke : timeout, value = " + stk.timestamp);
-			//self.set_value(stk.timestamp); // TODO
+			self.set_value(stk.timestamp);
 		};
 
 		this.update_interval = function (interval) {
