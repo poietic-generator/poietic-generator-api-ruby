@@ -119,7 +119,10 @@ module PoieticGen
 					param_request = {
 						:id => req_id
 					}
+					pp @session
+					pp User.first(:id => req_id)
 					pp @session.users.first(:id => req_id)
+					# FIXME: sometimes this does not work (since session was put in db)
 					user = @session.users.first_or_create param_request, param_create
 
 					tdiff = (now.to_i - user.alive_expires_at)
@@ -148,6 +151,8 @@ module PoieticGen
 
 				begin
 					user.save
+					@session.users << user
+					@session.save
 				rescue DataMapper::SaveFailureError => e
 					STDERR.puts e.resource.errors.inspect
 					raise e

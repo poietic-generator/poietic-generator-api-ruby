@@ -36,6 +36,7 @@ module PoieticGen
 		has n, :users
 
 		def initialize
+			@debug = true
 			super({
 				:token => (0...16).map{ ('a'..'z').to_a[rand(26)] }.join,
 				:timestamp => Time.now.to_i			

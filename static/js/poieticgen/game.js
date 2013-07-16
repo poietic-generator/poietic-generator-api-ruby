@@ -136,7 +136,7 @@
 		this.clear_observers = function () {
 			_observers = [];
 		};
-		
+
 		this.reset = function () {
 			if (null !== _timer) {
 				window.clearTimeout(_timer);
