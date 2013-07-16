@@ -250,7 +250,7 @@ module PoieticGen
 			}
 			user = @session.users.first param_request
 			pp user, now
-			raise InvalidSession, "No user found with session %d in DB" % @session.id if user.nil?
+			raise InvalidSession, "No user found with session_id %s in DB" % @session.token if user.nil?
 
 			if ( (now >= user.alive_expires_at) or (now >= user.idle_expires_at) ) then
 				# expired lease...
@@ -346,6 +346,7 @@ module PoieticGen
 			rdebug "call with %s" % params.inspect
 			req = SnapshotRequest.parse params
 			result = nil
+			req_session = @session
 
 			User.transaction do
 
@@ -361,18 +362,18 @@ module PoieticGen
 				# a complete second.
 				if req.date == -1 then
 					# get the current state, select only this session
-					users_db = @session.users.all(
+					users_db = req_session.users.all(
 						:did_expire.not => true
 					)
 					users = users_db.map{ |u| u.to_hash }
 					zones = users_db.map{ |u| @board[u.zone].to_desc_hash Zone::DESCRIPTION_FULL }
 					
-					timeline_id = Timeline.last_id @session
+					timeline_id = Timeline.last_id req_session
 					diffstamp = 0
 				else
 					# retrieve the total duration of the game
 
-					first_timeline = @session.timelines.first(:order => [ :id.asc ])
+					first_timeline = req_session.timelines.first(:order => [ :id.asc ])
 					pp first_timeline
 					date_range = if first_timeline.nil? then 0 else (now_i - first_timeline.timestamp) end
 
@@ -398,7 +399,7 @@ module PoieticGen
 						STDOUT.puts "abs_time %d (now %d, date %d)" % [absolute_time, now_i, req.date]
 
 						# The first event before the requested time
-						t = @session.timelines.first(
+						t = req_session.timelines.first(
 							:timestamp.lte => absolute_time,
 							:order => [ :id.desc ]
 						)
@@ -412,7 +413,7 @@ module PoieticGen
 					# retrieve users and zones
 					
 					if timeline_id > 0 then
-						users, zones = @board.load_board timeline_id
+						users, zones = @board.load_board timeline_id, req_session
 					
 						zones = zones.map{ |i,z| z.to_desc_hash Zone::DESCRIPTION_FULL }
 					else
@@ -428,7 +429,7 @@ module PoieticGen
 					:zone_column_count => @config.board.width,
 					:zone_line_count => @config.board.height,
 					:timeline_id => timeline_id,
-					:date_range => date_range,
+					:date_range => date_range, # total time of session
 					:diffstamp => diffstamp, # time between the found timeline and the requested date
 					:id => req.id
 				}
@@ -448,9 +449,10 @@ module PoieticGen
 			req = PlayRequest.parse params
 			now_i = Time.now.to_i
 			result = nil
+			req_session = @session
 
 			# TODO : ignore session_id because it is unknow for the viewer for now
-			#raise RuntimeError, "Invalid session" if req.session != @session.id
+			#raise RuntimeError, "Invalid session" if req.session != req_session.token
 
 			Event.transaction do
 
@@ -465,7 +467,7 @@ module PoieticGen
 				timestamp = 0
 
 				if req.view_mode == PlayRequest::REAL_TIME_VIEW then
-					timelines = @session.timelines.all(
+					timelines = req_session.timelines.all(
 						:id.gt => req.timeline_after
 					)
 				
@@ -494,7 +496,7 @@ module PoieticGen
 					STDOUT.puts "HISTORY_VIEW"
 					
 					# This stroke is used to compute diffstamps
-					since = @session.timelines.first(
+					since = req_session.timelines.first(
 						:id.gte => req.since,
 						:order => [ :id.asc ]
 					)
@@ -502,7 +504,7 @@ module PoieticGen
 					pp since
 					
 					if not since.nil? then
-						first_t = @session.timelines.first(
+						first_t = req_session.timelines.first(
 							:id.gt => req.timeline_after,
 							:order => [ :id.asc ]
 						)
@@ -514,7 +516,7 @@ module PoieticGen
 							min_timestamp = first_t.timestamp
 							max_timestamp = min_timestamp + req.duration
 						
-							timelines = @session.timelines.all(
+							timelines = req_session.timelines.all(
 								:id.gt => req.timeline_after,
 								:timestamp.lte => max_timestamp,
 								:order => [ :id.asc ]
@@ -540,14 +542,14 @@ module PoieticGen
 								STDOUT.puts "Events"
 								pp evt_req
 						
-								users, zones = @board.load_board timelines.last.id
+								users, zones = @board.load_board timelines.last.id, req_session
 								# FIXME: load_board loads some useless data for what we want
 						
 								events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index], since.timestamp }
 							end
 						end
 					
-						first_timeline_ever = @session.timelines.first(:order => [ :id.asc ])
+						first_timeline_ever = req_session.timelines.first(:order => [ :id.asc ])
 						timestamp = if first_timeline_ever.nil? or min_timestamp < 0
 							    then 0
 							    else
@@ -563,7 +565,7 @@ module PoieticGen
 				result = {
 					:events => events_collection,
 					:strokes => strokes_collection,
-					:timestamp => timestamp, # relative to the start of the game
+					:timestamp => timestamp, # relative to the start of the game session
 					:id => req.id,
 				}
 

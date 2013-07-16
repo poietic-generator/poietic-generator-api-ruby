@@ -131,7 +131,7 @@
 		this.observers = function () {
 			return _observers;
 		};
-		
+
 		this.clear_observers = function () {
 			_observers = [];
 		};

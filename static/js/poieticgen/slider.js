@@ -33,7 +33,8 @@
 			_slider = null,
 			_animation_interval = 1,
 			_timer_animation = null,
-			_mouseup_handler = null;
+			_mouseup_handler = null,
+			_animate = null;
 
 		this.name = "Slider";
 
@@ -102,15 +103,23 @@
 			_animation_interval = interval;
 		};
 
+		/**
+		 * Animate the slider button with interval
+		 */
 		this.start_animation = function () {
 			self.stop_animation();
 
+			_animate((new Date()).getTime());
+		};
+
+		_animate = function (init_stamp) {
+			self.set_value(self.value() + 1);
+
 			_timer_animation = window.setTimeout(function () {
-				window.console.log("slider/start_animation : value = " + self.value());
-				self.set_value(self.value() + 1);
-				_timer_animation = null;
-				self.start_animation();
-			}, _animation_interval * 1000);
+				if (_timer_animation) {
+					_animate(init_stamp + 1000);
+				}
+			}, (_animation_interval * 1000) - ((new Date()).getTime() - init_stamp));
 		};
 
 		this.stop_animation = function () {
@@ -137,16 +146,18 @@
 		* Handle stroke
 		*/
 		this.handle_stroke = function (stk) {
-			self.set_value(stk.timestamp);
+			/*if (stk.stamp_session) {
+				self.set_value(stk.stamp_session);
+			}*/
 		};
-		
+
 		/**
 		* Handle event
 		*/
 		this.handle_event = function (evt) {
-			if (evt.diffstamp) {
-				self.set_value(evt.timestamp);
-			}
+			/*if (evt.stamp_session) {
+				self.set_value(evt.stamp_session);
+			}*/
 		};
 
 		// call constructor

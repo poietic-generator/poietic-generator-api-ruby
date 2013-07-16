@@ -141,14 +141,8 @@ module PoieticGen
 		# Get the board state at timeline_id.
 		# FIXME: load_board is not static because it depends on @config.
 		#
-		def load_board timeline_id
+		def load_board timeline_id, session
 			
-			last_event = Timeline.get(timeline_id)
-			if last_event.nil? then
-				raise RuntimeError, "Invalid timeline_id %d" % timeline_id
-			end
-
-			session = last_event.session
 			snap = _get_snapshot timeline_id, session
 			zones_snap = {}
 			

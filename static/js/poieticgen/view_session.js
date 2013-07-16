@@ -64,7 +64,6 @@
 			// _get_server_date_fn,
 			// _set_local_start_date_fn,
 			_view_type = REAL_TIME_VIEW,
-			_last_update_timestamp = 0,
 			_last_join_diffstamp = 0,
 			_join_view_session_id = 0,
 			_update_view_session_id = 0,
@@ -131,13 +130,13 @@
 					_view_type = HISTORY_VIEW;
 				}
 				self.clear_all_timers();
-				_last_update_timestamp = date;
-				self.join_view_session(date);
+				self.join_view_session(-_slider.maximum() + date);
+				self.dispatch_reset();
 			});
 		};
 
 		this.join_view_session = function (date) {
-			
+
 			_game.clear_observers(); // Observers needs to be cleared because callback reregister all
 			self.register(_slider);
 
@@ -193,7 +192,7 @@
 					if (_view_type === HISTORY_VIEW) {
 						_slider.set_range((_local_start_date.getTime() / 1000) - response.date_range, _local_start_date.getTime() / 1000);
 
-						//_slider.start_animation();
+						_slider.start_animation();
 					}
 
 					self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
@@ -278,18 +277,20 @@
 							return;
 						}
 
+						var last_update_timestamp = 0;
 
 						if (_view_type === HISTORY_VIEW) {
-							_last_update_timestamp = parseInt(response.timestamp, 10);
-							if (_last_update_timestamp < 0 || _last_update_timestamp >= _slider.maximum() - 1) {
+							last_update_timestamp = parseInt(response.timestamp, 10);
+							if (last_update_timestamp < 0 || last_update_timestamp >= _slider.maximum() - 1) {
 								_view_type = REAL_TIME_VIEW;
 								console.log('view_session/update real time!');
 							}
-							//_slider.set_maximum((new Date()).getTime() / 1000);
+
+							_slider.set_maximum((new Date()).getTime() / 1000);
 						}
 
-						self.dispatch_events(response.events);
-						self.dispatch_strokes(response.strokes);
+						self.dispatch_events(response.events, last_update_timestamp);
+						self.dispatch_strokes(response.strokes, last_update_timestamp);
 					}
 
 					self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
@@ -301,11 +302,7 @@
 
 		};
 
-		this.last_update_timestamp = function () {
-			return _last_update_timestamp;
-		};
-
-		this.adjust_time = function (events) {
+		this.adjust_time = function (events, last_update_timestamp) {
 			var i, seconds = 0, evt_diffstamp;
 
 			if (events.length < 1) {
@@ -336,6 +333,7 @@
 				if (events[i].diffstamp) {
 					events[i].diffstamp -= seconds;
 					events[i].timestamp = parseInt(events[i].diffstamp, 10) + _local_start_date.getTime() / 1000;
+					events[i].stamp_session = last_update_timestamp + events[i].diffstamp;
 				} else {
 					events[i].timestamp = _local_start_date.getTime() / 1000;
 				}

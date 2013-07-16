@@ -42,7 +42,7 @@
 	// instead of windows.onload
 	$(document).ready(function () {
 		slider = new PoieticGen.Slider("#history_slider");
-	
+
 		// initialize zoness
 		session = new PoieticGen.ViewSession(function (session) {
 			//console.log("page_draw/ready: session callback ok");
@@ -50,7 +50,7 @@
 			viewer = new PoieticGen.Viewer(session, board, 'session-viewer', null, {fullsize: true});
 			//console.log("page_draw/ready: prepicker");
 		}, slider);
-		
+
 		slider.hide();
 
 		$("#view_start").bind("vclick", function (event) {
