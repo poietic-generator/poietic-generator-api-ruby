@@ -137,7 +137,7 @@
 
 		this.join_view_session = function (date) {
 
-			_game.clear_observers(); // Observers needs to be cleared because callback reregister all
+			_game.reset(); // Observers needs to be cleared because callback reregister all
 			self.register(_slider);
 
 			if (date !== -1) {
@@ -186,7 +186,7 @@
 					// handle other zone events
 					for (i = 0; i < self.other_zones.length; i += 1) {
 						//console.log('view_session/join on zone ' + JSON.stringify(self.other_zones[i]));
-						self.dispatch_strokes(self.other_zones[i].content);
+						self.dispatch_strokes(self.other_zones[i].content, 0);
 					}
 
 					if (_view_type === HISTORY_VIEW) {
@@ -355,14 +355,14 @@
 			}
 		};
 
-		this.dispatch_events = function (events) {
-			events = self.adjust_time(events);
+		this.dispatch_events = function (events, last_update_timestamp) {
+			events = self.adjust_time(events, last_update_timestamp);
 			self.update_current_timeline(events);
 			_game.dispatch_events(events);
 		};
 
-		this.dispatch_strokes = function (strokes) {
-			strokes = self.adjust_time(strokes);
+		this.dispatch_strokes = function (strokes, last_update_timestamp) {
+			strokes = self.adjust_time(strokes, last_update_timestamp);
 			self.update_current_timeline(strokes);
 			_game.dispatch_strokes(strokes);
 		};
@@ -414,6 +414,7 @@
 		this.restart = function () {
 			console.log("view_session/restart");
 			self.clear_all_timers();
+			_slider.set_value(_slider.minimum());
 			self.join_view_session(0);
 			self.dispatch_reset();
 		};

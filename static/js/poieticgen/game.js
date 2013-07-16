@@ -39,7 +39,8 @@
 			_observers = [],
 			_events = [],
 			_older_event,
-			_remove_event;
+			_remove_event,
+			_timer = null;
 
 		this.run = function () {
 			var e, event_desc, event, type, o,
@@ -61,7 +62,7 @@
 
 				// console.log("game.run event: " + JSON.stringify(event));
 
-				if (event.timestamp <= (new Date()).getTime() / 1000) {
+				if (event.timestamp === null || event.timestamp <= (new Date()).getTime() / 1000) {
 					type = event_desc.type;
 
 					console.log("game.run trigger event: now " + event.timestamp + " timeline " + event.id + " diffstamp " + event.diffstamp);
@@ -98,7 +99,7 @@
 				interval = GAME_UPDATE_INTERVAL;
 			}
 
-			window.setTimeout(self.run, interval);
+			_timer = window.setTimeout(self.run, interval);
 		};
 
 		this.dispatch_events = function (events) {
@@ -134,6 +135,16 @@
 
 		this.clear_observers = function () {
 			_observers = [];
+		};
+		
+		this.reset = function () {
+			if (null !== _timer) {
+				window.clearTimeout(_timer);
+				_timer = null;
+			}
+			self.clear();
+			self.clear_observers();
+			self.run();
 		};
 
 		/**
