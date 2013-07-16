@@ -131,7 +131,7 @@ module PoieticGen
 		end
 
 		def save session
-			last_timeline_id = Timeline.last_id
+			last_timeline_id = Timeline.last_id session
 			if BoardSnapshot.first(:timeline => last_timeline_id).nil? then
 				BoardSnapshot.new @allocator.zones, last_timeline_id, session
 			end
@@ -141,28 +141,26 @@ module PoieticGen
 		# Get the board state at timeline_id.
 		# FIXME: load_board is not static because it depends on @config.
 		#
-		def load_board timeline_id
+		def load_board timeline_id, session
 			
-			if timeline_id < 0 then
-				timeline_id = 0
-			end
-			
-			last_event = Timeline.get(timeline_id)
-			if last_event.nil? then
-				raise RuntimeError, "Invalid timeline_id %d" % timeline_id
-			end
-
-			session = last_event.session
 			snap = _get_snapshot timeline_id, session
-			
-			STDOUT.puts "snap"
-			pp snap
-			
-			# Create zones from snapshot
 			zones_snap = {}
 			
-			snap.zone_snapshots.each do |zs|
-				zones_snap[zs.index] = Zone.from_snapshot zs
+			if snap.nil? then			
+				STDOUT.puts "no snap found"
+				
+				# no snapshot: the board is empty
+				snap_timeline = timeline_id - 1
+			else
+				STDOUT.puts "snap"
+				pp snap
+			
+				snap_timeline = snap.timeline
+				
+				# Create zones from snapshot
+				snap.zone_snapshots.each do |zs|
+					zones_snap[zs.index] = Zone.from_snapshot zs
+				end
 			end
 			
 			STDOUT.puts "zones_snap"
@@ -180,7 +178,7 @@ module PoieticGen
 			
 			# get events since the snapshot
 			timelines = session.timelines.all(
-				:id.gt => snap.timeline,
+				:id.gt => snap_timeline,
 				:id.lte => timeline_id,
 				:order => [ :id.asc ]
 			)
@@ -243,11 +241,6 @@ module PoieticGen
 				:timeline.lte => timeline_id,
 				:order => [ :timeline.desc ]
 			)
-			
-			if snap.nil? then
-				# Impossible case because there is at least one snapshot
-				raise RuntimeError, "No snapshot found for timeline %d" % timeline_id
-			end
 			
 			return snap
 		end

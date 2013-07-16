@@ -27,14 +27,14 @@
 	// vim: set ts=4 sw=4 et:
 	"use strict";
 
-	function Slider(p_session, p_viewer, element) {
+	function Slider(p_element) {
 
 		var self = this,
 			_slider = null,
-			_viewer = p_viewer,
-			_session = p_session,
 			_animation_interval = 1,
-			_timer_animation = null;
+			_timer_animation = null,
+			_mouseup_handler = null,
+			_animate = null;
 
 		this.name = "Slider";
 
@@ -42,12 +42,8 @@
 		/**
 		* Constructor
 		*/
-		this.initialize = function (p_session, p_viewer, element) {
-			_slider = element;
-			_viewer = p_viewer;
-			_session = p_session;
-			_session.register(self);
-			_session.set_slider(self);
+		this.initialize = function (element) {
+			_slider = $(element).slider();
 			_animation_interval = 1;
 			_timer_animation = null;
 			_slider.attr('value', 0);
@@ -58,6 +54,7 @@
 		* Change slider position
 		*/
 		this.set_value = function (v) {
+			v = Math.floor(v);
 			window.console.log("slider/set_value : value = " + v);
 			if (v >= self.minimum() && v <= self.maximum()) {
 				_slider.attr('value', v);
@@ -76,18 +73,21 @@
 		* Set the slider range values
 		*/
 		this.set_range = function (min, max) {
-			_slider.attr('min', min);
-			_slider.attr('max', max);
+			window.console.log("slider/set_range : min = " + min + " max = " + max);
+			_slider.attr('min', Math.floor(min));
+			_slider.attr('max', Math.floor(max));
 			_slider.slider('refresh');
 		};
 
 		this.set_minimum = function (min) {
-			_slider.attr('min', min);
+			window.console.log("slider/set_minimum : min = " + min);
+			_slider.attr('min', Math.floor(min));
 			_slider.slider('refresh');
 		};
 
 		this.set_maximum = function (max) {
-			_slider.attr('max', max);
+			window.console.log("slider/set_maximum : max = " + max);
+			_slider.attr('max', Math.floor(max));
 			_slider.slider('refresh');
 		};
 
@@ -103,15 +103,23 @@
 			_animation_interval = interval;
 		};
 
+		/**
+		 * Animate the slider button with interval
+		 */
 		this.start_animation = function () {
 			self.stop_animation();
 
+			_animate((new Date()).getTime());
+		};
+
+		_animate = function (init_stamp) {
+			self.set_value(self.value() + 1);
+
 			_timer_animation = window.setTimeout(function () {
-				window.console.log("slider/start_animation : value = " + self.value());
-				self.set_value(self.value() + 1);
-				_timer_animation = null;
-				self.start_animation();
-			}, _animation_interval * 1000);
+				if (_timer_animation) {
+					_animate(init_stamp + 1000);
+				}
+			}, (_animation_interval * 1000) - ((new Date()).getTime() - init_stamp));
 		};
 
 		this.stop_animation = function () {
@@ -138,15 +146,22 @@
 		* Handle stroke
 		*/
 		this.handle_stroke = function (stk) {
-			self.set_value(stk.timestamp);
+			/*if (stk.stamp_session) {
+				self.set_value(stk.stamp_session);
+			}*/
 		};
 
-		this.update_interval = function (interval) {
-			self.set_animation_interval(interval);
+		/**
+		* Handle event
+		*/
+		this.handle_event = function (evt) {
+			/*if (evt.stamp_session) {
+				self.set_value(evt.stamp_session);
+			}*/
 		};
 
 		// call constructor
-		this.initialize(p_session, p_viewer, $("#history_slider"));
+		this.initialize(p_element);
 	}
 
 	PoieticGen.Slider = Slider;
