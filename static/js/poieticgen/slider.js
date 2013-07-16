@@ -42,7 +42,7 @@
 		* Constructor
 		*/
 		this.initialize = function (element) {
-			_slider = element;
+			_slider = $(element).slider();
 			_animation_interval = 1;
 			_timer_animation = null;
 			_slider.attr('value', 0);
@@ -109,7 +109,7 @@
 				window.console.log("slider/start_animation : value = " + self.value());
 				self.set_value(self.value() + 1);
 				_timer_animation = null;
-				//self.start_animation();
+				self.start_animation();
 			}, _animation_interval * 1000);
 		};
 
@@ -137,11 +137,16 @@
 		* Handle stroke
 		*/
 		this.handle_stroke = function (stk) {
-			//self.set_value(stk.timestamp);
+			self.set_value(stk.timestamp);
 		};
-
-		this.update_interval = function (interval) {
-			self.set_animation_interval(interval);
+		
+		/**
+		* Handle event
+		*/
+		this.handle_event = function (evt) {
+			if (evt.diffstamp) {
+				self.set_value(evt.timestamp);
+			}
 		};
 
 		// call constructor

@@ -59,27 +59,24 @@
 				event_desc = _events[e];
 				event = event_desc.event;
 
-				console.log("game.run sorted events: " + JSON.stringify(event));
+				// console.log("game.run event: " + JSON.stringify(event));
 
 				if (event.timestamp <= (new Date()).getTime() / 1000) {
 					type = event_desc.type;
 
-					console.log("now " + event.timestamp + " timeline " + event.id);
+					console.log("game.run trigger event: now " + event.timestamp + " timeline " + event.id + " diffstamp " + event.diffstamp);
 
 					for (o = 0; o < _observers.length; o += 1) {
 						if (type === EVENT_EVENT) {
 							if (_observers[o].handle_event) {
-								console.log("EVENT_EVENT");
 								_observers[o].handle_event(event);
 							}
 						} else if (type === STROKE_EVENT) {
 							if (_observers[o].handle_stroke) {
-								console.log("STROKE_EVENT");
 								_observers[o].handle_stroke(event);
 							}
 						} else if (type === MESSAGE_EVENT) {
 							if (_observers[o].handle_message) {
-								console.log("MESSAGE_EVENT");
 								_observers[o].handle_message(event);
 							}
 						}
@@ -133,6 +130,10 @@
 
 		this.observers = function () {
 			return _observers;
+		};
+		
+		this.clear_observers = function () {
+			_observers = [];
 		};
 
 		/**

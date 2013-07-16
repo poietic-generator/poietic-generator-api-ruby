@@ -118,9 +118,7 @@
 			_update_view_session_id = 0;
 			_game = new PoieticGen.Game();
 			_slider = slider;
-			_slider.update_interval(1);
-
-			self.register(_slider);
+			_slider.set_animation_interval(1);
 
 			self.join_view_session(date);
 
@@ -139,6 +137,9 @@
 		};
 
 		this.join_view_session = function (date) {
+			
+			_game.clear_observers(); // Observers needs to be cleared because callback reregister all
+			self.register(_slider);
 
 			if (date !== -1) {
 				_view_type = HISTORY_VIEW;
@@ -192,7 +193,7 @@
 					if (_view_type === HISTORY_VIEW) {
 						_slider.set_range((_local_start_date.getTime() / 1000) - response.date_range, _local_start_date.getTime() / 1000);
 
-						_slider.start_animation();
+						//_slider.start_animation();
 					}
 
 					self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
@@ -234,7 +235,7 @@
 		 */
 		this.update = function () {
 
-			var req;
+			var req, since;
 
 			// assign real values if objects are present
 			if (_game.observers().length < 1) {
@@ -244,13 +245,19 @@
 
 			_update_view_session_id += 1;
 
+			if (_view_type === HISTORY_VIEW) {
+				since = _init_timeline_id;
+			} else {
+				since = _current_timeline_id;
+			}
+
 			req = {
 				session: "default",
 
 				timeline_after : _current_timeline_id,
 
 				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed,
-				since : _init_timeline_id,
+				since : since,
 				id : _update_view_session_id,
 				view_mode : _view_type
 			};
@@ -278,7 +285,7 @@
 								_view_type = REAL_TIME_VIEW;
 								console.log('view_session/update real time!');
 							}
-							_slider.set_maximum((new Date()).getTime() / 1000);
+							//_slider.set_maximum((new Date()).getTime() / 1000);
 						}
 
 						self.dispatch_events(response.events);

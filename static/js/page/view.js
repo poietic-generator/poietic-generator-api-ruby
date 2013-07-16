@@ -41,7 +41,7 @@
 
 	// instead of windows.onload
 	$(document).ready(function () {
-		slider = new PoieticGen.Slider($("#history_slider"));
+		slider = new PoieticGen.Slider("#history_slider");
 	
 		// initialize zoness
 		session = new PoieticGen.ViewSession(function (session) {

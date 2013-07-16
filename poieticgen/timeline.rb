@@ -50,8 +50,8 @@ module PoieticGen
 			})
 		end
 
-		def self.last_id
-			last_timeline = first(:order => [ :id.desc ])
+		def self.last_id session
+			last_timeline = session.timelines.first(:order => [ :id.desc ])
 			if last_timeline.nil? then 0 else last_timeline.id end
 		end
 
