@@ -419,7 +419,7 @@ module PoieticGen
 					# retrieve users and zones
 					
 					if timeline_id > 0 then
-						users, zones = @board.load_board timeline_id, req_session
+						users, zones = @board.load_board timeline_id, req_session, true
 					
 						zones = zones.map{ |i,z| z.to_desc_hash Zone::DESCRIPTION_FULL }
 					else
@@ -510,56 +510,39 @@ module PoieticGen
 					pp since
 					
 					if not since.nil? then
-						first_t = req_session.timelines.first(
+						timelines = req_session.timelines.all(
 							:id.gt => req.timeline_after,
+							:id.lte => req.timeline_after + 10,
 							:order => [ :id.asc ]
 						)
+				
+						srk_req = timelines.strokes
 
-						if first_t.nil? then
-							max_timestamp = -1
-							min_timestamp = -1
-						else
-							min_timestamp = first_t.timestamp
-							max_timestamp = min_timestamp + req.duration
-						
-							timelines = req_session.timelines.all(
-								:id.gt => req.timeline_after,
-								:timestamp.lte => max_timestamp,
-								:order => [ :id.asc ]
-							)
+						strokes_collection = srk_req.map{ |s|
+							s.to_hash since.timestamp
+						}
 					
-							srk_req = timelines.strokes
+						STDOUT.puts "Strokes"
+						pp srk_req
+					
+						evt_req = timelines.events
 
-							strokes_collection = srk_req.map{ |s|
-								s.to_hash since.timestamp
-							}
-						
-							evt_req = timelines.events
+						if not evt_req.empty? then
 
-							if not evt_req.empty? then
-								STDOUT.puts "first timeline"
-								pp first_t
-						
-								STDOUT.puts "Max timestamp=%d" % max_timestamp
-						
-								STDOUT.puts "Strokes"
-								pp srk_req
-
-								STDOUT.puts "Events"
-								pp evt_req
-						
-								users, zones = @board.load_board timelines.last.id, req_session
-								# FIXME: load_board loads some useless data for what we want
-						
-								events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index], since.timestamp }
-							end
+							STDOUT.puts "Events"
+							pp evt_req
+					
+							users, zones = @board.load_board timelines.last.id, req_session, false
+							# FIXME: load_board loads some useless data for what we want
+					
+							events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index], since.timestamp }
 						end
 					
 						first_timeline_ever = req_session.timelines.first(:order => [ :id.asc ])
-						timestamp = if first_timeline_ever.nil? or min_timestamp < 0
+						timestamp = if first_timeline_ever.nil? or timelines.empty?
 							    then 0
 							    else
-							    	min_timestamp - first_timeline_ever.timestamp
+							    	timelines.first.timestamp - first_timeline_ever.timestamp
 							    end
 					else
 						pp "Invalid since" % req.since
@@ -639,8 +622,6 @@ module PoieticGen
 
 			# Create board with the configuration
 			@board = Board.new @config.board
-			# Take the initial snapshot of the board
-			@board.save @session
 
 			@chat = PoieticGen::ChatManager.new @config.chat
 

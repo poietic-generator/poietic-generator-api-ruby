@@ -254,7 +254,7 @@
 			var i;
 
 			for (i = 0; i < events.length; i += 1) {
-				if ((events[i].id) || (_current_timeline_id < events[i].id)) {
+				if ((events[i].id) && (_current_timeline_id < events[i].id)) {
 					_current_timeline_id = events[i].id;
 				}
 				// Make absolute times

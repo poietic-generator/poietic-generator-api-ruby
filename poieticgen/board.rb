@@ -131,17 +131,14 @@ module PoieticGen
 		end
 
 		def save session
-			last_timeline_id = Timeline.last_id session
-			if BoardSnapshot.first(:timeline => last_timeline_id).nil? then
-				BoardSnapshot.new @allocator.zones, last_timeline_id, session
-			end
+			BoardSnapshot.new @allocator.zones, (Timeline.create_now session), session
 		end
 		
 		#
 		# Get the board state at timeline_id.
 		# FIXME: load_board is not static because it depends on @config.
 		#
-		def load_board timeline_id, session
+		def load_board timeline_id, session, apply_strokes
 			
 			snap = _get_snapshot timeline_id, session
 			zones_snap = {}
@@ -150,7 +147,7 @@ module PoieticGen
 				STDOUT.puts "no snap found"
 				
 				# no snapshot: the board is empty
-				snap_timeline = timeline_id - 1
+				snap_timeline = 0
 			else
 				STDOUT.puts "snap"
 				pp snap
@@ -215,20 +212,22 @@ module PoieticGen
 			pp allocator
 			
 			users = users_db.map{ |u| u.to_hash } # FIXME: All users in the session are returned
-			strokes = timelines.strokes.map{ |s| s.to_hash s.timeline.timestamp } # strokes with diffstamp = 0 (not important)
 			zones = allocator.zones
 			
-			# Apply strokes
-			zones.each do |index,zone|
-				if zone.user_id != nil then
-					zone.apply_local strokes.select{ |s| s["zone"] == zone.index }
+			if apply_strokes then
+				strokes = timelines.strokes # strokes with diffstamp = 0 (not important)
+			
+				# Apply strokes
+				zones.each do |index,zone|
+					if zone.user_id != nil then
+						zone.apply_local strokes.select{ |s| s.zone == zone.index }
+					end
 				end
 			end
 
-			STDOUT.puts "users, zones and strokes"
+			STDOUT.puts "users and zones"
 			pp users
 			pp zones
-			pp strokes
 			
 			return users, zones
 		end
@@ -237,12 +236,12 @@ module PoieticGen
 
 		def _get_snapshot timeline_id, session
 			# The first snap before timeline_id
-			snap = session.board_snapshots.first(
-				:timeline.lte => timeline_id,
-				:order => [ :timeline.desc ]
+			timeline = session.timelines.first(
+				:id.lte => timeline_id,
+				:order => [ :id.desc ]
 			)
 			
-			return snap
+			return timeline.board_snapshot
 		end
 	end
 

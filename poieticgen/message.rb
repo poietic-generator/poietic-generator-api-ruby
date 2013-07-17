@@ -47,13 +47,13 @@ module PoieticGen
 			return res
 		end
 
-		def self.post src, dst, timestamp, content, session
+		def self.post src, dst, content, session
 			begin
 				msg = Message.create({
 					:user_src => src,
 					:user_dst => dst,
 					:content => content,
-					:timeline => (Timeline.create_with_time timestamp, session)
+					:timeline => (Timeline.create_now session)
 				})
 				msg.save
 				rdebug msg.inspect

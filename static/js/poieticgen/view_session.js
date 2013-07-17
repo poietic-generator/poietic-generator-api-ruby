@@ -331,8 +331,8 @@
 			for (i = 0; i < events.length; i += 1) {
 				// Make absolute times
 				if (events[i].diffstamp) {
-					events[i].diffstamp -= seconds;
-					events[i].timestamp = parseInt(events[i].diffstamp, 10) + _local_start_date.getTime() / 1000;
+					events[i].diffstamp = parseInt(events[i].diffstamp, 10) - seconds;
+					events[i].timestamp = events[i].diffstamp + _local_start_date.getTime() / 1000;
 					events[i].stamp_session = last_update_timestamp + events[i].diffstamp;
 				} else {
 					events[i].timestamp = _local_start_date.getTime() / 1000;
@@ -349,7 +349,7 @@
 
 			// Retrieve the new timeline_id
 			for (i = 0; i < events.length; i += 1) {
-				if (events[i].id || _current_timeline_id < events[i].id) {
+				if (events[i].id && _current_timeline_id < events[i].id) {
 					_current_timeline_id = events[i].id;
 				}
 			}

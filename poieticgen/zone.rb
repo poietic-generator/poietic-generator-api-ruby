@@ -113,7 +113,7 @@ module PoieticGen
 		def apply user, drawing
 			Zone.transaction do
 				# save patch into database
-				return if drawing.nil?
+				return if drawing.nil? or drawing.empty?
 
 				rdebug drawing.inspect if drawing.length != 0
 
@@ -151,24 +151,21 @@ module PoieticGen
 		end
 		
 		#
-		# Apply a list of strokes without saving it into the db
+		# Apply a list of strokes object without saving it into the db
 		#
 		def apply_local drawing
-			Zone.transaction do
-				# save patch into database
-				return if drawing.nil?
+			return if drawing.nil? or drawing.empty?
 
-				rdebug drawing.inspect if drawing.length != 0
+			rdebug drawing.inspect if drawing.length != 0
 
-				drawing.each do |patch|
+			drawing.each do |patch|
 
-					color = patch['color']
-					changes = patch['changes']
+				color = patch.color
+				changes = JSON.parse(patch.changes)
 
-					changes.each do |x,y,t_offset|
-						idx = _xy2idx(x,y)
-						self.data[idx] = color
-					end
+				changes.each do |x,y,t_offset|
+					idx = _xy2idx(x,y)
+					self.data[idx] = color
 				end
 			end
 		end

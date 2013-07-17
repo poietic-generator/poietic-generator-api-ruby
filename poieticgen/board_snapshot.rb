@@ -30,9 +30,9 @@ module PoieticGen
 		include DataMapper::Resource
 		
 		property :id,	Serial
-		property :timeline, Integer, :required => true, :unique => true
 		
 		has n, :zone_snapshots, :through => Resource
+		belongs_to :timeline
 		belongs_to :session
 
 		def initialize zones, last_timeline, session
