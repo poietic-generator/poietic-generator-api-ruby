@@ -148,12 +148,13 @@ module PoieticGen
 
 				begin
 					user.save
-					@session.users << user
-					@session.save
 				rescue DataMapper::SaveFailureError => e
 					STDERR.puts e.resource.errors.inspect
 					raise e
 				end
+				
+				@session.users << user
+				
 				pp user
 				session[PoieticGen::Api::SESSION_USER] = user.id
 				session[PoieticGen::Api::SESSION_SESSION] = @session.token
@@ -603,6 +604,8 @@ module PoieticGen
 		#
 		#
 		def check_expired_users
+			# FIXME: TODO: WARNING: the user association in @session is not updated when users are modified!
+		
 			User.transaction do
 				now = Time.now.to_i
 				if @leave_mutex.try_lock then
@@ -652,7 +655,7 @@ module PoieticGen
 		def _session_init 
 			@session = Session.new
 
-			# total count of users seen (FIXME: get it from db)
+			# total count of users seen (FIXME: get it from db, FIXME: unused)
 			@users_seen = 0
 
 			# Create board with the configuration
