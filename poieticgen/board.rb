@@ -167,9 +167,6 @@ module PoieticGen
 			allocator = ALLOCATORS[@config.allocator].new @config
 			allocator.set_zones zones_snap
 			
-			STDOUT.puts "Allocator snapshot"
-			pp allocator
-			
 			# get the session associated to the snapshot
 			users_db = session.users
 			
@@ -207,9 +204,6 @@ module PoieticGen
 					raise RuntimeError, "Unknown event type %s" % event.type
 				end
 			end
-			
-			STDOUT.puts "Allocator after events"
-			pp allocator
 			
 			users = users_db.map{ |u| u.to_hash } # FIXME: All users in the session are returned
 			zones = allocator.zones

@@ -29,7 +29,8 @@
 
 	function Slider(p_element) {
 
-		var self = this,
+		var console = window.noconsole,
+			self = this,
 			_slider = null,
 			_animation_interval = 1,
 			_timer_animation = null,
@@ -61,7 +62,7 @@
 				return;
 			}
 			v = Math.floor(v);
-			window.console.log("slider/set_value : value = " + v);
+			console.log("slider/set_value : value = " + v);
 			if (v >= self.minimum() && v <= self.maximum()) {
 				_slider.attr('value', v);
 				_slider.slider('refresh');
@@ -79,20 +80,20 @@
 		* Set the slider range values
 		*/
 		this.set_range = function (min, max) {
-			window.console.log("slider/set_range : min = " + min + " max = " + max);
+			console.log("slider/set_range : min = " + min + " max = " + max);
 			_slider.attr('min', Math.floor(min));
 			_slider.attr('max', Math.floor(max));
 			_slider.slider('refresh');
 		};
 
 		this.set_minimum = function (min) {
-			window.console.log("slider/set_minimum : min = " + min);
+			console.log("slider/set_minimum : min = " + min);
 			_slider.attr('min', Math.floor(min));
 			_slider.slider('refresh');
 		};
 
 		this.set_maximum = function (max) {
-			window.console.log("slider/set_maximum : max = " + max);
+			console.log("slider/set_maximum : max = " + max);
 			_slider.attr('max', Math.floor(max));
 			_slider.slider('refresh');
 		};

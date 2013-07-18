@@ -34,7 +34,7 @@
 		MESSAGE_EVENT = 2;
 
 	function Game() {
-		var console = window.console,
+		var console = window.noconsole,
 			self = this,
 			_observers = [],
 			_events = [],

@@ -46,7 +46,7 @@
 
 
 	function ViewSession(callback, p_slider) {
-		var console = window.console,
+		var console = window.noconsole,
 			self = this,
 			_current_timeline_id = -1,
 			_init_timeline_id = 0,
