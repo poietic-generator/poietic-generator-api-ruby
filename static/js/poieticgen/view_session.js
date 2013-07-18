@@ -47,7 +47,7 @@
 	function ViewSession(callback, p_slider) {
 		var console = window.console,
 			self = this,
-			_current_timeline_id = 0,
+			_current_timeline_id = -1,
 			_init_timeline_id = 0,
 			_slider = null,
 			_game = null,
@@ -65,6 +65,7 @@
 			// _set_local_start_date_fn,
 			_view_type = REAL_TIME_VIEW,
 			_last_join_diffstamp = 0,
+			_last_update_max_timestamp = -1,
 			_join_view_session_id = 0,
 			_update_view_session_id = 0,
 
@@ -177,6 +178,8 @@
 
 					_current_timeline_id = _init_timeline_id = response.timeline_id;
 					// console.log('view_session/join response mod : ' + JSON.stringify(this) );
+					
+					_last_update_max_timestamp = response.timestamp;
 
 					self.other_zones = response.zones;
 
@@ -253,7 +256,8 @@
 			req = {
 				session: "default",
 
-				timeline_after : _current_timeline_id,
+				timeline_after : _current_timeline_id + 1,
+				last_max_timestamp : _last_update_max_timestamp,
 
 				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed,
 				since : since,
@@ -287,10 +291,17 @@
 							}
 
 							_slider.set_maximum((new Date()).getTime() / 1000);
+							
+							_last_update_max_timestamp = response.max_timestamp;
 						}
 
-						self.dispatch_events(response.events, last_update_timestamp);
-						self.dispatch_strokes(response.strokes, last_update_timestamp);
+						if (response.events.length === 0 && response.strokes.length === 0 &&
+								response.next_timeline > 0) {
+							_current_timeline_id = response.next_timeline - 1;
+						} else {
+							self.dispatch_events(response.events, last_update_timestamp);
+							self.dispatch_strokes(response.strokes, last_update_timestamp);
+						}
 					}
 
 					self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);

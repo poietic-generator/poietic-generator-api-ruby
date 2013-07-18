@@ -119,10 +119,7 @@ module PoieticGen
 					param_request = {
 						:id => req_id
 					}
-					pp @session
-					pp User.first(:id => req_id)
-					pp @session.users.first(:id => req_id)
-					# FIXME: sometimes this does not work (since session was put in db)
+
 					user = @session.users.first_or_create param_request, param_create
 
 					tdiff = (now.to_i - user.alive_expires_at)
@@ -214,14 +211,21 @@ module PoieticGen
 			pp "FIXME: LEAVE(session)", session
 			# zone_idx = @users[user_id].zone
 
-			param_request = {
-				:id => session[PoieticGen::Api::SESSION_USER]
-			}
-			pp "FIXME: LEAVE(param_request)", param_request
+			session_user_id = session[PoieticGen::Api::SESSION_USER]
+			session_token = session[PoieticGen::Api::SESSION_SESSION]
+			
+			pp "FIXME: LEAVE(session_user_id)", session_user_id
 
-			cur_session = Session.first( :token => session[PoieticGen::Api::SESSION_SESSION] )
+			if session_token == @session.token then
+				cur_session = @session
+				pp "FIXME: LEAVE(cur_session) current", cur_session
+			else
+				cur_session = Session.first( :token => session_token )
+				pp "FIXME: LEAVE(cur_session) other", cur_session
+			end
+			
 			if cur_session then
-				user = cur_session.users.first param_request
+				user = cur_session.users.get(session_user_id)
 				pp "FIXME: LEAVE(user)", user
 			end
 
@@ -230,7 +234,7 @@ module PoieticGen
 				user.alive_expires_at = Time.now.to_i
 				user.did_expire = true
 				# create leave event if session is the current one
-				if session[PoieticGen::Api::SESSION_SESSION] == @session.token then
+				if session_token == @session.token then
 					@board.leave user
 					Event.create_leave user.id, user.alive_expires_at, user.zone, @session
 				end
@@ -362,7 +366,10 @@ module PoieticGen
 				# to distinguish old sessions/old users
 
 				now_i = Time.now.to_i - 1
+				timeline_id = 0
 				date_range = -1
+				diffstamp = 0
+				timestamp = -1
 				
 				# we take a snapshot one second in the past to be sure we will get
 				# a complete second.
@@ -375,27 +382,17 @@ module PoieticGen
 					zones = users_db.map{ |u| @board[u.zone].to_desc_hash Zone::DESCRIPTION_FULL }
 					
 					timeline_id = Timeline.last_id req_session
-					diffstamp = 0
 				else
 					# retrieve the total duration of the game
-
-					first_timeline = req_session.timelines.first(:order => [ :id.asc ])
-					pp first_timeline
-					date_range = if first_timeline.nil? then 0 else (now_i - first_timeline.timestamp) end
+					date_range = now_i - req_session.timestamp
 
 					# retrieve stroke_max and event_max
 
-					if req.date == 0 then
-						# get the first state.
-
-						timeline_id = if first_timeline.nil? then 0 else first_timeline.id end
-						diffstamp = 0
-					else
+					if req.date != 0 then
 						if req.date > 0 then
 							# get the state from the beginning.
 
-							absolute_time = if first_timeline.nil? then 0
-								else (first_timeline.timestamp + req.date) end
+							absolute_time = req_session.timestamp + req.date
 						else
 							# get the state from now.
 
@@ -410,8 +407,12 @@ module PoieticGen
 							:order => [ :id.desc ]
 						)
 
-						timeline_id = if t.nil? then 0 else t.id end
-						diffstamp = if t.nil? then 0 else absolute_time - t.timestamp end
+						if not t.nil? then
+							timeline_id = t.id
+							diffstamp = absolute_time - t.timestamp
+						end
+						
+						timestamp = absolute_time - req_session.timestamp
 					end
 
 					STDOUT.puts "timeline_id %d" % timeline_id
@@ -425,7 +426,7 @@ module PoieticGen
 							.select{ |i,z| not z.user_id.nil? } # only used zones
 							.map{ |i,z| z.to_desc_hash Zone::DESCRIPTION_FULL }
 					else
-						users = zones = []
+						users = zones = [] # no events => no users => no zones
 					end
 				end
 
@@ -437,6 +438,7 @@ module PoieticGen
 					:zone_column_count => @config.board.width,
 					:zone_line_count => @config.board.height,
 					:timeline_id => timeline_id,
+					:timestamp => timestamp, # time between the session start and the requested date
 					:date_range => date_range, # total time of session
 					:diffstamp => diffstamp, # time between the found timeline and the requested date
 					:id => req.id
@@ -473,12 +475,14 @@ module PoieticGen
 				strokes_collection = []
 				events_collection = []
 				timestamp = 0
+				next_timeline_id = -1
+				max_timestamp = -1
 
 				if req.view_mode == PlayRequest::REAL_TIME_VIEW then
 					STDOUT.puts "REAL_TIME_VIEW"
 				
 					timelines = req_session.timelines.all(
-						:id.gt => req.timeline_after
+						:id.gte => req.timeline_after
 					)
 				
 					evt_req = timelines.events
@@ -516,38 +520,23 @@ module PoieticGen
 					pp since
 					
 					if not since.nil? then
-						# The first requested event
-						first_timeline = session_timelines.first(
-							:id.gt => req.timeline_after,
-							:order => [ :id.asc ]
-						)
 						
-						pp "first_timeline"
-						pp first_timeline
-						
-						if not first_timeline.nil? then
-					
-							# The older requested event
-							older_timeline = session_timelines.first(
-								:id.gt => req.timeline_after,
-								:timestamp.lte => first_timeline.timestamp + req.duration * 2,
-								:order => [ :timestamp.desc, :id.desc ]
-							)
-							
-							pp "older_timeline"
-							pp older_timeline
-							
+						if req.last_max_timestamp > 0 then
+							max_timestamp = req.last_max_timestamp + req.duration * 2
 							# Events between the requested timeline and (timeline + duration)
 							timelines = session_timelines.all(
-								:id.gt => req.timeline_after,
-								:id.lte => older_timeline.id
+								:timestamp.gt => req_session.timestamp + req.last_max_timestamp,
+								:timestamp.lte => req_session.timestamp + max_timestamp
 							)
-							
-							pp "timelines"
-							pp timelines
 						else
-							timelines = []
+							max_timestamp = req.duration * 2
+							timelines = session_timelines.all(
+								:timestamp.lte => req_session.timestamp + max_timestamp
+							)
 						end
+						
+						pp "timelines"
+						pp timelines
 						
 						if not timelines.empty? then
 				
@@ -572,12 +561,21 @@ module PoieticGen
 					
 								events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index], since.timestamp }
 							end
-					
-							first_timeline_ever = session_timelines.first(:order => [ :id.asc ])
-							timestamp = if first_timeline_ever.nil?
-								    then 0
-								    else timelines.first.timestamp - first_timeline_ever.timestamp
-								    end
+
+							timestamp = timelines.first.timestamp - req_session.timestamp
+						else
+							# FIXME: is next timeline not always (timeline_after + 1)?
+							next_timeline = session_timelines.first(
+								:id.gt => req.timeline_after,
+								:order => [ :id.asc ]
+							)
+							next_timeline_id = if next_timeline.nil? then
+							                   	req.timeline_after
+							                   else
+							                   	next_timeline.id
+							                   end
+							pp "next_timeline_id"
+							pp next_timeline_id
 						end
 					else
 						pp "Invalid since" % req.since
@@ -590,6 +588,8 @@ module PoieticGen
 					:events => events_collection,
 					:strokes => strokes_collection,
 					:timestamp => timestamp, # relative to the start of the game session
+					:next_timeline => next_timeline_id,
+					:max_timestamp => max_timestamp,
 					:id => req.id,
 				}
 
