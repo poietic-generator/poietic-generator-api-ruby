@@ -77,7 +77,7 @@
 		_get_elapsed_time = function () {
 			return _get_current_time() - _last_join_start_time;
 		};
-		
+
 		_get_current_time = function () {
 			return Math.floor((new Date()).getTime() / 1000);
 		};
@@ -111,7 +111,6 @@
 		this.join_view_session = function (date) {
 
 			_game.reset(); // Observers needs to be cleared because callback reregister all
-			self.register(_slider);
 
 			if (date !== -1) {
 				_view_type = HISTORY_VIEW;
@@ -151,7 +150,7 @@
 
 					_current_timeline_id = _init_timeline_id = response.timeline_id;
 					// console.log('view_session/join response mod : ' + JSON.stringify(this) );
-					
+
 					_last_update_max_timestamp = response.timestamp;
 
 					self.other_zones = response.zones;
@@ -263,7 +262,7 @@
 
 							_slider.set_value(_slider.minimum() + _last_join_timestamp + _get_elapsed_time());
 							_slider.set_maximum(_get_current_time() - VIEW_SESSION_HISTORY_PROTECTED_INTERVAL);
-							
+
 							_last_update_max_timestamp = response.max_timestamp;
 						}
 
