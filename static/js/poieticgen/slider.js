@@ -29,12 +29,15 @@
 
 	function Slider(p_element) {
 
-		var self = this,
+		var console = window.noconsole,
+			self = this,
 			_slider = null,
 			_animation_interval = 1,
 			_timer_animation = null,
 			_mouseup_handler = null,
-			_animate = null;
+			_animate = null,
+			_cursor_moved_by_user = false,
+			_catch_mouse = null;
 
 		this.name = "Slider";
 
@@ -47,6 +50,7 @@
 			_animation_interval = 1;
 			_timer_animation = null;
 			_slider.attr('value', 0);
+			_catch_mouse();
 		};
 
 
@@ -54,8 +58,11 @@
 		* Change slider position
 		*/
 		this.set_value = function (v) {
+			if (_cursor_moved_by_user === true) {
+				return;
+			}
 			v = Math.floor(v);
-			window.console.log("slider/set_value : value = " + v);
+			console.log("slider/set_value : value = " + v);
 			if (v >= self.minimum() && v <= self.maximum()) {
 				_slider.attr('value', v);
 				_slider.slider('refresh');
@@ -73,20 +80,20 @@
 		* Set the slider range values
 		*/
 		this.set_range = function (min, max) {
-			window.console.log("slider/set_range : min = " + min + " max = " + max);
+			console.log("slider/set_range : min = " + min + " max = " + max);
 			_slider.attr('min', Math.floor(min));
 			_slider.attr('max', Math.floor(max));
 			_slider.slider('refresh');
 		};
 
 		this.set_minimum = function (min) {
-			window.console.log("slider/set_minimum : min = " + min);
+			console.log("slider/set_minimum : min = " + min);
 			_slider.attr('min', Math.floor(min));
 			_slider.slider('refresh');
 		};
 
 		this.set_maximum = function (max) {
-			window.console.log("slider/set_maximum : max = " + max);
+			console.log("slider/set_maximum : max = " + max);
 			_slider.attr('max', Math.floor(max));
 			_slider.slider('refresh');
 		};
@@ -141,23 +148,13 @@
 			$(".ui-slider").bind("vmouseup", callback);
 		};
 
-
-		/**
-		* Handle stroke
-		*/
-		this.handle_stroke = function (stk) {
-			/*if (stk.stamp_session) {
-				self.set_value(stk.stamp_session);
-			}*/
-		};
-
-		/**
-		* Handle event
-		*/
-		this.handle_event = function (evt) {
-			/*if (evt.stamp_session) {
-				self.set_value(evt.stamp_session);
-			}*/
+		_catch_mouse = function () {
+			$(".ui-slider").bind("vmouseup", function () {
+				_cursor_moved_by_user = false;
+			});
+			$(".ui-slider").bind("vmousedown", function () {
+				_cursor_moved_by_user = true;
+			});
 		};
 
 		// call constructor

@@ -27,6 +27,7 @@ module PoieticGen
 		SESSION = 'session'
 
 		TIMELINE_AFTER = 'timeline_after'
+		LAST_MAX_TIMESTAMP = 'last_max_timestamp'
 		
 		SINCE = 'since'
 		ID = 'id'
@@ -54,6 +55,8 @@ module PoieticGen
 					rdebug "session : %s" % val.inspect
 				when TIMELINE_AFTER then
 					rdebug "timeline_after : %s" % val.inspect
+				when LAST_MAX_TIMESTAMP then
+					rdebug "last_max_timestamp : %s" % val.inspect
 				when SINCE then
 					rdebug "since : %s" % val.inspect
 				when ID then
@@ -91,6 +94,10 @@ module PoieticGen
 
 		def timeline_after
 			return @hash[TIMELINE_AFTER].to_i
+		end
+
+		def last_max_timestamp
+			return @hash[LAST_MAX_TIMESTAMP].to_i
 		end
 		
 		def since

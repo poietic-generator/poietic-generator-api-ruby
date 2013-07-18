@@ -120,6 +120,9 @@ module PoieticGen
 				# FIXME: get user from user_id
 				ref = user.last_update_time
 
+				# Sort strokes by time
+				drawing = drawing.sort{ |a, b| a['diff'].to_i <=> b['diff'].to_i }
+
 				drawing.each do |patch|
 
 					color = patch['color']

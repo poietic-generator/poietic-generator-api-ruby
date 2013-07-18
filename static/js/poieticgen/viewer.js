@@ -204,7 +204,7 @@
 		*/
 		this.update_paint = function () {
 
-			var console = window.console,
+			var console = window.noconsole,
 				remote_zone,
 				zones,
 				rt_zone_pos,

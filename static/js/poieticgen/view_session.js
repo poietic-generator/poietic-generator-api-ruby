@@ -33,6 +33,7 @@
 
 		VIEW_SESSION_UPDATE_INTERVAL = 1000,
 		VIEW_PLAY_UPDATE_INTERVAL = VIEW_SESSION_UPDATE_INTERVAL / 1000,
+		VIEW_SESSION_HISTORY_PROTECTED_INTERVAL = 30, // Seconds reserved to real time
 
 		STATUS_INFORMATION = 1,
 		STATUS_SUCCESS = 2,
@@ -45,31 +46,25 @@
 
 
 	function ViewSession(callback, p_slider) {
-		var console = window.console,
+		var console = window.noconsole,
 			self = this,
-			_current_timeline_id = 0,
+			_current_timeline_id = -1,
 			_init_timeline_id = 0,
 			_slider = null,
 			_game = null,
 
-			// _server_start_date = 0, // in seconds, since jan, 1, 1970
-			// _server_elapsed_time = 0, // in seconds, since server start
-
-			_local_start_date = 0, // date Object
-			// _local_start_offset = 0, // seconds between server_start & js_start
+			_last_join_start_time = 0,
 
 			_timer = null,
 			_play_speed = 1,
-			_get_elapsed_time_fn,
-			// _get_server_date_fn,
-			// _set_local_start_date_fn,
+			_get_elapsed_time,
+			_get_current_time,
 			_view_type = REAL_TIME_VIEW,
+			_last_join_timestamp = 0,
 			_last_join_diffstamp = 0,
+			_last_update_max_timestamp = -1,
 			_join_view_session_id = 0,
-			_update_view_session_id = 0,
-
-			_dispatch_events_body,
-			_dispatch_strokes_body;
+			_update_view_session_id = 0;
 
 		this.zone_column_count = null;
 		this.zone_line_count = null;
@@ -78,34 +73,14 @@
 		/*
 		 * Date utilities 
 		 */
-		/* _set_local_start_date_fn = function (serverDate, serverElapsed) {
-			var localDateSec;
-				
-			_local_start_date = new Date();
-			//_server_start_date = serverDate;
-			localDateSec = Math.floor(_local_start_date.getTime() / 1000);
-			_local_start_offset = localDateSec - serverDate;
-		}; */
 
-
-		_get_elapsed_time_fn = function () {
-			var local_time = (new Date()).getTime();
-			return Math.floor((local_time - _local_start_date.getTime()) / 1000);
+		_get_elapsed_time = function () {
+			return _get_current_time() - _last_join_start_time;
 		};
 
-		/* _get_server_date_fn = function (offset_seconds) {
-			var server_time,
-				local_time,
-				local_server_diff,
-				local_time_sec,
-				elapsed_time,
-				offset;
-
-			elapsed_time = _get_elapsed_time_fn();
-			server_time = _server_start_date - local_time_sec;
-
-			return (server_time + offset_seconds);
-		}; */
+		_get_current_time = function () {
+			return Math.floor((new Date()).getTime() / 1000);
+		};
 
 
 		/**
@@ -124,21 +99,18 @@
 			_slider.mouseup(function (event) {
 				date = _slider.value();
 				console.log('User history change: ' + date);
-				if (date >= _slider.maximum()) {
+				/* if (date >= _slider.maximum()) {
 					_view_type = REAL_TIME_VIEW;
 				} else {
 					_view_type = HISTORY_VIEW;
-				}
-				self.clear_all_timers();
-				self.join_view_session(-_slider.maximum() + date);
-				self.dispatch_reset();
+				} */
+				self.play(date - _slider.minimum());
 			});
 		};
 
 		this.join_view_session = function (date) {
 
 			_game.reset(); // Observers needs to be cleared because callback reregister all
-			self.register(_slider);
 
 			if (date !== -1) {
 				_view_type = HISTORY_VIEW;
@@ -172,11 +144,14 @@
 					this.zone_column_count = response.zone_column_count;
 					this.zone_line_count = response.zone_line_count;
 
-					_local_start_date = new Date();
+					_last_join_start_time = _get_current_time();
+					_last_join_timestamp = response.timestamp;
 					_last_join_diffstamp = response.diffstamp;
 
 					_current_timeline_id = _init_timeline_id = response.timeline_id;
 					// console.log('view_session/join response mod : ' + JSON.stringify(this) );
+
+					_last_update_max_timestamp = response.timestamp;
 
 					self.other_zones = response.zones;
 
@@ -190,9 +165,7 @@
 					}
 
 					if (_view_type === HISTORY_VIEW) {
-						_slider.set_range((_local_start_date.getTime() / 1000) - response.date_range, _local_start_date.getTime() / 1000);
-
-						_slider.start_animation();
+						_slider.set_range(_last_join_start_time - response.date_range, _last_join_start_time - VIEW_SESSION_HISTORY_PROTECTED_INTERVAL);
 					}
 
 					self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
@@ -253,7 +226,8 @@
 			req = {
 				session: "default",
 
-				timeline_after : _current_timeline_id,
+				timeline_after : _current_timeline_id + 1,
+				last_max_timestamp : _last_update_max_timestamp,
 
 				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed,
 				since : since,
@@ -281,16 +255,24 @@
 
 						if (_view_type === HISTORY_VIEW) {
 							last_update_timestamp = parseInt(response.timestamp, 10);
-							if (last_update_timestamp < 0 || last_update_timestamp >= _slider.maximum() - 1) {
+							/* if (last_update_timestamp < 0 || last_update_timestamp >= _slider.maximum() - 1) {
 								_view_type = REAL_TIME_VIEW;
 								console.log('view_session/update real time!');
-							}
+							} */
 
-							_slider.set_maximum((new Date()).getTime() / 1000);
+							_slider.set_value(_slider.minimum() + _last_join_timestamp + _get_elapsed_time());
+							_slider.set_maximum(_get_current_time() - VIEW_SESSION_HISTORY_PROTECTED_INTERVAL);
+
+							_last_update_max_timestamp = response.max_timestamp;
 						}
 
-						self.dispatch_events(response.events, last_update_timestamp);
-						self.dispatch_strokes(response.strokes, last_update_timestamp);
+						if (response.events.length === 0 && response.strokes.length === 0 &&
+								response.next_timeline > 0) {
+							_current_timeline_id = response.next_timeline - 1;
+						} else {
+							self.dispatch_events(response.events, last_update_timestamp);
+							self.dispatch_strokes(response.strokes, last_update_timestamp);
+						}
 					}
 
 					self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
@@ -323,7 +305,7 @@
 
 			} else {
 				// diffstamps are relative to the local start date
-				seconds = _get_elapsed_time_fn() - _last_join_diffstamp;
+				seconds = _get_elapsed_time() - _last_join_diffstamp;
 			}
 
 			//console.log('view_session/update seconds : ' + seconds);
@@ -332,10 +314,10 @@
 				// Make absolute times
 				if (events[i].diffstamp) {
 					events[i].diffstamp = parseInt(events[i].diffstamp, 10) - seconds;
-					events[i].timestamp = events[i].diffstamp + _local_start_date.getTime() / 1000;
+					events[i].timestamp = events[i].diffstamp + _last_join_start_time;
 					events[i].stamp_session = last_update_timestamp + events[i].diffstamp;
 				} else {
-					events[i].timestamp = _local_start_date.getTime() / 1000;
+					events[i].timestamp = _last_join_start_time;
 				}
 			}
 
@@ -403,9 +385,7 @@
 		 */
 		this.current = function () {
 			console.log("view_session/current");
-			self.clear_all_timers();
-			self.join_view_session(-1);
-			self.dispatch_reset();
+			self.play(-1);
 		};
 
 		/**
@@ -413,9 +393,16 @@
 		 */
 		this.restart = function () {
 			console.log("view_session/restart");
-			self.clear_all_timers();
 			_slider.set_value(_slider.minimum());
-			self.join_view_session(0);
+			self.play(0);
+		};
+
+		/**
+		 * Play with date
+		 */
+		this.play = function (date) {
+			self.clear_all_timers();
+			self.join_view_session(date);
 			self.dispatch_reset();
 		};
 
