@@ -421,7 +421,9 @@ module PoieticGen
 					if timeline_id > 0 then
 						users, zones = @board.load_board timeline_id, req_session, true
 					
-						zones = zones.map{ |i,z| z.to_desc_hash Zone::DESCRIPTION_FULL }
+						zones = zones
+							.select{ |i,z| not z.user_id.nil? } # only used zones
+							.map{ |i,z| z.to_desc_hash Zone::DESCRIPTION_FULL }
 					else
 						users = zones = []
 					end
@@ -473,6 +475,8 @@ module PoieticGen
 				timestamp = 0
 
 				if req.view_mode == PlayRequest::REAL_TIME_VIEW then
+					STDOUT.puts "REAL_TIME_VIEW"
+				
 					timelines = req_session.timelines.all(
 						:id.gt => req.timeline_after
 					)
@@ -501,8 +505,10 @@ module PoieticGen
 					
 					STDOUT.puts "HISTORY_VIEW"
 					
+					session_timelines = req_session.timelines
+					
 					# This stroke is used to compute diffstamps
-					since = req_session.timelines.first(
+					since = session_timelines.first(
 						:id.gte => req.since,
 						:order => [ :id.asc ]
 					)
@@ -510,40 +516,69 @@ module PoieticGen
 					pp since
 					
 					if not since.nil? then
-						timelines = req_session.timelines.all(
+						# The first requested event
+						first_timeline = session_timelines.first(
 							:id.gt => req.timeline_after,
-							:id.lte => req.timeline_after + 10,
 							:order => [ :id.asc ]
 						)
-				
-						srk_req = timelines.strokes
-
-						strokes_collection = srk_req.map{ |s|
-							s.to_hash since.timestamp
-						}
+						
+						pp "first_timeline"
+						pp first_timeline
+						
+						if not first_timeline.nil? then
 					
-						STDOUT.puts "Strokes"
-						pp srk_req
-					
-						evt_req = timelines.events
-
-						if not evt_req.empty? then
-
-							STDOUT.puts "Events"
-							pp evt_req
-					
-							users, zones = @board.load_board timelines.last.id, req_session, false
-							# FIXME: load_board loads some useless data for what we want
-					
-							events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index], since.timestamp }
+							# The older requested event
+							older_timeline = session_timelines.first(
+								:id.gt => req.timeline_after,
+								:timestamp.lte => first_timeline.timestamp + req.duration * 2,
+								:order => [ :timestamp.desc, :id.desc ]
+							)
+							
+							pp "older_timeline"
+							pp older_timeline
+							
+							# Events between the requested timeline and (timeline + duration)
+							timelines = session_timelines.all(
+								:id.gt => req.timeline_after,
+								:id.lte => older_timeline.id
+							)
+							
+							pp "timelines"
+							pp timelines
+						else
+							timelines = []
 						end
+						
+						if not timelines.empty? then
+				
+							srk_req = timelines.strokes
+
+							strokes_collection = srk_req.map{ |s|
+								s.to_hash since.timestamp
+							}
 					
-						first_timeline_ever = req_session.timelines.first(:order => [ :id.asc ])
-						timestamp = if first_timeline_ever.nil? or timelines.empty?
-							    then 0
-							    else
-							    	timelines.first.timestamp - first_timeline_ever.timestamp
-							    end
+							STDOUT.puts "Strokes"
+							pp srk_req
+					
+							evt_req = timelines.events
+
+							if not evt_req.empty? then
+
+								STDOUT.puts "Events"
+								pp evt_req
+					
+								users, zones = @board.load_board timelines.last.id, req_session, false
+								# FIXME: load_board loads some useless data for what we want
+					
+								events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index], since.timestamp }
+							end
+					
+							first_timeline_ever = session_timelines.first(:order => [ :id.asc ])
+							timestamp = if first_timeline_ever.nil?
+								    then 0
+								    else timelines.first.timestamp - first_timeline_ever.timestamp
+								    end
+						end
 					else
 						pp "Invalid since" % req.since
 					end
