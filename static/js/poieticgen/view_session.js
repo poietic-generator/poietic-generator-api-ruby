@@ -266,13 +266,8 @@
 							_last_update_max_timestamp = response.max_timestamp;
 						}
 
-						if (response.events.length === 0 && response.strokes.length === 0 &&
-								response.next_timeline > 0) {
-							_current_timeline_id = response.next_timeline - 1;
-						} else {
-							self.dispatch_events(response.events, last_update_timestamp);
-							self.dispatch_strokes(response.strokes, last_update_timestamp);
-						}
+						self.dispatch_events(response.events, last_update_timestamp);
+						self.dispatch_strokes(response.strokes, last_update_timestamp);
 					}
 
 					self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);

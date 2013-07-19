@@ -17,6 +17,7 @@ GEM
       chunky_png (~> 1.2)
       fssm (>= 0.2.7)
       sass (~> 3.1)
+    daemons (1.1.9)
     data_objects (0.10.12)
       addressable (~> 2.1)
     datamapper (1.2.0)
@@ -118,6 +119,10 @@ GEM
     sinatra-reloader (1.0)
       sinatra-contrib
     stringex (1.5.1)
+    thin (1.5.1)
+      daemons (>= 1.0.9)
+      eventmachine (>= 0.12.6)
+      rack (>= 1.0.0)
     tilt (1.4.1)
     unicorn (4.6.2)
       kgio (~> 2.6)
@@ -148,4 +153,5 @@ DEPENDENCIES
   shotgun
   sinatra
   sinatra-reloader
+  thin
   unicorn

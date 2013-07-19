@@ -564,19 +564,6 @@ module PoieticGen
 							end
 
 							timestamp = timelines.first.timestamp - req_session.timestamp
-						else
-							# FIXME: is next timeline not always (timeline_after + 1)?
-							next_timeline = session_timelines.first(
-								:id.gt => req.timeline_after,
-								:order => [ :id.asc ]
-							)
-							next_timeline_id = if next_timeline.nil? then
-							                   	req.timeline_after
-							                   else
-							                   	next_timeline.id
-							                   end
-							pp "next_timeline_id"
-							pp next_timeline_id
 						end
 					else
 						pp "Invalid since" % req.since
@@ -589,7 +576,6 @@ module PoieticGen
 					:events => events_collection,
 					:strokes => strokes_collection,
 					:timestamp => timestamp, # relative to the start of the game session
-					:next_timeline => next_timeline_id,
 					:max_timestamp => max_timestamp,
 					:id => req.id,
 				}
