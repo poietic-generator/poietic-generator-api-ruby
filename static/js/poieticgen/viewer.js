@@ -240,7 +240,7 @@
 		*
 		*/
 		this.update_size = function () {
-			var win, margin, width, height, ctx;
+			var win, margin, width, height, ctx, canvas, next;
 
 			win = {
 				w: $(window).width(),
@@ -251,8 +251,19 @@
 			width   = this.fullsize ? win.h : win.h / 2;
 			height  = this.fullsize ? win.h : win.h / 2;
 
-			_real_canvas.width = Math.round(width) - margin;
-			_real_canvas.height = Math.round(height) - margin;
+			if (this.fullsize) {
+				canvas = $(_real_canvas);
+				next = canvas.parent().parent().next();
+
+				// Slider height
+				// FIXME: not generic
+				if (next && next.is(':visible')) {
+					height -= next.height();
+				}
+			}
+
+			_real_canvas.width = Math.floor(width) - margin;
+			_real_canvas.height = Math.floor(height) - margin;
 
 			// console.log("viewer/update_size: window.width = " + [ $(window).width(), $(window).height() ]);
 
