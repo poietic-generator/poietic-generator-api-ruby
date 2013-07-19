@@ -1,5 +1,8 @@
-.viewer { margin-top:.2em; text-align:center; 
-    background-color: #000;
+.viewer {
+    margin:0;
+    padding:0;
+    text-align:center; 
+    background-color:#000;
 }
 
 .slider {
