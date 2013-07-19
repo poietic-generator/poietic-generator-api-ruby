@@ -34,7 +34,7 @@
 		MESSAGE_EVENT = 2;
 
 	function Game() {
-		var console = window.console,
+		var console = window.noconsole,
 			self = this,
 			_observers = [],
 			_events = [],
@@ -119,6 +119,7 @@
 			for (e = 0; e < events.length; e += 1) {
 				_events.push({ event: events[e], type: type });
 			}
+			console.log("game.dispatch: " + JSON.stringify(events) + " now = " + (new Date()).getTime());
 		};
 
 		this.clear = function () {
