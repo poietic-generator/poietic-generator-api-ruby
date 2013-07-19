@@ -29,5 +29,5 @@ gem "dm-types"
 gem "inifile" #, "~> 0.3"
 gem "extlib"
 gem "rdebug"
-#gem "thin"
+gem "thin"
 
