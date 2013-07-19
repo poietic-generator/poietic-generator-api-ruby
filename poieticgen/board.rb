@@ -39,7 +39,7 @@ module PoieticGen
 	#
 	class Board
 
-		STROKE_COUNT_BETWEEN_QFRAMES = 5
+		STROKE_COUNT_BETWEEN_QFRAMES = 25
 
 		attr_reader :config
 
