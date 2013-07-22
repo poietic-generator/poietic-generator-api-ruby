@@ -42,6 +42,7 @@ require 'poieticgen/session'
 module PoieticGen
 
 	class InvalidSession < RuntimeError ; end
+	class AdminSessionNeeded < RuntimeError ; end
 
 	#
 	# manage a pool of users
@@ -60,11 +61,17 @@ module PoieticGen
 			# a 16-char long random string
 
 			_session_init
-			# FIXME put it in db
 		end
 
 
 		def restart session, params
+			user_id = session[PoieticGen::Api::SESSION_USER]
+			user = @session.users.get(user_id)
+			
+			raise InvalidSession, "No user found with user_id %d in DB" % user_id if user.nil?
+			
+			raise AdminSessionNeeded, "You have not the right to do that, please login as admin." if not user.is_admin
+			
 			_session_init
 		end
 
@@ -206,6 +213,60 @@ module PoieticGen
 
 			return result
 		end
+		
+		def admin_join session, params
+			req_name = params[:user_name]
+			req_password = params[:user_password]
+
+			# FIXME: prevent session from being stolen...
+			pp "requesting name=%s" % req_name
+			
+			user = nil
+			now = Time.now
+
+			is_admin = if req_password.nil? or req_name.nil? then false
+			           else req_password == @config.server.admin_password and
+			                req_name == @config.server.admin_username
+			           end
+			
+			raise AdminSessionNeeded, "Invalid parameters." if not is_admin
+			
+			param_create = {
+				:session => @session,
+				:name => req_name,
+				:zone => -1,
+				:created_at => now.to_i,
+				:alive_expires_at => (now + @config.user.liveness_timeout).to_i,
+				:idle_expires_at => (now + @config.user.idle_timeout).to_i,
+				:did_expire => false,
+				:last_update_time => now,
+				:is_admin => is_admin
+			}
+
+			User.transaction do
+
+				user = User.create param_create
+
+				# kill all previous users having the same zone
+
+				# update expiration time
+				user.idle_expires_at = (now + @config.user.idle_timeout)
+				user.alive_expires_at = (now + @config.user.liveness_timeout)
+				pp "Set expiring times at %s" % user.alive_expires_at.to_s
+
+				begin
+					user.save
+				rescue DataMapper::SaveFailureError => e
+					STDERR.puts e.resource.errors.inspect
+					raise e
+				end
+				
+				session[PoieticGen::Api::SESSION_USER] = user.id
+				session[PoieticGen::Api::SESSION_SESSION] = @session.token
+				
+				@session.users << user
+			end
+		end
 
 
 		def leave session
@@ -235,18 +296,28 @@ module PoieticGen
 				user.alive_expires_at = Time.now.to_i
 				user.did_expire = true
 				# create leave event if session is the current one
-				if session_token == @session.token then
+				if session_token == @session.token and user.zone >= 0 then
 					@board.leave user
 					Event.create_leave user.id, user.alive_expires_at, user.zone, @session
 				end
 				user.save
 			else
-				rdebug "Could not find any user for this request (user=%s)" % param_request.inspect;
-				pp param_request;
+				rdebug "Could not find any user for this request (user=%s)" % session.inspect;
 			end
 
 		end
 
+
+		#
+		# If the current user in session is an admin,
+		# returns true.
+		#
+		def admin? session
+			user_id = session[PoieticGen::Api::SESSION_USER]
+			user = @session.users.get(user_id)
+			
+			return ((not user.nil?) and user.is_admin)
+		end
 
 		#
 		# if not expired, update lease
@@ -256,10 +327,7 @@ module PoieticGen
 		def check_lease! session
 			now = Time.now.to_i
 
-			param_request = {
-				:id => session[PoieticGen::Api::SESSION_USER]
-			}
-			user = @session.users.first param_request
+			user = @session.users.get session[PoieticGen::Api::SESSION_USER]
 			pp user, now
 			raise InvalidSession, "No user found with session_id %s in DB" % @session.token if user.nil?
 
@@ -279,10 +347,6 @@ module PoieticGen
 		#
 		def update_data session, data
 
-			param_request = {
-				:id => session[PoieticGen::Api::SESSION_USER]
-			}
-
 			# parse update request first
 			rdebug "updating with : %s" % data.inspect
 			req = UpdateRequest.parse data
@@ -292,7 +356,7 @@ module PoieticGen
 
 			User.transaction do
 
-				user = @session.users.first param_request
+				user = @session.users.get session[PoieticGen::Api::SESSION_USER]
 				now = Time.now.to_i
 
 				self.check_expired_users

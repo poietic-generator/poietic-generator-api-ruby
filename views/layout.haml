@@ -17,4 +17,10 @@
     - @page.js << "/js/extern/json2.js"
     = @page.render_js
   %body{:class => @page.title }
+    - if flash[:success] then
+      .alert.alert-success.fade.in
+        = flash[:success]
+    - if flash[:error] then
+      .alert.alert-error.fade.in
+        = flash[:error]
     = yield

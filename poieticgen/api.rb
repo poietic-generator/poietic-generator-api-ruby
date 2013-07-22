@@ -22,7 +22,7 @@
 ##############################################################################
 
 require 'sinatra/base'
-
+require 'sinatra/flash'
 
 require 'poieticgen/config_manager'
 require 'poieticgen/page'
@@ -67,6 +67,8 @@ module PoieticGen
 		mime_type :eot, "application/octet-stream"
 		mime_type :otf, "application/octet-stream"
 		mime_type :woff, "application/octet-stream"
+		
+		register Sinatra::Flash
 
 
 		helpers do
@@ -139,9 +141,32 @@ module PoieticGen
 		# Restart session
 		#
 		get '/restart' do
-			session[SESSION_USER] ||= nil
-			settings.manager.restart session, params
-			redirect '/'
+			begin
+				# verify session expiration..
+				validate_session! session
+			
+				if settings.manager.check_lease! session then
+					settings.manager.restart session, params
+					session[SESSION_USER] ||= nil
+					
+				else
+					flash[:error] = "Session has expired!"
+				end
+
+			rescue PoieticGen::AdminSessionNeeded => e
+				flash[:error] = "Only admins can do that!"
+
+			rescue PoieticGen::InvalidSession => e
+				flash[:error] = "Session has expired!"
+
+			rescue Exception => e
+				STDERR.puts e.inspect, e.backtrace
+				Process.exit! #FIXME: remove in prod mode ? :-)
+
+			ensure
+				flash[:success] = "Session restarted!"
+				redirect '/page/index'
+			end
 		end
 
 		get '/page/index' do
@@ -186,9 +211,18 @@ module PoieticGen
 			redirect '/'
 		end
 
+		get '/page/login' do 
+			@page = Page.new "Login"
+			haml :page_login
+		end
+
 		get '/page/admin' do 
-			@page = Page.new "admin"
-			haml :page_admin
+			if settings.manager.admin? session then
+				@page = Page.new "admin"
+				haml :page_admin
+			else
+				redirect '/page/login'
+			end
 		end
 
 		get '/page/list' do
@@ -210,6 +244,22 @@ module PoieticGen
 
 			ensure
 				return JSON.generate( result )
+			end
+		end
+		
+		post '/api/session/admin_join' do 
+			begin
+				settings.manager.admin_join session, params
+				
+				redirect '/page/admin'
+			
+			rescue PoieticGen::AdminSessionNeeded => e
+				flash[:error] = "Invalid username or password"
+				redirect '/page/login'
+
+			rescue Exception => e
+				STDERR.puts e.inspect, e.backtrace
+				Process.exit! #FIXME: remove in prod mode ? :-)
 			end
 		end
 

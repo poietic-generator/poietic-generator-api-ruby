@@ -48,10 +48,10 @@ module PoieticGen ; class ConfigManager
 			@pidfile = hash["pidfile"]
 
 			raise MissingField, "Server.admin_username" unless hash.include? "admin_username"
-			@pidfile = hash["admin_username"]
+			@admin_username = hash["admin_username"]
 
 			raise MissingField, "Server.admin_password" unless hash.include? "admin_password"
-			@pidfile = hash["admin_password"]
+			@admin_password = hash["admin_password"]
 		end
 	end
 
