@@ -86,11 +86,6 @@ module PoieticGen ; module Allocation
 			@config = config
 			@monitor = Monitor.new
 
-			# FIXME : maintain boundaries for the board
-			@boundary_left = 0
-			@boundary_right = 0
-			@boundary_top = 0
-			@boundary_bottom = 0
 		end
 
 
@@ -182,8 +177,6 @@ module PoieticGen ; module Allocation
 				rdebug "Spiral/allocate zone : ", zone.inspect
 				@zones[index] = zone
 
-				_update_boundaries
-
 				return zone
 			end
 		end
@@ -196,6 +189,7 @@ module PoieticGen ; module Allocation
 			@monitor.synchronize do
 				zone = @zones[zone_idx]
 				zone.user_id = nil
+
 				return zone
 			end
 		end
@@ -222,31 +216,6 @@ module PoieticGen ; module Allocation
 			return result_index
 		end
 
-
-		def _update_boundaries
-			@monitor.synchronize do
-
-				@boundary_left = 0
-				@boundary_top = 0
-				@boundary_right = 0
-				@boundary_bottom = 0
-
-				@zones.each do |idx, zone|
-					x,y = zone.position
-					@boundary_left = x if x < @boundary_left
-					@boundary_right = x if x > @boundary_right
-					@boundary_top = y if y < @boundary_top
-					@boundary_bottom = y if y > @boundary_bottom
-				end
-
-				rdebug "Spiral/_update_boundaries : ", { 
-					:top => @boundary_top, 
-					:left => @boundary_left,
-					:right => @boundary_right,
-					:bottom => @boundary_bottom
-				}
-			end
-		end
 	end
 end ; end
 
