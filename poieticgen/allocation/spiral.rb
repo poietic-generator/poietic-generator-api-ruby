@@ -94,21 +94,25 @@ module PoieticGen ; module Allocation
 		end
 
 
+		#
+		# return the zone associated with an index
+		#
 		def [] index
 			res = if @zones.include? index then
-				@zones[index]
-			else nil
-			end
+					  @zones[index]
+				  else nil
+				  end
 			return res
 		end
 
 		#
-		# get all zones
+		# get all zones 
+		# FIXME: direct access should not be allowed
 		#
 		def zones
 			return @zones
 		end
-		
+
 		#
 		# replace zones
 		#
@@ -169,21 +173,24 @@ module PoieticGen ; module Allocation
 		def allocate
 			@monitor.synchronize do
 				index = _next_index()
-			
+
 				zone = Zone.new index, 
-				(self.index_to_position index),
-				@config.width,
-				@config.height
+					(self.index_to_position index),
+					@config.width,
+					@config.height
 
 				rdebug "Spiral/allocate zone : ", zone.inspect
 				@zones[index] = zone
-				
+
+				_update_boundaries
+
 				return zone
 			end
 		end
 
 		#
-		#
+		# disable the zone in the allocator
+		# FIXME: why did'nt we remove the zone from the allocator ?
 		#
 		def free zone_idx
 			@monitor.synchronize do
@@ -194,6 +201,7 @@ module PoieticGen ; module Allocation
 		end
 
 		private
+
 		# 
 		# Find the first allocatable index
 		#
@@ -214,5 +222,31 @@ module PoieticGen ; module Allocation
 			return result_index
 		end
 
+
+		def _update_boundaries
+			@monitor.synchronize do
+
+				@boundary_left = 0
+				@boundary_top = 0
+				@boundary_right = 0
+				@boundary_bottom = 0
+
+				@zones.each do |idx, zone|
+					x,y = zone.position
+					@boundary_left = x if x < @boundary_left
+					@boundary_right = x if x > @boundary_right
+					@boundary_top = y if y < @boundary_top
+					@boundary_bottom = y if y > @boundary_bottom
+				end
+
+				rdebug "Spiral/_update_boundaries : ", { 
+					:top => @boundary_top, 
+					:left => @boundary_left,
+					:right => @boundary_right,
+					:bottom => @boundary_bottom
+				}
+			end
+		end
 	end
 end ; end
+
