@@ -55,11 +55,12 @@ module PoieticGen
 		#disable :run
 
 		#set :environment, :development
+		set :root, File.expand_path(File.join(File.dirname(__FILE__),'..'))
 		set :environment, :production
 
 		set :static, true
-		set :public_folder, File.expand_path( File.dirname(__FILE__) + '/../static' )
-		set :views, File.expand_path( File.dirname(__FILE__) + '/../views' )
+		set :public_folder, 'public'
+		set :views, 'views'
 		set :protection, :except => :frame_options
 
 		mime_type :ttf, "application/octet-stream"
@@ -89,8 +90,8 @@ module PoieticGen
 		end
 
 		configure do
-			# FIXME: Add compass assets management (the following line) in the future
-			# Compass.add_project_configuration(File.join(Sinatra::Application.root, 'config', 'compass.config'))
+			# Compass assets management
+			Compass.add_project_configuration(File.join(settings.root, 'config', 'compass.rb'))
 
 			begin
 				config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
@@ -119,7 +120,13 @@ module PoieticGen
 			end
 		end
 
-
+		#
+		# Load compass-managed assets
+		#
+		get '/stylesheets/:name.css' do
+			content_type 'text/css', :charset => 'utf-8'
+			scss(:"stylesheets/#{params[:name]}" ) 
+		end
 
 		#
 		#
