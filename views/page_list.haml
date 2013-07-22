@@ -1,11 +1,9 @@
-<%=
-@page.css << "/stylesheets/page_admin.css"
+- # vim: set ts=2 sw=2 et:
+- @page.js << "/js/extern/jquery.cookie.js"
+- @page.js << "/js/console.js"
+- @page.js << "/js/poieticgen.js"
+- @page.js << "/js/page/admin.js"
 
-@page.js << "/js/extern/jquery.cookie.js"
-@page.js << "/js/console.js"
-@page.js << "/js/poieticgen.js"
-@page.js << "/js/page/admin.js"
-\%>
 / admin zone
 #session-zone{"data-fullscreen" => "false", "data-role" => "page"}
   %div{"data-id" => "head", "data-position" => "fixed", "data-role" => "header"}
