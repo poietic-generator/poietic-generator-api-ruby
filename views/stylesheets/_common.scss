@@ -2,7 +2,7 @@
     font-family: 'Raleway Thin';
     src: url('/fonts/raleway/raleway_thin.eot');
     src: local('☺'),
-		url('/fonts/raleway/raleway_thin.otf') format('opentype');
+	url('/fonts/raleway/raleway_thin.otf') format('opentype');
 }
 
 body {
@@ -75,3 +75,9 @@ body {
 }
 
 .spacer { clear: both; width:0px; height: 0px; }
+
+
+.ui-link {
+    text-decoration: none;
+}
+
