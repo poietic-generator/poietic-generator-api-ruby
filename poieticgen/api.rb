@@ -146,14 +146,14 @@ module PoieticGen
 
 		get '/page/index' do
 			session[SESSION_USER] ||= nil
-			@page = Page.new "Index"
+			@page = Page.new "index"
 			haml :page_index
 		end
 		#
 		#
 		#
 		get '/page/draw' do
-			@page = Page.new "Session"
+			@page = Page.new "draw"
 			haml :page_draw
 		end
 
@@ -162,7 +162,7 @@ module PoieticGen
 		# display global activity on this session
 		#
 		get '/page/view' do
-			@page = Page.new "View"
+			@page = Page.new "view"
 			haml :page_view
 		end
 
@@ -172,7 +172,7 @@ module PoieticGen
 		# without toolbar
 		#
 		get '/view/standalone' do
-			@page = Page.new "View"
+			@page = Page.new "view-standalone"
 			haml :page_view_standalone
 		end
 
@@ -187,12 +187,12 @@ module PoieticGen
 		end
 
 		get '/page/admin' do 
-			@page = Page.new "Admin"
+			@page = Page.new "admin"
 			haml :page_admin
 		end
 
 		get '/page/list' do
-			@page = Page.new "List"
+			@page = Page.new "list"
 			haml :page_list
 		end
 
