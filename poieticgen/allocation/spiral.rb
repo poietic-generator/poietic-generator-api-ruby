@@ -79,13 +79,17 @@ module PoieticGen ; module Allocation
 		#
 		#
 		#
-		def initialize config
+		def initialize config, zone_dump = nil
 			# map index => Zone object (or nil if unallocated)
 			@debug = true
-			@zones = {}
+			if zone_dump.nil? then
+				@zones = {}
+			else 
+				@zones = zone_dump
+			end
+
 			@config = config
 			@monitor = Monitor.new
-
 		end
 
 
@@ -106,13 +110,6 @@ module PoieticGen ; module Allocation
 		#
 		def zones
 			return @zones
-		end
-
-		#
-		# replace zones
-		#
-		def set_zones zones
-			@zones = zones
 		end
 
 		#
