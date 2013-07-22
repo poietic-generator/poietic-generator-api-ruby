@@ -1,0 +1,23 @@
+body.view {
+    .viewer {
+	margin:0;
+	padding:0;
+	text-align:center; 
+	background-color:#000;
+    }
+
+    .slider {
+	margin:0;
+	padding:0 20px;
+    }
+
+    .slider div.ui-slider {
+	width:100%;
+	margin:0;
+	padding:0;
+    }
+
+    #history_slider {
+	display:none;
+    }
+}

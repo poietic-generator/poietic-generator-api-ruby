@@ -55,11 +55,12 @@ module PoieticGen
 		#disable :run
 
 		#set :environment, :development
+		set :root, File.expand_path(File.join(File.dirname(__FILE__),'..'))
 		set :environment, :production
 
 		set :static, true
-		set :public_folder, File.expand_path( File.dirname(__FILE__) + '/../static' )
-		set :views, File.expand_path( File.dirname(__FILE__) + '/../views' )
+		set :public_folder, 'public'
+		set :views, 'views'
 		set :protection, :except => :frame_options
 
 		mime_type :ttf, "application/octet-stream"
@@ -91,8 +92,8 @@ module PoieticGen
 		end
 
 		configure do
-			# FIXME: Add compass assets management (the following line) in the future
-			# Compass.add_project_configuration(File.join(Sinatra::Application.root, 'config', 'compass.config'))
+			# Compass assets management
+			Compass.add_project_configuration(File.join(settings.root, 'config', 'compass.rb'))
 
 			begin
 				config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
@@ -121,7 +122,13 @@ module PoieticGen
 			end
 		end
 
-
+		#
+		# Load compass-managed assets
+		#
+		get '/stylesheets/:name.css' do
+			content_type 'text/css', :charset => 'utf-8'
+			scss(:"stylesheets/#{params[:name]}" ) 
+		end
 
 		#
 		#
@@ -164,14 +171,14 @@ module PoieticGen
 
 		get '/page/index' do
 			session[SESSION_USER] ||= nil
-			@page = Page.new "Index"
+			@page = Page.new "index"
 			haml :page_index
 		end
 		#
 		#
 		#
 		get '/page/draw' do
-			@page = Page.new "Session"
+			@page = Page.new "draw"
 			haml :page_draw
 		end
 
@@ -180,7 +187,7 @@ module PoieticGen
 		# display global activity on this session
 		#
 		get '/page/view' do
-			@page = Page.new "View"
+			@page = Page.new "view"
 			haml :page_view
 		end
 
@@ -190,7 +197,7 @@ module PoieticGen
 		# without toolbar
 		#
 		get '/view/standalone' do
-			@page = Page.new "View"
+			@page = Page.new "view-standalone"
 			haml :page_view_standalone
 		end
 
@@ -211,7 +218,7 @@ module PoieticGen
 
 		get '/page/admin' do 
 			if settings.manager.admin? session then
-				@page = Page.new "Admin"
+				@page = Page.new "admin"
 				haml :page_admin
 			else
 				redirect '/page/login'
@@ -219,7 +226,7 @@ module PoieticGen
 		end
 
 		get '/page/list' do
-			@page = Page.new "List"
+			@page = Page.new "list"
 			haml :page_list
 		end
 
