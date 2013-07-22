@@ -57,6 +57,12 @@ module PoieticGen
 			pp @allocator
 			@monitor = Monitor.new
 			@stroke_count = 0
+
+			# FIXME : maintain boundaries for the board
+			@boundary_left = 0
+			@boundary_right = 0
+			@boundary_top = 0
+			@boundary_bottom = 0
 		end
 
 
@@ -134,24 +140,19 @@ module PoieticGen
 			BoardSnapshot.new @allocator.zones, (Timeline.create_now session), session
 		end
 		
+
 		#
 		# Get the board state at timeline_id.
 		# FIXME: load_board is not static because it depends on @config.
 		#
 		def load_board timeline_id, session, apply_strokes
-			
 			snap = _get_snapshot timeline_id, session
 			zones_snap = {}
 			
 			if snap.nil? then			
-				STDOUT.puts "no snap found"
-				
 				# no snapshot: the board is empty
 				snap_timeline = 0
 			else
-				STDOUT.puts "snap"
-				pp snap
-			
 				snap_timeline = snap.timeline
 				
 				# Create zones from snapshot
@@ -159,13 +160,9 @@ module PoieticGen
 					zones_snap[zs.index] = Zone.from_snapshot zs
 				end
 			end
-			
-			STDOUT.puts "zones_snap"
-			pp zones_snap
-			
+		
 			# Put zones from snapshot in allocator
-			allocator = ALLOCATORS[@config.allocator].new @config
-			allocator.set_zones zones_snap
+			allocator = ALLOCATORS[@config.allocator].new @config, zones_snap
 			
 			# get the session associated to the snapshot
 			users_db = session.users
@@ -213,7 +210,8 @@ module PoieticGen
 			
 				# Apply strokes
 				zones.each do |index,zone|
-					if zone.user_id != nil then
+					# FIXME: use allocator to test if zone is allocated	
+					unless zone.user_id.nil? then
 						zone.apply_local strokes.select{ |s| s.zone == zone.index }
 					end
 				end
@@ -228,14 +226,45 @@ module PoieticGen
 		
 		private
 
+		#
+		# return the snapshot preceeding timeline_id
+		#
 		def _get_snapshot timeline_id, session
-			# The first snap before timeline_id
 			timeline = session.timelines.first(
 				:id.lte => timeline_id,
 				:order => [ :id.desc ]
 			)
 			
 			return timeline.board_snapshot
+		end
+
+
+		#
+		# update boundaries of board
+		#
+		def _update_boundaries
+			@monitor.synchronize do
+
+				@boundary_left = 0
+				@boundary_top = 0
+				@boundary_right = 0
+				@boundary_bottom = 0
+
+				@zones.each do |idx, zone|
+					x,y = zone.position
+					@boundary_left = x if x < @boundary_left
+					@boundary_right = x if x > @boundary_right
+					@boundary_top = y if y < @boundary_top
+					@boundary_bottom = y if y > @boundary_bottom
+				end
+
+				rdebug "Spiral/_update_boundaries : ", { 
+					:top => @boundary_top, 
+					:left => @boundary_left,
+					:right => @boundary_right,
+					:bottom => @boundary_bottom
+				}
+			end
 		end
 	end
 

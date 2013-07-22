@@ -54,9 +54,14 @@ module PoieticGen
 		DESCRIPTION_MINIMAL = 1
 		DESCRIPTION_FULL = 2
 		
+		#
+		# convert JSON strings to integers
+		#
 		def position
 			super.map{|x| x.to_i}
 		end
+
+
 
 		def initialize index, position, width, height
 			@debug = true

@@ -79,13 +79,17 @@ module PoieticGen ; module Allocation
 		#
 		#
 		#
-		def initialize config
+		def initialize config, zone_dump = nil
 			# map index => Zone object (or nil if unallocated)
 			@debug = true
-			@zones = {}
+			if zone_dump.nil? then
+				@zones = {}
+			else 
+				@zones = zone_dump
+			end
+
 			@config = config
 			@monitor = Monitor.new
-
 		end
 
 
@@ -106,13 +110,6 @@ module PoieticGen ; module Allocation
 		#
 		def zones
 			return @zones
-		end
-
-		#
-		# replace zones
-		#
-		def set_zones zones
-			@zones = zones
 		end
 
 		#
@@ -181,6 +178,18 @@ module PoieticGen ; module Allocation
 			end
 		end
 
+
+		#
+		# test if the zone exists
+		# FIXME: use something else than user.nil to test if zone is free
+ 		#
+		def free? zone_idx
+			@monitor.synchronize do
+				zone = @zones[zone_idx]
+				return zone.user_id.nil?
+			end
+		end
+
 		#
 		# disable the zone in the allocator
 		# FIXME: why did'nt we remove the zone from the allocator ?
@@ -189,7 +198,6 @@ module PoieticGen ; module Allocation
 			@monitor.synchronize do
 				zone = @zones[zone_idx]
 				zone.user_id = nil
-
 				return zone
 			end
 		end
