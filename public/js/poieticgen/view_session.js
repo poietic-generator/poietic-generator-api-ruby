@@ -260,8 +260,8 @@
 								console.log('view_session/update real time!');
 							} */
 
-							_slider.set_value(_slider.minimum() + _last_join_timestamp + _get_elapsed_time());
 							_slider.set_maximum(_get_current_time() - VIEW_SESSION_HISTORY_PROTECTED_INTERVAL);
+							_slider.set_value(_slider.minimum() + _last_join_timestamp + _get_elapsed_time());
 
 							_last_update_max_timestamp = response.max_timestamp;
 						}
