@@ -8,9 +8,9 @@ require 'dm-migrations'
 require 'dm-transactions'
 require 'dm-types'
 
+require 'compass'
 require 'haml'
 require 'sass'
-#require 'compass'
 
 $:.insert(0,".")
 require 'poieticgen/manager'
