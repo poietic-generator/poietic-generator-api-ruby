@@ -487,6 +487,7 @@ module PoieticGen
 					if timeline_id > 0 then
 						users, zones = @board.load_board timeline_id, req_session, true
 					
+						# FIXME: use allocator to test if zone is allocated	
 						zones = zones
 							.select{ |i,z| not z.user_id.nil? } # only used zones
 							.map{ |i,z| z.to_desc_hash Zone::DESCRIPTION_FULL }
