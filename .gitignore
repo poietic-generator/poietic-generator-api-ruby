@@ -4,3 +4,4 @@ config/config.ini
 vendor
 tmp
 log
+.sass-cache
