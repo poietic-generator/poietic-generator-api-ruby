@@ -36,6 +36,10 @@
 /* display: block; */
 }
 
+#credits {
+    text-align: center;
+}
+
 #index-menu #username {
     max-width: 40%;
     width: 40%;
