@@ -37,6 +37,7 @@ module PoieticGen
 		property :idle_expires_at, Integer, :required => true
 		property :did_expire, Boolean, :required => true
 		property :last_update_time, Integer, :required => true
+		property :is_admin, Boolean, :default => false
 		
 		belongs_to :session
 
