@@ -48,6 +48,8 @@ module PoieticGen
 
 		SESSION_USER = :user
 		SESSION_SESSION = :name
+		
+		SESSION_MAX_LISTED_COUNT = 5
 
 		enable :sessions
 		enable :run
@@ -172,6 +174,20 @@ module PoieticGen
 		get '/page/index' do
 			session[SESSION_USER] ||= nil
 			@page = Page.new "index"
+			@session_list = {}
+			@selected_session = ""
+			
+			sessions = Session.first(SESSION_MAX_LISTED_COUNT,
+				:order => [:timestamp.desc])
+			
+			if not sessions.nil? then
+				@selected_session = sessions.first.token
+				
+				sessions.each do |s|
+					@session_list[s.token] = "Session %d" % s.id
+				end
+			end
+			
 			haml :page_index
 		end
 		#
