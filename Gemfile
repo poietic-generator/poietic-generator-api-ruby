@@ -1,5 +1,7 @@
 source "http://rubygems.org"
 
+gem "thor"
+
 gem "sinatra", :require => "sinatra/base"
 gem "sinatra-reloader"
 gem "sinatra-flash"
