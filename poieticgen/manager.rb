@@ -349,13 +349,25 @@ module PoieticGen
 			# parse update request first
 			rdebug "updating with : %s" % data.inspect
 			req = UpdateRequest.parse data
+			
+			req_session = begin
+				if session[PoieticGen::Api::SESSION_SESSION] == @session.token then
+					@session
+				else
+					Session.first(:token => session[PoieticGen::Api::SESSION_SESSION])
+				end
+			end
+			
+			if req_session.nil? then
+				req_session = @session
+			end
 
 			# prepare empty result message
 			result = nil
 
 			User.transaction do
 
-				user = @session.users.get session[PoieticGen::Api::SESSION_USER]
+				user = req_session.users.get session[PoieticGen::Api::SESSION_USER]
 				now = Time.now.to_i
 
 				self.check_expired_users
@@ -370,7 +382,7 @@ module PoieticGen
 				@board.update_data user, req.strokes
 				@chat.update_data user, req.messages
 				
-				timelines = @session.timelines.all(
+				timelines = req_session.timelines.all(
 					:id.gt => req.timeline_after
 				)
 
@@ -401,7 +413,7 @@ module PoieticGen
 					:events => events_collection,
 					:strokes => strokes_collection,
 					:messages => messages_collection,
-					:stamp => (now - @session.timestamp), # FIXME: unused by the client
+					:stamp => (now - req_session.timestamp), # FIXME: unused by the client
 					:idle_timeout => (user.idle_expires_at - now)
 				}
 
@@ -420,7 +432,18 @@ module PoieticGen
 			rdebug "call with %s" % params.inspect
 			req = SnapshotRequest.parse params
 			result = nil
-			req_session = @session
+			
+			req_session = begin
+				if req.session == @session.token then
+					@session
+				else
+					Session.first(:token => req.session)
+				end
+			end
+			
+			if req_session.nil? then
+				req_session = @session
+			end
 
 			User.transaction do
 
@@ -524,7 +547,18 @@ module PoieticGen
 			req = PlayRequest.parse params
 			now_i = Time.now.to_i
 			result = nil
-			req_session = @session
+			
+			req_session = begin
+				if req.session == @session.token then
+					@session
+				else
+					Session.first(:token => req.session)
+				end
+			end
+			
+			if req_session.nil? then
+				req_session = @session
+			end
 
 			# TODO : ignore session_id because it is unknow for the viewer for now
 			#raise RuntimeError, "Invalid session" if req.session != req_session.token
