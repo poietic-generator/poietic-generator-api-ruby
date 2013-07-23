@@ -27,7 +27,7 @@ module PoieticGen
 	class Message
 		include DataMapper::Resource
 
-		@debug = true
+		# @debug = true
 
 		property :id,	Serial
 		property :user_src,	Integer, :required => true
@@ -58,7 +58,7 @@ module PoieticGen
 				msg.save
 				rdebug msg.inspect
 			rescue DataMapper::SaveFailureError => e
-				puts e.resource.errors.inspect
+				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e
 			end
 		end

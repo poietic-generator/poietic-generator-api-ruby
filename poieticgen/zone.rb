@@ -64,7 +64,7 @@ module PoieticGen
 
 
 		def initialize index, position, width, height
-			@debug = true
+			# @debug = true
 
 			param_create = {
 				:index => index,
@@ -85,8 +85,6 @@ module PoieticGen
 		
 		def save
 			begin
-				# FIXME: debug
-				pp self
 				super
 			rescue DataMapper::SaveFailureError => e
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
@@ -96,8 +94,6 @@ module PoieticGen
 		end
 		
 		def self.from_snapshot snapshot
-			pp snapshot.index
-			pp snapshot.position
 			zone = Zone.new snapshot.index, snapshot.position, snapshot.width, snapshot.height
 			zone.user_id = snapshot.user_id
 			zone.data = snapshot.data

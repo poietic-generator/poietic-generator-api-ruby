@@ -41,7 +41,7 @@ module PoieticGen
 		def initialize hash
 			@hash = hash
 			@enable_timeline = false # FIXME: unused
-			@debug = true
+			# @debug = true
 		end
 
 		public

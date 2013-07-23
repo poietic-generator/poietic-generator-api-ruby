@@ -50,7 +50,7 @@ module PoieticGen
 
 
 		def initialize config
-			@debug = true
+			# @debug = true
 			rdebug "using allocator %s" % config.allocator
 			@config = config
 			@allocator = ALLOCATORS[config.allocator].new config
@@ -131,8 +131,6 @@ module PoieticGen
 				end
 				
 				@stroke_count = (@stroke_count + drawing.length) % STROKE_COUNT_BETWEEN_QFRAMES;
-
-				STDOUT.puts "stroke_count %d" % [@stroke_count]
 			end
 		end
 
@@ -174,15 +172,6 @@ module PoieticGen
 				:order => [ :id.asc ]
 			)
 			
-			STDOUT.puts "users_db"
-			pp users_db
-			
-			STDOUT.puts "strokes_db"
-			pp timelines.strokes
-			
-			STDOUT.puts "events_db"
-			pp timelines.events
-			
 			# Add/Remove zones since the snapshot
 			timelines.events.each do |event|
 				zone_index = event.zone_index
@@ -216,10 +205,6 @@ module PoieticGen
 					end
 				end
 			end
-
-			STDOUT.puts "users and zones"
-			pp users
-			pp zones
 			
 			return users, zones
 		end

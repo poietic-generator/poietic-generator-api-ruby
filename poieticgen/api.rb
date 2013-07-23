@@ -77,7 +77,7 @@ module PoieticGen
 			# FIXME: verify also that it is alive
 			#
 			def validate_session! session
-				STDERR.puts "API -- validate_session: %s" % session.inspect
+				# STDERR.puts "API -- validate_session: %s" % session.inspect
 				unless session.include? SESSION_USER and
 					not session[SESSION_USER].nil? then
 					throw :halt, [401, "Not authorized\n"]

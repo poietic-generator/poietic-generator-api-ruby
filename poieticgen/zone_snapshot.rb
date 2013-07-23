@@ -49,13 +49,12 @@ module PoieticGen
 		has n, :board_snapshots, :through => Resource
 
 		def initialize json
-			@debug = true
+			# @debug = true
 			
 			super json
 
 			begin
 				self.save
-				pp self
 			rescue DataMapper::SaveFailureError => e
 				pp e.resource.errors.inspect
 				rdebug "Saving failure : %s" % e.resource.errors.inspect

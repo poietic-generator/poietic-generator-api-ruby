@@ -40,7 +40,7 @@ module PoieticGen
 
 		def initialize hash
 			@hash = hash
-			@debug = true
+			# @debug = true
 		end
 
 		public

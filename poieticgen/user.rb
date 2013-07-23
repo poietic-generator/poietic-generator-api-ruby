@@ -40,6 +40,8 @@ module PoieticGen
 		property :is_admin, Boolean, :default => false
 		
 		belongs_to :session
+		
+		# @debug = true
 
 		def to_hash
 			res = {

@@ -36,7 +36,7 @@ module PoieticGen
 		belongs_to :session
 
 		def initialize zones, last_timeline, session
-			@debug = true
+			# @debug = true
 			
 			json = {
 				:session => session,
@@ -52,7 +52,6 @@ module PoieticGen
 
 			begin
 				self.save
-				pp self
 			rescue DataMapper::SaveFailureError => e
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e

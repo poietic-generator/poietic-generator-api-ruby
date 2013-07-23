@@ -27,7 +27,7 @@ module PoieticGen
 	class Event
 		include DataMapper::Resource
 
-		@debug = true
+		# @debug = true
 
 		property :id,	Serial
 		property :type,	String, :required => true
@@ -45,8 +45,6 @@ module PoieticGen
 			begin
 				event.save
 			rescue DataMapper::SaveFailureError => e
-				STDOUT.puts "Error"
-				pp e.resource.errors
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e
 			end
@@ -79,8 +77,7 @@ module PoieticGen
 		def to_hash zone, ref
 			user = User.first( :id => self.zone_user )
 
-			rdebug "Event/to_hash user"
-			pp user
+			rdebug "Event/to_hash user", user
 
 			res_desc = {
 				:user => user.to_hash,

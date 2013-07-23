@@ -56,7 +56,7 @@ module PoieticGen
 
 		def initialize config
 			@config = config
-			@debug = true
+			# @debug = true
 			pp config
 			# a 16-char long random string
 
@@ -88,7 +88,7 @@ module PoieticGen
 
 
 			# FIXME: prevent session from being stolen...
-			pp "requesting id=%s, session=%s, name=%s" \
+			rdebug "requesting id=%s, session=%s, name=%s" \
 				% [ req_id, req_session, req_name ]
 
 			user = nil
@@ -114,7 +114,7 @@ module PoieticGen
 
 				# reuse user_id if session is still valid
 				if req_session != @session.token then
-					pp "User is requesting a different session"
+					rdebug "User is requesting a different session"
 					# create new
 					user = User.create param_create
 
@@ -122,7 +122,7 @@ module PoieticGen
 					@board.join user
 
 				else
-					pp "User is in session"
+					rdebug "User is in session"
 					param_request = {
 						:id => req_id
 					}
@@ -130,10 +130,10 @@ module PoieticGen
 					user = @session.users.first_or_create param_request, param_create
 
 					tdiff = (now.to_i - user.alive_expires_at)
-					pp [ now.to_i, user.alive_expires_at, tdiff ]
+					rdebug [ now.to_i, user.alive_expires_at, tdiff ]
 					if ( tdiff > 0  ) then
 						# The event will be generated elsewhere (in update_data).
-						pp "User session expired"
+						rdebug "User session expired"
 						# create new if session expired
 						user = User.create param_create
 
@@ -148,7 +148,7 @@ module PoieticGen
 				# update expiration time
 				user.idle_expires_at = (now + @config.user.idle_timeout)
 				user.alive_expires_at = (now + @config.user.liveness_timeout)
-				pp "Set expiring times at %s" % user.alive_expires_at.to_s
+				rdebug "Set expiring times at %s" % user.alive_expires_at.to_s
 
 				# reset name if requested
 				user.name = param_name
@@ -162,7 +162,7 @@ module PoieticGen
 				
 				@session.users << user
 				
-				pp user
+				rdebug "User : ", user
 				session[PoieticGen::Api::SESSION_USER] = user.id
 				session[PoieticGen::Api::SESSION_SESSION] = @session.token
 
@@ -192,7 +192,7 @@ module PoieticGen
 				}
 				msg_history_req = Message.all(:user_dst => user.id) + Message.all(:user_src => user.id)
 				msg_history = msg_history_req.map{ |msg| msg.to_hash }
-				pp "msg_history req : %s" % msg_history.inspect
+				rdebug "msg_history req : %s" % msg_history.inspect
 
 
 				result = { :user_id => user.id,
@@ -209,7 +209,6 @@ module PoieticGen
 			end
 
 			rdebug "result : %s" % result.inspect
-			pp result
 
 			return result
 		end
@@ -219,7 +218,7 @@ module PoieticGen
 			req_password = params[:user_password]
 
 			# FIXME: prevent session from being stolen...
-			pp "requesting name=%s" % req_name
+			rdebug "requesting name=%s" % req_name
 			
 			user = nil
 			now = Time.now
@@ -252,7 +251,7 @@ module PoieticGen
 				# update expiration time
 				user.idle_expires_at = (now + @config.user.idle_timeout)
 				user.alive_expires_at = (now + @config.user.liveness_timeout)
-				pp "Set expiring times at %s" % user.alive_expires_at.to_s
+				rdebug "Set expiring times at %s" % user.alive_expires_at.to_s
 
 				begin
 					user.save
@@ -270,25 +269,25 @@ module PoieticGen
 
 
 		def leave session
-			pp "FIXME: LEAVE(session)", session
+			rdebug "FIXME: LEAVE(session)", session
 			# zone_idx = @users[user_id].zone
 
 			session_user_id = session[PoieticGen::Api::SESSION_USER]
 			session_token = session[PoieticGen::Api::SESSION_SESSION]
 			
-			pp "FIXME: LEAVE(session_user_id)", session_user_id
+			rdebug "FIXME: LEAVE(session_user_id)", session_user_id
 
 			if session_token == @session.token then
 				cur_session = @session
-				pp "FIXME: LEAVE(cur_session) current", cur_session
+				rdebug "FIXME: LEAVE(cur_session) current", cur_session
 			else
 				cur_session = Session.first( :token => session_token )
-				pp "FIXME: LEAVE(cur_session) other", cur_session
+				rdebug "FIXME: LEAVE(cur_session) other", cur_session
 			end
 			
 			if cur_session then
 				user = cur_session.users.get(session_user_id)
-				pp "FIXME: LEAVE(user)", user
+				rdebug "FIXME: LEAVE(user)", user
 			end
 
 			if user then
@@ -328,7 +327,7 @@ module PoieticGen
 			now = Time.now.to_i
 
 			user = @session.users.get session[PoieticGen::Api::SESSION_USER]
-			pp user, now
+			rdebug "check_lease! user = ", user, " now = ", now
 			raise InvalidSession, "No user found with session_id %s in DB" % @session.token if user.nil?
 
 			if ( (now >= user.alive_expires_at) or (now >= user.idle_expires_at) ) then
@@ -464,7 +463,7 @@ module PoieticGen
 							absolute_time = now_i + req.date + 1
 						end
 
-						STDOUT.puts "abs_time %d (now %d, date %d)" % [absolute_time, now_i, req.date]
+						rdebug "abs_time %d (now %d, date %d)" % [absolute_time, now_i, req.date]
 
 						# The first event before the requested time
 						t = req_session.timelines.first(
@@ -480,7 +479,7 @@ module PoieticGen
 						timestamp = absolute_time - req_session.timestamp
 					end
 
-					STDOUT.puts "timeline_id %d" % timeline_id
+					rdebug "timeline_id %d" % timeline_id
 
 					# retrieve users and zones
 					
@@ -545,7 +544,7 @@ module PoieticGen
 				max_timestamp = -1
 
 				if req.view_mode == PlayRequest::REAL_TIME_VIEW then
-					STDOUT.puts "REAL_TIME_VIEW"
+					rdebug "REAL_TIME_VIEW"
 				
 					timelines = req_session.timelines.all(
 						:id.gte => req.timeline_after
@@ -553,11 +552,11 @@ module PoieticGen
 				
 					evt_req = timelines.events
 
-					pp evt_req
+					rdebug evt_req
 					
 					srk_req = timelines.strokes
 
-					pp srk_req
+					rdebug srk_req
 					
 					first_timeline = timelines.first(
 						:order => [ :id.asc ]
@@ -573,7 +572,7 @@ module PoieticGen
 					
 				elsif req.view_mode == PlayRequest::HISTORY_VIEW then
 					
-					STDOUT.puts "HISTORY_VIEW"
+					rdebug "HISTORY_VIEW"
 					
 					session_timelines = req_session.timelines
 					
@@ -583,7 +582,7 @@ module PoieticGen
 						:order => [ :id.asc ]
 					)
 					
-					pp since
+					rdebug "since = ", since
 					
 					if not since.nil? then
 						
@@ -601,8 +600,7 @@ module PoieticGen
 							)
 						end
 						
-						pp "timelines"
-						pp timelines
+						rdebug "timelines = ", timelines
 						
 						if not timelines.empty? then
 				
@@ -612,15 +610,13 @@ module PoieticGen
 								s.to_hash since.timestamp
 							}
 					
-							STDOUT.puts "Strokes"
-							pp srk_req
+							rdebug "Strokes ", srk_req
 					
 							evt_req = timelines.events
 
 							if not evt_req.empty? then
 
-								STDOUT.puts "Events"
-								pp evt_req
+								rdebug "Events ", evt_req
 					
 								users, zones = @board.load_board timelines.last.id, req_session, false
 								# FIXME: load_board loads some useless data for what we want
@@ -631,7 +627,7 @@ module PoieticGen
 							timestamp = timelines.first.timestamp - req_session.timestamp
 						end
 					else
-						pp "Invalid since" % req.since
+						rdebug "Invalid since ", req.since
 					end
 				else
 					raise RuntimeError, "Unknown view mode %d" % req.view_mode

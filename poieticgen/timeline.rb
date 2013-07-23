@@ -37,6 +37,8 @@ module PoieticGen
 		
 		belongs_to :session
 		
+		# @debug = true
+		
 		def self.create_now session
 			create({
 				:timestamp => Time.now.to_i,
