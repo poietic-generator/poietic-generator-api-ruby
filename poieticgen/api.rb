@@ -133,16 +133,9 @@ module PoieticGen
 		end
 
 		#
+		# Create a new session
 		#
-		#
-		get '/' do
-			redirect '/page/index'
-		end
-
-		#
-		# Restart session
-		#
-		get '/restart' do
+		post '/session/create' do
 			begin
 				# verify session expiration..
 				validate_session! session
@@ -167,11 +160,11 @@ module PoieticGen
 
 			ensure
 				flash[:success] = "Session restarted!"
-				redirect '/page/index'
+				redirect '/'
 			end
 		end
 
-		get '/page/index' do
+		get '/' do
 			session[SESSION_USER] ||= nil
 			@page = Page.new "index"
 			@session_list = {}
@@ -193,7 +186,7 @@ module PoieticGen
 		#
 		#
 		#
-		get '/page/draw' do
+		get '/session/:session_token/draw' do
 			@page = Page.new "draw"
 			haml :page_draw
 		end
@@ -202,7 +195,7 @@ module PoieticGen
 		#
 		# display global activity on this session
 		#
-		get '/page/view' do
+		get '/session/:session_token/view' do
 			@page = Page.new "view"
 			haml :page_view
 		end
@@ -211,37 +204,52 @@ module PoieticGen
 		#
 		# display global activity on this session
 		# without toolbar
-		#
-		get '/view/standalone' do
+		# 
+		get '/session/:session_token/view_standalone' do
 			@page = Page.new "view-standalone"
 			haml :page_view_standalone
 		end
 
 
-		get '/page/logout' do
+		get '/session/:session_token/logout' do
 			# ensure that lazy session loading will work
 			session[SESSION_USER] ||= nil
 			settings.manager.leave session
 			response.set_cookie('user_id', {:value => nil, :path => "/"});
-			response.set_cookie('user_session', {:value => nil, :path => "/"});
 			redirect '/'
 		end
 
-		get '/page/login' do 
+		get '/user/login' do 
 			@page = Page.new "Login"
 			haml :page_login
 		end
+		
+		post '/user/login' do 
+			begin
+				settings.manager.admin_join session, params
+				
+				redirect '/session/admin'
+			
+			rescue PoieticGen::AdminSessionNeeded => e
+				flash[:error] = "Invalid username or password"
+				redirect '/user/login'
 
-		get '/page/admin' do 
+			rescue Exception => e
+				STDERR.puts e.inspect, e.backtrace
+				Process.exit! #FIXME: remove in prod mode ? :-)
+			end
+		end
+
+		get '/session/admin' do 
 			if settings.manager.admin? session then
 				@page = Page.new "admin"
 				haml :page_admin
 			else
-				redirect '/page/login'
+				redirect '/user/login'
 			end
 		end
 
-		get '/page/list' do
+		get '/session/list' do
 			@page = Page.new "list"
 			haml :page_list
 		end
@@ -249,7 +257,7 @@ module PoieticGen
 		#
 		# notify server about the intention of joining the session
 		#
-		get '/api/session/join' do
+		get '/session/:session_token/draw/join.json' do
 			begin
 				result = {}
 				result = settings.manager.join session, params
@@ -262,22 +270,6 @@ module PoieticGen
 				return JSON.generate( result )
 			end
 		end
-		
-		post '/api/session/admin_join' do 
-			begin
-				settings.manager.admin_join session, params
-				
-				redirect '/page/admin'
-			
-			rescue PoieticGen::AdminSessionNeeded => e
-				flash[:error] = "Invalid username or password"
-				redirect '/page/login'
-
-			rescue Exception => e
-				STDERR.puts e.inspect, e.backtrace
-				Process.exit! #FIXME: remove in prod mode ? :-)
-			end
-		end
 
 
 		#
@@ -287,7 +279,8 @@ module PoieticGen
 		# clients having not renewed their lease before 300
 		# seconds are considered disconnected
 		#
-		post '/api/session/update' do
+		# FIXME: add precision about updated object...
+		post '/session/:session_token/draw/update.json' do
 			begin
 				result = {}
 				# verify session expiration..
@@ -330,7 +323,7 @@ module PoieticGen
 		#
 		# get a snapshot from the server.
 		#
-		get '/api/session/snapshot' do
+		get '/session/:session_token/view/snapshot.json' do
 			begin
 				result = {}
 				# verify session expiration..
@@ -366,7 +359,7 @@ module PoieticGen
 		#
 		# play a scene in view
 		#
-		get '/api/session/play' do
+		get '/session/:session_token/view/update.json' do
 			begin
 				result = {}
 				status = [ STATUS_SUCCESS ]

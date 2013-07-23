@@ -36,17 +36,22 @@ body.index {
 	}
 
 	#credentials {
-	    label {
-	        margin: 0;
-	        vertical-align: middle;
-	    	width: 20%;
-	    	display: inline-block;
-	    }
+	    @media (min-width: 450px) {
+	        label {
+	            margin: 0;
+	            vertical-align: middle;
+	    	    width: 20%;
+	    	    display: inline-block;
+	            text-align: right;
+	        }
 	
-	    div.ui-select, input.ui-input-text {
-	        max-width: 40%;
-	        width: 40%;
-	        text-align: center;
+	        div.ui-select, input.ui-input-text {
+	    	    /* @include box-sizing(border-box); */
+	    	    box-sizing: border-box;
+	            max-width: 40%;
+	            width: 40%;
+	            text-align: center;
+	        }
 	    }
 	}
 

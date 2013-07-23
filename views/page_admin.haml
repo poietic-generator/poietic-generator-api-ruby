@@ -4,12 +4,12 @@
 - @page.js << "/js/poieticgen.js"
 - @page.js << "/js/page/admin.js"
 
->>>>>>> develop
 / admin zone
 #session-zone{"data-fullscreen" => "false", "data-role" => "page"}
   %div{"data-id" => "head", "data-position" => "fixed", "data-role" => "header"}
     %h1.username Administration
-    %a.ui-btn-right.logout{"data-ajax" => "false", :href => "/page/logout"} Logout
+    - url = "/session/%s/logout" % @params[:session_token]
+    %a.ui-btn-right.logout{"data-ajax" => "false", :href => url} Logout
   #page-container{"data-role" => "content"}
     .admin-buttons
-      %a{"data-ajax" => "false", "href" => "/restart", "data-role" => "button"} New session
+      %a{"data-ajax" => "false", "href" => "/session/create", "data-role" => "button"} New session

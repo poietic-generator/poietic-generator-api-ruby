@@ -28,10 +28,7 @@
 (function (PoieticGen, $) {
 	"use strict";
 
-	var VIEW_SESSION_URL_JOIN = "/api/session/snapshot",
-		VIEW_SESSION_URL_UPDATE = "/api/session/play",
-
-		VIEW_SESSION_UPDATE_INTERVAL = 1000,
+	var VIEW_SESSION_UPDATE_INTERVAL = 1000,
 		VIEW_PLAY_UPDATE_INTERVAL = VIEW_SESSION_UPDATE_INTERVAL / 1000,
 		VIEW_SESSION_HISTORY_PROTECTED_INTERVAL = 30, // Seconds reserved to real time
 
@@ -122,10 +119,9 @@
 
 			// get session info from
 			$.ajax({
-				url: VIEW_SESSION_URL_JOIN,
+				url: window.location + "/snapshot.json",
 				data: {
 					date: date,
-					session: "default",
 					id: _join_view_session_id
 				},
 				dataType: "json",
@@ -224,8 +220,6 @@
 			}
 
 			req = {
-				session: "default",
-
 				timeline_after : _current_timeline_id + 1,
 				last_max_timestamp : _last_update_max_timestamp,
 
@@ -237,7 +231,7 @@
 
 			console.log("view_session/update: req = " + JSON.stringify(req));
 			$.ajax({
-				url: VIEW_SESSION_URL_UPDATE,
+				url: window.location + "/update.json",
 				dataType: "json",
 				data: req,
 				type: 'GET',

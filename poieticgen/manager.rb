@@ -80,7 +80,7 @@ module PoieticGen
 		#
 		def join session, params
 			req_id = params[:user_id]
-			req_session = params[:user_session]
+			req_session = params[:session_token]
 			req_name = params[:user_name]
 
 			is_new = true;
@@ -196,7 +196,6 @@ module PoieticGen
 
 
 				result = { :user_id => user.id,
-					:user_session => user.session.token,
 					:user_name => user.name,
 					:user_zone => (zone.to_desc_hash Zone::DESCRIPTION_FULL),
 					:other_users => other_users,
@@ -434,10 +433,10 @@ module PoieticGen
 			result = nil
 			
 			req_session = begin
-				if req.session == @session.token then
+				if params[:session_token] == @session.token then
 					@session
 				else
-					Session.first(:token => req.session)
+					Session.first(:token => params[:session_token])
 				end
 			end
 			
@@ -549,10 +548,10 @@ module PoieticGen
 			result = nil
 			
 			req_session = begin
-				if req.session == @session.token then
+				if params[:session_token] == @session.token then
 					@session
 				else
-					Session.first(:token => req.session)
+					Session.first(:token => params[:session_token])
 				end
 			end
 			

@@ -24,7 +24,6 @@ module PoieticGen
 	class PlayRequest
 
 		DURATION = 'duration'
-		SESSION = 'session'
 
 		TIMELINE_AFTER = 'timeline_after'
 		LAST_MAX_TIMESTAMP = 'last_max_timestamp'
@@ -51,8 +50,6 @@ module PoieticGen
 				case key
 				when DURATION then
 					rdebug "duration : %s" % val.inspect
-				when SESSION then
-					rdebug "session : %s" % val.inspect
 				when TIMELINE_AFTER then
 					rdebug "timeline_after : %s" % val.inspect
 				when LAST_MAX_TIMESTAMP then
@@ -70,7 +67,6 @@ module PoieticGen
 
 			[
 				DURATION,
-				SESSION,
 				TIMELINE_AFTER,
 				SINCE,
 				ID,
@@ -86,10 +82,6 @@ module PoieticGen
 
 		def duration
 			return @hash[DURATION].to_i
-		end
-
-		def session
-			return @hash[SESSION]
 		end
 
 		def timeline_after
