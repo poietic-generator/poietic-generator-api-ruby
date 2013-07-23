@@ -63,10 +63,8 @@
 			}
 			v = Math.floor(v);
 			console.log("slider/set_value : value = " + v);
-			if (v >= self.minimum() && v <= self.maximum()) {
-				_slider.attr('value', v);
-				_slider.slider('refresh');
-			}
+			_slider.attr('value', v);
+			_slider.slider('refresh');
 		};
 
 		/**
