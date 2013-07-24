@@ -25,7 +25,6 @@ require 'poieticgen/zone'
 require 'poieticgen/user'
 require 'poieticgen/timeline'
 require 'poieticgen/board_snapshot'
-require 'poieticgen/session'
 
 require 'poieticgen/allocation/spiral'
 require 'poieticgen/allocation/random'
@@ -38,6 +37,24 @@ module PoieticGen
 	# A class that manages the global drawing
 	#
 	class Board
+		include DataMapper::Resource
+
+		property :id,            Serial
+		property :timestamp,     Integer, :required => true
+		property :session_token, String,  :required => true
+		property :end_timestamp, Integer, :default => 0
+		property :closed,        Boolean, :default => false
+		property :allocator_type, String, :required => true
+		# FIXME : maintain boundaries for the board
+		# property :boundary_left, Integer, :default => 0
+		# property :boundary_right, Integer, :default => 0
+		# property :boundary_top, Integer, :default => 0
+		# property :boundary_bottom, Integer, :default => 0
+
+		has n, :board_snapshots
+		has n, :timelines
+		has n, :users
+		has n, :zones
 
 		STROKE_COUNT_BETWEEN_QFRAMES = 25
 
@@ -50,19 +67,36 @@ module PoieticGen
 
 
 		def initialize config
-			# @debug = true
+			super({
+				:session_token => (0...16).map{ ('a'..'z').to_a[rand(26)] }.join,
+				:timestamp => Time.now.to_i,
+				:allocator_type => config.allocator
+			})
+		
+			@debug = true
 			rdebug "using allocator %s" % config.allocator
-			@config = config
-			@allocator = ALLOCATORS[config.allocator].new config
-			pp @allocator
-			@monitor = Monitor.new
-			@stroke_count = 0
 
-			# FIXME : maintain boundaries for the board
-			@boundary_left = 0
-			@boundary_right = 0
-			@boundary_top = 0
-			@boundary_bottom = 0
+			# @allocator = ALLOCATORS[config.allocator].new config
+			
+			begin
+				save
+			rescue DataMapper::SaveFailureError => e
+				pp e.resource.errors.inspect
+				rdebug "Saving failure : %s" % e.resource.errors.inspect
+				raise e
+			end
+		end
+		
+		def close
+			closed = true
+			end_timestamp = Time.now.to_i
+			
+			begin
+				save
+			rescue DataMapper::SaveFailureError => e
+				rdebug "Saving failure : %s" % e.resource.errors.inspect
+				raise e
+			end
 		end
 
 
@@ -70,12 +104,12 @@ module PoieticGen
 		# Get access to zone with given index
 		#
 		def [] idx
-			return @allocator[idx]
+			return zones.first(:index => idx)
 		end
 
 		def include? idx
-			@monitor.synchronize do
-				val = @allocator[idx]
+			Board.transaction do
+				val = self[idx]
 				return (not val.nil?)
 			end
 		end
@@ -86,7 +120,7 @@ module PoieticGen
 		#
 		def join user
 			zone = nil
-			@monitor.synchronize do
+			Board.transaction do
 				zone = @allocator.allocate
 				zone.user_id = user.id
 				user.zone = zone.index
@@ -101,11 +135,16 @@ module PoieticGen
 		# disconnect user from the board
 		#
 		def leave user
-			@monitor.synchronize do
-				# reset zone
-				@allocator[user.zone].reset
-				# unallocate it
-				@allocator.free user.zone
+			Board.transaction do
+				zone = self[user.zone]
+				unless zone.nil? then
+					# reset zone
+					zone.reset
+					# unallocate it
+					@allocator.free user.zone
+				else
+					#FIXME: return an error to the user?
+				end
 			end
 		end
 
@@ -113,11 +152,11 @@ module PoieticGen
 		def update_data user, drawing
 			return if drawing.empty?
 		
-			@monitor.synchronize do
+			Board.transaction do
 				
 				# Update the zone
 			
-				zone = @allocator[user.zone]
+				zone = self[user.zone]
 				unless zone.nil? then
 					zone.apply user, drawing
 				else
@@ -126,25 +165,28 @@ module PoieticGen
 				
 				# Save board periodically
 				
-				if @stroke_count == 0 then
-					self.save user.session
-				end
+				stroke_count = timelines.strokes.first(
+					:order => [ :id.desc ]
+				)
 				
-				@stroke_count = (@stroke_count + drawing.length) % STROKE_COUNT_BETWEEN_QFRAMES;
+				stroke_count = 0 if stroke_count.nil?
+				
+				if stroke_count % STROKE_COUNT_BETWEEN_QFRAMES == 0 then
+					self.take_snapshot
+				end
 			end
 		end
 
-		def save session
-			BoardSnapshot.new @allocator.zones, (Timeline.create_now session), session
+		def take_snapshot
+			BoardSnapshot.new self
 		end
 		
 
 		#
 		# Get the board state at timeline_id.
-		# FIXME: load_board is not static because it depends on @config.
 		#
-		def load_board timeline_id, session, apply_strokes
-			snap = _get_snapshot timeline_id, session
+		def load_board timeline_id, apply_strokes
+			snap = _get_snapshot timeline_id
 			zones_snap = {}
 			
 			if snap.nil? then			
@@ -160,13 +202,13 @@ module PoieticGen
 			end
 		
 			# Put zones from snapshot in allocator
-			allocator = ALLOCATORS[@config.allocator].new @config, zones_snap
+			allocator = ALLOCATORS[self.allocator_type].new @config, zones_snap
 			
-			# get the session associated to the snapshot
-			users_db = session.users
+			# get the users associated to the snapshot
+			users_db = self.users
 			
 			# get events since the snapshot
-			timelines = session.timelines.all(
+			timelines = self.timelines.all(
 				:id.gt => snap_timeline,
 				:id.lte => timeline_id,
 				:order => [ :id.asc ]
@@ -214,8 +256,8 @@ module PoieticGen
 		#
 		# return the snapshot preceeding timeline_id
 		#
-		def _get_snapshot timeline_id, session
-			timeline = session.timelines.first(
+		def _get_snapshot timeline_id
+			timeline = self.timelines.first(
 				:id.lte => timeline_id,
 				:order => [ :id.desc ]
 			)
@@ -228,7 +270,7 @@ module PoieticGen
 		# update boundaries of board
 		#
 		def _update_boundaries
-			@monitor.synchronize do
+			Board.transaction do
 
 				@boundary_left = 0
 				@boundary_top = 0

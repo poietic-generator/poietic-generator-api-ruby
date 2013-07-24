@@ -48,6 +48,7 @@ module PoieticGen
 
 		SESSION_USER = :user
 		SESSION_SESSION = :name
+		SESSION_AUTH = :auth
 		
 		SESSION_MAX_LISTED_COUNT = 5
 
@@ -105,8 +106,8 @@ module PoieticGen
 				end
 
 				set :config, config
-				DataMapper::Logger.new(STDERR, :info)
-				#DataMapper::Logger.new(STDERR, :debug)
+				#DataMapper::Logger.new(STDERR, :info)
+				DataMapper::Logger.new(STDERR, :debug)
 				hash = config.database.get_hash
 				pp "db hash :", hash
 				DataMapper.setup(:default, hash)
@@ -141,7 +142,7 @@ module PoieticGen
 				validate_session! session
 			
 				if settings.manager.check_lease! session then
-					settings.manager.restart session, params
+					settings.manager.create_session session, params
 					session[SESSION_USER] ||= nil
 					
 				else
@@ -170,14 +171,14 @@ module PoieticGen
 			@session_list = {}
 			@selected_session = ""
 			
-			sessions = Session.first(SESSION_MAX_LISTED_COUNT,
+			sessions = Board.first(SESSION_MAX_LISTED_COUNT,
 				:order => [:timestamp.desc])
 			
 			if not sessions.nil? then
-				@selected_session = sessions.first.token
+				@selected_session = sessions.first.session_token
 				
 				sessions.each do |s|
-					@session_list[s.token] = "Session %d" % s.id
+					@session_list[s.session_token] = "Session %d" % s.id
 				end
 			end
 			
@@ -241,7 +242,7 @@ module PoieticGen
 		end
 
 		get '/session/admin' do 
-			if settings.manager.admin? session then
+			if session[SESSION_AUTH] then
 				@page = Page.new "admin"
 				haml :page_admin
 			else

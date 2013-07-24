@@ -50,6 +50,7 @@ module PoieticGen
 
 	#	attr_reader :index, :position
 
+		belongs_to :board
 
 		DESCRIPTION_MINIMAL = 1
 		DESCRIPTION_FULL = 2
