@@ -32,6 +32,10 @@ module PoieticGen
 		ID = 'id'
 		VIEW_MODE = 'view_mode'
 		
+		SESSION_TOKEN = 'session_token'
+		SINATRA_SPLAT = 'splat'
+		SINATRA_CAPTURES = 'captures'
+		
 		REAL_TIME_VIEW = 0
 		HISTORY_VIEW = 1
 
@@ -60,6 +64,12 @@ module PoieticGen
 					rdebug "id : %s" % val.inspect
 				when VIEW_MODE then
 					rdebug "view_mode : %s" % val.inspect
+				when SESSION_TOKEN then
+					rdebug "session : %s" % val.inspect
+				when SINATRA_SPLAT then
+					rdebug "sinatra splat : %s" % val.inspect
+				when SINATRA_CAPTURES then
+					rdebug "sinatra captures : %s" % val.inspect
 				else
 					raise RuntimeError, "unknow request field '%s'" % key
 				end
@@ -70,7 +80,8 @@ module PoieticGen
 				TIMELINE_AFTER,
 				SINCE,
 				ID,
-				VIEW_MODE
+				VIEW_MODE,
+				SESSION_TOKEN
 			].each do |field|
 				unless hash.include? field then
 					raise ArgumentError, ("The '%s' field is missing" % field)
@@ -102,6 +113,10 @@ module PoieticGen
 		
 		def view_mode
 			return @hash[VIEW_MODE].to_i
+		end
+		
+		def session_token
+			return @hash[SESSION_TOKEN]
 		end
 	end
 

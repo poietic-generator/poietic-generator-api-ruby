@@ -79,9 +79,7 @@ module PoieticGen
 		# generates an unpredictible user id based on session id & user counter
 		#
 		def join session, params
-			req_id = params[:user_id]
-			req_session = params[:session_token]
-			req_name = params[:user_name]
+			req = JoinRequest.parse params
 
 			is_new = true;
 			result = nil
@@ -89,15 +87,15 @@ module PoieticGen
 
 			# FIXME: prevent session from being stolen...
 			rdebug "requesting id=%s, session=%s, name=%s" \
-				% [ req_id, req_session, req_name ]
+				% [ req.user_id, req.session_token, req.name ]
 
 			user = nil
 			now = Time.now
 
-			param_name = if req_name.nil? or (req_name.length == 0) then
+			param_name = if req.name.nil? or (req.name.length == 0) then
 							 "anonymous"
 						 else
-							 req_name
+							 req.name
 						 end
 			param_create = {
 				:session => @session,
@@ -113,7 +111,7 @@ module PoieticGen
 			User.transaction do
 
 				# reuse user_id if session is still valid
-				if req_session != @session.token then
+				if req.session_token != @session.token then
 					rdebug "User is requesting a different session"
 					# create new
 					user = User.create param_create
@@ -124,7 +122,7 @@ module PoieticGen
 				else
 					rdebug "User is in session"
 					param_request = {
-						:id => req_id
+						:id => req.user_id
 					}
 
 					user = @session.users.first_or_create param_request, param_create
@@ -343,11 +341,11 @@ module PoieticGen
 		#
 		# return latest updates from everyone !
 		#
-		def update_data session, data
+		def update_data session, params
 
 			# parse update request first
-			rdebug "updating with : %s" % data.inspect
-			req = UpdateRequest.parse data
+			rdebug "updating with : %s" % params.inspect
+			req = UpdateRequest.parse params
 			
 			req_session = begin
 				if session[PoieticGen::Api::SESSION_SESSION] == @session.token then
@@ -433,10 +431,10 @@ module PoieticGen
 			result = nil
 			
 			req_session = begin
-				if params[:session_token] == @session.token then
+				if req.session_token == @session.token then
 					@session
 				else
-					Session.first(:token => params[:session_token])
+					Session.first(:token => req.session_token)
 				end
 			end
 			
@@ -548,10 +546,10 @@ module PoieticGen
 			result = nil
 			
 			req_session = begin
-				if params[:session_token] == @session.token then
+				if req.session_token == @session.token then
 					@session
 				else
-					Session.first(:token => params[:session_token])
+					Session.first(:token => req.session_token)
 				end
 			end
 			

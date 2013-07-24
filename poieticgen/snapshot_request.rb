@@ -25,6 +25,10 @@ module PoieticGen
 
 		DATE = 'date'
 		ID = 'id'
+		
+		SESSION_TOKEN = 'session_token'
+		SINATRA_SPLAT = 'splat'
+		SINATRA_CAPTURES = 'captures'
 
 		private
 
@@ -43,6 +47,12 @@ module PoieticGen
 					rdebug "date : %s" % val.inspect
 				when ID then
 					rdebug "id : %s" % val.inspect
+				when SESSION_TOKEN then
+					rdebug "session : %s" % val.inspect
+				when SINATRA_SPLAT then
+					rdebug "sinatra splat : %s" % val.inspect
+				when SINATRA_CAPTURES then
+					rdebug "sinatra captures : %s" % val.inspect
 				else
 					raise RuntimeError, "unknow request field '%s'" % key
 				end
@@ -50,7 +60,8 @@ module PoieticGen
 
 			[
 				DATE,
-				ID
+				ID,
+				SESSION_TOKEN
 			].each do |field|
 				unless hash.include? field then
 					raise ArgumentError, ("The '%s' field is missing" % field)
@@ -68,6 +79,9 @@ module PoieticGen
 			return @hash[ID].to_i
 		end
 
+		def session_token
+			return @hash[SESSION_TOKEN]
+		end
 	end
 
 end
