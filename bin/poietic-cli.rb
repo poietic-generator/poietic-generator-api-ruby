@@ -37,9 +37,11 @@ module PoieticGen
 				raise NotImplementedError
 			end
 
-			desc "rename OLDLABEL NEWLABEL", "Rename a session"
-			def rename
-				raise NotImplementedError
+			desc "rename ID NEWLABEL", "Rename a session"
+			def rename id
+				configure
+				session = PoieticGen::Session.first(:id => id.to_i)
+				pp session
 			end
 
 			desc "finish", "Finish a session"
