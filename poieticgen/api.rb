@@ -365,7 +365,7 @@ module PoieticGen
 				status = [ STATUS_SUCCESS ]
 
 
-				result = settings.manager.play session, params
+				result = settings.manager.update_view session, params
 
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors

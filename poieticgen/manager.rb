@@ -36,7 +36,7 @@ require 'poieticgen/stroke'
 require 'poieticgen/timeline'
 require 'poieticgen/update_request'
 require 'poieticgen/snapshot_request'
-require 'poieticgen/play_request'
+require 'poieticgen/update_view_request'
 require 'poieticgen/session'
 
 module PoieticGen
@@ -538,10 +538,10 @@ module PoieticGen
 		#
 		# Get strokes and events for a non-user viewer.
 		#
-		def play session, params
+		def update_view session, params
 
 			rdebug "call with %s" % params.inspect
-			req = PlayRequest.parse params
+			req = UpdateViewRequest.parse params
 			now_i = Time.now.to_i
 			result = nil
 			
@@ -574,7 +574,7 @@ module PoieticGen
 				next_timeline_id = -1
 				max_timestamp = -1
 
-				if req.view_mode == PlayRequest::REAL_TIME_VIEW then
+				if req.view_mode == UpdateViewRequest::REAL_TIME_VIEW then
 					rdebug "REAL_TIME_VIEW"
 				
 					timelines = req_session.timelines.all(
@@ -601,7 +601,7 @@ module PoieticGen
 						s.to_hash first_timeline.timestamp
 					}
 					
-				elsif req.view_mode == PlayRequest::HISTORY_VIEW then
+				elsif req.view_mode == UpdateViewRequest::HISTORY_VIEW then
 					
 					rdebug "HISTORY_VIEW"
 					

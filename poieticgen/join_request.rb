@@ -21,23 +21,14 @@
 ##############################################################################
 
 module PoieticGen
-	class PlayRequest
+	class JoinRequest
 
-		DURATION = 'duration'
-
-		TIMELINE_AFTER = 'timeline_after'
-		LAST_MAX_TIMESTAMP = 'last_max_timestamp'
-		
-		SINCE = 'since'
-		ID = 'id'
-		VIEW_MODE = 'view_mode'
-		
+		USER_ID = 'user_id'
 		SESSION_TOKEN = 'session_token'
+		NAME = 'name'
+
 		SINATRA_SPLAT = 'splat'
 		SINATRA_CAPTURES = 'captures'
-		
-		REAL_TIME_VIEW = 0
-		HISTORY_VIEW = 1
 
 		private
 
@@ -52,20 +43,17 @@ module PoieticGen
 			# mandatory fields firstvalidate user input first
 			hash.each do |key, val|
 				case key
-				when DURATION then
-					rdebug "duration : %s" % val.inspect
-				when TIMELINE_AFTER then
-					rdebug "timeline_after : %s" % val.inspect
-				when LAST_MAX_TIMESTAMP then
-					rdebug "last_max_timestamp : %s" % val.inspect
-				when SINCE then
-					rdebug "since : %s" % val.inspect
-				when ID then
-					rdebug "id : %s" % val.inspect
-				when VIEW_MODE then
-					rdebug "view_mode : %s" % val.inspect
+				when NAME then
+				  	rdebug "name : %s" % val.inspect
+				when USER_ID then
+				  	begin
+				    		rdebug "user_id : %d" % val.to_i
+				  	rescue Exception => e
+				    		rdebug e
+				    		raise ArgumentError, ("%s with invalid value : " % USER_ID)
+					end
 				when SESSION_TOKEN then
-					rdebug "session : %s" % val.inspect
+					rdebug "session_token : %s" % val.inspect
 				when SINATRA_SPLAT then
 					rdebug "sinatra splat : %s" % val.inspect
 				when SINATRA_CAPTURES then
@@ -76,49 +64,31 @@ module PoieticGen
 			end
 
 			[
-				DURATION,
-				TIMELINE_AFTER,
-				SINCE,
-				ID,
-				VIEW_MODE,
+				NAME,
+				USER_ID,
 				SESSION_TOKEN
 			].each do |field|
 				unless hash.include? field then
 					raise ArgumentError, ("The '%s' field is missing" % field)
 				end
 			end
-			PlayRequest.new hash
+
+			JoinRequest.new hash
 		end
 
 
-		def duration
-			return @hash[DURATION].to_i
+		def user_id
+			return @hash[USER_ID]
 		end
 
-		def timeline_after
-			return @hash[TIMELINE_AFTER].to_i
+		def name
+			return @hash[NAME]
 		end
-
-		def last_max_timestamp
-			return @hash[LAST_MAX_TIMESTAMP].to_i
-		end
-		
-		def since
-			return @hash[SINCE].to_i
-		end
-		
-		def id
-			return @hash[ID].to_i
-		end
-		
-		def view_mode
-			return @hash[VIEW_MODE].to_i
-		end
-		
-		def session_token
+    		
+    		def session_token
 			return @hash[SESSION_TOKEN]
 		end
-	end
 
+	end
 end
 
