@@ -21,6 +21,8 @@
 ##############################################################################
 
 module PoieticGen
+	class UpdateRequestParseError < OptionParser::ParseError ; end
+
 	class UpdateRequest
 
 		MESSAGES = 'messages'
@@ -71,7 +73,7 @@ module PoieticGen
 				    		rdebug "update_interval : %d" % val.to_i
 				  	rescue Exception => e
 				    		rdebug e
-				    		raise ArgumentError, ("%s with invalid value : " % UPDATE_INTERVAL)
+				    		raise UpdateRequestParseError, ("%s with invalid value : " % UPDATE_INTERVAL)
 					end
 				when SESSION_TOKEN then
 					rdebug "session_token : %s" % val.inspect
@@ -80,7 +82,7 @@ module PoieticGen
 				when SINATRA_CAPTURES then
 					rdebug "sinatra captures : %s" % val.inspect
 				else
-					raise RuntimeError, "unknow request field '%s'" % key
+					raise UpdateRequestParseError, "Unknow request field '%s'" % key
 				end
 			end
 
@@ -92,7 +94,7 @@ module PoieticGen
 				SESSION_TOKEN
 			].each do |field|
 				unless hash.include? field then
-					raise ArgumentError, ("The '%s' field is missing" % field)
+					raise UpdateRequestParseError, ("The '%s' field is missing" % field)
 				end
 			end
 			# parse per-field content
@@ -103,7 +105,7 @@ module PoieticGen
 					MESSAGES_STAMP
 				].each do |field|
 					unless msg.include? field then
-						raise ArgumentError, ("The '%s' sub-field is missing" % field)
+						raise UpdateRequestParseError, ("The '%s' sub-field is missing" % field)
 					end
 				end
 				# FIXME: msg[MESSAGES_DST].to_i

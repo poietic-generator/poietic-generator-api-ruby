@@ -21,6 +21,8 @@
 ##############################################################################
 
 module PoieticGen
+	class UpdateViewRequestParseError < OptionParser::ParseError ; end
+
 	class UpdateViewRequest
 
 		DURATION = 'duration'
@@ -71,7 +73,7 @@ module PoieticGen
 				when SINATRA_CAPTURES then
 					rdebug "sinatra captures : %s" % val.inspect
 				else
-					raise RuntimeError, "unknow request field '%s'" % key
+					raise UpdateViewRequestParseError, "Unknow request field '%s'" % key
 				end
 			end
 
@@ -84,7 +86,7 @@ module PoieticGen
 				SESSION_TOKEN
 			].each do |field|
 				unless hash.include? field then
-					raise ArgumentError, ("The '%s' field is missing" % field)
+					raise UpdateViewRequestParseError, ("The '%s' field is missing" % field)
 				end
 			end
 			UpdateViewRequest.new hash

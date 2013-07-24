@@ -21,6 +21,8 @@
 ##############################################################################
 
 module PoieticGen
+	class JoinRequestParseError < OptionParser::ParseError ; end
+
 	class JoinRequest
 
 		USER_ID = 'user_id'
@@ -50,7 +52,7 @@ module PoieticGen
 				    		rdebug "user_id : %d" % val.to_i
 				  	rescue Exception => e
 				    		rdebug e
-				    		raise ArgumentError, ("%s with invalid value : " % USER_ID)
+				    		raise JoinRequestParseError, ("%s with invalid value : " % USER_ID)
 					end
 				when SESSION_TOKEN then
 					rdebug "session_token : %s" % val.inspect
@@ -59,17 +61,15 @@ module PoieticGen
 				when SINATRA_CAPTURES then
 					rdebug "sinatra captures : %s" % val.inspect
 				else
-					raise RuntimeError, "unknow request field '%s'" % key
+					raise JoinRequestParseError, "Unknow request field '%s'" % key
 				end
 			end
 
 			[
-				NAME,
-				USER_ID,
 				SESSION_TOKEN
 			].each do |field|
 				unless hash.include? field then
-					raise ArgumentError, ("The '%s' field is missing" % field)
+					raise JoinRequestParseError, ("The '%s' field is missing" % field)
 				end
 			end
 
