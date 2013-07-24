@@ -142,6 +142,7 @@ DEPENDENCIES
   compass
   datamapper
   dm-aggregates
+  dm-constraints
   dm-migrations
   dm-mysql-adapter
   dm-transactions
