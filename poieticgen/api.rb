@@ -260,13 +260,25 @@ module PoieticGen
 		get '/session/:session_token/draw/join.json' do
 			begin
 				result = {}
+				status = [ STATUS_SUCCESS ]
 				result = settings.manager.join session, params
+
+			rescue PoieticGen::JoinRequestParseError => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
+
+			rescue PoieticGen::InvalidSession => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_REDIRECTION, "Session does not exist!", "/"]
 
 			rescue Exception => e
 				STDERR.puts e.inspect, e.backtrace
 				Process.exit! #FIXME: remove in prod mode ? :-)
 
 			ensure
+				# force status of result
+				result[:status] = status
+				pp result
 				return JSON.generate( result )
 			end
 		end
@@ -297,7 +309,11 @@ module PoieticGen
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors
 				STDERR.puts e.inspect, e.backtrace
-				status = [ STATUS_BAD_REQUEST, "Invalid content : JSON expected" ]
+				status = [ STATUS_BAD_REQUEST, "Invalid content: JSON expected" ]
+
+			rescue PoieticGen::UpdateRequestParseError => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
 
 			rescue ArgumentError => e
 				STDERR.puts e.inspect, e.backtrace
@@ -333,7 +349,11 @@ module PoieticGen
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors
 				STDERR.puts e.inspect, e.backtrace
-				status = [ STATUS_BAD_REQUEST, "Invalid content : JSON expected" ]
+				status = [ STATUS_BAD_REQUEST, "Invalid content: JSON expected" ]
+
+			rescue PoieticGen::SnapshotRequestParseError => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
 
 			rescue ArgumentError => e
 				STDERR.puts e.inspect, e.backtrace
@@ -371,6 +391,10 @@ module PoieticGen
 				# handle non-JSON parsing errors
 				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_BAD_REQUEST, "Invalid content : JSON expected" ]
+
+			rescue PoieticGen::UpdateViewRequestParseError => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
 
 			rescue ArgumentError => e
 				STDERR.puts e.inspect, e.backtrace
