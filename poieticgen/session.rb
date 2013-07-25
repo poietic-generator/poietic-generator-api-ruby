@@ -34,9 +34,9 @@ module PoieticGen
 		property :timestamp, Integer
 		property :token,     String
 
-		has n, :board_snapshots
-		has n, :timelines
-		has n, :users
+		has n, :board_snapshots , :constraint => :destroy!
+		has n, :timelines , :constraint => :destroy!
+		has n, :users, :constraint => :destroy!
 
 		def initialize
 			# @debug = true
