@@ -188,9 +188,9 @@ module PoieticGen
 		#
 		# Get the board state at timeline_id.
 		#
-		def load_board timeline_id, apply_strokes
+		def load_board timeline_id, apply_strokes, config
 			snap = _get_snapshot timeline_id
-			zones_snap = {}
+			zones = {}
 			
 			if snap.nil? then			
 				# no snapshot: the board is empty
@@ -200,12 +200,12 @@ module PoieticGen
 				
 				# Create zones from snapshot
 				snap.zone_snapshots.each do |zs|
-					zones_snap[zs.index] = Zone.from_snapshot zs
+					zones[zs.index] = Zone.from_snapshot zs
 				end
 			end
 		
 			# Put zones from snapshot in allocator
-			allocator = ALLOCATORS[self.allocator_type].new @config, zones_snap
+			fake_allocator = ALLOCATORS[self.allocator_type].new config, zones
 			
 			# get the users associated to the snapshot
 			users_db = self.users
@@ -219,34 +219,30 @@ module PoieticGen
 			
 			# Add/Remove zones since the snapshot
 			timelines.events.each do |event|
-				user = event.zone.user
+				user = event.user
 				
 				if event.type == "join" then
-					zone = allocator.allocate
+					zone = fake_allocator.allocate self
 					zone.user = user
+					zones[zone.index] = zone
 				elsif event.type == "leave" then
 					zone_index = user.zone.index
-					# reset zone
-					allocator[zone_index].reset
-					# unallocate it
-					allocator.free zone_index
+					# unallocate zone
+					fake_allocator.free zone_index
+					zones.delete(zone_index)
 				else
 					raise RuntimeError, "Unknown event type %s" % event.type
 				end
 			end
 			
 			users = users_db.map{ |u| u.to_hash } # FIXME: All users in the session are returned
-			zones = allocator.zones
 			
 			if apply_strokes then
 				strokes = timelines.strokes # strokes with diffstamp = 0 (not important)
 			
 				# Apply strokes
 				zones.each do |index,zone|
-					# FIXME: use allocator to test if zone is allocated	
-					unless zone.user.nil? then
-						zone.apply_local strokes.select{ |s| s.zone == zone.index }
-					end
+					zone.apply_local strokes.select{ |s| s.zone == zone.index }
 				end
 			end
 			

@@ -93,7 +93,7 @@ module PoieticGen
 		end
 		
 		def self.from_snapshot snapshot
-			zone = Zone.new snapshot.index, snapshot.position, snapshot.width, snapshot.height
+			zone = Zone.new snapshot.index, snapshot.position, snapshot.width, snapshot.height, snapshot.user.board
 			zone.user = snapshot.user
 			zone.data = snapshot.data
 			
