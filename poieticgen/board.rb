@@ -41,7 +41,7 @@ module PoieticGen
 
 		property :id,            Serial
 		property :timestamp,     Integer, :required => true
-		property :session_token, String,  :required => true
+		property :session_token, String,  :required => true, :unique => true
 		property :end_timestamp, Integer, :default => 0
 		property :closed,        Boolean, :default => false
 		property :allocator_type, String, :required => true
@@ -68,6 +68,7 @@ module PoieticGen
 
 		def initialize config
 			super({
+				# FIXME: when the token already exists, SaveFailureError is raised
 				:session_token => (0...16).map{ ('a'..'z').to_a[rand(26)] }.join,
 				:timestamp => Time.now.to_i,
 				:allocator_type => config.allocator
