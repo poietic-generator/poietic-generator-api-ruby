@@ -49,13 +49,12 @@ module PoieticGen
 
 		def self.post src, dst, content, board
 			begin
-				msg = Message.create({
+				msg = create({
 					:user_src => src,
 					:user_dst => dst,
 					:content => content,
 					:timeline => (Timeline.create_now board)
 				})
-				msg.save
 				rdebug msg.inspect
 			rescue DataMapper::SaveFailureError => e
 				rdebug "Saving failure : %s" % e.resource.errors.inspect

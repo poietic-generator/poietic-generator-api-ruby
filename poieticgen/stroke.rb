@@ -43,10 +43,8 @@ module PoieticGen
 				:timeline => (Timeline.create_with_time timestamp, board)
 			}
 			
-			patch = create param_create
-			
 			begin
-				patch.save
+				create param_create
 			rescue DataMapper::SaveFailureError => e
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e

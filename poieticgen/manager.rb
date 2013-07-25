@@ -120,14 +120,7 @@ module PoieticGen
 				user = board.users.first(:id => req.user_id)
 
 				if user.nil? then
-					begin
-						user = board.users.create param_create
-					rescue DataMapper::SaveFailureError => e
-						STDERR.puts e.resource.errors.inspect
-						raise e
-					end
-
-					zone = board.join user, @config.board
+					user = board.users.new param_create
 				else
 					tdiff = (now.to_i - user.alive_expires_at)
 					rdebug [ now.to_i, user.alive_expires_at, tdiff ]
@@ -135,12 +128,9 @@ module PoieticGen
 						# The event will be generated elsewhere (in update_data).
 						rdebug "User session expired"
 						# create new if session expired
-						user = board.users.create param_create
-
-						zone = board.join user, @config.board
+						user = board.users.new param_create
 					else
 						is_new = false
-						zone = board[user.zone.index]
 					end
 				end
 
@@ -153,6 +143,14 @@ module PoieticGen
 
 				# reset name if requested
 				user.name = param_name
+
+				# return JSON for userid
+				if is_new then
+					zone = board.join user, @config.board
+					Event.create_join user, board
+				else
+					zone = board[user.zone.index]
+				end
 
 				begin
 					user.save
@@ -167,11 +165,6 @@ module PoieticGen
 
 				# FIXME: test request user_id
 				# FIXME: test request username
-
-				# return JSON for userid
-				if is_new then
-					Event.create_join user, board
-				end
 
 				# clean-up users first
 				self.check_expired_users
