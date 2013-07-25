@@ -126,7 +126,7 @@ module PoieticGen
 					Stroke.create_stroke color,
 						JSON.generate(changes).to_s,
 						timestamp,
-						user.zone,
+						user.zone.index,
 						user.board
 
 					changes.each do |x,y,t_offset|

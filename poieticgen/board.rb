@@ -159,7 +159,7 @@ module PoieticGen
 				
 				# Update the zone
 			
-				zone = self[user.zone]
+				zone = self[user.zone.index]
 				unless zone.nil? then
 					zone.apply drawing
 				else
