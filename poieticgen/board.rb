@@ -125,8 +125,8 @@ module PoieticGen
 			Board.transaction do
 				allocator = ALLOCATORS[allocator_type].new config, zones
 				zone = allocator.allocate self
-				zone.user_id = user.id
-				user.zone = zone.index
+				zone.user = user
+				user.zone = zone
 				zone.save
 			end
 			return zone
@@ -143,7 +143,7 @@ module PoieticGen
 					# reset zone
 					zone.reset
 					# unallocate it
-					zone.user_id = nil
+					zone.user = nil
 					zone.save
 				else
 					#FIXME: return an error to the user?
@@ -161,7 +161,7 @@ module PoieticGen
 			
 				zone = self[user.zone]
 				unless zone.nil? then
-					zone.apply user, drawing
+					zone.apply drawing
 				else
 					#FIXME: return an error to the user ?
 				end
@@ -219,14 +219,13 @@ module PoieticGen
 			
 			# Add/Remove zones since the snapshot
 			timelines.events.each do |event|
-				zone_index = event.zone_index
-				user_id = event.zone_user
+				user = event.zone.user
 				
-				STDOUT.puts "%s user_id = %d, zone_index = %d" % [ event.type, user_id, zone_index ]
 				if event.type == "join" then
 					zone = allocator.allocate
-					zone.user_id = user_id
+					zone.user = user
 				elsif event.type == "leave" then
+					zone_index = user.zone.index
 					# reset zone
 					allocator[zone_index].reset
 					# unallocate it
@@ -245,7 +244,7 @@ module PoieticGen
 				# Apply strokes
 				zones.each do |index,zone|
 					# FIXME: use allocator to test if zone is allocated	
-					unless zone.user_id.nil? then
+					unless zone.user.nil? then
 						zone.apply_local strokes.select{ |s| s.zone == zone.index }
 					end
 				end

@@ -37,9 +37,6 @@ module PoieticGen
 		# size attributes
 		property :width, Integer, :required => true
 		property :height, Integer, :required => true
-
-		# user 
-		property :user_id, Integer
 		
 		property :data, Json, :required => true
 		#property :data, Object, :required => true
@@ -51,6 +48,7 @@ module PoieticGen
 	#	attr_reader :index, :position
 
 		belongs_to :board
+		belongs_to :user
 
 		DESCRIPTION_MINIMAL = 1
 		DESCRIPTION_FULL = 2
@@ -73,7 +71,7 @@ module PoieticGen
 				:width => width,
 				:height => height,
 				:data => Array.new( width * height, '#000'),
-				:user_id => nil,
+				:user => nil,
 				:created_at => Time.now.to_i,
 				:deleted_at => 0,
 				:deleted => false,
@@ -96,7 +94,7 @@ module PoieticGen
 		
 		def self.from_snapshot snapshot
 			zone = Zone.new snapshot.index, snapshot.position, snapshot.width, snapshot.height
-			zone.user_id = snapshot.user_id
+			zone.user = snapshot.user
 			zone.data = snapshot.data
 			
 			return zone
@@ -106,14 +104,13 @@ module PoieticGen
 			self.data = Array.new( width * height, '#000')
 		end
 
-		def apply user, drawing
+		def apply drawing
 			Zone.transaction do
 				# save patch into database
 				return if drawing.nil? or drawing.empty?
 
 				rdebug drawing.inspect if drawing.length != 0
 
-				# FIXME: get user from user_id
 				ref = user.last_update_time
 
 				# Sort strokes by time
@@ -170,7 +167,7 @@ module PoieticGen
 				res = {
 					:index => self.index,
 					:position => self.position,
-					:user => self.user_id,
+					:user => self.user.id,
 					:content => if type == DESCRIPTION_FULL
 					            then self.to_patches_hash
 					            else [] end
@@ -236,7 +233,7 @@ module PoieticGen
 				:position => self.position,
 				:width => self.width,
 				:height => self.height,
-				:user_id => self.user_id,
+				:user_id => self.user.id,
 				:data => self.data
 			})
 		end

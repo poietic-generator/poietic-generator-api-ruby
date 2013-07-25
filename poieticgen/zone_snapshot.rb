@@ -39,14 +39,12 @@ module PoieticGen
 		# size attributes
 		property :width, Integer, :required => true
 		property :height, Integer, :required => true
-
-		# user 
-		property :user_id, Integer
 		
 		property :data, Json, :required => true
 		#property :data, Object, :required => true
 		
 		has n, :board_snapshots, :through => Resource
+		belongs_to :user
 
 		def initialize json
 			# @debug = true

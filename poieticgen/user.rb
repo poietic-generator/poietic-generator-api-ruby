@@ -31,7 +31,6 @@ module PoieticGen
 
 		property :id,	Serial
 		property :name,	String, :required => true
-		property :zone, Integer, :required => true # FIXME: make an association with zone
 		property :created_at, Integer, :required => true
 		property :alive_expires_at, Integer, :required => true
 		property :idle_expires_at, Integer, :required => true
@@ -39,6 +38,7 @@ module PoieticGen
 		property :last_update_time, Integer, :required => true
 		
 		belongs_to :board
+		has 1, :zone
 		
 		# @debug = true
 
@@ -46,7 +46,7 @@ module PoieticGen
 			res = {
 				:id => self.id,
 				:name => self.name,
-				:zone => self.zone
+				:zone => self.zone.index
 			}
 			return res
 		end

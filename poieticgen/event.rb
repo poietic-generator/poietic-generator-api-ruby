@@ -31,57 +31,41 @@ module PoieticGen
 
 		property :id,	Serial
 		property :type,	String, :required => true
-		property :desc, String, :required => true
 
 		belongs_to :timeline, :key => true
+		belongs_to :user
 
-		def self.create_join uid, uzone, board
-			event = Event.create({
-				:type => 'join',
-				:desc => JSON.generate({ :user => uid, :zone => uzone }),
-				:timeline => (Timeline.create_now board)
-			})
-		
+		def self.create_join user, board
 			begin
-				event.save
+				event = Event.create({
+					:type => 'join',
+					:user => user,
+					:timeline => (Timeline.create_now board)
+				})
 			rescue DataMapper::SaveFailureError => e
-				rdebug "Saving failure : %s" % e.resource.errors.inspect
+				pp "Saving failure : %s" % e.resource.errors.inspect
 				raise e
 			end
 			
 		end
 
-		def self.create_leave uid, leave_time, uzone, board
-			event = Event.create({
-				:type => 'leave',
-				:desc => JSON.generate({ :user => uid, :zone => uzone }),
-				:timeline => (Timeline.create_with_time leave_time, board)
-			})
-			
+		def self.create_leave user, leave_time, board
 			begin
-				event.save
+				event = Event.create({
+					:type => 'leave',
+					:user => user,
+					:timeline => (Timeline.create_with_time leave_time, board)
+				})
 			rescue DataMapper::SaveFailureError => e
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e
 			end
 		end
 		
-		def zone_index
-			return JSON.parse( self.desc )['zone'];
-		end
-		
-		def zone_user
-			return JSON.parse( self.desc )['user'];
-		end
-		
-		def to_hash zone, ref
-			user = User.first( :id => self.zone_user )
-
-			rdebug "Event/to_hash user", user
-
+		def to_hash ref
 			res_desc = {
 				:user => user.to_hash,
-				:zone => (zone.to_desc_hash Zone::DESCRIPTION_MINIMAL)
+				:zone => (user.zone.to_desc_hash Zone::DESCRIPTION_MINIMAL)
 			}
 
 			res = {

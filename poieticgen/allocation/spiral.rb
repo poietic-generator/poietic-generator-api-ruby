@@ -189,7 +189,7 @@ module PoieticGen ; module Allocation
 		def free? zone_idx
 			@monitor.synchronize do
 				zone = @zones[zone_idx]
-				return zone.user_id.nil?
+				return zone.user.nil?
 			end
 		end
 
@@ -200,7 +200,7 @@ module PoieticGen ; module Allocation
 		def free zone_idx
 			@monitor.synchronize do
 				zone = @zones[zone_idx]
-				zone.user_id = nil
+				zone.user = nil
 				return zone
 			end
 		end
@@ -215,7 +215,7 @@ module PoieticGen ; module Allocation
 
 			@monitor.synchronize do
 				# find a nil zone first
-				nil_zones = @zones.select{ |idx,zone| zone.user_id.nil? }
+				nil_zones = @zones.select{ |idx,zone| zone.user.nil? }
 				if nil_zones.size > 0 then
 					# got an unallocated zone !
 					result_index = nil_zones.first[0]
