@@ -176,7 +176,7 @@ module PoieticGen
 				)
 				other_users = users_db.map{ |u| u.to_hash }
 				other_zones = users_db.map{ |u|
-					puts "requesting zone for %s" % u.inspect
+					rdebug "requesting zone for %s" % u.inspect
 					board[u.zone.index].to_desc_hash Zone::DESCRIPTION_FULL
 				}
 				msg_history_req = Message.all(:user_dst => user.id) + Message.all(:user_src => user.id)

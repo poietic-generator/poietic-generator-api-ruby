@@ -103,7 +103,7 @@ module PoieticGen
 		# Get access to zone with given index
 		#
 		def [] idx
-			return zones.first(:index => idx)
+			return self.zones.first(:index => idx)
 		end
 
 		def include? idx
@@ -123,7 +123,7 @@ module PoieticGen
 		def join user, config
 			zone = nil
 			Board.transaction do
-				allocator = ALLOCATORS[allocator_type].new config, zones
+				allocator = ALLOCATORS[allocator_type].new config, self.zones
 				zone = allocator.allocate self
 				zone.user = user
 				user.zone = zone
@@ -138,12 +138,9 @@ module PoieticGen
 		#
 		def leave user
 			Board.transaction do
-				zone = self[user.zone]
+				zone = self[user.zone.index]
 				unless zone.nil? then
-					# reset zone
-					zone.reset
-					# unallocate it
-					zone.user = nil
+					zone.disable
 					zone.save
 				else
 					#FIXME: return an error to the user?
@@ -228,8 +225,7 @@ module PoieticGen
 				elsif event.type == "leave" then
 					zone_index = user.zone.index
 					# unallocate zone
-					fake_allocator.free zone_index
-					zones.delete(zone_index)
+					zones[zone_index].disable
 				else
 					raise RuntimeError, "Unknown event type %s" % event.type
 				end
@@ -242,7 +238,9 @@ module PoieticGen
 			
 				# Apply strokes
 				zones.each do |index,zone|
-					zone.apply_local strokes.select{ |s| s.zone == zone.index }
+					unless zone.expired then
+						zone.apply_local strokes.select{ |s| s.zone == zone.index }
+					end
 				end
 			end
 			

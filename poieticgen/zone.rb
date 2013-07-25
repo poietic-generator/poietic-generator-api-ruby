@@ -42,8 +42,8 @@ module PoieticGen
 		#property :data, Object, :required => true
 
 		property :created_at, Integer, :required => true
-		property :deleted_at, Integer, :required => true
-		property :deleted, Boolean, :required => true
+		property :expired_at, Integer, :required => true, :default => 0
+		property :expired, Boolean, :required => true, :default => false
 
 	#	attr_reader :index, :position
 
@@ -73,8 +73,6 @@ module PoieticGen
 				:data => Array.new( width * height, '#000'),
 				:user => nil,
 				:created_at => Time.now.to_i,
-				:deleted_at => 0,
-				:deleted => false,
 				:board => board
 			}
 			super param_create
@@ -104,6 +102,11 @@ module PoieticGen
 			self.data = Array.new( width * height, '#000')
 		end
 
+		def disable
+			self.expired_at = Time.now.to_i
+			self.expired = true
+		end
+
 		def apply drawing
 			Zone.transaction do
 				# save patch into database
@@ -111,7 +114,7 @@ module PoieticGen
 
 				rdebug drawing.inspect if drawing.length != 0
 
-				ref = user.last_update_time
+				ref = self.user.last_update_time
 
 				# Sort strokes by time
 				drawing = drawing.sort{ |a, b| a['diff'].to_i <=> b['diff'].to_i }
@@ -126,8 +129,8 @@ module PoieticGen
 					Stroke.create_stroke color,
 						JSON.generate(changes).to_s,
 						timestamp,
-						user.zone.index,
-						user.board
+						self.user.zone.index,
+						self.user.board
 
 					changes.each do |x,y,t_offset|
 						idx = _xy2idx(x,y)

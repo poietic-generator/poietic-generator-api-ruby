@@ -106,8 +106,8 @@ module PoieticGen
 				end
 
 				set :config, config
-				#DataMapper::Logger.new(STDERR, :info)
-				DataMapper::Logger.new(STDERR, :debug)
+				DataMapper::Logger.new(STDERR, :info)
+				#DataMapper::Logger.new(STDERR, :debug)
 				hash = config.database.get_hash
 				pp "db hash :", hash
 				DataMapper.setup(:default, hash)
@@ -171,14 +171,16 @@ module PoieticGen
 			@session_list = {}
 			@selected_session = ""
 			
-			sessions = Board.first(SESSION_MAX_LISTED_COUNT,
-				:order => [:timestamp.desc])
+			Board.transaction do
+				sessions = Board.first(SESSION_MAX_LISTED_COUNT,
+					:order => [:timestamp.desc])
 			
-			if not sessions.nil? then
-				@selected_session = sessions.first.session_token
+				if not sessions.nil? then
+					@selected_session = sessions.first.session_token
 				
-				sessions.each do |s|
-					@session_list[s.session_token] = "Session %d" % s.id
+					sessions.each do |s|
+						@session_list[s.session_token] = "Session %d" % s.id
+					end
 				end
 			end
 			
@@ -279,7 +281,6 @@ module PoieticGen
 			ensure
 				# force status of result
 				result[:status] = status
-				pp result
 				return JSON.generate( result )
 			end
 		end

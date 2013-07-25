@@ -64,8 +64,8 @@ module PoieticGen
 		
 		def to_hash ref
 			res_desc = {
-				:user => user.to_hash,
-				:zone => (user.zone.to_desc_hash Zone::DESCRIPTION_MINIMAL)
+				:user => self.user.to_hash,
+				:zone => (self.user.zone.to_desc_hash Zone::DESCRIPTION_MINIMAL)
 			}
 
 			res = {

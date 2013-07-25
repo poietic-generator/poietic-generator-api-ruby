@@ -107,14 +107,6 @@ module PoieticGen ; module Allocation
 		end
 
 		#
-		# get all zones 
-		# FIXME: direct access should not be allowed
-		#
-		def zones
-			return @zones
-		end
-
-		#
 		# return index to position
 		#
 		def index_to_position idx
@@ -184,12 +176,11 @@ module PoieticGen ; module Allocation
 
 		#
 		# test if the zone exists
-		# FIXME: use something else than user.nil to test if zone is free
  		#
 		def free? zone_idx
 			@monitor.synchronize do
 				zone = @zones[zone_idx]
-				return zone.user.nil?
+				return zone.expired
 			end
 		end
 
@@ -200,7 +191,7 @@ module PoieticGen ; module Allocation
 		def free zone_idx
 			@monitor.synchronize do
 				zone = @zones[zone_idx]
-				zone.user = nil
+				zone.disable
 				return zone
 			end
 		end
@@ -215,7 +206,7 @@ module PoieticGen ; module Allocation
 
 			@monitor.synchronize do
 				# find a nil zone first
-				nil_zones = @zones.select{ |idx,zone| zone.user.nil? }
+				nil_zones = @zones.select{ |idx,zone| zone.expired }
 				if nil_zones.size > 0 then
 					# got an unallocated zone !
 					result_index = nil_zones.first[0]
