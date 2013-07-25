@@ -81,6 +81,11 @@
 				success: function (response) {
 					console.log('edit_session/join response : ' + JSON.stringify(response));
 
+					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
+						self.treat_status_nok(response);
+						return;
+					}
+
 					this.user_zone = response.user_zone;
 					this.other_users = response.other_users;
 					this.other_zones = response.other_zones;

@@ -130,6 +130,11 @@
 				success: function (response) {
 					var i;
 
+					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
+						self.treat_status_nok(response);
+						return;
+					}
+
 					// Ensure that this response is associated to the last join request
 					if (response.id !== _join_view_session_id) {
 						return;
@@ -176,23 +181,29 @@
 		 * Treat not ok Status (!STATUS_SUCCESS)
 		 */
 		this.treat_status_nok = function (response) {
-			switch (response.status[0]) {
-			case STATUS_INFORMATION:
-				break;
-			case STATUS_SUCCESS:
-				// ???
-				break;
-			case STATUS_REDIRECTION:
-				// We got redirected for some reason, we do execute ourselfs
-				console.log("STATUS_REDIRECTION --> Got redirected to :" + response.status[2]);
-				document.location.href = response.status[2];
-				break;
-			case STATUS_SERVER_ERROR:
-				// FIXME : We got a server error, we should try to reload the page.
-				break;
-			case STATUS_BAD_REQUEST:
-				// FIXME : OK ???
-				break;
+			var empty;
+			if (response.status === null) {
+				// error on server side
+				empty = "argh";
+			} else {
+				switch (response.status[0]) {
+				case STATUS_INFORMATION:
+					break;
+				case STATUS_SUCCESS:
+					// ???
+					break;
+				case STATUS_REDIRECTION:
+					// We got redirected for some reason, we do execute ourselfs
+					console.log("STATUS_REDIRECTION --> Got redirected to :" + response.status[2]);
+					document.location.href = response.status[2];
+					break;
+				case STATUS_SERVER_ERROR:
+					// FIXME : We got a server error, we should try to reload the page.
+					break;
+				case STATUS_BAD_REQUEST:
+					// FIXME : OK ???
+					break;
+				}
 			}
 			return null;
 		};

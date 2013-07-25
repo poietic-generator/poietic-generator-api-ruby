@@ -357,6 +357,10 @@ module PoieticGen
 				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
 
+			rescue PoieticGen::InvalidSession => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_REDIRECTION, "Session does not exist!", "/"]
+
 			rescue ArgumentError => e
 				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_BAD_REQUEST, "Invalid content" ]
@@ -397,6 +401,10 @@ module PoieticGen
 			rescue PoieticGen::UpdateViewRequestParseError => e
 				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
+
+			rescue PoieticGen::InvalidSession => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_REDIRECTION, "Session does not exist!", "/"]
 
 			rescue ArgumentError => e
 				STDERR.puts e.inspect, e.backtrace
