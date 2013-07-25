@@ -6,6 +6,7 @@ require 'dm-core'
 require 'dm-validations'
 require 'dm-migrations'
 require 'dm-transactions'
+require 'dm-constraints'
 require 'dm-types'
 require 'thor'
 require 'pp'
@@ -17,8 +18,6 @@ require 'poieticgen/session'
 module PoieticGen
 	module CLI
 		class Session < Thor
-
-
 			desc "list", "List all session"
 			def list
 				configure
@@ -49,18 +48,25 @@ module PoieticGen
 				puts "FIXME: Create A new session" 
 				raise NotImplementedError
 			end
-
-			desc "delete ID", "Delete session ID"
-			def delete id
+ 
+			option :all, :type => :boolean, :aliases => :a
+			desc "delete [-a] ID", "Delete session ID"
+			def delete id=nil
 				configure
-				session = PoieticGen::Session.first(:id => id.to_i)
-				if session.nil? then
-					puts "ERROR: Session %s does not exist." % id.to_i
-					exit 1
+				if options[:all] then
+					sessions = PoieticGen::Session.all
+					res = sessions.destroy
+				else
+					session = PoieticGen::Session.first(:id => id.to_i)
+					if session.nil? then
+						puts "ERROR: Session %s does not exist." % id.to_i
+						exit 1
+					end
+					pp session.users
+					pp session
+					res = session.destroy
+					pp res
 				end
-
-				session.destroy
-				pp session
 			end
 
 			desc "shapshot OFFSET", "Dump snapshot at OFFSET"
