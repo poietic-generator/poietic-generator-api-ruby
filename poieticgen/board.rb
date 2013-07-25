@@ -76,8 +76,6 @@ module PoieticGen
 		
 			@debug = true
 			rdebug "using allocator %s" % config.allocator
-
-			# @allocator = ALLOCATORS[config.allocator].new config
 			
 			begin
 				save
@@ -109,24 +107,27 @@ module PoieticGen
 		end
 
 		def include? idx
+			val = nil
+
 			Board.transaction do
 				val = self[idx]
-				return (not val.nil?)
 			end
+
+			return (not val.nil?)
 		end
 
 
 		#
 		# make the user join the board
 		#
-		def join user
+		def join user, config
 			zone = nil
 			Board.transaction do
-				zone = @allocator.allocate
+				allocator = ALLOCATORS[allocator_type].new config, zones
+				zone = allocator.allocate self
 				zone.user_id = user.id
 				user.zone = zone.index
 				zone.save
-				user.save
 			end
 			return zone
 		end
@@ -142,7 +143,8 @@ module PoieticGen
 					# reset zone
 					zone.reset
 					# unallocate it
-					@allocator.free user.zone
+					zone.user_id = nil
+					zone.save
 				else
 					#FIXME: return an error to the user?
 				end
@@ -166,11 +168,11 @@ module PoieticGen
 				
 				# Save board periodically
 				
-				stroke_count = timelines.strokes.first(
+				last_stroke = timelines.strokes.first(
 					:order => [ :id.desc ]
 				)
 				
-				stroke_count = 0 if stroke_count.nil?
+				stroke_count = if last_stroke.nil? then 0 else last_stroke.timeline.id end
 				
 				if stroke_count % STROKE_COUNT_BETWEEN_QFRAMES == 0 then
 					self.take_snapshot

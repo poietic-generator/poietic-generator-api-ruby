@@ -302,6 +302,7 @@ module PoieticGen
 
 				if settings.manager.check_lease! session then
 					data = JSON.parse(request.body.read)
+					data['session_token'] = params['session_token']
 					result = settings.manager.update_data session, data
 				else
 					status = [ STATUS_REDIRECTION, "Session has expired !", "/"]

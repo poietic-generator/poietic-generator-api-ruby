@@ -81,27 +81,26 @@ module PoieticGen
 		def join session, params
 			req = JoinRequest.parse params
 
-			is_new = true;
+			is_new = true
 			result = nil
 
 			# FIXME: prevent session from being stolen...
-			rdebug "requesting id=%s, session=%s, name=%s" \
-				% [ req.user_id, req.session_token, req.name ]
+			rdebug "requesting id=%d, session=%s, name=%s" \
+				% [ req.user_id, req.session_token, req.user_name ]
 
 			user = nil
 			now = Time.now
 
-			param_name = if req.name.nil? or (req.name.length == 0) then
+			param_name = if req.user_name.nil? or (req.user_name.length == 0) then
 							 "anonymous"
 						 else
-							 req.name
+							 req.user_name
 						 end
 			
 			board = Board.first(
 				:session_token => req.session_token,
 				:closed => false
 			)
-			board.init
 			
 			raise InvalidSession, "Invalid session" if board.nil?
 			
@@ -118,23 +117,18 @@ module PoieticGen
 
 			User.transaction do
 
-				# reuse user_id if session is still valid
-				if req.session_token != board.session_token then
-					rdebug "User is requesting a different session"
-					# create new
-					user = User.create param_create
+				user = board.users.first(:id => req.user_id)
 
-					# allocate new zone
-					board.join user
+				if user.nil? then
+					begin
+						user = board.users.create param_create
+					rescue DataMapper::SaveFailureError => e
+						STDERR.puts e.resource.errors.inspect
+						raise e
+					end
 
+					zone = board.join user, @config.board
 				else
-					rdebug "User is in session"
-					param_request = {
-						:id => req.user_id
-					}
-
-					user = board.users.first_or_create param_request, param_create
-
 					tdiff = (now.to_i - user.alive_expires_at)
 					rdebug [ now.to_i, user.alive_expires_at, tdiff ]
 					if ( tdiff > 0  ) then
@@ -143,9 +137,10 @@ module PoieticGen
 						# create new if session expired
 						user = User.create param_create
 
-						board.join user
+						zone = board.join user, @config.board
 					else
-						is_new = false;
+						is_new = false
+						zone = board[user.zone]
 					end
 				end
 
@@ -169,8 +164,6 @@ module PoieticGen
 				rdebug "User : ", user
 				session[PoieticGen::Api::SESSION_USER] = user.id
 				session[PoieticGen::Api::SESSION_SESSION] = board.session_token
-
-				zone = board[user.zone]
 
 				# FIXME: test request user_id
 				# FIXME: test request username
@@ -281,11 +274,11 @@ module PoieticGen
 				:closed => false
 			)
 			
-			raise InvalidSession, "No opened session found for session %s" % session[PoieticGen::Api::SESSION_SESSION] if req_session.nil?
+			raise InvalidSession, "No opened session found for session %s" % session[PoieticGen::Api::SESSION_SESSION] if board.nil?
 
 			user = board.users.get session[PoieticGen::Api::SESSION_USER]
 			rdebug "check_lease! user = ", user, " now = ", now
-			raise InvalidSession, "No user found with session_token %s in DB" % board.token if user.nil?
+			raise InvalidSession, "No user found with session_token %s in DB" % board.session_token if user.nil?
 
 			if ( (now >= user.alive_expires_at) or (now >= user.idle_expires_at) ) then
 				# expired lease...
@@ -301,14 +294,14 @@ module PoieticGen
 		#
 		# return latest updates from everyone !
 		#
-		def update_data session, params
+		def update_data session, data
 
 			# parse update request first
-			rdebug "updating with : %s" % params.inspect
-			req = UpdateRequest.parse params
+			rdebug "updating with : %s" % data.inspect
+			req = UpdateRequest.parse data
 			
 			board = Board.first(
-				:session_token => session[PoieticGen::Api::SESSION_SESSION],
+				:session_token => req.session_token,
 				:closed => false
 			)
 			

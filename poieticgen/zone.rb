@@ -64,7 +64,7 @@ module PoieticGen
 
 
 
-		def initialize index, position, width, height
+		def initialize index, position, width, height, board
 			# @debug = true
 
 			param_create = {
@@ -76,7 +76,8 @@ module PoieticGen
 				:user_id => nil,
 				:created_at => Time.now.to_i,
 				:deleted_at => 0,
-				:deleted => false
+				:deleted => false,
+				:board => board
 			}
 			super param_create
 			
@@ -91,7 +92,6 @@ module PoieticGen
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e
 			end
-			rdebug "zone created!"
 		end
 		
 		def self.from_snapshot snapshot
@@ -103,13 +103,7 @@ module PoieticGen
 		end
 
 		def reset
-			self.data = Array.new( width * height, '#000');
-			begin
-				self.save
-			rescue DataMapper::SaveFailureError => e
-				rdebug "Saving failure : %s" % e.resource.errors.inspect
-				raise e
-			end
+			self.data = Array.new( width * height, '#000')
 		end
 
 		def apply user, drawing
@@ -136,7 +130,7 @@ module PoieticGen
 						JSON.generate(changes).to_s,
 						timestamp,
 						user.zone,
-						user.session
+						user.board
 
 					changes.each do |x,y,t_offset|
 						idx = _xy2idx(x,y)
@@ -146,12 +140,7 @@ module PoieticGen
 				
 				@is_snapshoted = false
 
-				begin
-					self.save
-				rescue DataMapper::SaveFailureError => e
-					rdebug "Saving failure : %s" % e.resource.errors.inspect
-					raise e
-				end
+				self.save
 			end
 		end
 		

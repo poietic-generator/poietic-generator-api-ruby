@@ -27,7 +27,7 @@ module PoieticGen
 
 		USER_ID = 'user_id'
 		SESSION_TOKEN = 'session_token'
-		NAME = 'name'
+		USER_NAME = 'user_name'
 
 		SINATRA_SPLAT = 'splat'
 		SINATRA_CAPTURES = 'captures'
@@ -45,8 +45,8 @@ module PoieticGen
 			# mandatory fields firstvalidate user input first
 			hash.each do |key, val|
 				case key
-				when NAME then
-				  	rdebug "name : %s" % val.inspect
+				when USER_NAME then
+				  	rdebug "user_name : %s" % val.inspect
 				when USER_ID then
 				  	begin
 				    		rdebug "user_id : %d" % val.to_i
@@ -78,11 +78,11 @@ module PoieticGen
 
 
 		def user_id
-			return @hash[USER_ID]
+			return @hash[USER_ID].to_i
 		end
 
-		def name
-			return @hash[NAME]
+		def user_name
+			return @hash[USER_NAME]
 		end
     		
     		def session_token

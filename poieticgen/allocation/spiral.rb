@@ -82,10 +82,12 @@ module PoieticGen ; module Allocation
 		def initialize config, zone_dump = nil
 			# map index => Zone object (or nil if unallocated)
 			@debug = true
-			if zone_dump.nil? then
-				@zones = {}
-			else 
-				@zones = zone_dump
+			@zones = {}
+
+			unless zone_dump.nil? then
+				zone_dump.each do |zone|
+					@zones[zone.index] = zone
+				end
 			end
 
 			@config = config
@@ -162,14 +164,15 @@ module PoieticGen ; module Allocation
 		# allocates and return 
 		# a zone                
 		#
-		def allocate
+		def allocate board
 			@monitor.synchronize do
 				index = _next_index()
 
 				zone = Zone.new index, 
 					(self.index_to_position index),
 					@config.width,
-					@config.height
+					@config.height,
+					board
 
 				rdebug "Spiral/allocate zone : ", zone.inspect
 				@zones[index] = zone
