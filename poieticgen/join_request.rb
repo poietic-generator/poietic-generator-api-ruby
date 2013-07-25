@@ -20,6 +20,7 @@
 #                                                                            #
 ##############################################################################
 
+
 module PoieticGen
 	class JoinRequestParseError < OptionParser::ParseError ; end
 
