@@ -1,5 +1,7 @@
 source "http://rubygems.org"
 
+gem "thor"
+
 gem "sinatra", :require => "sinatra/base"
 gem "sinatra-reloader"
 gem "sinatra-flash"
@@ -24,6 +26,7 @@ gem "dm-migrations"
 gem "dm-transactions"
 gem "dm-mysql-adapter"
 gem "dm-aggregates"
+gem "dm-constraints"
 gem "dm-types"
 gem "inifile" #, "~> 0.3"
 gem "extlib"
