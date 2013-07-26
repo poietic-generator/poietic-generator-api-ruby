@@ -62,7 +62,7 @@
 				session_url = null,
 				url_matches;
 
-			url_matches = /\/session\/(.+)\/draw/.exec(window.location);
+			url_matches = /\/session\/(\w+)\/draw/.exec(window.location);
 			if (url_matches !== null && url_matches.length === 2) {
 				_session = url_matches[1];
 			} else {
