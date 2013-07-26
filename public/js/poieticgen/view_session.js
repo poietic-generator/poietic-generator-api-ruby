@@ -46,7 +46,6 @@
 		var console = window.noconsole,
 			self = this,
 			_current_timeline_id = -1,
-			_init_timeline_id = 0,
 			_slider = null,
 			_game = null,
 
@@ -58,7 +57,6 @@
 			_get_current_time,
 			_view_type = REAL_TIME_VIEW,
 			_last_join_timestamp = 0,
-			_last_join_diffstamp = 0,
 			_last_update_max_timestamp = -1,
 			_join_view_session_id = 0,
 			_update_view_session_id = 0,
@@ -157,9 +155,8 @@
 
 					_last_join_start_time = _get_current_time();
 					_last_join_timestamp = response.timestamp;
-					_last_join_diffstamp = response.diffstamp;
 
-					_current_timeline_id = _init_timeline_id = response.timeline_id;
+					_current_timeline_id = response.timeline_id;
 					// console.log('view_session/join response mod : ' + JSON.stringify(this) );
 
 					_last_update_max_timestamp = response.timestamp;
@@ -224,7 +221,7 @@
 		 */
 		this.update = function () {
 
-			var req, since;
+			var req;
 
 			// assign real values if objects are present
 			if (_game.observers().length < 1) {
@@ -234,18 +231,12 @@
 
 			_update_view_session_id += 1;
 
-			if (_view_type === HISTORY_VIEW) {
-				since = _init_timeline_id;
-			} else {
-				since = _current_timeline_id;
-			}
-
 			req = {
 				timeline_after : _current_timeline_id + 1,
 				last_max_timestamp : _last_update_max_timestamp,
 
 				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed,
-				since : since,
+				since : _last_join_timestamp,
 				id : _update_view_session_id,
 				view_mode : _view_type
 			};
@@ -315,7 +306,7 @@
 
 			} else {
 				// diffstamps are relative to the local start date
-				seconds = _get_elapsed_time() - _last_join_diffstamp;
+				seconds = _get_elapsed_time();
 			}
 
 			//console.log('view_session/update seconds : ' + seconds);

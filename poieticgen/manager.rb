@@ -427,10 +427,11 @@ module PoieticGen
 
 						if not t.nil? then
 							timeline_id = t.id
-							diffstamp = absolute_time - t.timestamp
 						end
 						
 						timestamp = absolute_time - board.timestamp
+					else
+						timestamp = 0
 					end
 
 					rdebug "timeline_id %d" % timeline_id
@@ -456,7 +457,6 @@ module PoieticGen
 					:timeline_id => timeline_id,
 					:timestamp => timestamp, # time between the session start and the requested date
 					:date_range => date_range, # total time of session
-					:diffstamp => diffstamp, # time between the found timeline and the requested date
 					:id => req.id
 				}
 
@@ -529,53 +529,40 @@ module PoieticGen
 					
 					session_timelines = board.timelines
 					
-					# This stroke is used to compute diffstamps
-					since = session_timelines.first(
-						:id.gte => req.since,
-						:order => [ :id.asc ]
-					)
-					
-					rdebug "since = ", since
-					
-					if not since.nil? then
-						
-						if req.last_max_timestamp > 0 then
-							max_timestamp = req.last_max_timestamp + req.duration * 2
-							# Events between the requested timeline and (timeline + duration)
-							timelines = session_timelines.all(
-								:timestamp.gt => board.timestamp + req.last_max_timestamp,
-								:timestamp.lte => board.timestamp + max_timestamp
-							)
-						else
-							max_timestamp = req.duration * 2
-							timelines = session_timelines.all(
-								:timestamp.lte => board.timestamp + max_timestamp
-							)
-						end
-						
-						rdebug "timelines = ", timelines
-						
-						if not timelines.empty? then
-
-							srk_req = timelines.strokes
-
-							strokes_collection = srk_req.map{ |s| s.to_hash since.timestamp }
-
-							rdebug "Strokes ", srk_req
-
-							evt_req = timelines.events
-
-							if not evt_req.empty? then
-
-								rdebug "Events ", evt_req
-
-								events_collection = evt_req.map{ |e| e.to_hash since.timestamp }
-							end
-
-							timestamp = timelines.first.timestamp - board.timestamp
-						end
+					if req.last_max_timestamp > 0 then
+						max_timestamp = req.last_max_timestamp + req.duration * 2
+						# Events between the requested timeline and (timeline + duration)
+						timelines = session_timelines.all(
+							:timestamp.gt => board.timestamp + req.last_max_timestamp,
+							:timestamp.lte => board.timestamp + max_timestamp
+						)
 					else
-						rdebug "Invalid since ", req.since
+						max_timestamp = req.duration * 2
+						timelines = session_timelines.all(
+							:timestamp.lte => board.timestamp + max_timestamp
+						)
+					end
+					
+					rdebug "timelines = ", timelines
+					
+					if not timelines.empty? then
+
+						srk_req = timelines.strokes
+
+						strokes_collection = srk_req.map{ |s| s.to_hash req.since }
+
+						rdebug "Strokes ", srk_req
+
+						evt_req = timelines.events
+
+						if not evt_req.empty? then
+
+							rdebug "Events ", evt_req
+
+							events_collection = evt_req.map{ |e| e.to_hash req.since }
+						end
+
+						timestamp = timelines.first.timestamp - board.timestamp
 					end
 				else
 					raise RuntimeError, "Unknown view mode %d" % req.view_mode
