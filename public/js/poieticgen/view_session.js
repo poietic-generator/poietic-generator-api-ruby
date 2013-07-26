@@ -86,8 +86,8 @@
 
 			var url_matches;
 
-			url_matches = /\/session\/(.+)\/view/.exec(window.location);
-			if (url_matches.length === 2) {
+			url_matches = /\/session\/(\w+)\/view/.exec(window.location);
+			if (url_matches !== null && url_matches.length === 2) {
 				_session = url_matches[1];
 			} else {
 				_session = ""; // Error
@@ -316,7 +316,6 @@
 				if (events[i].diffstamp) {
 					events[i].diffstamp = parseInt(events[i].diffstamp, 10) - seconds;
 					events[i].timestamp = events[i].diffstamp + _last_join_start_time;
-					events[i].stamp_session = last_update_timestamp + events[i].diffstamp;
 				} else {
 					events[i].timestamp = _last_join_start_time;
 				}

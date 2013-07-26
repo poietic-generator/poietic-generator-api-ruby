@@ -309,6 +309,7 @@ module PoieticGen
 
 				self.check_expired_users
 
+				raise InvalidSession, "Invalid session" if user.nil?
 
 				user.alive_expires_at = (now + @config.user.liveness_timeout)
 				if not req.strokes.empty? then

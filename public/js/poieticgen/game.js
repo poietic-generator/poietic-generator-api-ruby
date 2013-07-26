@@ -38,8 +38,6 @@
 			self = this,
 			_observers = [],
 			_events = [],
-			_older_event,
-			_remove_event,
 			_timer = null;
 
 		this.run = function () {
@@ -146,32 +144,6 @@
 			self.clear();
 			self.clear_observers();
 			self.run();
-		};
-
-		/**
-		 * Returns the first event to be triggered.
-		 * Note: do not call this function if _events is empty.
-		 */
-		_older_event = function () {
-			var min_event = _events[0], e;
-
-			for (e = 1; e < _events.length; e += 1) {
-				if (_events[e].event.diffstamp < min_event.event.diffstamp) {
-					min_event = e;
-				}
-			}
-
-			return min_event;
-		};
-
-		_remove_event = function (e) {
-			var i;
-			for (i = 0; i < _events.length; i += 1) {
-				if (e === _events[i]) {
-					_events.splice(i, 1);
-					return;
-				}
-			}
 		};
 
 		self.run();

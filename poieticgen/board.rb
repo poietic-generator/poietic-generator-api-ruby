@@ -241,6 +241,10 @@ module PoieticGen
 				:order => [ :id.desc ]
 			)
 			
+			if timeline.nil? then
+				return nil
+			end
+
 			return timeline.board_snapshot
 		end
 
