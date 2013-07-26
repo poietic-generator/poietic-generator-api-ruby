@@ -149,7 +149,7 @@ module PoieticGen
 					zone = board.join user, @config.board
 					Event.create_join user, board
 				else
-					zone = board[user.zone.index]
+					zone = user.zone
 				end
 
 				begin
@@ -177,7 +177,7 @@ module PoieticGen
 				other_users = users_db.map{ |u| u.to_hash }
 				other_zones = users_db.map{ |u|
 					rdebug "requesting zone for %s" % u.inspect
-					board[u.zone.index].to_desc_hash Zone::DESCRIPTION_FULL
+					u.zone.to_desc_hash Zone::DESCRIPTION_FULL
 				}
 				msg_history_req = Message.all(:user_dst => user.id) + Message.all(:user_src => user.id)
 				msg_history = msg_history_req.map{ |msg| msg.to_hash }
@@ -232,24 +232,25 @@ module PoieticGen
 
 			board = Board.first( :session_token => session_token )
 			rdebug "FIXME: LEAVE(board) other", board
-			
-			if board then
+
+			unless board.nil? then
 				user = board.users.get(session_user_id)
 				rdebug "FIXME: LEAVE(user)", user
-			end
 
-			if user then
-				user.idle_expires_at = Time.now.to_i
-				user.alive_expires_at = Time.now.to_i
-				user.did_expire = true
-				# create leave event if session is the current one
-				board.leave user
-				Event.create_leave user, user.alive_expires_at, board
-				user.save
+				unless user.nil? then
+					user.idle_expires_at = Time.now.to_i
+					user.alive_expires_at = Time.now.to_i
+					user.did_expire = true
+					# create leave event if session is the current one
+					board.leave user
+					Event.create_leave user, user.alive_expires_at, board
+					user.save
+				else
+					rdebug "Could not find any user for this request (board=%s, session=%s)" % [ board.inspect, session.inspect]
+				end
 			else
-				rdebug "Could not find any user for this request (user=%s)" % session.inspect;
+				rdebug "Could not find any board for this request (session=%s)" % session.inspect
 			end
-
 		end
 
 		#
@@ -396,7 +397,7 @@ module PoieticGen
 						:did_expire.not => true
 					)
 					users = users_db.map{ |u| u.to_hash }
-					zones = users_db.map{ |u| board[u.zone.index].to_desc_hash Zone::DESCRIPTION_FULL }
+					zones = users_db.map{ |u| u.zone.to_desc_hash Zone::DESCRIPTION_FULL }
 					
 					timeline_id = Timeline.last_id board
 				else
@@ -555,21 +556,19 @@ module PoieticGen
 						rdebug "timelines = ", timelines
 						
 						if not timelines.empty? then
-				
+
 							srk_req = timelines.strokes
 
-							strokes_collection = srk_req.map{ |s|
-								s.to_hash since.timestamp
-							}
-					
+							strokes_collection = srk_req.map{ |s| s.to_hash since.timestamp }
+
 							rdebug "Strokes ", srk_req
-					
+
 							evt_req = timelines.events
 
 							if not evt_req.empty? then
 
 								rdebug "Events ", evt_req
-					
+
 								events_collection = evt_req.map{ |e| e.to_hash since.timestamp }
 							end
 
@@ -607,7 +606,8 @@ module PoieticGen
 					users_db = User.all( :did_expire.not => true )
 					users_db.each do |u|
 						# verify that user really has a zone in that program instance
-						has_zone = u.board.include? u.zone.index
+						has_zone = u.board == u.zone.board && (not u.zone.expired)
+
 						# disable users without a zone
 						if not has_zone then
 							# kill non-existant user
@@ -625,8 +625,8 @@ module PoieticGen
 							:did_expire => false,
 							:alive_expires_at.lte => now
 						) + User.all(
-						:did_expire => false,
-						:idle_expires_at.lte => now
+							:did_expire => false,
+							:idle_expires_at.lte => now
 						)
 						rdebug "New expired list : %s" % newly_expired_users.inspect
 						newly_expired_users.each do |leaver|

@@ -100,30 +100,12 @@ module PoieticGen
 
 
 		#
-		# Get access to zone with given index
-		#
-		def [] idx
-			return self.zones.first(:index => idx)
-		end
-
-		def include? idx
-			val = nil
-
-			Board.transaction do
-				val = self[idx]
-			end
-
-			return (not val.nil?)
-		end
-
-
-		#
 		# make the user join the board
 		#
 		def join user, config
 			zone = nil
 			Board.transaction do
-				allocator = ALLOCATORS[allocator_type].new config, self.zones
+				allocator = ALLOCATORS[self.allocator_type].new config, self.zones
 				zone = allocator.allocate self
 				zone.user = user
 				user.zone = zone
@@ -138,7 +120,7 @@ module PoieticGen
 		#
 		def leave user
 			Board.transaction do
-				zone = self[user.zone.index]
+				zone = user.zone # FIXME: verify if the user is in the board
 				unless zone.nil? then
 					zone.disable
 					zone.save
@@ -155,8 +137,8 @@ module PoieticGen
 			Board.transaction do
 				
 				# Update the zone
-			
-				zone = self[user.zone.index]
+
+				zone = user.zone # FIXME: verify if the user is in the board
 				unless zone.nil? then
 					zone.apply drawing
 				else
