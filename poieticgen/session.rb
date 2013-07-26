@@ -22,6 +22,9 @@
 
 require 'poieticgen/zone'
 
+require 'poieticgen/board_snapshot' #needed by has_n
+require 'poieticgen/user' #needed by has_n
+
 module PoieticGen
 
 	class Session

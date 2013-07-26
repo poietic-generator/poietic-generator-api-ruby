@@ -22,7 +22,8 @@
 
 require 'poieticgen/zone'
 require 'poieticgen/zone_snapshot'
-require 'poieticgen/session'
+require 'poieticgen/session' # needed by belongs_to
+require 'poieticgen/timeline' # needed by belongs_to
 
 module PoieticGen
 	
