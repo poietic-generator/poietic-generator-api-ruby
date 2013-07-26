@@ -38,11 +38,12 @@
 
 
 	function DrawSession(callback) {
-		var console = noconsole,
+		var console = window.noconsole,
 			self = this,
 			_current_timeline_id = 0,
 			_game = null,
-			_dispatch_strokes_body;
+			_dispatch_strokes_body,
+			_session;
 
 		this.user_id = null;
 		this.zone_column_count = null;
@@ -58,7 +59,15 @@
 			var user_id = $.cookie('user_id'),
 				user_name = $.cookie('user_name'),
 				session_opts = [],
-				session_url = null;
+				session_url = null,
+				url_matches;
+
+			url_matches = /\/session\/(.+)\/draw/.exec(window.location);
+			if (url_matches !== null && url_matches.length === 2) {
+				_session = url_matches[1];
+			} else {
+				_session = ""; // Error
+			}
 
 			_game = new PoieticGen.Game();
 
@@ -69,7 +78,7 @@
 				session_opts.push("user_name=" + user_name);
 			}
 
-			session_url = window.location + "/join.json?" + session_opts.join('&');
+			session_url = "/session/" + _session + "/draw/join.json?" + session_opts.join('&');
 
 			// get session info from
 
@@ -221,7 +230,7 @@
 			console.log("edit_session/update: req = " + JSON.stringify(req));
 			self.last_update_time = new Date();
 			$.ajax({
-				url: window.location + "/update.json",
+				url: "/session/" + _session + "/draw/update.json",
 				dataType: "json",
 				data: JSON.stringify(req),
 				type: 'POST',

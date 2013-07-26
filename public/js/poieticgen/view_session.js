@@ -86,8 +86,8 @@
 
 			var url_matches;
 
-			url_matches = /\/session\/(.+)\/view/.exec(window.location);
-			if (url_matches.length === 2) {
+			url_matches = /\/session\/(\w+)\/view/.exec(window.location);
+			if (url_matches !== null && url_matches.length === 2) {
 				_session = url_matches[1];
 			} else {
 				_session = ""; // Error
