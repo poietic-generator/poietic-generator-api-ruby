@@ -33,13 +33,15 @@ module PoieticGen
 		
 		has n, :board_snapshots, :through => Resource
 		belongs_to :zone
+		belongs_to :timeline
 
-		def self.create data, zone
+		def self.create data, zone, timeline
 			# @debug = true
 			begin
 				super ({
 					:data => data,
-					:zone => zone
+					:zone => zone,
+					:timeline => timeline
 				})
 			rescue DataMapper::SaveFailureError => e
 				rdebug "Saving failure : %s" % e.resource.errors.inspect

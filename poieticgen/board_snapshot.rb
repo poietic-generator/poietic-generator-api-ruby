@@ -36,16 +36,17 @@ module PoieticGen
 
 		def initialize board
 			# @debug = true
+			timeline = Timeline.create_now board
 			
 			json = {
 				:board => board,
-				:timeline => (Timeline.create_now board),
+				:timeline => timeline,
 				:zone_snapshots => []
 			}
 			super json
 
 			board.zones.each do |zone|
-				self.zone_snapshots<< zone.snapshot
+				self.zone_snapshots<< (zone.snapshot timeline)
 			end
 
 			begin
