@@ -17,28 +17,28 @@
 
 - url_logout = "/session/%s/logout" % @params[:session_token]
 / drawing zone
-#session-zone{"data-fullscreen" => "true", "data-role" => "page"}
-  %div{"data-id" => "head", "data-position" => "fixed", "data-role" => "header"}
-    %a#brush{"data-ajax" => "false", :href => "#"}
+#session-zone(data-fullscreen="true" data-role="page")
+  %div(data-id="head" data-position="fixed" data-role="header")
+    %a#brush(data-ajax="false" href="#")
       %span#current_color> &nbsp;&nbsp;&nbsp;&nbsp;
       Color
     %h1.username
     %a.ui-btn-right.logout{"data-ajax" => "false", :href => url_logout} Logout
-    %div{"data-role" => "navbar"}
+    %div(data-role="navbar")
       %ul
         %li
-          %a.ui-btn-active.ui-state-persist{"data-transition" => "slideup", :href => "#session-zone"} Drawing zone
+          %a.ui-btn-active.ui-state-persist(data-transition="slideup" href="#session-zone") Drawing zone
         %li
-          %a{"data-transition" => "slideup", :href => "#session-chat"}
+          %a(data-transition="slideup" href="#session-chat")
             Messages
             %span.ui-li-count.ui-btn-up-c.ui-btn-corner-all 0
-  #canvas-container{"data-role" => "content"}
+  #canvas-container(data-role="content")
     .ui-grid-a.viewer
       %canvas#session-viewer
     .ui-grid-a.editor
       %canvas#session-editor
 / chat zone
-#session-chat{"data-role" => "page"}
+#session-chat(data-role="page")
   %div{"data-id" => "head", "data-position" => "fixed", "data-role" => "header"}
     %h1.username
     %a.ui-btn-right.logout{"data-ajax" => "false", :href => url_logout} Logout
