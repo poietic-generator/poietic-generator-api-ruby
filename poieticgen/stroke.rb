@@ -29,18 +29,18 @@ module PoieticGen
 		include DataMapper::Resource
 
 		property :id,	Serial
-		property :zone, Integer, :required => true
 		property :color, String, :required => true
 		property :changes, Text, :required => true, :lazy => false
 		
 		belongs_to :timeline, :key => true
+		belongs_to :zone
 
-		def self.create_stroke color, changes, timestamp, zone, board
+		def self.create_stroke color, changes, timestamp, zone
 			param_create = {
 				:color => color,
 				:changes => changes,
 				:zone => zone,
-				:timeline => (Timeline.create_with_time timestamp, board)
+				:timeline => (Timeline.create_with_time timestamp, zone.board)
 			}
 			
 			begin
@@ -54,7 +54,7 @@ module PoieticGen
 		def to_hash ref
 			res = {
 				:id => self.timeline.id,
-				:zone => self.zone,
+				:zone => self.zone.index,
 				:color => self.color,
 				:changes => JSON.parse( self.changes ),
 				:diffstamp => self.timeline.timestamp - ref

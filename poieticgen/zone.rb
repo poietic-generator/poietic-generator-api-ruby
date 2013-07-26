@@ -128,8 +128,7 @@ module PoieticGen
 					Stroke.create_stroke color,
 						JSON.generate(changes).to_s,
 						timestamp,
-						self.user.zone.index,
-						self.user.board
+						self
 
 					changes.each do |x,y,t_offset|
 						idx = _xy2idx(x,y)

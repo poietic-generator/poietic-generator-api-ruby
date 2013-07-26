@@ -185,7 +185,7 @@ module PoieticGen
 		#
 		# Get the board state at timeline_id.
 		#
-		def load_board timeline_id, apply_strokes, config
+		def load_board timeline_id, apply_strokes
 			snap = _get_snapshot timeline_id
 			zones = {}
 			
@@ -200,9 +200,6 @@ module PoieticGen
 					zones[zs.index] = Zone.from_snapshot zs
 				end
 			end
-		
-			# Put zones from snapshot in allocator
-			fake_allocator = ALLOCATORS[self.allocator_type].new config, zones
 			
 			# get the users associated to the snapshot
 			users_db = self.users
@@ -217,15 +214,17 @@ module PoieticGen
 			# Add/Remove zones since the snapshot
 			timelines.events.each do |event|
 				user = event.user
+				zone = user.zone
 				
 				if event.type == "join" then
-					zone = fake_allocator.allocate self
-					zone.user = user
+					zone.reset
+					zone.expired = false
 					zones[zone.index] = zone
 				elsif event.type == "leave" then
-					zone_index = user.zone.index
+					zone = zones[zone.index]
 					# unallocate zone
-					zones[zone_index].disable
+					zone.reset
+					zone.disable
 				else
 					raise RuntimeError, "Unknown event type %s" % event.type
 				end
@@ -234,12 +233,12 @@ module PoieticGen
 			users = users_db.map{ |u| u.to_hash } # FIXME: All users in the session are returned
 			
 			if apply_strokes then
-				strokes = timelines.strokes # strokes with diffstamp = 0 (not important)
-			
+				strokes = timelines.strokes
+
 				# Apply strokes
 				zones.each do |index,zone|
 					unless zone.expired then
-						zone.apply_local strokes.select{ |s| s.zone == zone.index }
+						zone.apply_local strokes.select{ |s| s.zone.index == zone.index }
 					end
 				end
 			end

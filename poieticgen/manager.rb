@@ -437,7 +437,7 @@ module PoieticGen
 					# retrieve users and zones
 					
 					if timeline_id > 0 then
-						users, zones = board.load_board timeline_id, true, @config.board
+						users, zones = board.load_board timeline_id, true
 
 						zones = zones.map{ |i,z| z.to_desc_hash Zone::DESCRIPTION_FULL }
 					else
