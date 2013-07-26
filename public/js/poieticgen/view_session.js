@@ -61,7 +61,8 @@
 			_last_join_diffstamp = 0,
 			_last_update_max_timestamp = -1,
 			_join_view_session_id = 0,
-			_update_view_session_id = 0;
+			_update_view_session_id = 0,
+			_session = "";
 
 		this.zone_column_count = null;
 		this.zone_line_count = null;
@@ -84,6 +85,15 @@
 		 * Semi-Constructor
 		 */
 		this.initialize = function (date, slider) {
+
+			var url_matches;
+
+			url_matches = /\/session\/(.+)\/view/.exec(window.location);
+			if (url_matches.length === 2) {
+				_session = url_matches[1];
+			} else {
+				_session = ""; // Error
+			}
 
 			_join_view_session_id = 0;
 			_update_view_session_id = 0;
@@ -119,7 +129,7 @@
 
 			// get session info from
 			$.ajax({
-				url: window.location + "/snapshot.json",
+				url: "/session/" + _session + "/view/snapshot.json",
 				data: {
 					date: date,
 					id: _join_view_session_id
@@ -242,7 +252,7 @@
 
 			console.log("view_session/update: req = " + JSON.stringify(req));
 			$.ajax({
-				url: window.location + "/update.json",
+				url: "/session/" + _session + "/view/update.json",
 				dataType: "json",
 				data: req,
 				type: 'GET',
