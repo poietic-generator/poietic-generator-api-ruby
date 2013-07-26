@@ -15,6 +15,7 @@
 - @page.js << "/js/poieticgen/chat.js"
 - @page.js << "/js/page/draw.js"
 
+- url_logout = "/session/%s/logout" % @params[:session_token]
 / drawing zone
 #session-zone{"data-fullscreen" => "true", "data-role" => "page"}
   %div{"data-id" => "head", "data-position" => "fixed", "data-role" => "header"}
@@ -22,7 +23,7 @@
       %span#current_color> &nbsp;&nbsp;&nbsp;&nbsp;
       Color
     %h1.username
-    %a.ui-btn-right.logout{"data-ajax" => "false", :href => "/page/logout"} Logout
+    %a.ui-btn-right.logout{"data-ajax" => "false", :href => url_logout} Logout
     %div{"data-role" => "navbar"}
       %ul
         %li
@@ -40,7 +41,7 @@
 #session-chat{"data-role" => "page"}
   %div{"data-id" => "head", "data-position" => "fixed", "data-role" => "header"}
     %h1.username
-    %a.ui-btn-right.logout{"data-ajax" => "false", :href => "/page/logout"} Logout
+    %a.ui-btn-right.logout{"data-ajax" => "false", :href => url_logout} Logout
     %div{"data-role" => "navbar"}
       %ul
         %li

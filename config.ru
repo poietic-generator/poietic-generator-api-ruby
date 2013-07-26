@@ -7,6 +7,7 @@ require 'dm-validations'
 require 'dm-migrations'
 require 'dm-transactions'
 require 'dm-types'
+require 'dm-constraints'
 
 require 'compass'
 require 'haml'

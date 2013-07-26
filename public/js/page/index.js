@@ -34,6 +34,10 @@
 		);
 	}
 
+	function selectedSession() {
+		return $("#select_session option:selected").val();
+	}
+
 	$(document).ready(function () {
 		var user_name = $.cookie('user_name');
 		if (user_name) {
@@ -43,12 +47,18 @@
 		$("#credentials").submit(function (event) {
 			event.preventDefault();
 			setUsernameCookie();
-			document.location = $(this).attr("action");
+			document.location = "/session/" + selectedSession() + "/draw";
 		});
 
 		$("#link_play").bind("vclick", function (event) {
+			event.preventDefault();
 			setUsernameCookie();
-			return true;
+			document.location = "/session/" + selectedSession() + "/draw";
+		});
+
+		$("#link_view").bind("vclick", function (event) {
+			event.preventDefault();
+			document.location = "/session/" + selectedSession() + "/view";
 		});
 	});
 

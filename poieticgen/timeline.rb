@@ -38,26 +38,26 @@ module PoieticGen
 		has 1, :message
 		has 1, :board_snapshot
 		
-		belongs_to :session
+		belongs_to :board
 		
-		# @debug = true
+		@debug = true
 		
-		def self.create_now session
+		def self.create_now board
 			create({
 				:timestamp => Time.now.to_i,
-				:session => session
+				:board => board
 			})
 		end
 		
-		def self.create_with_time timestamp, session
+		def self.create_with_time timestamp, board
 			create({
 				:timestamp => timestamp,
-				:session => session
+				:board => board
 			})
 		end
 
-		def self.last_id session
-			last_timeline = session.timelines.first(:order => [ :id.desc ])
+		def self.last_id board
+			last_timeline = board.timelines.first(:order => [ :id.desc ])
 			if last_timeline.nil? then 0 else last_timeline.id end
 		end
 

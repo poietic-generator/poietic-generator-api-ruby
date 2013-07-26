@@ -36,8 +36,8 @@ require 'poieticgen/stroke'
 require 'poieticgen/timeline'
 require 'poieticgen/update_request'
 require 'poieticgen/snapshot_request'
-require 'poieticgen/play_request'
-require 'poieticgen/session'
+require 'poieticgen/update_view_request'
+require 'poieticgen/join_request'
 
 module PoieticGen
 
@@ -59,18 +59,18 @@ module PoieticGen
 			# @debug = true
 			pp config
 			# a 16-char long random string
+			
+			@chat = PoieticGen::ChatManager.new @config.chat
 
 			_session_init
 		end
 
 
-		def restart session, params
-			user_id = session[PoieticGen::Api::SESSION_USER]
-			user = @session.users.get(user_id)
+		def create_session session, params
+
+			is_admin = session[PoieticGen::Api::SESSION_AUTH]
 			
-			raise InvalidSession, "No user found with user_id %d in DB" % user_id if user.nil?
-			
-			raise AdminSessionNeeded, "You have not the right to do that, please login as admin." if not user.is_admin
+			raise AdminSessionNeeded, "You have not the right to do that, please login as admin." if not is_admin
 			
 			_session_init
 		end
@@ -79,30 +79,35 @@ module PoieticGen
 		# generates an unpredictible user id based on session id & user counter
 		#
 		def join session, params
-			req_id = params[:user_id]
-			req_session = params[:user_session]
-			req_name = params[:user_name]
+			req = JoinRequest.parse params
 
-			is_new = true;
+			is_new = true
 			result = nil
 
-
 			# FIXME: prevent session from being stolen...
-			rdebug "requesting id=%s, session=%s, name=%s" \
-				% [ req_id, req_session, req_name ]
+			rdebug "requesting id=%d, session=%s, name=%s" \
+				% [ req.user_id, req.session_token, req.user_name ]
 
 			user = nil
 			now = Time.now
 
-			param_name = if req_name.nil? or (req_name.length == 0) then
+			param_name = if req.user_name.nil? or (req.user_name.length == 0) then
 							 "anonymous"
 						 else
-							 req_name
+							 req.user_name
 						 end
+			
+			board = Board.first(
+				:session_token => req.session_token,
+				:closed => false
+			)
+			
+			raise InvalidSession, "Invalid session" if board.nil?
+			
 			param_create = {
-				:session => @session,
+				:board => board,
 				:name => param_name,
-				:zone => -1,
+				:zone => nil,
 				:created_at => now.to_i,
 				:alive_expires_at => (now + @config.user.liveness_timeout).to_i,
 				:idle_expires_at => (now + @config.user.idle_timeout).to_i,
@@ -112,34 +117,20 @@ module PoieticGen
 
 			User.transaction do
 
-				# reuse user_id if session is still valid
-				if req_session != @session.token then
-					rdebug "User is requesting a different session"
-					# create new
-					user = User.create param_create
+				user = board.users.first(:id => req.user_id)
 
-					# allocate new zone
-					@board.join user
-
+				if user.nil? then
+					user = board.users.new param_create
 				else
-					rdebug "User is in session"
-					param_request = {
-						:id => req_id
-					}
-
-					user = @session.users.first_or_create param_request, param_create
-
 					tdiff = (now.to_i - user.alive_expires_at)
 					rdebug [ now.to_i, user.alive_expires_at, tdiff ]
 					if ( tdiff > 0  ) then
 						# The event will be generated elsewhere (in update_data).
 						rdebug "User session expired"
 						# create new if session expired
-						user = User.create param_create
-
-						@board.join user
+						user = board.users.new param_create
 					else
-						is_new = false;
+						is_new = false
 					end
 				end
 
@@ -153,6 +144,14 @@ module PoieticGen
 				# reset name if requested
 				user.name = param_name
 
+				# return JSON for userid
+				if is_new then
+					zone = board.join user, @config.board
+					Event.create_join user, board
+				else
+					zone = user.zone
+				end
+
 				begin
 					user.save
 				rescue DataMapper::SaveFailureError => e
@@ -160,35 +159,25 @@ module PoieticGen
 					raise e
 				end
 				
-				@session.users << user
-				
 				rdebug "User : ", user
 				session[PoieticGen::Api::SESSION_USER] = user.id
-				session[PoieticGen::Api::SESSION_SESSION] = @session.token
-
-				zone = @board[user.zone]
+				session[PoieticGen::Api::SESSION_SESSION] = board.session_token
 
 				# FIXME: test request user_id
 				# FIXME: test request username
-
-				# return JSON for userid
-				if is_new then
-					Event.create_join user.id, user.zone, @session
-				end
 
 				# clean-up users first
 				self.check_expired_users
 
 				# get real users
-				users_db = @session.users.all(
+				users_db = board.users.all(
 					:did_expire.not => true,
-					:id.not => user.id,
-					:zone.gte => 0
+					:id.not => user.id
 				)
 				other_users = users_db.map{ |u| u.to_hash }
 				other_zones = users_db.map{ |u|
-					puts "requesting zone for %s" % u.inspect
-					@board[u.zone].to_desc_hash Zone::DESCRIPTION_FULL
+					rdebug "requesting zone for %s" % u.inspect
+					u.zone.to_desc_hash Zone::DESCRIPTION_FULL
 				}
 				msg_history_req = Message.all(:user_dst => user.id) + Message.all(:user_src => user.id)
 				msg_history = msg_history_req.map{ |msg| msg.to_hash }
@@ -196,14 +185,13 @@ module PoieticGen
 
 
 				result = { :user_id => user.id,
-					:user_session => user.session.token,
 					:user_name => user.name,
 					:user_zone => (zone.to_desc_hash Zone::DESCRIPTION_FULL),
 					:other_users => other_users,
 					:other_zones => other_zones,
 					:zone_column_count => @config.board.width,
 					:zone_line_count => @config.board.height,
-					:timeline_id => (Timeline.last_id @session),
+					:timeline_id => (Timeline.last_id board),
 					:msg_history => msg_history
 				}
 			end
@@ -230,92 +218,39 @@ module PoieticGen
 			
 			raise AdminSessionNeeded, "Invalid parameters." if not is_admin
 			
-			param_create = {
-				:session => @session,
-				:name => req_name,
-				:zone => -1,
-				:created_at => now.to_i,
-				:alive_expires_at => (now + @config.user.liveness_timeout).to_i,
-				:idle_expires_at => (now + @config.user.idle_timeout).to_i,
-				:did_expire => false,
-				:last_update_time => now,
-				:is_admin => is_admin
-			}
-
-			User.transaction do
-
-				user = User.create param_create
-
-				# kill all previous users having the same zone
-
-				# update expiration time
-				user.idle_expires_at = (now + @config.user.idle_timeout)
-				user.alive_expires_at = (now + @config.user.liveness_timeout)
-				rdebug "Set expiring times at %s" % user.alive_expires_at.to_s
-
-				begin
-					user.save
-				rescue DataMapper::SaveFailureError => e
-					STDERR.puts e.resource.errors.inspect
-					raise e
-				end
-				
-				session[PoieticGen::Api::SESSION_USER] = user.id
-				session[PoieticGen::Api::SESSION_SESSION] = @session.token
-				
-				@session.users << user
-			end
+			session[PoieticGen::Api::SESSION_AUTH] = true
 		end
 
 
 		def leave session
 			rdebug "FIXME: LEAVE(session)", session
-			# zone_idx = @users[user_id].zone
 
 			session_user_id = session[PoieticGen::Api::SESSION_USER]
 			session_token = session[PoieticGen::Api::SESSION_SESSION]
 			
 			rdebug "FIXME: LEAVE(session_user_id)", session_user_id
 
-			if session_token == @session.token then
-				cur_session = @session
-				rdebug "FIXME: LEAVE(cur_session) current", cur_session
-			else
-				cur_session = Session.first( :token => session_token )
-				rdebug "FIXME: LEAVE(cur_session) other", cur_session
-			end
-			
-			if cur_session then
-				user = cur_session.users.get(session_user_id)
+			board = Board.first( :session_token => session_token )
+			rdebug "FIXME: LEAVE(board) other", board
+
+			unless board.nil? then
+				user = board.users.get(session_user_id)
 				rdebug "FIXME: LEAVE(user)", user
-			end
 
-			if user then
-				user.idle_expires_at = Time.now.to_i
-				user.alive_expires_at = Time.now.to_i
-				user.did_expire = true
-				# create leave event if session is the current one
-				if session_token == @session.token and user.zone >= 0 then
-					@board.leave user
-					Event.create_leave user.id, user.alive_expires_at, user.zone, @session
+				unless user.nil? then
+					user.idle_expires_at = Time.now.to_i
+					user.alive_expires_at = Time.now.to_i
+					user.did_expire = true
+					# create leave event if session is the current one
+					board.leave user
+					Event.create_leave user, user.alive_expires_at, board
+					user.save
+				else
+					rdebug "Could not find any user for this request (board=%s, session=%s)" % [ board.inspect, session.inspect]
 				end
-				user.save
 			else
-				rdebug "Could not find any user for this request (user=%s)" % session.inspect;
+				rdebug "Could not find any board for this request (session=%s)" % session.inspect
 			end
-
-		end
-
-
-		#
-		# If the current user in session is an admin,
-		# returns true.
-		#
-		def admin? session
-			user_id = session[PoieticGen::Api::SESSION_USER]
-			user = @session.users.get(user_id)
-			
-			return ((not user.nil?) and user.is_admin)
 		end
 
 		#
@@ -325,10 +260,17 @@ module PoieticGen
 		#
 		def check_lease! session
 			now = Time.now.to_i
+			
+			board = Board.first(
+				:session_token => session[PoieticGen::Api::SESSION_SESSION],
+				:closed => false
+			)
+			
+			raise InvalidSession, "No opened session found for session %s" % session[PoieticGen::Api::SESSION_SESSION] if board.nil?
 
-			user = @session.users.get session[PoieticGen::Api::SESSION_USER]
+			user = board.users.get session[PoieticGen::Api::SESSION_USER]
 			rdebug "check_lease! user = ", user, " now = ", now
-			raise InvalidSession, "No user found with session_id %s in DB" % @session.token if user.nil?
+			raise InvalidSession, "No user found with session_token %s in DB" % board.session_token if user.nil?
 
 			if ( (now >= user.alive_expires_at) or (now >= user.idle_expires_at) ) then
 				# expired lease...
@@ -349,13 +291,20 @@ module PoieticGen
 			# parse update request first
 			rdebug "updating with : %s" % data.inspect
 			req = UpdateRequest.parse data
+			
+			board = Board.first(
+				:session_token => req.session_token,
+				:closed => false
+			)
+			
+			raise InvalidSession, "Invalid session" if board.nil?
 
 			# prepare empty result message
 			result = nil
 
 			User.transaction do
 
-				user = @session.users.get session[PoieticGen::Api::SESSION_USER]
+				user = board.users.get session[PoieticGen::Api::SESSION_USER]
 				now = Time.now.to_i
 
 				self.check_expired_users
@@ -367,16 +316,16 @@ module PoieticGen
 				end
 				user.save
 
-				@board.update_data user, req.strokes
+				board.update_data user, req.strokes
 				@chat.update_data user, req.messages
 				
-				timelines = @session.timelines.all(
+				timelines = board.timelines.all(
 					:id.gt => req.timeline_after
 				)
 
 				# rdebug "drawings: (since %s)" % req.timeline_after
 				strokes = timelines.strokes.all(
-					:zone.not => user.zone
+					:zone.not => user.zone.index
 				)
 				
 				ref_stamp = user.last_update_time - req.update_interval
@@ -385,7 +334,7 @@ module PoieticGen
 
 				# rdebug "events: (since %s)" % req.timeline_after
 				events = timelines.events
-				events_collection = events.map{ |e| e.to_hash @board[e.zone_index], ref_stamp }
+				events_collection = events.map{ |e| e.to_hash ref_stamp }
 
 				# rdebug "chat: (since %s)" % req.timeline_after
 				messages = timelines.messages.all(
@@ -401,7 +350,7 @@ module PoieticGen
 					:events => events_collection,
 					:strokes => strokes_collection,
 					:messages => messages_collection,
-					:stamp => (now - @session.timestamp), # FIXME: unused by the client
+					:stamp => (now - board.timestamp), # FIXME: unused by the client
 					:idle_timeout => (user.idle_expires_at - now)
 				}
 
@@ -420,7 +369,12 @@ module PoieticGen
 			rdebug "call with %s" % params.inspect
 			req = SnapshotRequest.parse params
 			result = nil
-			req_session = @session
+			
+			board = Board.first(
+				:session_token => req.session_token
+			)
+			
+			raise InvalidSession, "Invalid session" if board.nil?
 
 			User.transaction do
 
@@ -439,16 +393,16 @@ module PoieticGen
 				# a complete second.
 				if req.date == -1 then
 					# get the current state, select only this session
-					users_db = req_session.users.all(
+					users_db = board.users.all(
 						:did_expire.not => true
 					)
 					users = users_db.map{ |u| u.to_hash }
-					zones = users_db.map{ |u| @board[u.zone].to_desc_hash Zone::DESCRIPTION_FULL }
+					zones = users_db.map{ |u| u.zone.to_desc_hash Zone::DESCRIPTION_FULL }
 					
-					timeline_id = Timeline.last_id req_session
+					timeline_id = Timeline.last_id board
 				else
 					# retrieve the total duration of the game
-					date_range = now_i - req_session.timestamp
+					date_range = now_i - board.timestamp
 
 					# retrieve stroke_max and event_max
 
@@ -456,7 +410,7 @@ module PoieticGen
 						if req.date > 0 then
 							# get the state from the beginning.
 
-							absolute_time = req_session.timestamp + req.date
+							absolute_time = board.timestamp + req.date
 						else
 							# get the state from now.
 
@@ -466,7 +420,7 @@ module PoieticGen
 						rdebug "abs_time %d (now %d, date %d)" % [absolute_time, now_i, req.date]
 
 						# The first event before the requested time
-						t = req_session.timelines.first(
+						t = board.timelines.first(
 							:timestamp.lte => absolute_time,
 							:order => [ :id.desc ]
 						)
@@ -476,7 +430,7 @@ module PoieticGen
 							diffstamp = absolute_time - t.timestamp
 						end
 						
-						timestamp = absolute_time - req_session.timestamp
+						timestamp = absolute_time - board.timestamp
 					end
 
 					rdebug "timeline_id %d" % timeline_id
@@ -484,12 +438,9 @@ module PoieticGen
 					# retrieve users and zones
 					
 					if timeline_id > 0 then
-						users, zones = @board.load_board timeline_id, req_session, true
-					
-						# FIXME: use allocator to test if zone is allocated	
-						zones = zones
-							.select{ |i,z| not z.user_id.nil? } # only used zones
-							.map{ |i,z| z.to_desc_hash Zone::DESCRIPTION_FULL }
+						users, zones = board.load_board timeline_id, true
+
+						zones = zones.map{ |i,z| z.to_desc_hash Zone::DESCRIPTION_FULL }
 					else
 						users = zones = [] # no events => no users => no zones
 					end
@@ -518,16 +469,18 @@ module PoieticGen
 		#
 		# Get strokes and events for a non-user viewer.
 		#
-		def play session, params
+		def update_view session, params
 
 			rdebug "call with %s" % params.inspect
-			req = PlayRequest.parse params
+			req = UpdateViewRequest.parse params
 			now_i = Time.now.to_i
 			result = nil
-			req_session = @session
-
-			# TODO : ignore session_id because it is unknow for the viewer for now
-			#raise RuntimeError, "Invalid session" if req.session != req_session.token
+			
+			board = Board.first(
+				:session_token => req.session_token
+			)
+			
+			raise InvalidSession, "Invalid session" if board.nil?
 
 			Event.transaction do
 
@@ -543,10 +496,10 @@ module PoieticGen
 				next_timeline_id = -1
 				max_timestamp = -1
 
-				if req.view_mode == PlayRequest::REAL_TIME_VIEW then
+				if req.view_mode == UpdateViewRequest::REAL_TIME_VIEW then
 					rdebug "REAL_TIME_VIEW"
 				
-					timelines = req_session.timelines.all(
+					timelines = board.timelines.all(
 						:id.gte => req.timeline_after
 					)
 				
@@ -563,18 +516,18 @@ module PoieticGen
 					)
 					
 					events_collection = evt_req.map{ |e|
-						e.to_hash @board[e.zone_index], first_timeline.timestamp
+						e.to_hash first_timeline.timestamp
 					}
 				
 					strokes_collection = srk_req.map{ |s|
 						s.to_hash first_timeline.timestamp
 					}
 					
-				elsif req.view_mode == PlayRequest::HISTORY_VIEW then
+				elsif req.view_mode == UpdateViewRequest::HISTORY_VIEW then
 					
 					rdebug "HISTORY_VIEW"
 					
-					session_timelines = req_session.timelines
+					session_timelines = board.timelines
 					
 					# This stroke is used to compute diffstamps
 					since = session_timelines.first(
@@ -590,41 +543,36 @@ module PoieticGen
 							max_timestamp = req.last_max_timestamp + req.duration * 2
 							# Events between the requested timeline and (timeline + duration)
 							timelines = session_timelines.all(
-								:timestamp.gt => req_session.timestamp + req.last_max_timestamp,
-								:timestamp.lte => req_session.timestamp + max_timestamp
+								:timestamp.gt => board.timestamp + req.last_max_timestamp,
+								:timestamp.lte => board.timestamp + max_timestamp
 							)
 						else
 							max_timestamp = req.duration * 2
 							timelines = session_timelines.all(
-								:timestamp.lte => req_session.timestamp + max_timestamp
+								:timestamp.lte => board.timestamp + max_timestamp
 							)
 						end
 						
 						rdebug "timelines = ", timelines
 						
 						if not timelines.empty? then
-				
+
 							srk_req = timelines.strokes
 
-							strokes_collection = srk_req.map{ |s|
-								s.to_hash since.timestamp
-							}
-					
+							strokes_collection = srk_req.map{ |s| s.to_hash since.timestamp }
+
 							rdebug "Strokes ", srk_req
-					
+
 							evt_req = timelines.events
 
 							if not evt_req.empty? then
 
 								rdebug "Events ", evt_req
-					
-								users, zones = @board.load_board timelines.last.id, req_session, false
-								# FIXME: load_board loads some useless data for what we want
-					
-								events_collection = evt_req.map{ |e| e.to_hash zones[e.zone_index], since.timestamp }
+
+								events_collection = evt_req.map{ |e| e.to_hash since.timestamp }
 							end
 
-							timestamp = timelines.first.timestamp - req_session.timestamp
+							timestamp = timelines.first.timestamp - board.timestamp
 						end
 					else
 						rdebug "Invalid since ", req.since
@@ -650,9 +598,7 @@ module PoieticGen
 		#
 		#
 		#
-		def check_expired_users
-			# FIXME: TODO: WARNING: the user association in @session is not updated when users are modified!
-		
+		def check_expired_users	
 			User.transaction do
 				now = Time.now.to_i
 				if @leave_mutex.try_lock then
@@ -660,7 +606,8 @@ module PoieticGen
 					users_db = User.all( :did_expire.not => true )
 					users_db.each do |u|
 						# verify that user really has a zone in that program instance
-						has_zone = @board.include? u.zone
+						has_zone = u.board == u.zone.board && (not u.zone.expired)
+
 						# disable users without a zone
 						if not has_zone then
 							# kill non-existant user
@@ -678,14 +625,14 @@ module PoieticGen
 							:did_expire => false,
 							:alive_expires_at.lte => now
 						) + User.all(
-						:did_expire => false,
-						:idle_expires_at.lte => now
+							:did_expire => false,
+							:idle_expires_at.lte => now
 						)
 						rdebug "New expired list : %s" % newly_expired_users.inspect
 						newly_expired_users.each do |leaver|
 							fake_session = {}
 							fake_session[PoieticGen::Api::SESSION_USER] = leaver.id
-							fake_session[PoieticGen::Api::SESSION_SESSION] = leaver.session.token
+							fake_session[PoieticGen::Api::SESSION_SESSION] = leaver.board.session_token
 							self.leave fake_session
 						end
 						@last_leave_check_time = now
@@ -699,16 +646,12 @@ module PoieticGen
 
 		private
 
-		def _session_init 
-			@session = Session.new
-
+		def _session_init
 			# total count of users seen (FIXME: get it from db, FIXME: unused)
 			@users_seen = 0
 
 			# Create board with the configuration
-			@board = Board.new @config.board
-
-			@chat = PoieticGen::ChatManager.new @config.chat
+			Board.new @config.board
 
 			@last_leave_check_time = Time.now.to_i - LEAVE_CHECK_TIME_MIN
 			@leave_mutex = Mutex.new

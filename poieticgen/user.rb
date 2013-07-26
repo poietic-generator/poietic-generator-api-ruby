@@ -21,7 +21,7 @@
 ##############################################################################
 
 require 'dm-core'
-require 'poieticgen/session'
+require 'poieticgen/board'
 
 module PoieticGen
 
@@ -31,15 +31,14 @@ module PoieticGen
 
 		property :id,	Serial
 		property :name,	String, :required => true
-		property :zone, Integer, :required => true
 		property :created_at, Integer, :required => true
 		property :alive_expires_at, Integer, :required => true
 		property :idle_expires_at, Integer, :required => true
 		property :did_expire, Boolean, :required => true
 		property :last_update_time, Integer, :required => true
-		property :is_admin, Boolean, :default => false
 		
-		belongs_to :session
+		belongs_to :board
+		has 1, :zone
 		
 		# @debug = true
 
@@ -47,7 +46,7 @@ module PoieticGen
 			res = {
 				:id => self.id,
 				:name => self.name,
-				:zone => self.zone
+				:zone => self.zone.index
 			}
 			return res
 		end

@@ -28,10 +28,7 @@
 (function (PoieticGen, $) {
 	"use strict";
 
-	var VIEW_SESSION_URL_JOIN = "/api/session/snapshot",
-		VIEW_SESSION_URL_UPDATE = "/api/session/play",
-
-		VIEW_SESSION_UPDATE_INTERVAL = 1000,
+	var VIEW_SESSION_UPDATE_INTERVAL = 1000,
 		VIEW_PLAY_UPDATE_INTERVAL = VIEW_SESSION_UPDATE_INTERVAL / 1000,
 		VIEW_SESSION_HISTORY_PROTECTED_INTERVAL = 30, // Seconds reserved to real time
 
@@ -122,10 +119,9 @@
 
 			// get session info from
 			$.ajax({
-				url: VIEW_SESSION_URL_JOIN,
+				url: window.location + "/snapshot.json",
 				data: {
 					date: date,
-					session: "default",
 					id: _join_view_session_id
 				},
 				dataType: "json",
@@ -133,6 +129,11 @@
 				context: self,
 				success: function (response) {
 					var i;
+
+					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
+						self.treat_status_nok(response);
+						return;
+					}
 
 					// Ensure that this response is associated to the last join request
 					if (response.id !== _join_view_session_id) {
@@ -180,23 +181,29 @@
 		 * Treat not ok Status (!STATUS_SUCCESS)
 		 */
 		this.treat_status_nok = function (response) {
-			switch (response.status[0]) {
-			case STATUS_INFORMATION:
-				break;
-			case STATUS_SUCCESS:
-				// ???
-				break;
-			case STATUS_REDIRECTION:
-				// We got redirected for some reason, we do execute ourselfs
-				console.log("STATUS_REDIRECTION --> Got redirected to :" + response.status[2]);
-				document.location.href = response.status[2];
-				break;
-			case STATUS_SERVER_ERROR:
-				// FIXME : We got a server error, we should try to reload the page.
-				break;
-			case STATUS_BAD_REQUEST:
-				// FIXME : OK ???
-				break;
+			var empty;
+			if (response.status === null) {
+				// error on server side
+				empty = "argh";
+			} else {
+				switch (response.status[0]) {
+				case STATUS_INFORMATION:
+					break;
+				case STATUS_SUCCESS:
+					// ???
+					break;
+				case STATUS_REDIRECTION:
+					// We got redirected for some reason, we do execute ourselfs
+					console.log("STATUS_REDIRECTION --> Got redirected to :" + response.status[2]);
+					document.location.href = response.status[2];
+					break;
+				case STATUS_SERVER_ERROR:
+					// FIXME : We got a server error, we should try to reload the page.
+					break;
+				case STATUS_BAD_REQUEST:
+					// FIXME : OK ???
+					break;
+				}
 			}
 			return null;
 		};
@@ -224,8 +231,6 @@
 			}
 
 			req = {
-				session: "default",
-
 				timeline_after : _current_timeline_id + 1,
 				last_max_timestamp : _last_update_max_timestamp,
 
@@ -237,7 +242,7 @@
 
 			console.log("view_session/update: req = " + JSON.stringify(req));
 			$.ajax({
-				url: VIEW_SESSION_URL_UPDATE,
+				url: window.location + "/update.json",
 				dataType: "json",
 				data: req,
 				type: 'GET',

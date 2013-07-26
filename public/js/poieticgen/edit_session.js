@@ -28,11 +28,7 @@
 (function (PoieticGen, $) {
 	"use strict";
 
-	var DRAW_SESSION_URL_JOIN = "/api/session/join",
-		DRAW_SESSION_URL_LEAVE = "/api/session/leave",
-		DRAW_SESSION_URL_UPDATE = "/api/session/update",
-
-		DRAW_SESSION_UPDATE_INTERVAL = 1000,
+	var DRAW_SESSION_UPDATE_INTERVAL = 1000,
 
 		STATUS_INFORMATION = 1,
 		STATUS_SUCCESS = 2,
@@ -61,7 +57,6 @@
 		this.initialize = function () {
 			var user_id = $.cookie('user_id'),
 				user_name = $.cookie('user_name'),
-				user_session = $.cookie('user_session'),
 				session_opts = [],
 				session_url = null;
 
@@ -70,13 +65,11 @@
 			if (user_id !== null) {
 				session_opts.push("user_id=" + user_id);
 			}
-			if (user_session !== null) {
-				session_opts.push("user_session=" + user_session);
-			}
 			if (user_name !== null) {
 				session_opts.push("user_name=" + user_name);
 			}
-			session_url = DRAW_SESSION_URL_JOIN + "?" + session_opts.join('&');
+
+			session_url = window.location + "/join.json?" + session_opts.join('&');
 
 			// get session info from
 
@@ -88,12 +81,16 @@
 				success: function (response) {
 					console.log('edit_session/join response : ' + JSON.stringify(response));
 
+					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
+						self.treat_status_nok(response);
+						return;
+					}
+
 					this.user_zone = response.user_zone;
 					this.other_users = response.other_users;
 					this.other_zones = response.other_zones;
 					this.user_id = response.user_id;
 					this.user_name = response.user_name;
-					this.user_session = response.user_session;
 					this.zone_column_count = response.zone_column_count;
 					this.zone_line_count = response.zone_line_count;
 
@@ -101,7 +98,6 @@
 
 					$.cookie('user_id', this.user_id, {path: "/"});
 					$.cookie('user_name', this.user_name, {path: "/"});
-					$.cookie('user_session', this.user_session, {path: "/"});
 					// console.log('edit_session/join response mod : ' + JSON.stringify(this));
 
 					console.log("gotcha!");
@@ -225,7 +221,7 @@
 			console.log("edit_session/update: req = " + JSON.stringify(req));
 			self.last_update_time = new Date();
 			$.ajax({
-				url: DRAW_SESSION_URL_UPDATE,
+				url: window.location + "/update.json",
 				dataType: "json",
 				data: JSON.stringify(req),
 				type: 'POST',

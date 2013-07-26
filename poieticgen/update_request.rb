@@ -21,6 +21,8 @@
 ##############################################################################
 
 module PoieticGen
+	class UpdateRequestParseError < OptionParser::ParseError ; end
+
 	class UpdateRequest
 
 		MESSAGES = 'messages'
@@ -35,6 +37,10 @@ module PoieticGen
 		MESSAGES_STAMP = 'stamp'
 
 		UPDATE_INTERVAL = 'update_interval'
+		
+		SESSION_TOKEN = 'session_token'
+		SINATRA_SPLAT = 'splat'
+		SINATRA_CAPTURES = 'captures'
 
 		private
 
@@ -67,10 +73,16 @@ module PoieticGen
 				    		rdebug "update_interval : %d" % val.to_i
 				  	rescue Exception => e
 				    		rdebug e
-				    		raise ArgumentError, ("%s with invalid value : " % UPDATE_INTERVAL)
+				    		raise UpdateRequestParseError, ("%s with invalid value : " % UPDATE_INTERVAL)
 					end
+				when SESSION_TOKEN then
+					rdebug "session_token : %s" % val.inspect
+				when SINATRA_SPLAT then
+					rdebug "sinatra splat : %s" % val.inspect
+				when SINATRA_CAPTURES then
+					rdebug "sinatra captures : %s" % val.inspect
 				else
-					raise RuntimeError, "unknow request field '%s'" % key
+					raise UpdateRequestParseError, "Unknow request field '%s'" % key
 				end
 			end
 
@@ -78,10 +90,11 @@ module PoieticGen
 				TIMELINE_AFTER,
 				STROKES,
 				MESSAGES,
-				UPDATE_INTERVAL
+				UPDATE_INTERVAL,
+				SESSION_TOKEN
 			].each do |field|
 				unless hash.include? field then
-					raise ArgumentError, ("The '%s' field is missing" % field)
+					raise UpdateRequestParseError, ("The '%s' field is missing" % field)
 				end
 			end
 			# parse per-field content
@@ -92,7 +105,7 @@ module PoieticGen
 					MESSAGES_STAMP
 				].each do |field|
 					unless msg.include? field then
-						raise ArgumentError, ("The '%s' sub-field is missing" % field)
+						raise UpdateRequestParseError, ("The '%s' sub-field is missing" % field)
 					end
 				end
 				# FIXME: msg[MESSAGES_DST].to_i
@@ -114,9 +127,12 @@ module PoieticGen
 		end
 
 		def update_interval
-		  return @hash[UPDATE_INTERVAL].to_i
+			return @hash[UPDATE_INTERVAL].to_i
     		end
-
+    		
+    		def session_token
+			return @hash[SESSION_TOKEN]
+		end
 	end
 end
 

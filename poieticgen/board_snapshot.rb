@@ -22,8 +22,6 @@
 
 require 'poieticgen/zone'
 require 'poieticgen/zone_snapshot'
-require 'poieticgen/session' # needed by belongs_to
-require 'poieticgen/timeline' # needed by belongs_to
 
 module PoieticGen
 	
@@ -34,21 +32,21 @@ module PoieticGen
 		
 		has n, :zone_snapshots, :through => Resource
 		belongs_to :timeline
-		belongs_to :session
+		belongs_to :board
 
-		def initialize zones, last_timeline, session
+		def initialize board
 			# @debug = true
+			timeline = Timeline.create_now board
 			
 			json = {
-				:session => session,
-				:timeline => last_timeline,
+				:board => board,
+				:timeline => timeline,
 				:zone_snapshots => []
-				
 			}
 			super json
 
-			zones.each do |index, zone|
-				self.zone_snapshots<< zone.snapshot
+			board.zones.each do |zone|
+				self.zone_snapshots<< (zone.snapshot timeline)
 			end
 
 			begin

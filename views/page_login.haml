@@ -7,7 +7,7 @@
   %div{"data-id" => "head", "data-position" => "fixed", "data-role" => "header"}
     %h1.username Login
   #page-container{"data-role" => "content"}
-    %form#credentials{:action => "/api/session/admin_join", "data-ajax" => "false", :method => "post"}
+    %form#credentials{:action => "/user/login", "data-ajax" => "false", :method => "post"}
       %div.ui-field-contain.ui-body.ui-br(data-role="fieldcontain")
         %label{:for => "username"} Username
         %input#username(name="user_name" type="text" value="")/
