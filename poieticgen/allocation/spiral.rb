@@ -82,10 +82,12 @@ module PoieticGen ; module Allocation
 		def initialize config, zone_dump = nil
 			# map index => Zone object (or nil if unallocated)
 			@debug = true
-			if zone_dump.nil? then
-				@zones = {}
-			else 
-				@zones = zone_dump
+			@zones = {}
+
+			unless zone_dump.nil? then
+				zone_dump.each do |zone|
+					@zones[zone.index] = zone
+				end
 			end
 
 			@config = config
@@ -102,14 +104,6 @@ module PoieticGen ; module Allocation
 				  else nil
 				  end
 			return res
-		end
-
-		#
-		# get all zones 
-		# FIXME: direct access should not be allowed
-		#
-		def zones
-			return @zones
 		end
 
 		#
@@ -162,14 +156,15 @@ module PoieticGen ; module Allocation
 		# allocates and return 
 		# a zone                
 		#
-		def allocate
+		def allocate board
 			@monitor.synchronize do
 				index = _next_index()
 
 				zone = Zone.new index, 
 					(self.index_to_position index),
 					@config.width,
-					@config.height
+					@config.height,
+					board
 
 				rdebug "Spiral/allocate zone : ", zone.inspect
 				@zones[index] = zone
@@ -181,12 +176,11 @@ module PoieticGen ; module Allocation
 
 		#
 		# test if the zone exists
-		# FIXME: use something else than user.nil to test if zone is free
  		#
 		def free? zone_idx
 			@monitor.synchronize do
 				zone = @zones[zone_idx]
-				return zone.user_id.nil?
+				return zone.expired
 			end
 		end
 
@@ -197,7 +191,7 @@ module PoieticGen ; module Allocation
 		def free zone_idx
 			@monitor.synchronize do
 				zone = @zones[zone_idx]
-				zone.user_id = nil
+				zone.disable
 				return zone
 			end
 		end
@@ -212,7 +206,7 @@ module PoieticGen ; module Allocation
 
 			@monitor.synchronize do
 				# find a nil zone first
-				nil_zones = @zones.select{ |idx,zone| zone.user_id.nil? }
+				nil_zones = @zones.select{ |idx,zone| zone.expired }
 				if nil_zones.size > 0 then
 					# got an unallocated zone !
 					result_index = nil_zones.first[0]

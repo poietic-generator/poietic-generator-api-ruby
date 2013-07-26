@@ -28,10 +28,7 @@
 (function (PoieticGen, $) {
 	"use strict";
 
-	var VIEW_SESSION_URL_JOIN = "/api/session/snapshot",
-		VIEW_SESSION_URL_UPDATE = "/api/session/play",
-
-		VIEW_SESSION_UPDATE_INTERVAL = 1000,
+	var VIEW_SESSION_UPDATE_INTERVAL = 1000,
 		VIEW_PLAY_UPDATE_INTERVAL = VIEW_SESSION_UPDATE_INTERVAL / 1000,
 		VIEW_SESSION_HISTORY_PROTECTED_INTERVAL = 30, // Seconds reserved to real time
 
@@ -49,7 +46,6 @@
 		var console = window.noconsole,
 			self = this,
 			_current_timeline_id = -1,
-			_init_timeline_id = 0,
 			_slider = null,
 			_game = null,
 
@@ -61,10 +57,10 @@
 			_get_current_time,
 			_view_type = REAL_TIME_VIEW,
 			_last_join_timestamp = 0,
-			_last_join_diffstamp = 0,
 			_last_update_max_timestamp = -1,
 			_join_view_session_id = 0,
-			_update_view_session_id = 0;
+			_update_view_session_id = 0,
+			_session = "";
 
 		this.zone_column_count = null;
 		this.zone_line_count = null;
@@ -87,6 +83,15 @@
 		 * Semi-Constructor
 		 */
 		this.initialize = function (date, slider) {
+
+			var url_matches;
+
+			url_matches = /\/session\/(.+)\/view/.exec(window.location);
+			if (url_matches.length === 2) {
+				_session = url_matches[1];
+			} else {
+				_session = ""; // Error
+			}
 
 			_join_view_session_id = 0;
 			_update_view_session_id = 0;
@@ -122,10 +127,9 @@
 
 			// get session info from
 			$.ajax({
-				url: VIEW_SESSION_URL_JOIN,
+				url: "/session/" + _session + "/view/snapshot.json",
 				data: {
 					date: date,
-					session: "default",
 					id: _join_view_session_id
 				},
 				dataType: "json",
@@ -133,6 +137,11 @@
 				context: self,
 				success: function (response) {
 					var i;
+
+					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
+						self.treat_status_nok(response);
+						return;
+					}
 
 					// Ensure that this response is associated to the last join request
 					if (response.id !== _join_view_session_id) {
@@ -146,9 +155,8 @@
 
 					_last_join_start_time = _get_current_time();
 					_last_join_timestamp = response.timestamp;
-					_last_join_diffstamp = response.diffstamp;
 
-					_current_timeline_id = _init_timeline_id = response.timeline_id;
+					_current_timeline_id = response.timeline_id;
 					// console.log('view_session/join response mod : ' + JSON.stringify(this) );
 
 					_last_update_max_timestamp = response.timestamp;
@@ -180,23 +188,29 @@
 		 * Treat not ok Status (!STATUS_SUCCESS)
 		 */
 		this.treat_status_nok = function (response) {
-			switch (response.status[0]) {
-			case STATUS_INFORMATION:
-				break;
-			case STATUS_SUCCESS:
-				// ???
-				break;
-			case STATUS_REDIRECTION:
-				// We got redirected for some reason, we do execute ourselfs
-				console.log("STATUS_REDIRECTION --> Got redirected to :" + response.status[2]);
-				document.location.href = response.status[2];
-				break;
-			case STATUS_SERVER_ERROR:
-				// FIXME : We got a server error, we should try to reload the page.
-				break;
-			case STATUS_BAD_REQUEST:
-				// FIXME : OK ???
-				break;
+			var empty;
+			if (response.status === null) {
+				// error on server side
+				empty = "argh";
+			} else {
+				switch (response.status[0]) {
+				case STATUS_INFORMATION:
+					break;
+				case STATUS_SUCCESS:
+					// ???
+					break;
+				case STATUS_REDIRECTION:
+					// We got redirected for some reason, we do execute ourselfs
+					console.log("STATUS_REDIRECTION --> Got redirected to :" + response.status[2]);
+					document.location.href = response.status[2];
+					break;
+				case STATUS_SERVER_ERROR:
+					// FIXME : We got a server error, we should try to reload the page.
+					break;
+				case STATUS_BAD_REQUEST:
+					// FIXME : OK ???
+					break;
+				}
 			}
 			return null;
 		};
@@ -207,7 +221,7 @@
 		 */
 		this.update = function () {
 
-			var req, since;
+			var req;
 
 			// assign real values if objects are present
 			if (_game.observers().length < 1) {
@@ -217,27 +231,19 @@
 
 			_update_view_session_id += 1;
 
-			if (_view_type === HISTORY_VIEW) {
-				since = _init_timeline_id;
-			} else {
-				since = _current_timeline_id;
-			}
-
 			req = {
-				session: "default",
-
 				timeline_after : _current_timeline_id + 1,
 				last_max_timestamp : _last_update_max_timestamp,
 
 				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed,
-				since : since,
+				since : _last_join_timestamp,
 				id : _update_view_session_id,
 				view_mode : _view_type
 			};
 
 			console.log("view_session/update: req = " + JSON.stringify(req));
 			$.ajax({
-				url: VIEW_SESSION_URL_UPDATE,
+				url: "/session/" + _session + "/view/update.json",
 				dataType: "json",
 				data: req,
 				type: 'GET',
@@ -300,7 +306,7 @@
 
 			} else {
 				// diffstamps are relative to the local start date
-				seconds = _get_elapsed_time() - _last_join_diffstamp;
+				seconds = _get_elapsed_time();
 			}
 
 			//console.log('view_session/update seconds : ' + seconds);

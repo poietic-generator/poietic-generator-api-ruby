@@ -20,37 +20,76 @@
 #                                                                            #
 ##############################################################################
 
-require 'poieticgen/zone'
-
-require 'poieticgen/board_snapshot' #needed by has_n
-require 'poieticgen/user' #needed by has_n
 
 module PoieticGen
+	class JoinRequestParseError < OptionParser::ParseError ; end
 
-	class Session
-		include DataMapper::Resource
+	class JoinRequest
 
-		property :id,        Serial
-		property :timestamp, Integer
-		property :token,     String
+		USER_ID = 'user_id'
+		SESSION_TOKEN = 'session_token'
+		USER_NAME = 'user_name'
 
-		has n, :board_snapshots , :constraint => :destroy!
-		has n, :timelines , :constraint => :destroy!
-		has n, :users, :constraint => :destroy!
+		SINATRA_SPLAT = 'splat'
+		SINATRA_CAPTURES = 'captures'
 
-		def initialize
+		private
+
+		def initialize hash
+			@hash = hash
 			# @debug = true
-			super({
-				:token => (0...16).map{ ('a'..'z').to_a[rand(26)] }.join,
-				:timestamp => Time.now.to_i			
-			})
-			
-			begin
-				save
-			rescue DataMapper::SaveFailureError => e
-				rdebug "Saving failure : %s" % e.resource.errors.inspect
-				raise e
-			end
 		end
+
+		public
+
+		def self.parse hash
+			# mandatory fields firstvalidate user input first
+			hash.each do |key, val|
+				case key
+				when USER_NAME then
+				  	rdebug "user_name : %s" % val.inspect
+				when USER_ID then
+				  	begin
+				    		rdebug "user_id : %d" % val.to_i
+				  	rescue Exception => e
+				    		rdebug e
+				    		raise JoinRequestParseError, ("%s with invalid value : " % USER_ID)
+					end
+				when SESSION_TOKEN then
+					rdebug "session_token : %s" % val.inspect
+				when SINATRA_SPLAT then
+					rdebug "sinatra splat : %s" % val.inspect
+				when SINATRA_CAPTURES then
+					rdebug "sinatra captures : %s" % val.inspect
+				else
+					raise JoinRequestParseError, "Unknow request field '%s'" % key
+				end
+			end
+
+			[
+				SESSION_TOKEN
+			].each do |field|
+				unless hash.include? field then
+					raise JoinRequestParseError, ("The '%s' field is missing" % field)
+				end
+			end
+
+			JoinRequest.new hash
+		end
+
+
+		def user_id
+			return @hash[USER_ID].to_i
+		end
+
+		def user_name
+			return @hash[USER_NAME]
+		end
+    		
+    		def session_token
+			return @hash[SESSION_TOKEN]
+		end
+
 	end
 end
+

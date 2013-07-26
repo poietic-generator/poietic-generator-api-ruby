@@ -37,19 +37,21 @@ module PoieticGen
 		# size attributes
 		property :width, Integer, :required => true
 		property :height, Integer, :required => true
-
-		# user 
-		property :user_id, Integer
 		
 		property :data, Json, :required => true
 		#property :data, Object, :required => true
 
 		property :created_at, Integer, :required => true
-		property :deleted_at, Integer, :required => true
-		property :deleted, Boolean, :required => true
+		property :expired_at, Integer, :required => true, :default => 0
+		property :expired, Boolean, :required => true, :default => false
+
+		property :is_snapshoted, Boolean, :default => false
 
 	#	attr_reader :index, :position
 
+		belongs_to :board
+		belongs_to :user
+		has n, :zone_snapshots
 
 		DESCRIPTION_MINIMAL = 1
 		DESCRIPTION_FULL = 2
@@ -63,7 +65,7 @@ module PoieticGen
 
 
 
-		def initialize index, position, width, height
+		def initialize index, position, width, height, board
 			# @debug = true
 
 			param_create = {
@@ -72,15 +74,11 @@ module PoieticGen
 				:width => width,
 				:height => height,
 				:data => Array.new( width * height, '#000'),
-				:user_id => nil,
+				:user => nil,
 				:created_at => Time.now.to_i,
-				:deleted_at => 0,
-				:deleted => false
+				:board => board
 			}
 			super param_create
-			
-			@last_snapshot = nil
-			@is_snapshoted = false
 		end
 		
 		def save
@@ -90,36 +88,32 @@ module PoieticGen
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e
 			end
-			rdebug "zone created!"
 		end
 		
 		def self.from_snapshot snapshot
-			zone = Zone.new snapshot.index, snapshot.position, snapshot.width, snapshot.height
-			zone.user_id = snapshot.user_id
+			zone = snapshot.zone
 			zone.data = snapshot.data
 			
 			return zone
 		end
 
 		def reset
-			self.data = Array.new( width * height, '#000');
-			begin
-				self.save
-			rescue DataMapper::SaveFailureError => e
-				rdebug "Saving failure : %s" % e.resource.errors.inspect
-				raise e
-			end
+			self.data = Array.new( width * height, '#000')
 		end
 
-		def apply user, drawing
+		def disable
+			self.expired_at = Time.now.to_i
+			self.expired = true
+		end
+
+		def apply drawing
 			Zone.transaction do
 				# save patch into database
 				return if drawing.nil? or drawing.empty?
 
 				rdebug drawing.inspect if drawing.length != 0
 
-				# FIXME: get user from user_id
-				ref = user.last_update_time
+				ref = self.user.last_update_time
 
 				# Sort strokes by time
 				drawing = drawing.sort{ |a, b| a['diff'].to_i <=> b['diff'].to_i }
@@ -134,8 +128,7 @@ module PoieticGen
 					Stroke.create_stroke color,
 						JSON.generate(changes).to_s,
 						timestamp,
-						user.zone,
-						user.session
+						self
 
 					changes.each do |x,y,t_offset|
 						idx = _xy2idx(x,y)
@@ -143,14 +136,9 @@ module PoieticGen
 					end
 				end
 				
-				@is_snapshoted = false
+				self.is_snapshoted = false
 
-				begin
-					self.save
-				rescue DataMapper::SaveFailureError => e
-					rdebug "Saving failure : %s" % e.resource.errors.inspect
-					raise e
-				end
+				self.save
 			end
 		end
 		
@@ -180,7 +168,7 @@ module PoieticGen
 				res = {
 					:index => self.index,
 					:position => self.position,
-					:user => self.user_id,
+					:user => self.user.id,
 					:content => if type == DESCRIPTION_FULL
 					            then self.to_patches_hash
 					            else [] end
@@ -220,12 +208,23 @@ module PoieticGen
 			return result
 		end
 		
-		def snapshot
-			if not @is_snapshoted then
-				@last_snapshot = _take_snapshot
+		def snapshot timeline
+			snap = nil
+
+			unless self.is_snapshoted then
+				Zone.transaction do
+					self.is_snapshoted = true
+
+					snap = _take_snapshot timeline
+
+					self.save
+				end
+			else
+				# last snapshot
+				snap = self.zone_snapshots.timeline.first(:order => [ :id.desc ])
 			end
-			
-			return @last_snapshot
+
+			return snap
 		end
 
 		private
@@ -240,15 +239,8 @@ module PoieticGen
 			return x,y
 		end
 		
-		def _take_snapshot
-			ZoneSnapshot.new ({
-				:index => self.index,
-				:position => self.position,
-				:width => self.width,
-				:height => self.height,
-				:user_id => self.user_id,
-				:data => self.data
-			})
+		def _take_snapshot timeline
+			ZoneSnapshot.create self.data, self, timeline
 		end
 	end
 end

@@ -21,10 +21,11 @@
 ##############################################################################
 
 module PoieticGen
-	class PlayRequest
+	class UpdateViewRequestParseError < OptionParser::ParseError ; end
+
+	class UpdateViewRequest
 
 		DURATION = 'duration'
-		SESSION = 'session'
 
 		TIMELINE_AFTER = 'timeline_after'
 		LAST_MAX_TIMESTAMP = 'last_max_timestamp'
@@ -32,6 +33,10 @@ module PoieticGen
 		SINCE = 'since'
 		ID = 'id'
 		VIEW_MODE = 'view_mode'
+		
+		SESSION_TOKEN = 'session_token'
+		SINATRA_SPLAT = 'splat'
+		SINATRA_CAPTURES = 'captures'
 		
 		REAL_TIME_VIEW = 0
 		HISTORY_VIEW = 1
@@ -51,8 +56,6 @@ module PoieticGen
 				case key
 				when DURATION then
 					rdebug "duration : %s" % val.inspect
-				when SESSION then
-					rdebug "session : %s" % val.inspect
 				when TIMELINE_AFTER then
 					rdebug "timeline_after : %s" % val.inspect
 				when LAST_MAX_TIMESTAMP then
@@ -63,33 +66,35 @@ module PoieticGen
 					rdebug "id : %s" % val.inspect
 				when VIEW_MODE then
 					rdebug "view_mode : %s" % val.inspect
+				when SESSION_TOKEN then
+					rdebug "session : %s" % val.inspect
+				when SINATRA_SPLAT then
+					rdebug "sinatra splat : %s" % val.inspect
+				when SINATRA_CAPTURES then
+					rdebug "sinatra captures : %s" % val.inspect
 				else
-					raise RuntimeError, "unknow request field '%s'" % key
+					raise UpdateViewRequestParseError, "Unknow request field '%s'" % key
 				end
 			end
 
 			[
 				DURATION,
-				SESSION,
 				TIMELINE_AFTER,
 				SINCE,
 				ID,
-				VIEW_MODE
+				VIEW_MODE,
+				SESSION_TOKEN
 			].each do |field|
 				unless hash.include? field then
-					raise ArgumentError, ("The '%s' field is missing" % field)
+					raise UpdateViewRequestParseError, ("The '%s' field is missing" % field)
 				end
 			end
-			PlayRequest.new hash
+			UpdateViewRequest.new hash
 		end
 
 
 		def duration
 			return @hash[DURATION].to_i
-		end
-
-		def session
-			return @hash[SESSION]
 		end
 
 		def timeline_after
@@ -110,6 +115,10 @@ module PoieticGen
 		
 		def view_mode
 			return @hash[VIEW_MODE].to_i
+		end
+		
+		def session_token
+			return @hash[SESSION_TOKEN]
 		end
 	end
 

@@ -74,7 +74,7 @@
 				);
 			}
 
-			for (i = 0; i < p_session.other_zones.length; i += 1) {
+			for (i = 0; undefined !== p_session.other_zones && i < p_session.other_zones.length; i += 1) {
 				z = p_session.other_zones[i];
 
 				zones[z.index] = new PoieticGen.Zone(

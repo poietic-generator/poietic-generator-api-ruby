@@ -48,6 +48,9 @@ module PoieticGen
 
 		SESSION_USER = :user
 		SESSION_SESSION = :name
+		SESSION_AUTH = :auth
+		
+		SESSION_MAX_LISTED_COUNT = 5
 
 		enable :sessions
 		enable :run
@@ -131,22 +134,15 @@ module PoieticGen
 		end
 
 		#
+		# Create a new session
 		#
-		#
-		get '/' do
-			redirect '/page/index'
-		end
-
-		#
-		# Restart session
-		#
-		get '/restart' do
+		post '/session/create' do
 			begin
 				# verify session expiration..
 				validate_session! session
 			
 				if settings.manager.check_lease! session then
-					settings.manager.restart session, params
+					settings.manager.create_session session, params
 					session[SESSION_USER] ||= nil
 					
 				else
@@ -165,19 +161,35 @@ module PoieticGen
 
 			ensure
 				flash[:success] = "Session restarted!"
-				redirect '/page/index'
+				redirect '/'
 			end
 		end
 
-		get '/page/index' do
+		get '/' do
 			session[SESSION_USER] ||= nil
 			@page = Page.new "index"
+			@session_list = {}
+			@selected_session = ""
+			
+			Board.transaction do
+				sessions = Board.first(SESSION_MAX_LISTED_COUNT,
+					:order => [:timestamp.desc])
+			
+				if not sessions.nil? then
+					@selected_session = sessions.first.session_token
+				
+					sessions.each do |s|
+						@session_list[s.session_token] = "Session %d" % s.id
+					end
+				end
+			end
+			
 			haml :page_index
 		end
 		#
 		#
 		#
-		get '/page/draw' do
+		get '/session/:session_token/draw' do
 			@page = Page.new "draw"
 			haml :page_draw
 		end
@@ -186,7 +198,7 @@ module PoieticGen
 		#
 		# display global activity on this session
 		#
-		get '/page/view' do
+		get '/session/:session_token/view' do
 			@page = Page.new "view"
 			haml :page_view
 		end
@@ -195,37 +207,52 @@ module PoieticGen
 		#
 		# display global activity on this session
 		# without toolbar
-		#
-		get '/view/standalone' do
+		# 
+		get '/session/:session_token/view_standalone' do
 			@page = Page.new "view-standalone"
 			haml :page_view_standalone
 		end
 
 
-		get '/page/logout' do
+		get '/session/:session_token/logout' do
 			# ensure that lazy session loading will work
 			session[SESSION_USER] ||= nil
 			settings.manager.leave session
 			response.set_cookie('user_id', {:value => nil, :path => "/"});
-			response.set_cookie('user_session', {:value => nil, :path => "/"});
 			redirect '/'
 		end
 
-		get '/page/login' do 
+		get '/user/login' do 
 			@page = Page.new "Login"
 			haml :page_login
 		end
+		
+		post '/user/login' do 
+			begin
+				settings.manager.admin_join session, params
+				
+				redirect '/session/admin'
+			
+			rescue PoieticGen::AdminSessionNeeded => e
+				flash[:error] = "Invalid username or password"
+				redirect '/user/login'
 
-		get '/page/admin' do 
-			if settings.manager.admin? session then
-				@page = Page.new "admin"
-				haml :page_admin
-			else
-				redirect '/page/login'
+			rescue Exception => e
+				STDERR.puts e.inspect, e.backtrace
+				Process.exit! #FIXME: remove in prod mode ? :-)
 			end
 		end
 
-		get '/page/list' do
+		get '/session/admin' do 
+			if session[SESSION_AUTH] then
+				@page = Page.new "admin"
+				haml :page_admin
+			else
+				redirect '/user/login'
+			end
+		end
+
+		get '/session/list' do
 			@page = Page.new "list"
 			haml :page_list
 		end
@@ -233,33 +260,28 @@ module PoieticGen
 		#
 		# notify server about the intention of joining the session
 		#
-		get '/api/session/join' do
+		get '/session/:session_token/draw/join.json' do
 			begin
 				result = {}
+				status = [ STATUS_SUCCESS ]
 				result = settings.manager.join session, params
+
+			rescue PoieticGen::JoinRequestParseError => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
+
+			rescue PoieticGen::InvalidSession => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_REDIRECTION, "Session does not exist!", "/"]
 
 			rescue Exception => e
 				STDERR.puts e.inspect, e.backtrace
 				Process.exit! #FIXME: remove in prod mode ? :-)
 
 			ensure
+				# force status of result
+				result[:status] = status
 				return JSON.generate( result )
-			end
-		end
-		
-		post '/api/session/admin_join' do 
-			begin
-				settings.manager.admin_join session, params
-				
-				redirect '/page/admin'
-			
-			rescue PoieticGen::AdminSessionNeeded => e
-				flash[:error] = "Invalid username or password"
-				redirect '/page/login'
-
-			rescue Exception => e
-				STDERR.puts e.inspect, e.backtrace
-				Process.exit! #FIXME: remove in prod mode ? :-)
 			end
 		end
 
@@ -271,7 +293,8 @@ module PoieticGen
 		# clients having not renewed their lease before 300
 		# seconds are considered disconnected
 		#
-		post '/api/session/update' do
+		# FIXME: add precision about updated object...
+		post '/session/:session_token/draw/update.json' do
 			begin
 				result = {}
 				# verify session expiration..
@@ -280,6 +303,7 @@ module PoieticGen
 
 				if settings.manager.check_lease! session then
 					data = JSON.parse(request.body.read)
+					data['session_token'] = params['session_token']
 					result = settings.manager.update_data session, data
 				else
 					status = [ STATUS_REDIRECTION, "Session has expired !", "/"]
@@ -288,7 +312,11 @@ module PoieticGen
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors
 				STDERR.puts e.inspect, e.backtrace
-				status = [ STATUS_BAD_REQUEST, "Invalid content : JSON expected" ]
+				status = [ STATUS_BAD_REQUEST, "Invalid content: JSON expected" ]
+
+			rescue PoieticGen::UpdateRequestParseError => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
 
 			rescue ArgumentError => e
 				STDERR.puts e.inspect, e.backtrace
@@ -314,7 +342,7 @@ module PoieticGen
 		#
 		# get a snapshot from the server.
 		#
-		get '/api/session/snapshot' do
+		get '/session/:session_token/view/snapshot.json' do
 			begin
 				result = {}
 				# verify session expiration..
@@ -324,7 +352,15 @@ module PoieticGen
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors
 				STDERR.puts e.inspect, e.backtrace
-				status = [ STATUS_BAD_REQUEST, "Invalid content : JSON expected" ]
+				status = [ STATUS_BAD_REQUEST, "Invalid content: JSON expected" ]
+
+			rescue PoieticGen::SnapshotRequestParseError => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
+
+			rescue PoieticGen::InvalidSession => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_REDIRECTION, "Session does not exist!", "/"]
 
 			rescue ArgumentError => e
 				STDERR.puts e.inspect, e.backtrace
@@ -350,18 +386,26 @@ module PoieticGen
 		#
 		# play a scene in view
 		#
-		get '/api/session/play' do
+		get '/session/:session_token/view/update.json' do
 			begin
 				result = {}
 				status = [ STATUS_SUCCESS ]
 
 
-				result = settings.manager.play session, params
+				result = settings.manager.update_view session, params
 
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors
 				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_BAD_REQUEST, "Invalid content : JSON expected" ]
+
+			rescue PoieticGen::UpdateViewRequestParseError => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
+
+			rescue PoieticGen::InvalidSession => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_REDIRECTION, "Session does not exist!", "/"]
 
 			rescue ArgumentError => e
 				STDERR.puts e.inspect, e.backtrace
