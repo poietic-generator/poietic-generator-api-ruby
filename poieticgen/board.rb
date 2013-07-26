@@ -50,13 +50,14 @@ module PoieticGen
 		# property :boundary_right, Integer, :default => 0
 		# property :boundary_top, Integer, :default => 0
 		# property :boundary_bottom, Integer, :default => 0
+		property :strokes_since_last_snapshot, Integer, :default => 0
 
 		has n, :board_snapshots
 		has n, :timelines
 		has n, :users
 		has n, :zones
 
-		STROKE_COUNT_BETWEEN_QFRAMES = 25
+		STROKE_COUNT_BETWEEN_QFRAMES = 25 # FIXME: move in config
 
 		attr_reader :config
 
@@ -109,6 +110,7 @@ module PoieticGen
 				zone = allocator.allocate self
 				zone.user = user
 				user.zone = zone
+				zones << zone
 				zone.save
 			end
 			return zone
@@ -122,6 +124,7 @@ module PoieticGen
 			Board.transaction do
 				zone = user.zone # FIXME: verify if the user is in the board
 				unless zone.nil? then
+					zone.reset
 					zone.disable
 					zone.save
 				else
@@ -146,16 +149,15 @@ module PoieticGen
 				end
 				
 				# Save board periodically
-				
-				last_stroke = timelines.strokes.first(
-					:order => [ :id.desc ]
-				)
-				
-				stroke_count = if last_stroke.nil? then 0 else last_stroke.timeline.id end
-				
-				if stroke_count % STROKE_COUNT_BETWEEN_QFRAMES == 0 then
+
+				self.strokes_since_last_snapshot += drawing.size
+
+				if self.strokes_since_last_snapshot > STROKE_COUNT_BETWEEN_QFRAMES then
 					self.take_snapshot
+					self.strokes_since_last_snapshot = 0
 				end
+
+				save
 			end
 		end
 
@@ -179,7 +181,7 @@ module PoieticGen
 				
 				# Create zones from snapshot
 				snap.zone_snapshots.each do |zs|
-					zones[zs.index] = Zone.from_snapshot zs
+					zones[zs.zone.index] = Zone.from_snapshot zs
 				end
 			end
 			
@@ -220,7 +222,7 @@ module PoieticGen
 				# Apply strokes
 				zones.each do |index,zone|
 					unless zone.expired then
-						zone.apply_local strokes.select{ |s| s.zone.index == zone.index }
+						zone.apply_local strokes.select{ |s| s.zone.id == zone.id }
 					end
 				end
 			end
@@ -234,7 +236,7 @@ module PoieticGen
 		# return the snapshot preceeding timeline_id
 		#
 		def _get_snapshot timeline_id
-			timeline = self.timelines.first(
+			timeline = self.board_snapshots.timelines.first(
 				:id.lte => timeline_id,
 				:order => [ :id.desc ]
 			)
