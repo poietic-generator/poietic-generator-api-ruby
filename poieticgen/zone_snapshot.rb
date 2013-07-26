@@ -28,45 +28,23 @@ module PoieticGen
 		include DataMapper::Resource
 		
 		property :id,	Serial
-
-		# the position, from center
-		property :index, Integer, :required => true
-
-		# position
-		property :position, Json, :required => true
-		# property :position, Csv, :required => true
-	
-		# size attributes
-		property :width, Integer, :required => true
-		property :height, Integer, :required => true
 		
 		property :data, Json, :required => true
-		#property :data, Object, :required => true
 		
 		has n, :board_snapshots, :through => Resource
-		belongs_to :user
+		belongs_to :zone
 
-		def initialize json
+		def self.create data, zone
 			# @debug = true
-			
-			super json
-
 			begin
-				self.save
+				super ({
+					:data => data,
+					:zone => zone
+				})
 			rescue DataMapper::SaveFailureError => e
-				pp e.resource.errors.inspect
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e
 			end
 		end
-
-		def to_hash
-			res = nil
-			ZoneSnapshot.transaction do
-				res = self.data
-			end
-			return res
-		end
-		
 	end
 end

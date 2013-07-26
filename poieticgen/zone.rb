@@ -45,10 +45,13 @@ module PoieticGen
 		property :expired_at, Integer, :required => true, :default => 0
 		property :expired, Boolean, :required => true, :default => false
 
+		property :is_snapshoted, Boolean, :default => false
+
 	#	attr_reader :index, :position
 
 		belongs_to :board
 		belongs_to :user
+		has n, :zone_snapshots
 
 		DESCRIPTION_MINIMAL = 1
 		DESCRIPTION_FULL = 2
@@ -76,9 +79,6 @@ module PoieticGen
 				:board => board
 			}
 			super param_create
-			
-			@last_snapshot = nil
-			@is_snapshoted = false
 		end
 		
 		def save
@@ -91,8 +91,7 @@ module PoieticGen
 		end
 		
 		def self.from_snapshot snapshot
-			zone = Zone.new snapshot.index, snapshot.position, snapshot.width, snapshot.height, snapshot.user.board
-			zone.user = snapshot.user
+			zone = snapshot.zone
 			zone.data = snapshot.data
 			
 			return zone
@@ -211,11 +210,22 @@ module PoieticGen
 		end
 		
 		def snapshot
-			if not @is_snapshoted then
-				@last_snapshot = _take_snapshot
+			snap = nil
+
+			#unless @is_snapshoted then
+			Zone.transaction do
+				@is_snapshoted = true
+
+				snap = _take_snapshot
+
+				self.save
 			end
-			
-			return @last_snapshot
+			#else
+				# last snapshot
+			#	snap = @zone_snapshots.board_snapshots.timeline.first(:order => [ :id.desc ])
+			#end
+
+			return snap
 		end
 
 		private
@@ -231,14 +241,7 @@ module PoieticGen
 		end
 		
 		def _take_snapshot
-			ZoneSnapshot.new ({
-				:index => self.index,
-				:position => self.position,
-				:width => self.width,
-				:height => self.height,
-				:user_id => self.user.id,
-				:data => self.data
-			})
+			ZoneSnapshot.create self.data, self
 		end
 	end
 end
