@@ -37,10 +37,11 @@ module PoieticGen
 		has 1, :stroke
 		has 1, :message
 		has 1, :board_snapshot
+		has 1, :zone_snapshot
 		
 		belongs_to :board
 		
-		@debug = true
+		# @debug = true
 		
 		def self.create_now board
 			create({

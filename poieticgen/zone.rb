@@ -38,7 +38,7 @@ module PoieticGen
 		property :width, Integer, :required => true
 		property :height, Integer, :required => true
 		
-		property :data, Json, :required => true
+		property :data, Json, :required => true, :lazy => true
 		#property :data, Object, :required => true
 
 		property :created_at, Integer, :required => true
@@ -209,22 +209,20 @@ module PoieticGen
 			return result
 		end
 		
-		def snapshot timeline
+		def snapshot
 			snap = nil
-
-			unless self.is_snapshoted then
-				Zone.transaction do
+			Zone.transaction do
+				unless self.is_snapshoted then
 					self.is_snapshoted = true
 
-					snap = _take_snapshot timeline
+					snap = _take_snapshot
 
 					self.save
+				else
+					# last snapshot
+					snap = self.zone_snapshots.timeline.first(:order => [ :id.desc ]).zone_snapshot
 				end
-			else
-				# last snapshot
-				snap = self.zone_snapshots.timeline.first(:order => [ :id.desc ])
 			end
-
 			return snap
 		end
 
@@ -240,8 +238,8 @@ module PoieticGen
 			return x,y
 		end
 		
-		def _take_snapshot timeline
-			ZoneSnapshot.create self.data, self, timeline
+		def _take_snapshot
+			ZoneSnapshot.create self.data, self
 		end
 	end
 end

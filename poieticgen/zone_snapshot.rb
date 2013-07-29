@@ -35,13 +35,13 @@ module PoieticGen
 		belongs_to :zone
 		belongs_to :timeline
 
-		def self.create data, zone, timeline
+		def self.create data, zone
 			# @debug = true
 			begin
 				super ({
 					:data => data,
 					:zone => zone,
-					:timeline => timeline
+					:timeline => (Timeline.create_now zone.board)
 				})
 			rescue DataMapper::SaveFailureError => e
 				rdebug "Saving failure : %s" % e.resource.errors.inspect

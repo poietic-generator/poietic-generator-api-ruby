@@ -74,10 +74,10 @@ module PoieticGen
 				:timestamp => Time.now.to_i,
 				:allocator_type => config.allocator
 			})
-		
+
 			@debug = true
 			rdebug "using allocator %s" % config.allocator
-			
+
 			begin
 				save
 			rescue DataMapper::SaveFailureError => e
@@ -88,14 +88,16 @@ module PoieticGen
 		end
 		
 		def close
-			closed = true
-			end_timestamp = Time.now.to_i
-			
-			begin
-				save
-			rescue DataMapper::SaveFailureError => e
-				rdebug "Saving failure : %s" % e.resource.errors.inspect
-				raise e
+			Board.transaction do
+				closed = true
+				end_timestamp = Time.now.to_i
+
+				begin
+					save
+				rescue DataMapper::SaveFailureError => e
+					rdebug "Saving failure : %s" % e.resource.errors.inspect
+					raise e
+				end
 			end
 		end
 
@@ -162,7 +164,9 @@ module PoieticGen
 		end
 
 		def take_snapshot
-			BoardSnapshot.new self
+			Board.transaction do
+				BoardSnapshot.new self
+			end
 		end
 		
 
@@ -174,7 +178,7 @@ module PoieticGen
 			snap = _get_snapshot timestamp
 			zones = {}
 			
-			if snap.nil? then			
+			if snap.nil? then
 				# no snapshot: the board is empty
 				snap_timeline = 0
 			else
@@ -192,7 +196,7 @@ module PoieticGen
 				:timestamp.lte => timestamp,
 				:order => [ :timestamp.asc, :id.asc ]
 			)
-			
+
 			# Add/Remove zones since the snapshot
 			timelines.events.each do |event|
 				user = event.user
@@ -212,19 +216,15 @@ module PoieticGen
 				end
 			end
 
-			# get the users associated to the snapshot
-			users = self.users.map{ |u| u.to_hash } # FIXME: All users in the session are returned
-			
 			strokes = timelines.strokes
+			zones = zones.select{ |i,z| not z.expired }
 
 			# Apply strokes
 			zones.each do |index,zone|
-				unless zone.expired then
-					zone.apply_local strokes.select{ |s| s.zone.id == zone.id }
-				end
+				zone.apply_local strokes.select{ |s| s.zone.id == zone.id }
 			end
 			
-			return users, zones
+			return zones
 		end
 		
 		private
