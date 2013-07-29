@@ -74,10 +74,10 @@ module PoieticGen
 				:timestamp => Time.now.to_i,
 				:allocator_type => config.allocator
 			})
-		
+
 			@debug = true
 			rdebug "using allocator %s" % config.allocator
-			
+
 			begin
 				save
 			rescue DataMapper::SaveFailureError => e
@@ -88,14 +88,16 @@ module PoieticGen
 		end
 		
 		def close
-			closed = true
-			end_timestamp = Time.now.to_i
-			
-			begin
-				save
-			rescue DataMapper::SaveFailureError => e
-				rdebug "Saving failure : %s" % e.resource.errors.inspect
-				raise e
+			Board.transaction do
+				closed = true
+				end_timestamp = Time.now.to_i
+
+				begin
+					save
+				rescue DataMapper::SaveFailureError => e
+					rdebug "Saving failure : %s" % e.resource.errors.inspect
+					raise e
+				end
 			end
 		end
 
@@ -162,7 +164,9 @@ module PoieticGen
 		end
 
 		def take_snapshot
-			BoardSnapshot.new self
+			Board.transaction do
+				BoardSnapshot.new self
+			end
 		end
 		
 

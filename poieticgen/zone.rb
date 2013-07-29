@@ -211,20 +211,18 @@ module PoieticGen
 		
 		def snapshot timeline
 			snap = nil
-
-			unless self.is_snapshoted then
-				Zone.transaction do
+			Zone.transaction do
+				unless self.is_snapshoted then
 					self.is_snapshoted = true
 
 					snap = _take_snapshot timeline
 
 					self.save
+				else
+					# last snapshot
+					snap = self.zone_snapshots.timeline.first(:order => [ :id.desc ])
 				end
-			else
-				# last snapshot
-				snap = self.zone_snapshots.timeline.first(:order => [ :id.desc ])
 			end
-
 			return snap
 		end
 
