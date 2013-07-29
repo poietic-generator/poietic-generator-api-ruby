@@ -33,7 +33,8 @@
 		viewer = null,
 		board = null,
 		editor = null,
-		chat = null;
+		chat = null,
+		bot = null;
 
 	if (PoieticGen.Zone === undefined) {
 		console.error("PoieticGen.Zone is not defined !");
@@ -86,6 +87,8 @@
 						editor.hide_color_picker($("#brush"));
 					}
 				});
+
+				bot = new PoieticGen.Bot(editor);
 			}
 		);
 	});
