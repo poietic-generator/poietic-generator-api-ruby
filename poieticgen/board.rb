@@ -167,10 +167,11 @@ module PoieticGen
 		
 
 		#
-		# Get the board state at timeline_id.
+		# Get the board state at timestamp.
 		#
-		def load_board timeline_id, apply_strokes
-			snap = _get_snapshot timeline_id
+		def load_board timestamp
+
+			snap = _get_snapshot timestamp
 			zones = {}
 			
 			if snap.nil? then			
@@ -191,8 +192,8 @@ module PoieticGen
 			# get events since the snapshot
 			timelines = self.timelines.all(
 				:id.gt => snap_timeline,
-				:id.lte => timeline_id,
-				:order => [ :id.asc ]
+				:timestamp.lte => timestamp,
+				:order => [ :timestamp.asc, :id.asc ]
 			)
 			
 			# Add/Remove zones since the snapshot
@@ -205,10 +206,10 @@ module PoieticGen
 					zone.expired = false
 					zones[zone.index] = zone
 				elsif event.type == "leave" then
-					zone = zones[zone.index]
 					# unallocate zone
 					zone.reset
 					zone.disable
+					zones[zone.index] = zone
 				else
 					raise RuntimeError, "Unknown event type %s" % event.type
 				end
@@ -216,14 +217,12 @@ module PoieticGen
 			
 			users = users_db.map{ |u| u.to_hash } # FIXME: All users in the session are returned
 			
-			if apply_strokes then
-				strokes = timelines.strokes
+			strokes = timelines.strokes
 
-				# Apply strokes
-				zones.each do |index,zone|
-					unless zone.expired then
-						zone.apply_local strokes.select{ |s| s.zone.id == zone.id }
-					end
+			# Apply strokes
+			zones.each do |index,zone|
+				unless zone.expired then
+					zone.apply_local strokes.select{ |s| s.zone.id == zone.id }
 				end
 			end
 			
@@ -233,11 +232,11 @@ module PoieticGen
 		private
 
 		#
-		# return the snapshot preceeding timeline_id
+		# return the snapshot preceeding timestamp
 		#
-		def _get_snapshot timeline_id
+		def _get_snapshot timestamp
 			timeline = self.board_snapshots.timelines.first(
-				:id.lte => timeline_id,
+				:timestamp.lte => timestamp,
 				:order => [ :id.desc ]
 			)
 			

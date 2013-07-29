@@ -117,34 +117,32 @@ module PoieticGen
 
 			User.transaction do
 
-				user = board.users.first(:id => req.user_id)
+				user = board.users.get req.user_id
 
 				if user.nil? then
 					user = board.users.new param_create
 				else
-					tdiff = (now.to_i - user.alive_expires_at)
+					tdiff = now.to_i - user.alive_expires_at
 					rdebug [ now.to_i, user.alive_expires_at, tdiff ]
-					if ( tdiff > 0  ) then
+					if tdiff > 0 then
 						# The event will be generated elsewhere (in update_data).
 						rdebug "User session expired"
 						# create new if session expired
 						user = board.users.new param_create
 					else
 						is_new = false
+
+						# update expiration time
+						user.idle_expires_at = (now + @config.user.idle_timeout)
+						user.alive_expires_at = (now + @config.user.liveness_timeout)
+						rdebug "Set expiring times at %s" % user.alive_expires_at.to_s
+
+						# reset name if requested
+						user.name = param_name
 					end
 				end
 
-				# kill all previous users having the same zone
-
-				# update expiration time
-				user.idle_expires_at = (now + @config.user.idle_timeout)
-				user.alive_expires_at = (now + @config.user.liveness_timeout)
-				rdebug "Set expiring times at %s" % user.alive_expires_at.to_s
-
-				# reset name if requested
-				user.name = param_name
-
-				# return JSON for userid
+				# join the board
 				if is_new then
 					zone = board.join user, @config.board
 					Event.create_join user, board
@@ -158,7 +156,7 @@ module PoieticGen
 					STDERR.puts e.resource.errors.inspect
 					raise e
 				end
-				
+
 				rdebug "User : ", user
 				session[PoieticGen::Api::SESSION_USER] = user.id
 				session[PoieticGen::Api::SESSION_SESSION] = board.session_token
@@ -231,10 +229,10 @@ module PoieticGen
 			rdebug "FIXME: LEAVE(session_user_id)", session_user_id
 
 			board = Board.first( :session_token => session_token )
-			rdebug "FIXME: LEAVE(board) other", board
+			rdebug "FIXME: LEAVE(board)", board
 
 			unless board.nil? then
-				user = board.users.get(session_user_id)
+				user = board.users.get session_user_id
 				rdebug "FIXME: LEAVE(user)", user
 
 				unless user.nil? then
@@ -345,7 +343,7 @@ module PoieticGen
 
 				user.last_update_time = now
 				# FIXME: handle the save
-				user.save
+				user.save # FIXME: two 'save' for the same user?
 
 				result = {
 					:events => events_collection,
@@ -401,6 +399,8 @@ module PoieticGen
 					zones = users_db.map{ |u| u.zone.to_desc_hash Zone::DESCRIPTION_FULL }
 					
 					timeline_id = Timeline.last_id board
+
+					rdebug "timeline_id %d" % timeline_id
 				else
 					# retrieve the total duration of the game
 					date_range = now_i - board.timestamp
@@ -419,31 +419,16 @@ module PoieticGen
 						end
 
 						rdebug "abs_time %d (now %d, date %d)" % [absolute_time, now_i, req.date]
-
-						# The first event before the requested time
-						t = board.timelines.first(
-							:timestamp.lte => absolute_time,
-							:order => [ :id.desc ]
-						)
-
-						if not t.nil? then
-							timeline_id = t.id
-						end
 						
 						timestamp = absolute_time - board.timestamp
-					else
-						timestamp = 0
-					end
 
-					rdebug "timeline_id %d" % timeline_id
+						# retrieve users and zones
 
-					# retrieve users and zones
-					
-					if timeline_id > 0 then
-						users, zones = board.load_board timeline_id, true
+						users, zones = board.load_board absolute_time
 
 						zones = zones.map{ |i,z| z.to_desc_hash Zone::DESCRIPTION_FULL }
 					else
+						timestamp = 0
 						users = zones = [] # no events => no users => no zones
 					end
 				end
@@ -487,8 +472,6 @@ module PoieticGen
 
 				self.check_expired_users
 
-				rdebug "req.timeline_after = %d" % req.timeline_after
-
 				# Get events and strokes between req.timeline_after and req.duration
 
 				strokes_collection = []
@@ -499,6 +482,8 @@ module PoieticGen
 
 				if req.view_mode == UpdateViewRequest::REAL_TIME_VIEW then
 					rdebug "REAL_TIME_VIEW"
+
+					rdebug "req.timeline_after = %d" % req.timeline_after
 				
 					timelines = board.timelines.all(
 						:id.gte => req.timeline_after
@@ -525,14 +510,16 @@ module PoieticGen
 					}
 					
 				elsif req.view_mode == UpdateViewRequest::HISTORY_VIEW then
-					
 					rdebug "HISTORY_VIEW"
+
+					rdebug "req.last_max_timestamp = %d, req.since = %d, req.duration = %d" %
+						[ req.last_max_timestamp, req.since, req.duration ]
 					
 					session_timelines = board.timelines
 					
 					if req.last_max_timestamp > 0 then
 						max_timestamp = req.last_max_timestamp + req.duration * 2
-						# Events between the requested timeline and (timeline + duration)
+						# Events between the requested timestamp and (timestamp + duration)
 						timelines = session_timelines.all(
 							:timestamp.gt => board.timestamp + req.last_max_timestamp,
 							:timestamp.lte => board.timestamp + max_timestamp
@@ -550,18 +537,15 @@ module PoieticGen
 
 						srk_req = timelines.strokes
 
-						strokes_collection = srk_req.map{ |s| s.to_hash req.since }
+						strokes_collection = srk_req.map{ |s| s.to_hash (board.timestamp + req.since) }
 
 						rdebug "Strokes ", srk_req
 
 						evt_req = timelines.events
 
-						if not evt_req.empty? then
+						rdebug "Events ", evt_req
 
-							rdebug "Events ", evt_req
-
-							events_collection = evt_req.map{ |e| e.to_hash req.since }
-						end
+						events_collection = evt_req.map{ |e| e.to_hash (board.timestamp + req.since) }
 
 						timestamp = timelines.first.timestamp - board.timestamp
 					end
