@@ -38,7 +38,7 @@ module PoieticGen
 		property :width, Integer, :required => true
 		property :height, Integer, :required => true
 		
-		property :data, Json, :required => true
+		property :data, Json, :required => true, :lazy => true
 		#property :data, Object, :required => true
 
 		property :created_at, Integer, :required => true
