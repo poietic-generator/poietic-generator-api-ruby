@@ -46,7 +46,9 @@ module PoieticGen
 			super json
 
 			board.zones.each do |zone|
-				self.zone_snapshots<< (zone.snapshot timeline)
+				unless zone.expired then
+					self.zone_snapshots<< (zone.snapshot timeline)
+				end
 			end
 
 			begin

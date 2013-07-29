@@ -426,7 +426,9 @@ module PoieticGen
 
 						users, zones = board.load_board absolute_time
 
-						zones = zones.map{ |i,z| z.to_desc_hash Zone::DESCRIPTION_FULL }
+						zones = zones
+						        .select{ |i,z| not z.expired }
+						        .map{ |i,z| z.to_desc_hash Zone::DESCRIPTION_FULL }
 					else
 						timestamp = 0
 						users = zones = [] # no events => no users => no zones

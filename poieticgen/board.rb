@@ -178,16 +178,13 @@ module PoieticGen
 				# no snapshot: the board is empty
 				snap_timeline = 0
 			else
-				snap_timeline = snap.timeline
+				snap_timeline = snap.timeline.id
 				
 				# Create zones from snapshot
 				snap.zone_snapshots.each do |zs|
 					zones[zs.zone.index] = Zone.from_snapshot zs
 				end
 			end
-			
-			# get the users associated to the snapshot
-			users_db = self.users
 			
 			# get events since the snapshot
 			timelines = self.timelines.all(
@@ -214,8 +211,9 @@ module PoieticGen
 					raise RuntimeError, "Unknown event type %s" % event.type
 				end
 			end
-			
-			users = users_db.map{ |u| u.to_hash } # FIXME: All users in the session are returned
+
+			# get the users associated to the snapshot
+			users = self.users.map{ |u| u.to_hash } # FIXME: All users in the session are returned
 			
 			strokes = timelines.strokes
 
