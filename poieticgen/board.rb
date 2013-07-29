@@ -215,20 +215,16 @@ module PoieticGen
 					raise RuntimeError, "Unknown event type %s" % event.type
 				end
 			end
-
-			# get the users associated to the snapshot
-			users = self.users.map{ |u| u.to_hash } # FIXME: All users in the session are returned
 			
 			strokes = timelines.strokes
+			zones = zones.select{ |i,z| not z.expired }
 
 			# Apply strokes
 			zones.each do |index,zone|
-				unless zone.expired then
-					zone.apply_local strokes.select{ |s| s.zone.id == zone.id }
-				end
+				zone.apply_local strokes.select{ |s| s.zone.id == zone.id }
 			end
 			
-			return users, zones
+			return zones
 		end
 		
 		private
