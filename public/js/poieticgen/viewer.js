@@ -420,6 +420,10 @@
 				i;
 			console.log("viewer/draw_stroke : stroke = " + JSON.stringify(stk));
 			remote_zone = _board.get_zone(stk.zone);
+			if (undefined === remote_zone) {
+				console.warn("view/draw_stroke: trying to draw stroke for missing zone " + stk.zone);
+				return;
+			}
 			// console.log("viewer/handle_stroke : remote_zone = " + JSON.stringify(remote_zone));
 			color = stk.color;
 			// console.log("viewer/handle_stroke : color = " + JSON.stringify(color));
@@ -473,7 +477,7 @@
 					if (x < _boundaries.xmin) { _boundaries.xmin = x; }
 					if (x > _boundaries.xmax) { _boundaries.xmax = x; }
 					if (y < _boundaries.ymin) { _boundaries.ymin = y; }
-					if (y > _boundaries.ymay) { _boundaries.ymay = y; }
+					if (y > _boundaries.ymax) { _boundaries.ymax = y; }
 				}
 			}
 
