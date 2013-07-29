@@ -178,7 +178,7 @@ module PoieticGen
 			snap = _get_snapshot timestamp
 			zones = {}
 			
-			if snap.nil? then			
+			if snap.nil? then
 				# no snapshot: the board is empty
 				snap_timeline = 0
 			else
@@ -196,7 +196,7 @@ module PoieticGen
 				:timestamp.lte => timestamp,
 				:order => [ :timestamp.asc, :id.asc ]
 			)
-			
+
 			# Add/Remove zones since the snapshot
 			timelines.events.each do |event|
 				user = event.user
@@ -215,7 +215,7 @@ module PoieticGen
 					raise RuntimeError, "Unknown event type %s" % event.type
 				end
 			end
-			
+
 			strokes = timelines.strokes
 			zones = zones.select{ |i,z| not z.expired }
 
