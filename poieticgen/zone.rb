@@ -93,6 +93,7 @@ module PoieticGen
 		def self.from_snapshot snapshot
 			zone = snapshot.zone
 			zone.data = snapshot.data
+			zone.expired = false
 			
 			return zone
 		end
