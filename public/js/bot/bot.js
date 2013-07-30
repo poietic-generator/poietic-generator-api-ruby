@@ -20,7 +20,7 @@
 /*                                                                            */
 /******************************************************************************/
 
-/*jslint browser: true*/
+/*jslint browser: true, nomen: true*/
 /*global $, jQuery, document, PoieticGen, console, alert */
 
 (function (PoieticGen) {
@@ -35,7 +35,9 @@
 
 		var console = window.noconsole,
 			self = this,
-			editor,
+			_editor = null,
+			_started = false,
+			_timer = null,
 			STROKE_INTERVAL = 40;
 
 		this.name = "Bot";
@@ -44,21 +46,33 @@
 		* Constructor
 		*/
 		this.initialize = function (editor) {
-			self.editor = editor;
-
-			setTimeout(self.draw, STROKE_INTERVAL);
+			_editor = editor;
 		};
 
 		this.draw = function () {
 			var color, local_pos = {
-				x: Math.floor(Math.random() * self.editor.column_count),
-				y: Math.floor(Math.random() * self.editor.line_count)
+				x: Math.floor(Math.random() * _editor.column_count),
+				y: Math.floor(Math.random() * _editor.line_count)
 			};
 
-			color = Math.floor(Math.random() * 255 * 255 * 255);
-			self.editor.pixel_set(local_pos, "#" + color.toString(16));
+			_started = true;
 
-			setTimeout(self.draw, STROKE_INTERVAL);
+			color = Math.floor(Math.random() * 255 * 255 * 255);
+			_editor.pixel_set(local_pos, "#" + color.toString(16));
+
+			_timer = window.setTimeout(self.draw, STROKE_INTERVAL);
+		};
+
+		this.stop = function () {
+			if (null !== _timer) {
+				window.clearTimeout(_timer);
+				_timer = null;
+			}
+			_started = false;
+		};
+
+		this.started = function () {
+			return _started;
 		};
 
 		this.initialize(p_editor);

@@ -34,7 +34,13 @@
 		board = null,
 		editor = null,
 		chat = null,
-		bot = null;
+		bot = null,
+		KEY_LEFT = 37,
+		KEY_UP = 38,
+		KEY_RIGHT = 39,
+		KEY_DOWN = 40,
+		KEY_A = 65,
+		KEY_B = 66;
 
 	if (PoieticGen.Zone === undefined) {
 		console.error("PoieticGen.Zone is not defined !");
@@ -51,6 +57,15 @@
 
 	// instead of windows.onload
 	$(document).ready(function () {
+		var bot_cur_key = 0, bot_keys;
+
+		bot_keys = [ KEY_UP, KEY_UP,
+			KEY_DOWN, KEY_DOWN,
+			KEY_LEFT, KEY_RIGHT,
+			KEY_LEFT, KEY_RIGHT,
+			KEY_B,
+			KEY_A ];
+
 		$(".logout").bind("click", function (event) {
 			if (!confirm("Leave Poietic Generator?")) {
 				return false;
@@ -87,10 +102,34 @@
 						editor.hide_color_picker($("#brush"));
 					}
 				});
-
-				bot = new PoieticGen.Bot(editor);
 			}
 		);
+
+		// Bot starts with a combination of keys
+		$(document).bind("keydown", function (event) {
+			if (bot_cur_key < bot_keys.length && event.keyCode === bot_keys[bot_cur_key]) {
+				bot_cur_key += 1;
+
+				window.console.log("OK");
+
+				if (bot_cur_key >= bot_keys.length) {
+					if (null === bot) {
+						bot = new PoieticGen.Bot(editor);
+					}
+					if (bot.started()) {
+						bot.stop();
+					} else {
+						bot.draw();
+					}
+
+					bot_cur_key = 0;
+				}
+			} else {
+				window.console.log("WRONG " + event.keyCode);
+
+				bot_cur_key = 0;
+			}
+		});
 	});
 
 }(PoieticGen, jQuery));
