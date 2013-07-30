@@ -169,25 +169,6 @@ module PoieticGen ; module Allocation
 			return zone
 		end
 
-
-		#
-		# test if the zone exists
- 		#
-		def free? zone_idx
-			zone = @zones[zone_idx]
-			return zone.expired
-		end
-
-		#
-		# disable the zone in the allocator
-		# FIXME: why did'nt we remove the zone from the allocator ?
-		#
-		def free zone_idx
-			zone = @zones[zone_idx]
-			zone.disable
-			return zone
-		end
-
 		private
 
 		# 

@@ -29,28 +29,7 @@ module PoieticGen ; module Allocation
 		#
 		# return a zone, somewhere...
 		#
-		def allocate
-			raise NotImplementedError
-		end
-		
-		#
-		# return a zone at index
-		#
-		def allocate_at index
-			raise NotImplementedError
-		end
-		
-		#
-		# put a zone, somewhere...
-		#
-		def insert zone
-			raise NotImplementedError
-		end
-
-		#
-		# free zone at given index
-		#
-		def free idx
+		def allocate board
 			raise NotImplementedError
 		end
 
@@ -65,20 +44,6 @@ module PoieticGen ; module Allocation
 		# get zone at given index
 		#
 		def [] index
-			raise NotImplementedError
-		end
-
-		#
-		# get all zones
-		#
-		def zones
-			raise NotImplementedError
-		end
-
-		#
-		# replace zones
-		#
-		def set_zones zones
 			raise NotImplementedError
 		end
 
