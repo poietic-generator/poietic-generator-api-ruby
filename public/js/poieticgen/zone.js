@@ -44,7 +44,9 @@
 			_current_patch = null,
 
 			// patches to apply localy
-			_input_queue = [];
+			_input_queue = [],
+
+			_create_patch = null;
 
 
 		// zone dimensions
@@ -52,6 +54,16 @@
 		this.position = p_position;
 		this.width = p_width;
 		this.height = p_height;
+
+
+		_create_patch = function (pos, color) {
+			return {
+				zone: self.index,
+				diff: ((new Date()) - _session.last_update_time) / 1000,
+				color: color,
+				changes: [ [ pos.x, pos.y, 0 ] ]
+			};
+		};
 
 
 		// console.log("zone/initialize width = " + this.width );
@@ -111,21 +123,11 @@
 
 			if (_current_patch === null) {
 				// console.log("zone/patch_record: patch creation!");
-				_current_patch = {
-					zone: self.index,
-					diff: ((new Date()) - _session.last_update_time) / 1000,
-					color: color,
-					changes: [ [ pos.x, pos.y, 0 ]  ]
-				};
+				_current_patch = _create_patch(pos, color);
 			} else {
 				if (_current_patch.color !== color) {
 					self.patch_enqueue();
-					_current_patch = {
-						zone: self.index,
-						diff: (new Date()) - self._session._last_update_time,
-						color: color,
-						changes: [ [ pos.x, pos.y, 0 ]  ]
-					};
+					_current_patch = _create_patch(pos, color);
 				} else {
 					// console.log("zone/patch_record: patch update!");
 
