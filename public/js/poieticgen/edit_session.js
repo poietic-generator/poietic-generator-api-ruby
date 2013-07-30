@@ -263,7 +263,7 @@
 				}
 				// Make absolute times
 				if (events[i].diffstamp) {
-					events[i].timestamp = events[i].diffstamp + self.last_update_time.getTime() / 1000;
+					events[i].timestamp = parseInt(events[i].diffstamp, 10) + self.last_update_time.getTime() / 1000;
 				} else {
 					events[i].timestamp = self.last_update_time.getTime() / 1000;
 				}

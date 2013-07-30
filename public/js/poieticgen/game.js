@@ -60,7 +60,7 @@
 
 				// console.log("game.run event: " + JSON.stringify(event));
 
-				if (event.timestamp === null || event.timestamp <= (new Date()).getTime() / 1000) {
+				if (event.timestamp === undefined || event.timestamp <= (new Date()).getTime() / 1000) {
 					type = event_desc.type;
 
 					console.log("game.run trigger event: now " + event.timestamp + " timeline " + event.id + " diffstamp " + event.diffstamp);

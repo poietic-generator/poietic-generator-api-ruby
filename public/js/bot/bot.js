@@ -42,7 +42,10 @@
 			_str_pad_number = null,
 			_rgb_to_hex = null,
 			_hsv_to_rgb = null,
-			STROKE_INTERVAL = 40;
+			INTERVAL_AGRESSIVE = 40,
+			INTERVAL_STANDARD = 500,
+			INTERVAL_KIND = 1500,
+			STROKE_INTERVAL = INTERVAL_STANDARD;
 
 		this.name = "Bot";
 
