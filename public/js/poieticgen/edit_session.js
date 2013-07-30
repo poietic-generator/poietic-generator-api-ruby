@@ -38,7 +38,7 @@
 
 
 	function DrawSession(callback) {
-		var console = window.console,
+		var console = window.noconsole,
 			self = this,
 			_current_timeline_id = 0,
 			_game = null,
