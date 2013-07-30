@@ -38,7 +38,7 @@
 
 
 	function DrawSession(callback) {
-		var console = window.noconsole,
+		var console = window.console,
 			self = this,
 			_current_timeline_id = 0,
 			_game = null,
@@ -243,9 +243,8 @@
 						self.dispatch_events(response.events);
 						self.dispatch_strokes(response.strokes);
 						self.dispatch_messages(response.messages);
-
-						window.setTimeout(self.update, DRAW_SESSION_UPDATE_INTERVAL);
 					}
+					window.setTimeout(self.update, DRAW_SESSION_UPDATE_INTERVAL);
 				},
 				error: function (response) {
 					window.setTimeout(self.update, DRAW_SESSION_UPDATE_INTERVAL * 2);

@@ -38,6 +38,8 @@ require 'pp'
 
 module PoieticGen
 
+	class SessionLostException < RuntimeError ; end
+
 	class Api < Sinatra::Base
 
 		STATUS_INFORMATION = 1
@@ -83,7 +85,7 @@ module PoieticGen
 				# STDERR.puts "API -- validate_session: %s" % session.inspect
 				unless session.include? SESSION_USER and
 					not session[SESSION_USER].nil? then
-					throw :halt, [401, "Not authorized\n"]
+					raise PoieticGen::SessionLostException, "Please re-join the session"
 				end
 			end
 		end
@@ -152,7 +154,8 @@ module PoieticGen
 			rescue PoieticGen::AdminSessionNeeded => e
 				flash[:error] = "Only admins can do that!"
 
-			rescue PoieticGen::InvalidSession => e
+			rescue PoieticGen::InvalidSession,
+			       PoieticGen::SessionLostException => e
 				flash[:error] = "Session has expired!"
 
 			rescue Exception => e
@@ -306,6 +309,7 @@ module PoieticGen
 					data['session_token'] = params['session_token']
 					result = settings.manager.update_data session, data
 				else
+					STDERR.puts "Session has expired!"
 					status = [ STATUS_REDIRECTION, "Session has expired !", "/"]
 				end
 
@@ -318,12 +322,17 @@ module PoieticGen
 				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
 
+			rescue PoieticGen::InvalidSession => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_REDIRECTION, "Session has expired !", "/"]
+
+			rescue PoieticGen::SessionLostException => e
+				STDERR.puts e.inspect, e.backtrace
+				status = [ STATUS_REDIRECTION, e.message, "/session/%s/draw" % params['session_token'] ]
+
 			rescue ArgumentError => e
 				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_BAD_REQUEST, "Invalid content" ]
-
-			rescue PoieticGen::InvalidSession => e
-				status = [ STATUS_REDIRECTION, "Session has expired !", "/"]
 
 			rescue Exception => e
 				# handle non-JSON parsing errors

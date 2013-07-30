@@ -110,8 +110,6 @@
 			if (bot_cur_key < bot_keys.length && event.keyCode === bot_keys[bot_cur_key]) {
 				bot_cur_key += 1;
 
-				window.console.log("OK");
-
 				if (bot_cur_key >= bot_keys.length) {
 					if (null === bot) {
 						bot = new PoieticGen.Bot(editor);
@@ -125,8 +123,6 @@
 					bot_cur_key = 0;
 				}
 			} else {
-				window.console.log("WRONG " + event.keyCode);
-
 				bot_cur_key = 0;
 			}
 		});
