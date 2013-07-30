@@ -21,7 +21,6 @@
 ##############################################################################
 
 require 'poieticgen/allocation/generic'
-require 'monitor'
 
 module PoieticGen ; module Allocation
 	class Spiral < Generic
@@ -91,7 +90,6 @@ module PoieticGen ; module Allocation
 			end
 
 			@config = config
-			@monitor = Monitor.new
 		end
 
 
@@ -157,20 +155,18 @@ module PoieticGen ; module Allocation
 		# a zone                
 		#
 		def allocate board
-			@monitor.synchronize do
-				index = _next_index()
+			index = _next_index()
 
-				zone = Zone.new index, 
-					(self.index_to_position index),
-					@config.width,
-					@config.height,
-					board
+			zone = Zone.new index, 
+				(self.index_to_position index),
+				@config.width,
+				@config.height,
+				board
 
-				rdebug "Spiral/allocate zone : ", zone.inspect
-				@zones[index] = zone
+			rdebug "Spiral/allocate zone : ", zone.inspect
+			@zones[index] = zone
 
-				return zone
-			end
+			return zone
 		end
 
 
@@ -178,10 +174,8 @@ module PoieticGen ; module Allocation
 		# test if the zone exists
  		#
 		def free? zone_idx
-			@monitor.synchronize do
-				zone = @zones[zone_idx]
-				return zone.expired
-			end
+			zone = @zones[zone_idx]
+			return zone.expired
 		end
 
 		#
@@ -189,11 +183,9 @@ module PoieticGen ; module Allocation
 		# FIXME: why did'nt we remove the zone from the allocator ?
 		#
 		def free zone_idx
-			@monitor.synchronize do
-				zone = @zones[zone_idx]
-				zone.disable
-				return zone
-			end
+			zone = @zones[zone_idx]
+			zone.disable
+			return zone
 		end
 
 		private
@@ -204,16 +196,14 @@ module PoieticGen ; module Allocation
 		def _next_index 
 			result_index = nil
 
-			@monitor.synchronize do
-				# find a nil zone first
-				nil_zones = @zones.select{ |idx,zone| zone.expired }
-				if nil_zones.size > 0 then
-					# got an unallocated zone !
-					result_index = nil_zones.first[0]
-				else
-					# try the normal method
-					result_index = @zones.size
-				end
+			# find a nil zone first
+			nil_zones = @zones.select{ |idx,zone| zone.expired }
+			if nil_zones.size > 0 then
+				# got an unallocated zone !
+				result_index = nil_zones.first[0]
+			else
+				# try the normal method
+				result_index = @zones.size
 			end
 			return result_index
 		end
