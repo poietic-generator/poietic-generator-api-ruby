@@ -294,11 +294,12 @@ module PoieticGen
 				# verify session expiration..
 				validate_session! session
 				status = [ STATUS_SUCCESS ]
+				
+				# FIXME: check if params['session_token'] == board.session_token
 
 				# FIXME: there are db requests to get user/board twice (in check_lease and update_data)
 				if settings.manager.check_lease! session then
 					data = JSON.parse(request.body.read)
-					data['session_token'] = params['session_token']
 					result = settings.manager.update_data session, data
 				else
 					STDERR.puts "Session has expired!"

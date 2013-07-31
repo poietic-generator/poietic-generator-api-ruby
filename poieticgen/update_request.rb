@@ -90,8 +90,7 @@ module PoieticGen
 				TIMELINE_AFTER,
 				STROKES,
 				MESSAGES,
-				UPDATE_INTERVAL,
-				SESSION_TOKEN
+				UPDATE_INTERVAL
 			].each do |field|
 				unless hash.include? field then
 					raise UpdateRequestParseError, ("The '%s' field is missing" % field)

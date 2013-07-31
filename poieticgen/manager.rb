@@ -108,38 +108,25 @@ module PoieticGen
 			)
 			
 			raise InvalidSession, "Invalid session" if board.nil?
-			
-			param_create = {
-				:board => board,
-				:name => param_name,
-				:zone => nil,
-				:created_at => now.to_i,
-				:alive_expires_at => (now + @config.user.liveness_timeout).to_i,
-				:idle_expires_at => (now + @config.user.idle_timeout).to_i,
-				:did_expire => false,
-				:last_update_time => now
-			}
 
 			User.transaction do
 
 				user = User.get req.user_id
 
 				if user.nil? then
-					user = board.users.new param_create
+					user = User.new param_name, board, @config.user
 				else
-					tdiff = now.to_i - user.alive_expires_at
-					rdebug [ now.to_i, user.alive_expires_at, tdiff ]
-					if tdiff > 0 then
+					if user.expired? then
 						# The event will be generated elsewhere (in update_data).
 						rdebug "User session expired"
 						# create new if session expired
-						user = board.users.new param_create
+						user = User.new param_name, board, @config.user
 					else
 						is_new = false
 
 						# update expiration time
-						user.idle_expires_at = (now + @config.user.idle_timeout)
-						user.alive_expires_at = (now + @config.user.liveness_timeout)
+						user.idle_expires_at = now + @config.user.idle_timeout
+						user.alive_expires_at = now + @config.user.liveness_timeout
 						rdebug "Set expiring times at %s" % user.alive_expires_at.to_s
 
 						# reset name if requested
@@ -174,7 +161,7 @@ module PoieticGen
 
 				# get real users
 				users_db = board.users.all(
-					:did_expire.not => true,
+					:did_expire => false,
 					:id.not => user.id
 				)
 				other_users = users_db.map{ |u| u.to_hash }
@@ -241,12 +228,10 @@ module PoieticGen
 				rdebug "FIXME: LEAVE(user)", user
 
 				unless user.nil? then
-					user.idle_expires_at = Time.now.to_i
-					user.alive_expires_at = Time.now.to_i
-					user.did_expire = true
+					user.set_expired
 					# create leave event if session is the current one
 					board.leave user
-					Event.create_leave user, user.alive_expires_at, board
+					Event.create_leave user, board
 					user.save
 				else
 					rdebug "Could not find any user for this request (board=%s, session=%s)" % [ board.inspect, session.inspect]
@@ -268,16 +253,11 @@ module PoieticGen
 			
 			raise InvalidSession, "No opened session found for board %d" % session[PoieticGen::Api::SESSION_BOARD] if board.nil? or board.closed
 
-			user = board.users.get session[PoieticGen::Api::SESSION_USER]
+			user = User.get session[PoieticGen::Api::SESSION_USER]
 			rdebug "check_lease! user = ", user, " now = ", now
 			raise InvalidSession, "No user found with session_token %s in DB" % board.session_token if user.nil?
 
-			if ( (now >= user.alive_expires_at) or (now >= user.idle_expires_at) ) then
-				# expired lease...
-				return false
-			else
-				return true
-			end
+			return (not user.expired?)
 		end
 
 
@@ -310,9 +290,9 @@ module PoieticGen
 
 				ref_stamp = user.last_update_time - req.update_interval
 
-				user.alive_expires_at = (now + @config.user.liveness_timeout)
+				user.alive_expires_at = now + @config.user.liveness_timeout
 				if not req.strokes.empty? then
-					user.idle_expires_at = (now + @config.user.idle_timeout)
+					user.idle_expires_at = now + @config.user.idle_timeout
 				end
 				user.last_update_time = now
 
@@ -345,8 +325,8 @@ module PoieticGen
 					:events => events_collection,
 					:strokes => strokes_collection,
 					:messages => messages_collection,
-					:stamp => (now - board.timestamp), # FIXME: unused by the client
-					:idle_timeout => (user.idle_expires_at - now)
+					# :stamp => (now - board.timestamp), # FIXME: unused by the client
+					# :idle_timeout => (user.idle_expires_at - now) # FIXME: unused by the client
 				}
 
 				rdebug "returning : %s" % result.inspect
@@ -389,7 +369,7 @@ module PoieticGen
 				if req.date == -1 then
 					# get the current state, select only this session
 					users_db = board.users.all(
-						:did_expire.not => true
+						:did_expire => false
 					)
 					users = users_db.map{ |u| u.to_hash }
 					zones = users_db.map{ |u| u.zone.to_desc_hash Zone::DESCRIPTION_FULL }

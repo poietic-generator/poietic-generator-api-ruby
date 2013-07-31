@@ -49,12 +49,12 @@ module PoieticGen
 			
 		end
 
-		def self.create_leave user, leave_time, board
+		def self.create_leave user, board
 			begin
 				event = Event.create({
 					:type => 'leave',
 					:user => user,
-					:timeline => (Timeline.create_with_time leave_time, board)
+					:timeline => (Timeline.create_now board)
 				})
 			rescue DataMapper::SaveFailureError => e
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
