@@ -10,7 +10,6 @@ require: []
 
 environment: production
 max_persistent_conns: 512
-servers: 10
 daemonize: true
 #socket: /var/tmp/poieticgen.sock
 #chdir: /home/opt/data/src/_Gnuside/poietic-generator-reloaded
