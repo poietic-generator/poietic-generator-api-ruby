@@ -49,7 +49,7 @@ module PoieticGen
 		STATUS_BAD_REQUEST = 5
 
 		SESSION_USER = :user
-		SESSION_SESSION = :name
+		SESSION_BOARD = :board
 		SESSION_AUTH = :auth
 		
 		SESSION_MAX_LISTED_COUNT = 5
@@ -295,6 +295,7 @@ module PoieticGen
 				validate_session! session
 				status = [ STATUS_SUCCESS ]
 
+				# FIXME: there are db requests to get user/board twice (in check_lease and update_data)
 				if settings.manager.check_lease! session then
 					data = JSON.parse(request.body.read)
 					data['session_token'] = params['session_token']

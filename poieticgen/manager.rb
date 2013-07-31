@@ -122,7 +122,7 @@ module PoieticGen
 
 			User.transaction do
 
-				user = board.users.get req.user_id
+				user = User.get req.user_id
 
 				if user.nil? then
 					user = board.users.new param_create
@@ -164,7 +164,7 @@ module PoieticGen
 
 				rdebug "User : ", user
 				session[PoieticGen::Api::SESSION_USER] = user.id
-				session[PoieticGen::Api::SESSION_SESSION] = board.session_token
+				session[PoieticGen::Api::SESSION_BOARD] = board.id
 
 				# FIXME: test request user_id
 				# FIXME: test request username
@@ -229,11 +229,11 @@ module PoieticGen
 			rdebug "FIXME: LEAVE(session)", session
 
 			session_user_id = session[PoieticGen::Api::SESSION_USER]
-			session_token = session[PoieticGen::Api::SESSION_SESSION]
+			session_board_id = session[PoieticGen::Api::SESSION_BOARD]
 			
 			rdebug "FIXME: LEAVE(session_user_id)", session_user_id
 
-			board = Board.first( :session_token => session_token )
+			board = Board.get session_board_id
 			rdebug "FIXME: LEAVE(board)", board
 
 			unless board.nil? then
@@ -264,12 +264,9 @@ module PoieticGen
 		def check_lease! session
 			now = Time.now.to_i
 			
-			board = Board.first(
-				:session_token => session[PoieticGen::Api::SESSION_SESSION],
-				:closed => false
-			)
+			board = Board.get session[PoieticGen::Api::SESSION_BOARD]
 			
-			raise InvalidSession, "No opened session found for session %s" % session[PoieticGen::Api::SESSION_SESSION] if board.nil?
+			raise InvalidSession, "No opened session found for board %d" % session[PoieticGen::Api::SESSION_BOARD] if board.nil? or board.closed
 
 			user = board.users.get session[PoieticGen::Api::SESSION_USER]
 			rdebug "check_lease! user = ", user, " now = ", now
@@ -295,19 +292,16 @@ module PoieticGen
 			rdebug "updating with : %s" % data.inspect
 			req = UpdateRequest.parse data
 			
-			board = Board.first(
-				:session_token => req.session_token,
-				:closed => false
-			)
+			board = Board.get session[PoieticGen::Api::SESSION_BOARD]
 			
-			raise InvalidSession, "Invalid session" if board.nil?
+			raise InvalidSession, "Invalid session" if board.nil? or board.closed
 
 			# prepare empty result message
 			result = nil
 
 			User.transaction do
 
-				user = board.users.get session[PoieticGen::Api::SESSION_USER]
+				user = User.get session[PoieticGen::Api::SESSION_USER]
 				now = Time.now.to_i
 
 				self.check_expired_users
@@ -573,49 +567,26 @@ module PoieticGen
 		#
 		#
 		#
-		def check_expired_users	
-			User.transaction do
-				now = Time.now.to_i
-				if @leave_mutex.try_lock then
-					# remove users without a zone
-					users_db = User.all( :did_expire.not => true )
-					users_db.each do |u|
-						# verify that user really has a zone in that program instance
-						has_zone = u.board == u.zone.board && (not u.zone.expired)
+		def check_expired_users
+			now = Time.now.to_i
 
-						# disable users without a zone
-						if not has_zone then
-							# kill non-existant user
-							rdebug "Killing user with no zone : %s" % u.inspect
-							u.idle_expires_at = now
-							u.alive_expires_at = now
-							u.did_expire = true
-							u.save
-						end
-					end
-
-					# remove expired users that have not yet been declared as expired
-					if (@last_leave_check_time + LEAVE_CHECK_TIME_MIN) < now then
-						newly_expired_users = User.all(
-							:did_expire => false,
-							:alive_expires_at.lte => now
-						) + User.all(
-							:did_expire => false,
-							:idle_expires_at.lte => now
-						)
-						rdebug "New expired list : %s" % newly_expired_users.inspect
-						newly_expired_users.each do |leaver|
-							fake_session = {}
-							fake_session[PoieticGen::Api::SESSION_USER] = leaver.id
-							fake_session[PoieticGen::Api::SESSION_SESSION] = leaver.board.session_token
-							self.leave fake_session
-						end
-						@last_leave_check_time = now
-					end
-					@leave_mutex.unlock
-				else
-					rdebug "Leaver updates : Can't update because someone is already working on that"
+			# remove expired users that have not yet been declared as expired
+			if (@last_leave_check_time + LEAVE_CHECK_TIME_MIN) < now then
+				newly_expired_users = User.all(
+					:did_expire => false,
+					:alive_expires_at.lte => now
+				) + User.all(
+					:did_expire => false,
+					:idle_expires_at.lte => now
+				)
+				rdebug "New expired list : %s" % newly_expired_users.inspect
+				newly_expired_users.each do |leaver|
+					fake_session = {}
+					fake_session[PoieticGen::Api::SESSION_USER] = leaver.id
+					fake_session[PoieticGen::Api::SESSION_BOARD] = leaver.board.id
+					self.leave fake_session
 				end
+				@last_leave_check_time = now
 			end
 		end
 
