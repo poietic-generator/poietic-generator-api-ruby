@@ -138,18 +138,10 @@ module PoieticGen
 		#
 		# Create a new session
 		#
-		post '/session/create' do
+		get '/session/create' do
 			begin
-				# verify session expiration..
-				validate_session! session
-			
-				if settings.manager.check_lease! session then
-					settings.manager.create_session session, params
-					session[SESSION_USER] ||= nil
-					
-				else
-					flash[:error] = "Session has expired!"
-				end
+				session_id = settings.manager.create_session session, params
+				flash[:success] = "Session %d created!" % session_id
 
 			rescue PoieticGen::AdminSessionNeeded => e
 				flash[:error] = "Only admins can do that!"
@@ -163,7 +155,6 @@ module PoieticGen
 				Process.exit! #FIXME: remove in prod mode ? :-)
 
 			ensure
-				flash[:success] = "Session restarted!"
 				redirect '/'
 			end
 		end

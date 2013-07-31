@@ -62,7 +62,8 @@ module PoieticGen
 			
 			@chat = PoieticGen::ChatManager.new @config.chat
 
-			_session_init
+			@last_leave_check_time = Time.now.to_i - LEAVE_CHECK_TIME_MIN
+			@leave_mutex = Mutex.new
 		end
 
 
@@ -72,7 +73,11 @@ module PoieticGen
 			
 			raise AdminSessionNeeded, "You have not the right to do that, please login as admin." if not is_admin
 			
-			_session_init
+			# Create board with the configuration
+			board = Board.new @config.board
+			board.save
+
+			return board.id
 		end
 
 		#
@@ -615,19 +620,6 @@ module PoieticGen
 					rdebug "Leaver updates : Can't update because someone is already working on that"
 				end
 			end
-		end
-
-		private
-
-		def _session_init
-			# total count of users seen (FIXME: get it from db, FIXME: unused)
-			@users_seen = 0
-
-			# Create board with the configuration
-			Board.new @config.board
-
-			@last_leave_check_time = Time.now.to_i - LEAVE_CHECK_TIME_MIN
-			@leave_mutex = Mutex.new
 		end
 
 	end
