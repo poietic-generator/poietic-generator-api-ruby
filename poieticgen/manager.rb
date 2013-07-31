@@ -314,10 +314,14 @@ module PoieticGen
 
 				raise InvalidSession, "Invalid session" if user.nil?
 
+				ref_stamp = user.last_update_time - req.update_interval
+
 				user.alive_expires_at = (now + @config.user.liveness_timeout)
 				if not req.strokes.empty? then
 					user.idle_expires_at = (now + @config.user.idle_timeout)
 				end
+				user.last_update_time = now
+
 				user.save
 
 				board.update_data user, req.strokes
@@ -329,26 +333,19 @@ module PoieticGen
 
 				# rdebug "drawings: (since %s)" % req.timeline_after
 				strokes = timelines.strokes.all(
-					:zone.not => user.zone.index
+					:zone.not => user.zone
 				)
-				
-				ref_stamp = user.last_update_time - req.update_interval
 
 				strokes_collection = strokes.map{ |d| d.to_hash ref_stamp }
 
 				# rdebug "events: (since %s)" % req.timeline_after
-				events = timelines.events
-				events_collection = events.map{ |e| e.to_hash ref_stamp }
+				events_collection = timelines.events.map{ |e| e.to_hash ref_stamp }
 
 				# rdebug "chat: (since %s)" % req.timeline_after
 				messages = timelines.messages.all(
 					:user_dst => user.id
 				)
 				messages_collection = messages.map{ |e| e.to_hash }
-
-				user.last_update_time = now
-				# FIXME: handle the save
-				user.save # FIXME: two 'save' for the same user?
 
 				result = {
 					:events => events_collection,
