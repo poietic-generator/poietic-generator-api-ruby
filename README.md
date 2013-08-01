@@ -57,7 +57,7 @@ Install a reverse proxy server, like nginx :
 
     sudo apt-get install nginx
 
-In the directory "/etc/nginx/sites-enabled/", create a configuration file for 
+In the directory "/etc/nginx/sites-available/", create a configuration file for 
 a virtual host called "poietic-generator.com", with the following content :
 
     upstream poietic-generator_cluster {
