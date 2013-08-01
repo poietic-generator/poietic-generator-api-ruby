@@ -155,7 +155,7 @@ module PoieticGen
 				self.strokes_since_last_snapshot += drawing.size
 
 				if self.strokes_since_last_snapshot > STROKE_COUNT_BETWEEN_QFRAMES then
-					self.take_snapshot
+					BoardSnapshot.new self
 					self.strokes_since_last_snapshot = 0
 				end
 
@@ -163,12 +163,6 @@ module PoieticGen
 			end
 		end
 
-		def take_snapshot
-			Board.transaction do
-				BoardSnapshot.new self
-			end
-		end
-		
 
 		#
 		# Get the board state at timestamp.

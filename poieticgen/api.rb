@@ -83,8 +83,8 @@ module PoieticGen
 			#
 			def validate_session! session
 				# STDERR.puts "API -- validate_session: %s" % session.inspect
-				unless session.include? SESSION_USER and
-					not session[SESSION_USER].nil? then
+				if not session.include? SESSION_USER or
+					session[SESSION_USER].nil? then
 					raise PoieticGen::SessionLostException, "Please re-join the session"
 				end
 			end
@@ -108,8 +108,8 @@ module PoieticGen
 				end
 
 				set :config, config
-				DataMapper::Logger.new(STDERR, :info)
-				#DataMapper::Logger.new(STDERR, :debug)
+				#DataMapper::Logger.new(STDERR, :info)
+				DataMapper::Logger.new(STDERR, :debug)
 				hash = config.database.get_hash
 				pp "db hash :", hash
 				DataMapper.setup(:default, hash)
@@ -169,7 +169,7 @@ module PoieticGen
 				sessions = Board.first(SESSION_MAX_LISTED_COUNT,
 					:order => [:timestamp.desc])
 			
-				if not sessions.nil? then
+				unless sessions.nil? or sessions.first.nil? then
 					@selected_session = sessions.first.session_token
 				
 					sessions.each do |s|

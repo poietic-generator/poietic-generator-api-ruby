@@ -108,16 +108,17 @@ module PoieticGen
 		end
 
 		def apply drawing
-			Zone.transaction do
-				# save patch into database
-				return if drawing.nil? or drawing.empty?
+			# save patch into database
+			return if drawing.nil? or drawing.empty?
 
-				rdebug drawing.inspect if drawing.length != 0
+			rdebug drawing.inspect if drawing.length != 0
+
+			# Sort strokes by time
+			drawing = drawing.sort{ |a, b| a['diff'].to_i <=> b['diff'].to_i }
+
+			Zone.transaction do
 
 				ref = self.user.last_update_time
-
-				# Sort strokes by time
-				drawing = drawing.sort{ |a, b| a['diff'].to_i <=> b['diff'].to_i }
 
 				drawing.each do |patch|
 
@@ -136,7 +137,7 @@ module PoieticGen
 						self.data[idx] = color
 					end
 				end
-				
+
 				self.is_snapshoted = false
 
 				self.save
@@ -171,10 +172,11 @@ module PoieticGen
 					:position => self.position,
 					:user => self.user.id,
 					:content => if type == DESCRIPTION_FULL
-					            then self.to_patches_hash
-					            else [] end
+                                                    then self.to_patches_hash
+                                                    else [] end
 				}
 			end
+
 			return res
 		end
 
@@ -206,6 +208,7 @@ module PoieticGen
 					result.push patch
 				end
 			end
+
 			return result
 		end
 		
@@ -220,9 +223,13 @@ module PoieticGen
 					self.save
 				else
 					# last snapshot
-					snap = self.zone_snapshots.timeline.first(:order => [ :id.desc ]).zone_snapshot
+					last_timeline = self.zone_snapshots.timeline.first(:order => [ :id.desc ])
+					unless last_timeline.nil? then
+						snap = last_timeline.zone_snapshot
+					end
 				end
 			end
+
 			return snap
 		end
 

@@ -32,8 +32,8 @@ module PoieticGen
 		property :data, Json, :required => true
 		
 		has n, :board_snapshots, :through => Resource
+		belongs_to :timeline, :key => true
 		belongs_to :zone
-		belongs_to :timeline
 
 		def self.create data, zone
 			# @debug = true

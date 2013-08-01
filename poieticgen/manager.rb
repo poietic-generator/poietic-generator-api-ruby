@@ -101,15 +101,15 @@ module PoieticGen
 						 else
 							 req.user_name
 						 end
-			
-			board = Board.first(
-				:session_token => req.session_token,
-				:closed => false
-			)
-			
-			raise InvalidSession, "Invalid session" if board.nil?
 
 			User.transaction do
+
+				board = Board.first(
+					:session_token => req.session_token,
+					:closed => false
+				)
+
+				raise InvalidSession, "Invalid session" if board.nil?
 
 				user = User.get req.user_id
 
@@ -272,17 +272,17 @@ module PoieticGen
 			rdebug "updating with : %s" % data.inspect
 			req = UpdateRequest.parse data
 			
-			board = Board.get session[PoieticGen::Api::SESSION_BOARD]
-			
-			raise InvalidSession, "Invalid session" if board.nil? or board.closed
-
 			# prepare empty result message
 			result = nil
+			now = Time.now.to_i
 
 			User.transaction do
 
+				board = Board.get session[PoieticGen::Api::SESSION_BOARD]
+
+				raise InvalidSession, "Invalid session" if board.nil? or board.closed
+
 				user = User.get session[PoieticGen::Api::SESSION_USER]
-				now = Time.now.to_i
 
 				self.check_expired_users
 
@@ -344,14 +344,14 @@ module PoieticGen
 			rdebug "call with %s" % params.inspect
 			req = SnapshotRequest.parse params
 			result = nil
-			
-			board = Board.first(
-				:session_token => req.session_token
-			)
-			
-			raise InvalidSession, "Invalid session" if board.nil?
 
 			User.transaction do
+
+				board = Board.first(
+					:session_token => req.session_token
+				)
+
+				raise InvalidSession, "Invalid session" if board.nil?
 
 				self.check_expired_users
 
@@ -438,14 +438,14 @@ module PoieticGen
 			req = UpdateViewRequest.parse params
 			now_i = Time.now.to_i
 			result = nil
-			
-			board = Board.first(
-				:session_token => req.session_token
-			)
-			
-			raise InvalidSession, "Invalid session" if board.nil?
 
-			Event.transaction do
+			User.transaction do
+
+				board = Board.first(
+					:session_token => req.session_token
+				)
+
+				raise InvalidSession, "Invalid session" if board.nil?
 
 				self.check_expired_users
 
