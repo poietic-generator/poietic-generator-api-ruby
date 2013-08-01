@@ -106,7 +106,7 @@
 		);
 
 		// Bot starts with a combination of keys
-		$(document).bind("keydown", function (event) {
+		$(document).bind("keydown", function bot_keydown_handle(event) {
 			if (bot_cur_key < bot_keys.length && event.keyCode === bot_keys[bot_cur_key]) {
 				bot_cur_key += 1;
 
@@ -122,6 +122,9 @@
 
 					bot_cur_key = 0;
 				}
+			} else if (bot_cur_key !== 0) {
+				bot_cur_key = 0;
+				bot_keydown_handle(event);
 			} else {
 				bot_cur_key = 0;
 			}
