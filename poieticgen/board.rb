@@ -155,7 +155,7 @@ module PoieticGen
 				self.strokes_since_last_snapshot += drawing.size
 
 				if self.strokes_since_last_snapshot > STROKE_COUNT_BETWEEN_QFRAMES then
-					BoardSnapshot.new self
+					BoardSnapshot.create self
 					self.strokes_since_last_snapshot = 0
 				end
 

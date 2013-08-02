@@ -34,24 +34,23 @@ module PoieticGen
 		belongs_to :timeline
 		belongs_to :board
 
-		def initialize board
+		def self.create board
 			# @debug = true
-			
-			json = {
-				:board => board,
-				:timeline => (Timeline.create_now board),
-				:zone_snapshots => []
-			}
-			super json
+
+			zone_snaps = []
 
 			board.zones.each do |zone|
 				unless zone.expired then
-					self.zone_snapshots<< zone.snapshot
+					zone_snaps.push zone.snapshot
 				end
 			end
 
 			begin
-				self.save
+				super ({
+					:board => board,
+					:timeline => (Timeline.create_now board),
+					:zone_snapshots => zone_snaps
+				})
 			rescue DataMapper::SaveFailureError => e
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e
