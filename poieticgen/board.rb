@@ -114,6 +114,8 @@ module PoieticGen
 				user.zone = zone
 				zones << zone
 				zone.save
+
+				Event.create_join user, self
 			end
 			return zone
 		end
@@ -129,6 +131,8 @@ module PoieticGen
 					zone.reset
 					zone.disable
 					zone.save
+
+					Event.create_leave user, self
 				else
 					#FIXME: return an error to the user?
 				end

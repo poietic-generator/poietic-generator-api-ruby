@@ -30,6 +30,7 @@ module PoieticGen
 		include DataMapper::Resource
 
 		property :id,	Serial
+		property :token, String, :required => true, :unique => true
 		property :name,	String, :required => true
 		property :created_at, Integer, :required => true
 		property :alive_expires_at, Integer, :required => true
@@ -47,6 +48,7 @@ module PoieticGen
 
 			super({
 				:board => board,
+				:token => (0...32).map{ ('a'..'z').to_a[rand(26)] }.join,
 				:name => name,
 				:zone => nil,
 				:created_at => now.to_i,

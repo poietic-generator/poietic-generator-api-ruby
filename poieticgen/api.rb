@@ -75,21 +75,6 @@ module PoieticGen
 		
 		register Sinatra::Flash
 
-
-		helpers do
-			#
-			# verify that session exist
-			# FIXME: verify also that it is alive
-			#
-			def validate_session! session
-				# STDERR.puts "API -- validate_session: %s" % session.inspect
-				if not session.include? SESSION_USER or
-					session[SESSION_USER].nil? then
-					raise PoieticGen::SessionLostException, "Please re-join the session"
-				end
-			end
-		end
-
 		configure :development do |c|
 			require "sinatra/reloader"
 			register Sinatra::Reloader
@@ -97,6 +82,7 @@ module PoieticGen
 		end
 
 		configure do
+
 			# Compass assets management
 			Compass.add_project_configuration(File.join(settings.root, 'config', 'compass.rb'))
 
@@ -108,8 +94,8 @@ module PoieticGen
 				end
 
 				set :config, config
-				#DataMapper::Logger.new(STDERR, :info)
-				DataMapper::Logger.new(STDERR, :debug)
+				DataMapper::Logger.new(STDERR, :info)
+				#DataMapper::Logger.new(STDERR, :debug)
 				hash = config.database.get_hash
 				pp "db hash :", hash
 				DataMapper.setup(:default, hash)
@@ -160,7 +146,6 @@ module PoieticGen
 		end
 
 		get '/' do
-			session[SESSION_USER] ||= nil
 			@page = Page.new "index"
 			@session_list = {}
 			@selected_session = ""
@@ -208,10 +193,8 @@ module PoieticGen
 		end
 
 
-		get '/session/:session_token/logout' do
-			# ensure that lazy session loading will work
-			session[SESSION_USER] ||= nil
-			settings.manager.leave session
+		get '/session/:session_token/logout/:user_token' do
+			settings.manager.leave params['user_token'], params['session_token']
 			response.set_cookie('user_id', {:value => nil, :path => "/"});
 			redirect '/'
 		end
@@ -258,7 +241,7 @@ module PoieticGen
 			begin
 				result = {}
 				status = [ STATUS_SUCCESS ]
-				result = settings.manager.join session, params
+				result = settings.manager.join params
 
 			rescue PoieticGen::JoinRequestParseError => e
 				STDERR.puts e.inspect, e.backtrace
@@ -291,20 +274,11 @@ module PoieticGen
 		post '/session/:session_token/draw/update.json' do
 			begin
 				result = {}
-				# verify session expiration..
-				validate_session! session
 				status = [ STATUS_SUCCESS ]
 				
-				# FIXME: check if params['session_token'] == board.session_token
-
-				# FIXME: there are db requests to get user/board twice (in check_lease and update_data)
-				if settings.manager.check_lease! session then
-					data = JSON.parse(request.body.read)
-					result = settings.manager.update_data session, data
-				else
-					STDERR.puts "Session has expired!"
-					status = [ STATUS_REDIRECTION, "Session has expired !", "/"]
-				end
+				data = JSON.parse(request.body.read)
+				data['session_token'] = params[:session_token]
+				result = settings.manager.update_data data
 
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors
@@ -318,10 +292,6 @@ module PoieticGen
 			rescue PoieticGen::InvalidSession => e
 				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_REDIRECTION, "Session has expired !", "/"]
-
-			rescue PoieticGen::SessionLostException => e
-				STDERR.puts e.inspect, e.backtrace
-				status = [ STATUS_REDIRECTION, e.message, "/session/%s/draw" % params['session_token'] ]
 
 			rescue ArgumentError => e
 				STDERR.puts e.inspect, e.backtrace
@@ -347,9 +317,8 @@ module PoieticGen
 		get '/session/:session_token/view/snapshot.json' do
 			begin
 				result = {}
-				# verify session expiration..
 				status = [ STATUS_SUCCESS ]
-				result = settings.manager.snapshot session, params
+				result = settings.manager.snapshot params
 
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors
@@ -359,10 +328,6 @@ module PoieticGen
 			rescue PoieticGen::SnapshotRequestParseError => e
 				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
-
-			rescue PoieticGen::InvalidSession => e
-				STDERR.puts e.inspect, e.backtrace
-				status = [ STATUS_REDIRECTION, "Session does not exist!", "/"]
 
 			rescue ArgumentError => e
 				STDERR.puts e.inspect, e.backtrace
@@ -392,9 +357,7 @@ module PoieticGen
 			begin
 				result = {}
 				status = [ STATUS_SUCCESS ]
-
-
-				result = settings.manager.update_view session, params
+				result = settings.manager.update_view params
 
 			rescue JSON::ParserError => e
 				# handle non-JSON parsing errors
@@ -404,10 +367,6 @@ module PoieticGen
 			rescue PoieticGen::UpdateViewRequestParseError => e
 				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
-
-			rescue PoieticGen::InvalidSession => e
-				STDERR.puts e.inspect, e.backtrace
-				status = [ STATUS_REDIRECTION, "Session does not exist!", "/"]
 
 			rescue ArgumentError => e
 				STDERR.puts e.inspect, e.backtrace

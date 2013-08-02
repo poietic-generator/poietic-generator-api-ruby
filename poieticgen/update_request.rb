@@ -38,6 +38,8 @@ module PoieticGen
 
 		UPDATE_INTERVAL = 'update_interval'
 		
+		USER_TOKEN = 'user_token'
+
 		SESSION_TOKEN = 'session_token'
 		SINATRA_SPLAT = 'splat'
 		SINATRA_CAPTURES = 'captures'
@@ -75,6 +77,8 @@ module PoieticGen
 				    		rdebug e
 				    		raise UpdateRequestParseError, ("%s with invalid value : " % UPDATE_INTERVAL)
 					end
+				when USER_TOKEN then
+					rdebug "user_token : %s" % val.inspect
 				when SESSION_TOKEN then
 					rdebug "session_token : %s" % val.inspect
 				when SINATRA_SPLAT then
@@ -90,7 +94,9 @@ module PoieticGen
 				TIMELINE_AFTER,
 				STROKES,
 				MESSAGES,
-				UPDATE_INTERVAL
+				UPDATE_INTERVAL,
+				USER_TOKEN,
+				SESSION_TOKEN
 			].each do |field|
 				unless hash.include? field then
 					raise UpdateRequestParseError, ("The '%s' field is missing" % field)
@@ -128,7 +134,11 @@ module PoieticGen
 		def update_interval
 			return @hash[UPDATE_INTERVAL].to_i
     		end
-    		
+
+    		def user_token
+			return @hash[USER_TOKEN]
+		end
+
     		def session_token
 			return @hash[SESSION_TOKEN]
 		end

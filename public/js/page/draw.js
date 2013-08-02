@@ -67,9 +67,11 @@
 			KEY_A ];
 
 		$(".logout").bind("click", function (event) {
+			event.preventDefault();
 			if (!confirm("Leave Poietic Generator?")) {
 				return false;
 			}
+			document.location = $(this).attr("href") + "/" + session.user_token;
 			return true;
 		});
 
