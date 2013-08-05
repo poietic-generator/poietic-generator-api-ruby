@@ -26,7 +26,7 @@ module PoieticGen
 
 	class JoinRequest
 
-		USER_ID = 'user_id'
+		USER_TOKEN = 'user_token'
 		SESSION_TOKEN = 'session_token'
 		USER_NAME = 'user_name'
 
@@ -48,13 +48,8 @@ module PoieticGen
 				case key
 				when USER_NAME then
 				  	rdebug "user_name : %s" % val.inspect
-				when USER_ID then
-				  	begin
-				    		rdebug "user_id : %d" % val.to_i
-				  	rescue Exception => e
-				    		rdebug e
-				    		raise JoinRequestParseError, ("%s with invalid value : " % USER_ID)
-					end
+				when USER_TOKEN then
+				  	rdebug "user_token : %s" % val.inspect
 				when SESSION_TOKEN then
 					rdebug "session_token : %s" % val.inspect
 				when SINATRA_SPLAT then
@@ -78,8 +73,8 @@ module PoieticGen
 		end
 
 
-		def user_id
-			return @hash[USER_ID].to_i
+		def user_token
+			return @hash[USER_TOKEN]
 		end
 
 		def user_name

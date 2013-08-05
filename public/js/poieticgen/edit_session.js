@@ -42,10 +42,11 @@
 			self = this,
 			_current_timeline_id = 0,
 			_game = null,
-			_dispatch_strokes_body,
-			_session;
+			_dispatch_strokes_body;
 
+		this.session_token = null;
 		this.user_id = null;
+		this.user_token = null;
 		this.zone_column_count = null;
 		this.zone_line_count = null;
 		this.user_zone = null;
@@ -56,7 +57,7 @@
 		* Semi-Constructor
 		*/
 		this.initialize = function () {
-			var user_id = $.cookie('user_id'),
+			var user_token = $.cookie('user_token'),
 				user_name = $.cookie('user_name'),
 				session_opts = [],
 				session_url = null,
@@ -64,21 +65,21 @@
 
 			url_matches = /\/session\/(\w+)\/draw/.exec(window.location);
 			if (url_matches !== null && url_matches.length === 2) {
-				_session = url_matches[1];
+				self.session_token = url_matches[1];
 			} else {
-				_session = ""; // Error
+				self.session_token = ""; // Error
 			}
 
 			_game = new PoieticGen.Game();
 
-			if (user_id !== null) {
-				session_opts.push("user_id=" + user_id);
+			if (user_token !== null) {
+				session_opts.push("user_token=" + user_token);
 			}
 			if (user_name !== null) {
 				session_opts.push("user_name=" + user_name);
 			}
 
-			session_url = "/session/" + _session + "/draw/join.json?" + session_opts.join('&');
+			session_url = "/session/" + self.session_token + "/draw/join.json?" + session_opts.join('&');
 
 			// get session info from
 
@@ -98,6 +99,7 @@
 					this.user_zone = response.user_zone;
 					this.other_users = response.other_users;
 					this.other_zones = response.other_zones;
+					this.user_token = response.user_token;
 					this.user_id = response.user_id;
 					this.user_name = response.user_name;
 					this.zone_column_count = response.zone_column_count;
@@ -105,7 +107,7 @@
 
 					_current_timeline_id = response.timeline_id;
 
-					$.cookie('user_id', this.user_id, {path: "/"});
+					$.cookie('user_token', this.user_token, {path: "/"});
 					$.cookie('user_name', this.user_name, {path: "/"});
 					// console.log('edit_session/join response mod : ' + JSON.stringify(this));
 
@@ -194,8 +196,8 @@
 				i,
 				observers = _game.observers();
 
-			// skip if no user id assigned
-			if (!self.user_id) {
+			// skip if no user token assigned
+			if (!self.user_token) {
 				window.setTimeout(self.update, DRAW_SESSION_UPDATE_INTERVAL);
 				return null;
 			}
@@ -224,13 +226,14 @@
 				strokes : strokes_updates,
 				messages : messages_updates,
 
-				update_interval : DRAW_SESSION_UPDATE_INTERVAL / 1000
+				update_interval : DRAW_SESSION_UPDATE_INTERVAL / 1000,
+				user_token : self.user_token
 			};
 
 			console.log("edit_session/update: req = " + JSON.stringify(req));
 			self.last_update_time = new Date();
 			$.ajax({
-				url: "/session/" + _session + "/draw/update.json",
+				url: "/session/" + self.session_token + "/draw/update.json",
 				dataType: "json",
 				data: JSON.stringify(req),
 				type: 'POST',

@@ -29,6 +29,7 @@ require 'poieticgen/board'
 require 'poieticgen/zone'
 require 'poieticgen/palette'
 require 'poieticgen/user'
+require 'poieticgen/admin'
 require 'poieticgen/event'
 require 'poieticgen/chat_manager'
 require 'poieticgen/message'
@@ -67,10 +68,9 @@ module PoieticGen
 		end
 
 
-		def create_session session, params
+		def create_session params
+			is_admin = admin? params
 
-			is_admin = session[PoieticGen::Api::SESSION_AUTH]
-			
 			raise AdminSessionNeeded, "You have not the right to do that, please login as admin." if not is_admin
 			
 			# Create board with the configuration
@@ -83,15 +83,15 @@ module PoieticGen
 		#
 		# generates an unpredictible user id based on session id & user counter
 		#
-		def join session, params
+		def join params
 			req = JoinRequest.parse params
 
 			is_new = true
 			result = nil
 
 			# FIXME: prevent session from being stolen...
-			rdebug "requesting id=%d, session=%s, name=%s" \
-				% [ req.user_id, req.session_token, req.user_name ]
+			rdebug "requesting user_token=%s, session=%s, name=%s" \
+				% [ req.user_token, req.session_token, req.user_name ]
 
 			user = nil
 			now = Time.now
@@ -111,7 +111,9 @@ module PoieticGen
 
 				raise InvalidSession, "Invalid session" if board.nil?
 
-				user = User.get req.user_id
+				user = User.first(
+					:token => req.user_token
+				)
 
 				if user.nil? then
 					user = User.new param_name, board, @config.user
@@ -137,7 +139,6 @@ module PoieticGen
 				# join the board
 				if is_new then
 					zone = board.join user, @config.board
-					Event.create_join user, board
 				else
 					zone = user.zone
 				end
@@ -150,10 +151,7 @@ module PoieticGen
 				end
 
 				rdebug "User : ", user
-				session[PoieticGen::Api::SESSION_USER] = user.id
-				session[PoieticGen::Api::SESSION_BOARD] = board.id
 
-				# FIXME: test request user_id
 				# FIXME: test request username
 
 				# clean-up users first
@@ -174,7 +172,9 @@ module PoieticGen
 				rdebug "msg_history req : %s" % msg_history.inspect
 
 
-				result = { :user_id => user.id,
+				result = {
+					:user_token => user.token,
+					:user_id => user.id, # FIXME: redundant information
 					:user_name => user.name,
 					:user_zone => (zone.to_desc_hash Zone::DESCRIPTION_FULL),
 					:other_users => other_users,
@@ -191,13 +191,13 @@ module PoieticGen
 			return result
 		end
 		
-		def admin_join session, params
+		def admin_join params
 			req_name = params[:user_name]
 			req_password = params[:user_password]
 
 			# FIXME: prevent session from being stolen...
 			rdebug "requesting name=%s" % req_name
-			
+
 			user = nil
 			now = Time.now
 
@@ -205,59 +205,57 @@ module PoieticGen
 			           else req_password == @config.server.admin_password and
 			                req_name == @config.server.admin_username
 			           end
-			
+
 			raise AdminSessionNeeded, "Invalid parameters." if not is_admin
+
+			admin = Admin.first(:name => req_name)
 			
-			session[PoieticGen::Api::SESSION_AUTH] = true
+			if admin.nil? then
+				admin = Admin.create req_name, @config.user
+			else
+				admin.report_expiration @config.user
+			end
+
+			return admin.token
 		end
 
 
-		def leave session
-			rdebug "FIXME: LEAVE(session)", session
+		def leave user_token, session_token
+			rdebug "FIXME: LEAVE(user_token)", user_token
+			#FIXME: use session_token?
 
-			session_user_id = session[PoieticGen::Api::SESSION_USER]
-			session_board_id = session[PoieticGen::Api::SESSION_BOARD]
-			
-			rdebug "FIXME: LEAVE(session_user_id)", session_user_id
+			user = User.first(:token => user_token)
 
-			board = Board.get session_board_id
-			rdebug "FIXME: LEAVE(board)", board
+			unless user.nil? then
+				board = user.board
 
-			unless board.nil? then
-				user = board.users.get session_user_id
-				rdebug "FIXME: LEAVE(user)", user
-
-				unless user.nil? then
-					user.set_expired
-					# create leave event if session is the current one
-					board.leave user
-					Event.create_leave user, board
-					user.save
-				else
-					rdebug "Could not find any user for this request (board=%s, session=%s)" % [ board.inspect, session.inspect]
-				end
+				user.set_expired
+				# create leave event if session is the current one
+				board.leave user
+				user.save
 			else
-				rdebug "Could not find any board for this request (session=%s)" % session.inspect
+				rdebug "Could not find any user for this request (user_token=%s)" % user_token
 			end
 		end
 
-		#
-		# if not expired, update lease
-		#
-		# no result expected
-		#
-		def check_lease! session
-			now = Time.now.to_i
-			
-			board = Board.get session[PoieticGen::Api::SESSION_BOARD]
-			
-			raise InvalidSession, "No opened session found for board %d" % session[PoieticGen::Api::SESSION_BOARD] if board.nil? or board.closed
 
-			user = User.get session[PoieticGen::Api::SESSION_USER]
-			rdebug "check_lease! user = ", user, " now = ", now
-			raise InvalidSession, "No user found with session_token %s in DB" % board.session_token if user.nil?
+		def admin_leave params
+			req_token = params[:admin_token]
 
-			return (not user.expired?)
+			admin = Admin.first(:token => req_token)
+
+			unless admin.nil? then
+				admin.set_expired
+			end
+		end
+
+
+		def admin? params
+			req_token = params[:admin_token]
+
+			admin = Admin.first(:token => req_token)
+
+			return (!admin.nil? and !admin.expired?)
 		end
 
 
@@ -266,27 +264,34 @@ module PoieticGen
 		#
 		# return latest updates from everyone !
 		#
-		def update_data session, data
+		def update_data data
 
 			# parse update request first
 			rdebug "updating with : %s" % data.inspect
+
 			req = UpdateRequest.parse data
-			
+
 			# prepare empty result message
 			result = nil
 			now = Time.now.to_i
 
 			User.transaction do
 
-				board = Board.get session[PoieticGen::Api::SESSION_BOARD]
+				user = User.first(:token => req.user_token)
 
-				raise InvalidSession, "Invalid session" if board.nil? or board.closed
+				if user.nil? or user.expired? then
+					raise InvalidSession, "Session has expired!"
+				end
 
-				user = User.get session[PoieticGen::Api::SESSION_USER]
+				board = user.board
+
+				if board.nil? or
+				   board.closed or
+				   board.session_token != req.session_token then
+					raise InvalidSession, "No opened session found for board %s" % req.session_token
+				end
 
 				self.check_expired_users
-
-				raise InvalidSession, "Invalid session" if user.nil?
 
 				ref_stamp = user.last_update_time - req.update_interval
 
@@ -339,7 +344,7 @@ module PoieticGen
 		#
 		# Return a session snapshot
 		#
-		def snapshot session, params
+		def snapshot params
 
 			rdebug "call with %s" % params.inspect
 			req = SnapshotRequest.parse params
@@ -432,7 +437,7 @@ module PoieticGen
 		#
 		# Get strokes and events for a non-user viewer.
 		#
-		def update_view session, params
+		def update_view params
 
 			rdebug "call with %s" % params.inspect
 			req = UpdateViewRequest.parse params
@@ -561,10 +566,7 @@ module PoieticGen
 				)
 				rdebug "New expired list : %s" % newly_expired_users.inspect
 				newly_expired_users.each do |leaver|
-					fake_session = {}
-					fake_session[PoieticGen::Api::SESSION_USER] = leaver.id
-					fake_session[PoieticGen::Api::SESSION_BOARD] = leaver.board.id
-					self.leave fake_session
+					self.leave leaver.token, leaver.board.session_token
 				end
 				@last_leave_check_time = now
 			end

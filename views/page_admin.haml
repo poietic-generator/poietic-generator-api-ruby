@@ -8,8 +8,8 @@
 #session-zone{"data-fullscreen" => "false", "data-role" => "page"}
   %div{"data-id" => "head", "data-position" => "fixed", "data-role" => "header"}
     %h1.username Administration
-    - url = "/session/%s/logout" % @params[:session_token]
+    - url = "/user/logout?admin_token=%s" % @params[:admin_token]
     %a.ui-btn-right.logout{"data-ajax" => "false", :href => url} Logout
   #page-container{"data-role" => "content"}
     .admin-buttons
-      %a{"data-ajax" => "false", "href" => "/session/create", "data-role" => "button"} New session
+      %a{"data-ajax" => "false", "href" => "/session/create?admin_token=%s" % @params[:admin_token], "data-role" => "button"} New session
