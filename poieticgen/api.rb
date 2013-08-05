@@ -22,6 +22,7 @@
 ##############################################################################
 
 require 'sinatra/base'
+require 'sinatra/cookies'
 require 'sinatra/flash'
 
 require 'poieticgen/config_manager'
@@ -47,17 +48,13 @@ module PoieticGen
 		STATUS_REDIRECTION = 3
 		STATUS_SERVER_ERROR = 4
 		STATUS_BAD_REQUEST = 5
-
-		SESSION_USER = :user
-		SESSION_BOARD = :board
-		SESSION_AUTH = :auth
 		
 		SESSION_MAX_LISTED_COUNT = 5
 
-		enable :sessions
 		enable :run
-		# set :session_secret, "FIXME: this should be removed :)"
 		#disable :run
+
+		helpers Sinatra::Cookies
 
 		#set :environment, :development
 		set :root, File.expand_path(File.join(File.dirname(__FILE__),'..'))
@@ -73,7 +70,7 @@ module PoieticGen
 		mime_type :otf, "application/octet-stream"
 		mime_type :woff, "application/octet-stream"
 		
-		register Sinatra::Flash
+		register Sinatra::Flash # FIXME: doesn't work
 
 		configure :development do |c|
 			require "sinatra/reloader"
@@ -126,7 +123,7 @@ module PoieticGen
 		#
 		get '/session/create' do
 			begin
-				session_id = settings.manager.create_session session, params
+				session_id = settings.manager.create_session params
 				flash[:success] = "Session %d created!" % session_id
 
 			rescue PoieticGen::AdminSessionNeeded => e
@@ -199,16 +196,18 @@ module PoieticGen
 			redirect '/'
 		end
 
+
 		get '/user/login' do 
 			@page = Page.new "Login"
 			haml :page_login
 		end
-		
+
+
 		post '/user/login' do 
 			begin
-				settings.manager.admin_join session, params
-				
-				redirect '/session/admin'
+				admin_token = settings.manager.admin_join params
+
+				redirect '/session/admin?admin_token=%s' % admin_token
 			
 			rescue PoieticGen::AdminSessionNeeded => e
 				flash[:error] = "Invalid username or password"
@@ -220,8 +219,14 @@ module PoieticGen
 			end
 		end
 
+
 		get '/session/admin' do 
-			if session[SESSION_AUTH] then
+
+			if params[:admin_token].nil? then
+				params[:admin_token] = cookies[:admin_token] # prevent session from being lost
+			end
+
+			if settings.manager.admin? params then
 				@page = Page.new "admin"
 				haml :page_admin
 			else
@@ -229,10 +234,18 @@ module PoieticGen
 			end
 		end
 
+
+		get '/user/logout' do
+			settings.manager.admin_leave params
+			redirect '/'
+		end
+
+
 		get '/session/list' do
 			@page = Page.new "list"
 			haml :page_list
 		end
+
 
 		#
 		# notify server about the intention of joining the session

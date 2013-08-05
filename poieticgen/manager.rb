@@ -29,6 +29,7 @@ require 'poieticgen/board'
 require 'poieticgen/zone'
 require 'poieticgen/palette'
 require 'poieticgen/user'
+require 'poieticgen/admin'
 require 'poieticgen/event'
 require 'poieticgen/chat_manager'
 require 'poieticgen/message'
@@ -67,10 +68,9 @@ module PoieticGen
 		end
 
 
-		def create_session session, params
+		def create_session params
+			is_admin = admin? params
 
-			is_admin = session[PoieticGen::Api::SESSION_AUTH]
-			
 			raise AdminSessionNeeded, "You have not the right to do that, please login as admin." if not is_admin
 			
 			# Create board with the configuration
@@ -191,13 +191,13 @@ module PoieticGen
 			return result
 		end
 		
-		def admin_join session, params
+		def admin_join params
 			req_name = params[:user_name]
 			req_password = params[:user_password]
 
 			# FIXME: prevent session from being stolen...
 			rdebug "requesting name=%s" % req_name
-			
+
 			user = nil
 			now = Time.now
 
@@ -205,10 +205,18 @@ module PoieticGen
 			           else req_password == @config.server.admin_password and
 			                req_name == @config.server.admin_username
 			           end
-			
+
 			raise AdminSessionNeeded, "Invalid parameters." if not is_admin
+
+			admin = Admin.first(:name => req_name)
 			
-			session[PoieticGen::Api::SESSION_AUTH] = true
+			if admin.nil? then
+				admin = Admin.create req_name, @config.user
+			else
+				admin.report_expiration @config.user
+			end
+
+			return admin.token
 		end
 
 
@@ -228,6 +236,26 @@ module PoieticGen
 			else
 				rdebug "Could not find any user for this request (user_token=%s)" % user_token
 			end
+		end
+
+
+		def admin_leave params
+			req_token = params[:admin_token]
+
+			admin = Admin.first(:token => req_token)
+
+			unless admin.nil? then
+				admin.set_expired
+			end
+		end
+
+
+		def admin? params
+			req_token = params[:admin_token]
+
+			admin = Admin.first(:token => req_token)
+
+			return (!admin.nil? and !admin.expired?)
 		end
 
 
