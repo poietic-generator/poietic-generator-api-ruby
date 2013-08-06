@@ -36,15 +36,13 @@ module PoieticGen
 		belongs_to :zone
 
 		def self.create_stroke color, changes, timestamp, zone
-			param_create = {
-				:color => color,
-				:changes => changes,
-				:zone => zone,
-				:timeline => (Timeline.create_with_time timestamp, zone.board)
-			}
-			
 			begin
-				create param_create
+				create ({
+					:color => color,
+					:changes => changes,
+					:zone => zone,
+					:timeline => (Timeline.create_with_time timestamp, zone.board)
+				})
 			rescue DataMapper::SaveFailureError => e
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e

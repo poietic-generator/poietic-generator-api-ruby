@@ -39,7 +39,7 @@ module PoieticGen
 			# @debug = true
 			begin
 				super ({
-					:data => data,
+					:data => zone.data,
 					:zone => zone,
 					:timeline => timeline
 				})

@@ -147,23 +147,38 @@ module PoieticGen
 				
 				# Update the zone
 
-				zone = user.zone # FIXME: verify if the user is in the board
+				zone = user.zone
 				unless zone.nil? then
 					zone.apply drawing
 				else
 					#FIXME: return an error to the user ?
 				end
+			end
+
+			begin
+				Board.transaction do
+					# Save board periodically
+
+					stroke_count = self.strokes_since_last_snapshot + drawing.size
+
+					if stroke_count > STROKE_COUNT_BETWEEN_QFRAMES then
+						board_snap = BoardSnapshot.create self
+						alive_zones = self.zones.all(:expired => false)
+
+						alive_zones.each do |zone|
+							board_snap.zone_snapshots << (zone.snapshot board_snap.timeline)
+						end
+
+						board_snap.save
 				
-				# Save board periodically
+						stroke_count = 0
+					end
 
-				self.strokes_since_last_snapshot += drawing.size
-
-				if self.strokes_since_last_snapshot > STROKE_COUNT_BETWEEN_QFRAMES then
-					BoardSnapshot.create self
-					self.strokes_since_last_snapshot = 0
+					self.strokes_since_last_snapshot = stroke_count
+					self.save
 				end
-
-				save
+			rescue Exception => e
+				STDERR.puts e.inspect, e.backtrace
 			end
 		end
 
