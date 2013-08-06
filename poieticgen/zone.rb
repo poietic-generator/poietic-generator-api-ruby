@@ -211,17 +211,11 @@ module PoieticGen
 			snap = nil
 			Zone.transaction do
 				unless self.is_snapshoted then
-					self.is_snapshoted = true
+					self.update(:is_snapshoted => true)
 
 					snap = ZoneSnapshot.create self, timeline
-
-					self.save
 				else
-					# last snapshot
-					last_timeline = self.zone_snapshots.timeline.first(:order => [ :id.desc ])
-					unless last_timeline.nil? then
-						snap = last_timeline.zone_snapshot
-					end
+					snap = self.zone_snapshots.first(:order => [ :timeline_id.desc ])
 				end
 			end
 
