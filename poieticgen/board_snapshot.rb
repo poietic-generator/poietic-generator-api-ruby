@@ -38,17 +38,18 @@ module PoieticGen
 			# @debug = true
 
 			zone_snaps = []
+			timeline = Timeline.create_now board
 
 			board.zones.each do |zone|
 				unless zone.expired then
-					zone_snaps.push zone.snapshot
+					zone_snaps.push (zone.snapshot timeline)
 				end
 			end
 
 			begin
 				super ({
 					:board => board,
-					:timeline => (Timeline.create_now board),
+					:timeline => timeline,
 					:zone_snapshots => zone_snaps
 				})
 			rescue DataMapper::SaveFailureError => e

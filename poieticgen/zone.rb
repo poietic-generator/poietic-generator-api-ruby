@@ -212,13 +212,13 @@ module PoieticGen
 			return result
 		end
 		
-		def snapshot
+		def snapshot timeline
 			snap = nil
 			Zone.transaction do
 				unless self.is_snapshoted then
 					self.is_snapshoted = true
 
-					snap = _take_snapshot
+					snap = ZoneSnapshot.create self, timeline
 
 					self.save
 				else
@@ -243,10 +243,6 @@ module PoieticGen
 			x = idx % self.width
 			y = idx / self.width
 			return x,y
-		end
-		
-		def _take_snapshot
-			ZoneSnapshot.create self.data, self
 		end
 	end
 end
