@@ -165,17 +165,14 @@ module PoieticGen
 		end
 
 		def to_desc_hash type
-			res = nil
-			Zone.transaction do
-				res = {
-					:index => self.index,
-					:position => self.position,
-					:user => self.user.id,
-					:content => if type == DESCRIPTION_FULL
-                                                    then self.to_patches_hash
-                                                    else [] end
-				}
-			end
+			res = {
+				:index => self.index,
+				:position => self.position,
+				:user => self.user.id,
+				:content => if type == DESCRIPTION_FULL
+                                            then self.to_patches_hash
+                                            else [] end
+			}
 
 			return res
 		end
@@ -186,27 +183,25 @@ module PoieticGen
 		#
 		def to_patches_hash
 			result = []
-			Zone.transaction do
-				patches = {}
+			patches = {}
 
-				self.width.times do |w|
-					self.height.times do |h|
-						color = self.data[_xy2idx(w,h)]
-						next if color.nil?
-						patches[color] = [] unless patches.include? color
-						patches[color].push [w,h,0]
-					end
+			self.width.times do |w|
+				self.height.times do |h|
+					color = self.data[_xy2idx(w,h)]
+					next if color.nil?
+					patches[color] = [] unless patches.include? color
+					patches[color].push [w,h,0]
 				end
-				patches.each do |color, where|
-					patch = {
-						:id => nil,
-						:zone => self.index,
-						:color => color,
-						:changes => where,
-						:diffstamp => nil
-					}
-					result.push patch
-				end
+			end
+			patches.each do |color, where|
+				patch = {
+					:id => nil,
+					:zone => self.index,
+					:color => color,
+					:changes => where,
+					:diffstamp => nil
+				}
+				result.push patch
 			end
 
 			return result
