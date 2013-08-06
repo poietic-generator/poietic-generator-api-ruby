@@ -333,10 +333,10 @@ module PoieticGen
 					# :stamp => (now - board.timestamp), # FIXME: unused by the client
 					# :idle_timeout => (user.idle_expires_at - now) # FIXME: unused by the client
 				}
-
-				rdebug "returning : %s" % result.inspect
-
 			end
+
+			rdebug "returning : %s" % result.inspect
+
 			return result
 		end
 
@@ -427,10 +427,10 @@ module PoieticGen
 					:date_range => date_range, # total time of session
 					:id => req.id
 				}
-
-				rdebug "returning : %s" % result.inspect
-
 			end
+
+			rdebug "returning : %s" % result.inspect
+
 			return result
 		end
 
@@ -542,9 +542,10 @@ module PoieticGen
 					:max_timestamp => max_timestamp,
 					:id => req.id,
 				}
-
-				rdebug "returning : %s" % result.inspect
 			end
+
+			rdebug "returning : %s" % result.inspect
+
 			return result
 		end
 
