@@ -217,8 +217,8 @@
 				}
 			}
 
-			console.log("edit_session/update: strokes_updates = " + JSON.stringify(strokes_updates));
-			console.log("edit_session/update: messages_updates = " + JSON.stringify(messages_updates));
+			//console.log("edit_session/update: strokes_updates = " + JSON.stringify(strokes_updates));
+			//console.log("edit_session/update: messages_updates = " + JSON.stringify(messages_updates));
 
 			req = {
 				timeline_after : _current_timeline_id,
@@ -239,7 +239,7 @@
 				type: 'POST',
 				context: self,
 				success: function (response) {
-					console.log('edit_session/update response : ' + JSON.stringify(response));
+					//console.log('edit_session/update response : ' + JSON.stringify(response));
 					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
 						self.treat_status_nok(response);
 					} else {
@@ -267,8 +267,6 @@
 				// Make absolute times
 				if (events[i].diffstamp) {
 					events[i].timestamp = parseInt(events[i].diffstamp, 10) + self.last_update_time.getTime() / 1000;
-				} else {
-					events[i].timestamp = self.last_update_time.getTime() / 1000;
 				}
 			}
 		};
@@ -291,7 +289,7 @@
 
 		this.handle_event = function (ev) {
 			var i;
-			console.log("edit_session/handle_event : " + JSON.stringify(ev));
+			//console.log("edit_session/handle_event : " + JSON.stringify(ev));
 			switch (ev.type) {
 			case "join":
 				this.other_users.push(ev.desc.user);

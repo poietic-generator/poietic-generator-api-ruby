@@ -59,7 +59,7 @@
 		_create_patch = function (pos, color) {
 			return {
 				zone: self.index,
-				diff: ((new Date()) - _session.last_update_time) / 1000,
+				diff: Math.floor(((new Date()) - _session.last_update_time) / 1000),
 				color: color,
 				changes: [ [ pos.x, pos.y, 0 ] ]
 			};
