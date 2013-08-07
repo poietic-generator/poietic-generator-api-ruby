@@ -20,6 +20,7 @@
 #                                                                            #
 ##############################################################################
 
+require 'optparse'
 
 module PoieticGen
 	class JoinRequestParseError < OptionParser::ParseError ; end

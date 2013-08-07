@@ -20,6 +20,8 @@
 #                                                                            #
 ##############################################################################
 
+require 'optparse'
+
 module PoieticGen
 	class SnapshotRequestParseError < OptionParser::ParseError ; end
 

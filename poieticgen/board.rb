@@ -45,11 +45,6 @@ module PoieticGen
 		property :end_timestamp, Integer, :default => 0
 		property :closed,        Boolean, :default => false
 		property :allocator_type, String, :required => true
-		# FIXME : maintain boundaries for the board
-		# property :boundary_left, Integer, :default => 0
-		# property :boundary_right, Integer, :default => 0
-		# property :boundary_top, Integer, :default => 0
-		# property :boundary_bottom, Integer, :default => 0
 		property :strokes_since_last_snapshot, Integer, :default => 0
 
 		has n, :board_snapshots
@@ -67,21 +62,18 @@ module PoieticGen
 		}
 
 
-		def initialize config
-			super({
-				# FIXME: when the token already exists, SaveFailureError is raised
-				:session_token => (0...16).map{ ('a'..'z').to_a[rand(26)] }.join,
-				:timestamp => Time.now.to_i,
-				:allocator_type => config.allocator
-			})
-
-			@debug = true
-			rdebug "using allocator %s" % config.allocator
-
+		def self.create config
 			begin
-				save
+				super({
+					# FIXME: when the token already exists, SaveFailureError is raised
+					:session_token => (0...16).map{ ('a'..'z').to_a[rand(26)] }.join,
+					:timestamp => Time.now.to_i,
+					:allocator_type => config.allocator
+				})
+
+				@debug = true
+				rdebug "using allocator %s" % config.allocator
 			rescue DataMapper::SaveFailureError => e
-				pp e.resource.errors.inspect
 				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e
 			end
@@ -224,7 +216,29 @@ module PoieticGen
 			
 			return zones
 		end
-		
+
+
+		def max_size
+			min_left = 0
+			max_right = 0
+			min_top = 0
+			max_bottom = 0
+
+			# FIXME: store zone size in board
+			self.zones.each do |zone|
+				x, y = zone.position
+				x *= zone.width
+				y *= zone.height
+				min_left = x if x < min_left
+				max_right = x + zone.width if x + zone.width > max_right
+				min_top = y if y < min_top
+				max_bottom = y + zone.height if y + zone.height > max_bottom
+			end
+
+			return (max_right - min_left), (max_bottom - min_top), min_left, min_top
+		end
+
+
 		private
 
 		#
@@ -241,35 +255,6 @@ module PoieticGen
 			end
 
 			return timeline.board_snapshot
-		end
-
-
-		#
-		# update boundaries of board
-		#
-		def _update_boundaries
-			Board.transaction do
-
-				@boundary_left = 0
-				@boundary_top = 0
-				@boundary_right = 0
-				@boundary_bottom = 0
-
-				@zones.each do |idx, zone|
-					x,y = zone.position
-					@boundary_left = x if x < @boundary_left
-					@boundary_right = x if x > @boundary_right
-					@boundary_top = y if y < @boundary_top
-					@boundary_bottom = y if y > @boundary_bottom
-				end
-
-				rdebug "Spiral/_update_boundaries : ", { 
-					:top => @boundary_top, 
-					:left => @boundary_left,
-					:right => @boundary_right,
-					:bottom => @boundary_bottom
-				}
-			end
 		end
 	end
 
