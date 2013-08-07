@@ -104,6 +104,9 @@ module PoieticGen
 
 			User.transaction do
 
+				# clean-up users first
+				self.check_expired_users
+
 				board = Board.first(
 					:session_token => req.session_token,
 					:closed => false
@@ -153,9 +156,6 @@ module PoieticGen
 				rdebug "User : ", user
 
 				# FIXME: test request username
-
-				# clean-up users first
-				self.check_expired_users
 
 				# get real users
 				users_db = board.users.all(
