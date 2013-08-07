@@ -38,6 +38,7 @@
 			_editor = null,
 			_base_hue = 0,
 			_started = false,
+			_current_line = 0,
 			_timer = null,
 			_str_pad_number = null,
 			_rgb_to_hex = null,
@@ -47,7 +48,7 @@
 			INTERVAL_AGRESSIVE = 40,
 			INTERVAL_STANDARD = 500,
 			INTERVAL_KIND = 1500,
-			STROKE_INTERVAL = INTERVAL_STANDARD;
+			STROKE_INTERVAL = INTERVAL_KIND;
 
 		this.name = "Bot";
 
@@ -142,10 +143,13 @@
 		};
 
 
-		_random_color = function () {
+		_random_color = function (value) {
 			var rgb;
 
-			rgb = _hsv_to_rgb(_base_hue, 80, Math.floor(Math.random() * 100));
+			if (typeof value === 'undefined') {
+				value = 25 + Math.floor(Math.random() * 75);
+			}
+			rgb = _hsv_to_rgb(_base_hue, 80, value);
 			console.log("color: #" + _rgb_to_hex(rgb[0], rgb[1], rgb[2]));
 
 			return "#" + _rgb_to_hex(rgb[0], rgb[1], rgb[2]);
@@ -162,7 +166,7 @@
 				};
 			}
 
-			color_hex = _random_color();
+			color_hex = _random_color(80);
 			if (typeof length === 'undefined') {
 				length = Math.floor(Math.random() * _editor.column_count);
 			}
@@ -206,6 +210,7 @@
 		this.initialize = function (editor) {
 			_editor = editor;
 			_base_hue = Math.floor(Math.random() * 360);
+			_current_line = 0;
 		};
 
 
@@ -226,12 +231,17 @@
 		this.draw_lines = function () {
 			var length = _editor.column_count, local_pos = {
 				x: 0,
-				y: Math.floor(Math.random() * _editor.line_count)
+				y: _current_line
 			};
 
 			_started = true;
+			_current_line = (_current_line + 1) % _editor.line_count;
 
 			_draw_random_line(local_pos, length, 0);
+
+			if (_current_line === 0) {
+				_base_hue = Math.floor(Math.random() * 360);
+			}
 
 			_timer = window.setTimeout(self.draw_lines, STROKE_INTERVAL);
 		};
