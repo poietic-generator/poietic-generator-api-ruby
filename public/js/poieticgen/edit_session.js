@@ -111,8 +111,6 @@
 					$.cookie('user_name', this.user_name, {path: "/"});
 					// console.log('edit_session/join response mod : ' + JSON.stringify(this));
 
-					console.log("gotcha!");
-
 					callback(self);
 
 					//console.log('edit_session/join post-callback ! observers = ' + JSON.stringify(_game.observers()));
@@ -235,6 +233,7 @@
 			$.ajax({
 				url: "/session/" + self.session_token + "/draw/update.json",
 				dataType: "json",
+				contentType: "application/json",
 				data: JSON.stringify(req),
 				type: 'POST',
 				context: self,
