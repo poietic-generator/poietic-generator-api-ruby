@@ -29,6 +29,7 @@
 	"use strict";
 
 	var DRAW_SESSION_UPDATE_INTERVAL = 1000,
+		DRAW_SESSION_JOIN_RETRY_INTERVAL = 1000,
 
 		STATUS_INFORMATION = 1,
 		STATUS_SUCCESS = 2,
@@ -57,11 +58,7 @@
 		* Semi-Constructor
 		*/
 		this.initialize = function () {
-			var user_token = $.cookie('user_token'),
-				user_name = $.cookie('user_name'),
-				session_opts = [],
-				session_url = null,
-				url_matches;
+			var url_matches;
 
 			url_matches = /\/session\/(\w+)\/draw/.exec(window.location);
 			if (url_matches !== null && url_matches.length === 2) {
@@ -71,6 +68,20 @@
 			}
 
 			_game = new PoieticGen.Game();
+
+			self.join();
+
+			this.register(self);
+		};
+
+
+		this.join = function () {
+			var user_token = $.cookie('user_token'),
+				user_name = $.cookie('user_name'),
+				session_opts = [],
+				session_url = null;
+
+			_game.reset(); // Observers needs to be cleared because callback reregister all
 
 			if (user_token !== null) {
 				session_opts.push("user_token=" + user_token);
@@ -128,10 +139,11 @@
 
 					console.log('edit_session/join end');
 
+				},
+				error: function (response) {
+					window.setTimeout(self.join, DRAW_SESSION_JOIN_RETRY_INTERVAL);
 				}
 			});
-
-			this.register(self);
 		};
 
 
