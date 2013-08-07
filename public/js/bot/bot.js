@@ -220,6 +220,7 @@
 				y: Math.floor(Math.random() * _editor.line_count)
 			};
 
+			self.stop();
 			_started = true;
 
 			_editor.pixel_set(local_pos, _random_color());
@@ -234,6 +235,7 @@
 				y: _current_line
 			};
 
+			self.stop();
 			_started = true;
 			_current_line = (_current_line + 1) % _editor.line_count;
 
