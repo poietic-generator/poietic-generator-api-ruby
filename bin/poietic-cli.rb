@@ -118,8 +118,7 @@ module PoieticGen
 
 				FileUtils.mkdir_p directory
 
-				# TODO: interval
-				(offset_start..offset_end).each do |offset|
+				(offset_start..offset_end).step(interval).each do |offset|
 					filename = '%s/image-%d.png' % [ directory, offset ]
 					_take_snap board, offset, filename, factor
 				end
