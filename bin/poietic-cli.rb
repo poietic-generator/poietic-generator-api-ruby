@@ -86,8 +86,65 @@ module PoieticGen
 					return
 				end
 
+				_take_snap board, offset.to_i, filename, factor.to_i
+			end
+
+			desc "range ID", "Duration of session ID"
+			def range id
+				configure
+				board = PoieticGen::Board.first(:id => id.to_i)
+
 				# FIXME: when not closed, remove ~30 seconds from finish
-				offset = offset.to_i
+				start = board.timestamp
+				finish = if board.closed then board.end_timestamp else Time.now.to_i end
+
+				puts "%d" % (finish - start)
+			end
+
+			desc "sequence ID OFFSET_START OFFSET_END INTERVAL DIRECTORY [FACTOR]", "Dump a sequence of snapshots in session ID between OFFSET_START and OFFSET_END with INTERVAL, and save it in DIRECTORY"
+			def sequence id, offset_start, offset_end, interval, directory, factor=1
+				configure
+				board = PoieticGen::Board.first(:id => id.to_i)
+
+				if board.nil? then
+					puts "The board %s does not exist" % id
+					return
+				end
+
+				offset_start = offset_start.to_i
+				offset_end = offset_end.to_i
+				interval = interval.to_i
+				factor = factor.to_i
+
+				# TODO: interval + dir creation
+				(offset_start..offset_end).each do |offset|
+					filename = '%s/image-%d.png' % [ directory, offset ]
+					_take_snap board, offset, filename, factor
+				end
+			end
+
+			private
+			def configure
+				$stdout = File.new '/dev/null', 'w' # mute STDOUT
+
+				@config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
+				DataMapper::Logger.new(STDERR, :info)
+				#DataMapper::Logger.new(STDERR, :debug)
+				hash = @config.database.get_hash
+				#pp "db hash :", hash
+				DataMapper.setup(:default, hash)
+
+				# raise exception on save failure (globally across all models)
+				DataMapper::Model.raise_on_save_failure = true
+
+				DataMapper.auto_upgrade!
+
+				$stdout = STDOUT # unmute STDOUT
+			end
+
+
+			def _take_snap board, offset, filename, factor
+				# FIXME: when not closed, remove ~30 seconds from finish
 				timestamp = board.timestamp + offset
 				end_timestamp = if board.closed then board.end_timestamp else Time.now.to_i end
 
@@ -101,7 +158,6 @@ module PoieticGen
 
 				width, height, diff_x, diff_y = board.max_size
 
-				factor = factor.to_i
 				black = PoieticGen::CLI::Color.from_rgb(0, 0, 0)
 				image = PoieticGen::CLI::Image.new width * factor, height * factor, black
 
@@ -126,38 +182,6 @@ module PoieticGen
 				end
 
 				image.save filename
-			end
-			
-			desc "range ID", "Duration of session ID"
-			def range id
-				configure
-				board = PoieticGen::Board.first(:id => id.to_i)
-				
-				# FIXME: when not closed, remove ~30 seconds from finish
-				start = board.timestamp
-				finish = if board.closed then board.end_timestamp else Time.now.to_i end
-				
-				puts "%d" % (finish - start)
-			end
-
-
-			private
-			def configure
-				$stdout = File.new '/dev/null', 'w' # mute STDOUT
-
-				@config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
-				DataMapper::Logger.new(STDERR, :info)
-				#DataMapper::Logger.new(STDERR, :debug)
-				hash = @config.database.get_hash
-				#pp "db hash :", hash
-				DataMapper.setup(:default, hash)
-
-				# raise exception on save failure (globally across all models)
-				DataMapper::Model.raise_on_save_failure = true
-
-				DataMapper.auto_upgrade!
-
-				$stdout = STDOUT # unmute STDOUT
 			end
 		end
 
