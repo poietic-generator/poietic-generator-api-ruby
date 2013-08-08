@@ -137,7 +137,9 @@ module PoieticGen
 
 					changes.each do |x,y,t_offset|
 						idx = _xy2idx(x,y)
-						self.data[idx] = color
+						if idx >= 0 and idx < self.data.length then
+							self.data[idx] = color
+						end
 					end
 				end
 

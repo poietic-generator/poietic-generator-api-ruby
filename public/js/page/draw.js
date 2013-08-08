@@ -119,7 +119,7 @@
 					if (bot.started()) {
 						bot.stop();
 					} else {
-						bot.draw();
+						bot.draw_lines();
 					}
 
 					bot_cur_key = 0;
