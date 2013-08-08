@@ -19,6 +19,13 @@ module PoieticGen
 				super x, y, color
 			end
 
+			def draw_rect x, y, w, h, color
+				(y..y+h-1).each do |_y|
+					(x..x+w-1).each do |_x|
+						set_pixel _x, _y, color
+					end
+				end
+			end
 
 			def save filename
 				super filename

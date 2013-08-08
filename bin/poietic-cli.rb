@@ -76,8 +76,8 @@ module PoieticGen
 				end
 			end
 
-			desc "shapshot ID OFFSET FILENAME", "Dump snapshot in session ID at OFFSET and save it in FILENAME"
-			def snapshot id, offset, filename
+			desc "shapshot ID OFFSET FILENAME [FACTOR]", "Dump snapshot in session ID at OFFSET and save it in FILENAME"
+			def snapshot id, offset, filename, factor=1
 				configure
 				board = PoieticGen::Board.first(:id => id.to_i)
 
@@ -101,8 +101,9 @@ module PoieticGen
 
 				width, height, diff_x, diff_y = board.max_size
 
+				factor = factor.to_i
 				black = PoieticGen::CLI::Color.from_rgb(0, 0, 0)
-				image = PoieticGen::CLI::Image.new width, height, black
+				image = PoieticGen::CLI::Image.new width * factor, height * factor, black
 
 				pp "board width=%d, height=%d, x=%d, y=%d" % [ width, height, diff_x, diff_y ]
 
@@ -117,7 +118,9 @@ module PoieticGen
 					(0..zone.height-1).each do |y|
 						(0..zone.width-1).each do |x|
 							color = PoieticGen::CLI::Color.from_hex (zone.color x, y)
-							image.set_pixel (zone_x + x), (zone_y + y), color
+							image.draw_rect (zone_x + x) * factor,
+								(zone_y + y) * factor,
+								factor, factor, color
 						end
 					end
 				end
