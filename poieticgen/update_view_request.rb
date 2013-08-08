@@ -20,6 +20,8 @@
 #                                                                            #
 ##############################################################################
 
+require 'optparse'
+
 module PoieticGen
 	class UpdateViewRequestParseError < OptionParser::ParseError ; end
 

@@ -74,8 +74,7 @@ module PoieticGen
 			raise AdminSessionNeeded, "You have not the right to do that, please login as admin." if not is_admin
 			
 			# Create board with the configuration
-			board = Board.new @config.board
-			board.save
+			board = Board.create @config.board
 
 			return board.id
 		end

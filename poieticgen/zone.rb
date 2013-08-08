@@ -64,6 +64,9 @@ module PoieticGen
 		end
 
 
+		def color x, y
+			return self.data[_xy2idx(x,y)]
+		end
 
 		def initialize index, position, width, height, board
 			# @debug = true
