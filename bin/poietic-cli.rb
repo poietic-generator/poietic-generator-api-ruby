@@ -77,9 +77,26 @@ module PoieticGen
 			end
 
 			desc "shapshot ID OFFSET FILENAME", "Dump snapshot in session ID at OFFSET and save it in FILENAME"
-			def snapshot id, timestamp, filename
+			def snapshot id, offset, filename
 				configure
 				board = PoieticGen::Board.first(:id => id.to_i)
+
+				if board.nil? then
+					puts "The board %s does not exist" % id
+					return
+				end
+
+				# FIXME: when not closed, remove ~30 seconds from finish
+				offset = offset.to_i
+				timestamp = board.timestamp + offset
+				end_timestamp = if board.closed then board.end_timestamp else Time.now.to_i end
+
+				if offset < 0 or timestamp > end_timestamp then
+					puts "Offset '%d' out of bounds (%d -> %d)" %
+						[ offset, 0, (end_timestamp - board.timestamp) ]
+					return
+				end
+
 				zones = board.load_board timestamp
 
 				width, height, diff_x, diff_y = board.max_size
@@ -107,10 +124,24 @@ module PoieticGen
 
 				image.save filename
 			end
+			
+			desc "range ID", "Duration of session ID"
+			def range id
+				configure
+				board = PoieticGen::Board.first(:id => id.to_i)
+				
+				# FIXME: when not closed, remove ~30 seconds from finish
+				start = board.timestamp
+				finish = if board.closed then board.end_timestamp else Time.now.to_i end
+				
+				puts "%d" % (finish - start)
+			end
 
 
 			private
 			def configure
+				$stdout = File.new '/dev/null', 'w' # mute STDOUT
+
 				@config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
 				DataMapper::Logger.new(STDERR, :info)
 				#DataMapper::Logger.new(STDERR, :debug)
@@ -122,6 +153,8 @@ module PoieticGen
 				DataMapper::Model.raise_on_save_failure = true
 
 				DataMapper.auto_upgrade!
+
+				$stdout = STDOUT # unmute STDOUT
 			end
 		end
 
