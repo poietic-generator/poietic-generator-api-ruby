@@ -116,7 +116,9 @@ module PoieticGen
 				interval = interval.to_i
 				factor = factor.to_i
 
-				# TODO: interval + dir creation
+				FileUtils.mkdir_p directory
+
+				# TODO: interval
 				(offset_start..offset_end).each do |offset|
 					filename = '%s/image-%d.png' % [ directory, offset ]
 					_take_snap board, offset, filename, factor
