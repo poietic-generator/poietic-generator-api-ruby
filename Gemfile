@@ -4,6 +4,7 @@ gem "thor"
 
 gem "sinatra", :require => "sinatra/base"
 gem "sinatra-reloader"
+gem "async_sinatra"
 gem "sinatra-flash"
 gem "capistrano"
 gem "capistrano-ext"
@@ -32,4 +33,5 @@ gem "inifile" #, "~> 0.3"
 gem "extlib"
 gem "rdebug"
 gem "thin"
+gem "oily_png"
 

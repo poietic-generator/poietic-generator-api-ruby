@@ -85,8 +85,20 @@ module PoieticGen
 					puts "The board %s does not exist" % id
 					return
 				end
+				
+				timestamp = board.timestamp + offset
+				end_timestamp = if board.closed then board.end_timestamp else Time.now.to_i end
 
-				_take_snap board, offset.to_i, filename, factor.to_i
+				if offset < 0 or timestamp > end_timestamp then
+					puts "Offset '%d' out of bounds (%d -> %d)" %
+						[ offset, 0, (end_timestamp - board.timestamp) ]
+					return
+				end
+
+				zones = board.load_board (board.timestamp + offset)
+				width, height, diff_x, diff_y = board.max_size
+
+				_take_snap zones, filename, factor.to_i, width, height, diff_x, diff_y
 			end
 
 			desc "range ID", "Duration of session ID"
@@ -101,8 +113,12 @@ module PoieticGen
 				puts "%d" % (finish - start)
 			end
 
-			desc "sequence ID OFFSET_START OFFSET_END INTERVAL DIRECTORY [FACTOR]", "Dump a sequence of snapshots in session ID between OFFSET_START and OFFSET_END with INTERVAL, and save it in DIRECTORY"
-			def sequence id, offset_start, offset_end, interval, directory, factor=1
+			option :start, :type => :numeric, :default => 0, :aliases => :s
+			option :length, :type => :numeric, :default => 0, :aliases => :l
+			option :interval, :type => :numeric, :default => 1, :aliases => :i
+			option :factor, :type => :numeric, :default => 1, :aliases => :f
+			desc "sequence ID DIRECTORY", "Dump a sequence of snapshots in session ID between OFFSET_START and OFFSET_END with INTERVAL, and save it in DIRECTORY"
+			def sequence id, directory
 				configure
 				board = PoieticGen::Board.first(:id => id.to_i)
 
@@ -110,18 +126,57 @@ module PoieticGen
 					puts "The board %s does not exist" % id
 					return
 				end
+				
+				offset_start = board.timestamp + options[:start]
+				offset_end = if options[:length] <= 0 then
+						if board.closed then board.end_timestamp else Time.now.to_i end
+					else
+						offset_start + options[:length]
+					end
+				interval = options[:interval]
+				factor = options[:factor]
 
-				offset_start = offset_start.to_i
-				offset_end = offset_end.to_i
-				interval = interval.to_i
-				factor = factor.to_i
+				# FIXME: check offsets (board.timestamp <= offset_start < offset_end <= board.end_timestamp|now)
 
 				FileUtils.mkdir_p directory
 
+				width, height, diff_x, diff_y = board.max_size
+				board_timelines = board.timelines
+				zones = board.load_board offset_start
+				last_offset = offset_start
+				file_id = 0
+				
 				(offset_start..offset_end).step(interval).each do |offset|
-					filename = '%s/image-%d.png' % [ directory, offset ]
-					_take_snap board, offset, filename, factor
+					filename = '%s/image-%07d.png' % [ directory, file_id ]
+					file_id += 1
+
+					if offset > offset_start then
+						# get events since the snapshot
+						timelines = board_timelines.all(
+							:timestamp.gt => last_offset,
+							:timestamp.lte => offset,
+							:order => [ :timestamp.asc ]
+						)
+						zones = board.apply_events timelines, zones
+					end
+
+					_take_snap zones, filename, factor, width, height, diff_x, diff_y
+
+					last_offset = offset
 				end
+			end
+			
+			option :outfps, :type => :numeric, :default => 24
+			desc "video DIRECTORY FILENAME [-outfps v]", "Create a video from a DIRECTORY with FPS (using FFMPEG) and save it in FILENAME"
+			def video directory, filename
+				#fixme: use option & transform to int
+				err = system("ffmpeg -r %d -i '%s/image-%%7d.png' -r %d %s" %
+					[ options[:outfps], directory, options[:outfps], filename ])
+				if !err then
+					puts "Error while creating video"
+				end
+				
+				puts "Video created as '%s'" % filename
 			end
 
 			private
@@ -144,41 +199,25 @@ module PoieticGen
 			end
 
 
-			def _take_snap board, offset, filename, factor
-				# FIXME: when not closed, remove ~30 seconds from finish
-				timestamp = board.timestamp + offset
-				end_timestamp = if board.closed then board.end_timestamp else Time.now.to_i end
-
-				if offset < 0 or timestamp > end_timestamp then
-					puts "Offset '%d' out of bounds (%d -> %d)" %
-						[ offset, 0, (end_timestamp - board.timestamp) ]
-					return
-				end
-
-				zones = board.load_board timestamp
-
-				width, height, diff_x, diff_y = board.max_size
-
+			def _take_snap zones, filename, factor, width, height, diff_x, diff_y
 				black = PoieticGen::CLI::Color.from_rgb(0, 0, 0)
 				image = PoieticGen::CLI::Image.new width * factor, height * factor, black
 
-				pp "board width=%d, height=%d, x=%d, y=%d" % [ width, height, diff_x, diff_y ]
+				#pp "board width=%d, height=%d, x=%d, y=%d" % [ width, height, diff_x, diff_y ]
 
 				zones.each do |index, zone|
 					zone_x, zone_y = zone.position
 					zone_x = (zone_x * zone.width) - diff_x
 					zone_y = (zone_y * zone.height) - diff_y
 
-					pp "zone %d width=%d, height=%d, x=%d, y=%d" %
-						[ index, zone.width, zone.height, zone_x, zone_y ]
+					#pp "zone %d width=%d, height=%d, x=%d, y=%d" %
+					#	[ index, zone.width, zone.height, zone_x, zone_y ]
 
-					(0..zone.height-1).each do |y|
-						(0..zone.width-1).each do |x|
-							color = PoieticGen::CLI::Color.from_hex (zone.color x, y)
-							image.draw_rect (zone_x + x) * factor,
-								(zone_y + y) * factor,
-								factor, factor, color
-						end
+					(0..(zone.height * zone.width)-1).each do |i|
+						image.draw_rect (zone_x + (i % zone.width)) * factor,
+								(zone_y + (i / zone.width)) * factor,
+								factor, factor,
+								(PoieticGen::CLI::Color.from_hex zone.data[i])
 					end
 				end
 
