@@ -167,13 +167,13 @@ module PoieticGen
 
 			snap = _get_snapshot timestamp
 			zones = {}
-			
+
 			if snap.nil? then
 				# no snapshot: the board is empty
 				snap_timeline = 0
 			else
 				snap_timeline = snap.timeline.id
-				
+
 				# Create zones from snapshot
 				snap.zone_snapshots.each do |zs|
 					zones[zs.zone.index] = Zone.from_snapshot zs
@@ -187,6 +187,11 @@ module PoieticGen
 				:order => [ :timestamp.asc, :id.asc ]
 			)
 
+			return apply_events timelines, zones
+		end
+
+
+		def apply_events timelines, zones
 			# Add/Remove zones since the snapshot
 			timelines.events.each do |event|
 				user = event.user

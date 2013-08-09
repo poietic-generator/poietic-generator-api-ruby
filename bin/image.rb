@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'chunky_png'
+require 'oily_png'
 
 module PoieticGen
 	module CLI
@@ -19,9 +19,12 @@ module PoieticGen
 				super x, y, color
 			end
 
+			def draw_rect x, y, w, h, color
+				rect x, y, x + w - 1, y + h - 1, color, color
+			end
 
 			def save filename
-				super filename
+				super filename, :fast_rgb
 			end
 		end
 
