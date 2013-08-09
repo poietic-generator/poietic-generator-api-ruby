@@ -104,7 +104,6 @@ module PoieticGen
 				zone = allocator.allocate self
 				zone.user = user
 				user.zone = zone
-				zones << zone
 				zone.save
 
 				Event.create_join user, self

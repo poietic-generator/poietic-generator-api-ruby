@@ -106,16 +106,16 @@ module PoieticGen
 				# clean-up users first
 				self.check_expired_users
 
+				user = User.first(
+					:token => req.user_token
+				)
+
 				board = Board.first(
 					:session_token => req.session_token,
 					:closed => false
 				)
 
 				raise InvalidSession, "Invalid session" if board.nil?
-
-				user = User.first(
-					:token => req.user_token
-				)
 
 				if user.nil? then
 					user = User.new param_name, board, @config.user
@@ -161,13 +161,16 @@ module PoieticGen
 					:did_expire => false,
 					:id.not => user.id
 				)
+
 				other_users = users_db.map{ |u| u.to_hash }
 				other_zones = users_db.map{ |u|
 					rdebug "requesting zone for %s" % u.inspect
 					u.zone.to_desc_hash Zone::DESCRIPTION_FULL
 				}
+
 				msg_history_req = Message.all(:user_dst => user.id) + Message.all(:user_src => user.id)
 				msg_history = msg_history_req.map{ |msg| msg.to_hash }
+
 				rdebug "msg_history req : %s" % msg_history.inspect
 
 
@@ -276,6 +279,8 @@ module PoieticGen
 
 			User.transaction do
 
+				self.check_expired_users
+
 				user = User.first(:token => req.user_token)
 
 				if user.nil? or user.expired? then
@@ -289,8 +294,6 @@ module PoieticGen
 				   board.session_token != req.session_token then
 					raise InvalidSession, "No opened session found for board %s" % req.session_token
 				end
-
-				self.check_expired_users
 
 				ref_stamp = user.last_update_time - req.update_interval
 
@@ -351,13 +354,13 @@ module PoieticGen
 
 			User.transaction do
 
+				self.check_expired_users
+
 				board = Board.first(
 					:session_token => req.session_token
 				)
 
 				raise InvalidSession, "Invalid session" if board.nil?
-
-				self.check_expired_users
 
 				# ignore session_id from the viewer point of view but use server one
 				# to distinguish old sessions/old users
@@ -445,13 +448,13 @@ module PoieticGen
 
 			User.transaction do
 
+				self.check_expired_users
+
 				board = Board.first(
 					:session_token => req.session_token
 				)
 
 				raise InvalidSession, "Invalid session" if board.nil?
-
-				self.check_expired_users
 
 				# Get events and strokes between req.timeline_after and req.duration
 
@@ -469,27 +472,27 @@ module PoieticGen
 					timelines = board.timelines.all(
 						:id.gte => req.timeline_after
 					)
-				
-					evt_req = timelines.events
-
-					rdebug evt_req
 					
 					srk_req = timelines.strokes
 
 					rdebug srk_req
+
+					evt_req = timelines.events
+
+					rdebug evt_req
 					
 					first_timeline = timelines.first(
 						:order => [ :id.asc ]
 					)
-					
-					events_collection = evt_req.map{ |e|
-						e.to_hash first_timeline.timestamp
-					}
 				
 					strokes_collection = srk_req.map{ |s|
 						s.to_hash first_timeline.timestamp
 					}
 					
+					events_collection = evt_req.map{ |e|
+						e.to_hash first_timeline.timestamp
+					}
+
 				elsif req.view_mode == UpdateViewRequest::HISTORY_VIEW then
 					rdebug "HISTORY_VIEW"
 
