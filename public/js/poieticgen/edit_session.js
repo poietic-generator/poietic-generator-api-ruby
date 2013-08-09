@@ -29,6 +29,7 @@
 	"use strict";
 
 	var DRAW_SESSION_UPDATE_INTERVAL = 1000,
+		DRAW_SESSION_JOIN_RETRY_INTERVAL = 1000,
 
 		STATUS_INFORMATION = 1,
 		STATUS_SUCCESS = 2,
@@ -57,11 +58,7 @@
 		* Semi-Constructor
 		*/
 		this.initialize = function () {
-			var user_token = $.cookie('user_token'),
-				user_name = $.cookie('user_name'),
-				session_opts = [],
-				session_url = null,
-				url_matches;
+			var url_matches;
 
 			url_matches = /\/session\/(\w+)\/draw/.exec(window.location);
 			if (url_matches !== null && url_matches.length === 2) {
@@ -71,6 +68,20 @@
 			}
 
 			_game = new PoieticGen.Game();
+
+			self.join();
+
+			this.register(self);
+		};
+
+
+		this.join = function () {
+			var user_token = $.cookie('user_token'),
+				user_name = $.cookie('user_name'),
+				session_opts = [],
+				session_url = null;
+
+			_game.reset(); // Observers needs to be cleared because callback reregister all
 
 			if (user_token !== null) {
 				session_opts.push("user_token=" + user_token);
@@ -111,8 +122,6 @@
 					$.cookie('user_name', this.user_name, {path: "/"});
 					// console.log('edit_session/join response mod : ' + JSON.stringify(this));
 
-					console.log("gotcha!");
-
 					callback(self);
 
 					//console.log('edit_session/join post-callback ! observers = ' + JSON.stringify(_game.observers()));
@@ -130,10 +139,11 @@
 
 					console.log('edit_session/join end');
 
+				},
+				error: function (response) {
+					window.setTimeout(self.join, DRAW_SESSION_JOIN_RETRY_INTERVAL);
 				}
 			});
-
-			this.register(self);
 		};
 
 
@@ -217,8 +227,8 @@
 				}
 			}
 
-			console.log("edit_session/update: strokes_updates = " + JSON.stringify(strokes_updates));
-			console.log("edit_session/update: messages_updates = " + JSON.stringify(messages_updates));
+			//console.log("edit_session/update: strokes_updates = " + JSON.stringify(strokes_updates));
+			//console.log("edit_session/update: messages_updates = " + JSON.stringify(messages_updates));
 
 			req = {
 				timeline_after : _current_timeline_id,
@@ -235,11 +245,12 @@
 			$.ajax({
 				url: "/session/" + self.session_token + "/draw/update.json",
 				dataType: "json",
+				contentType: "application/json",
 				data: JSON.stringify(req),
 				type: 'POST',
 				context: self,
 				success: function (response) {
-					console.log('edit_session/update response : ' + JSON.stringify(response));
+					//console.log('edit_session/update response : ' + JSON.stringify(response));
 					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
 						self.treat_status_nok(response);
 					} else {
@@ -267,8 +278,6 @@
 				// Make absolute times
 				if (events[i].diffstamp) {
 					events[i].timestamp = parseInt(events[i].diffstamp, 10) + self.last_update_time.getTime() / 1000;
-				} else {
-					events[i].timestamp = self.last_update_time.getTime() / 1000;
 				}
 			}
 		};
@@ -291,7 +300,7 @@
 
 		this.handle_event = function (ev) {
 			var i;
-			console.log("edit_session/handle_event : " + JSON.stringify(ev));
+			//console.log("edit_session/handle_event : " + JSON.stringify(ev));
 			switch (ev.type) {
 			case "join":
 				this.other_users.push(ev.desc.user);

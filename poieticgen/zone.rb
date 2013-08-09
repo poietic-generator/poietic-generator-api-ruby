@@ -170,17 +170,14 @@ module PoieticGen
 		end
 
 		def to_desc_hash type
-			res = nil
-			Zone.transaction do
-				res = {
-					:index => self.index,
-					:position => self.position,
-					:user => self.user.id,
-					:content => if type == DESCRIPTION_FULL
-                                                    then self.to_patches_hash
-                                                    else [] end
-				}
-			end
+			res = {
+				:index => self.index,
+				:position => self.position,
+				:user => self.user.id,
+				:content => if type == DESCRIPTION_FULL
+                                            then self.to_patches_hash
+                                            else [] end
+			}
 
 			return res
 		end
@@ -191,47 +188,39 @@ module PoieticGen
 		#
 		def to_patches_hash
 			result = []
-			Zone.transaction do
-				patches = {}
+			patches = {}
 
-				self.width.times do |w|
-					self.height.times do |h|
-						color = self.data[_xy2idx(w,h)]
-						next if color.nil?
-						patches[color] = [] unless patches.include? color
-						patches[color].push [w,h,0]
-					end
+			self.width.times do |w|
+				self.height.times do |h|
+					color = self.data[_xy2idx(w,h)]
+					next if color.nil?
+					patches[color] = [] unless patches.include? color
+					patches[color].push [w,h,0]
 				end
-				patches.each do |color, where|
-					patch = {
-						:id => nil,
-						:zone => self.index,
-						:color => color,
-						:changes => where,
-						:diffstamp => nil
-					}
-					result.push patch
-				end
+			end
+			patches.each do |color, where|
+				patch = {
+					:id => nil,
+					:zone => self.index,
+					:color => color,
+					:changes => where,
+					:diffstamp => nil
+				}
+				result.push patch
 			end
 
 			return result
 		end
 		
-		def snapshot
+		def snapshot timeline
 			snap = nil
 			Zone.transaction do
 				unless self.is_snapshoted then
-					self.is_snapshoted = true
+					self.update(:is_snapshoted => true)
 
-					snap = _take_snapshot
-
-					self.save
+					snap = ZoneSnapshot.create self, timeline
 				else
-					# last snapshot
-					last_timeline = self.zone_snapshots.timeline.first(:order => [ :id.desc ])
-					unless last_timeline.nil? then
-						snap = last_timeline.zone_snapshot
-					end
+					snap = self.zone_snapshots.first(:order => [ :timeline_id.desc ])
 				end
 			end
 
@@ -248,10 +237,6 @@ module PoieticGen
 			x = idx % self.width
 			y = idx / self.width
 			return x,y
-		end
-		
-		def _take_snapshot
-			ZoneSnapshot.create self.data, self
 		end
 	end
 end

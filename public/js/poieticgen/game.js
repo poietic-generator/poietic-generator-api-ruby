@@ -45,7 +45,8 @@
 				to_remove_count = 0, interval;
 
 			_events.sort(function (a, b) {
-				if (a.event.id < b.event.id) {
+				if (a.event.timestamp === undefined
+				        || a.event.id < b.event.id) {
 					return -1;
 				}
 				if (a.event.id > b.event.id) {

@@ -30,6 +30,7 @@
 
 	var VIEW_SESSION_UPDATE_INTERVAL = 1000,
 		VIEW_PLAY_UPDATE_INTERVAL = VIEW_SESSION_UPDATE_INTERVAL / 1000,
+		VIEW_SESSION_JOIN_RETRY_INTERVAL = 1000,
 		VIEW_SESSION_HISTORY_PROTECTED_INTERVAL = 30, // Seconds reserved to real time
 
 		STATUS_INFORMATION = 1,
@@ -177,6 +178,9 @@
 					self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
 
 					console.log('view_session/join end');
+				},
+				error: function (response) {
+					self.set_timer(self.join_view_session, VIEW_SESSION_JOIN_RETRY_INTERVAL);
 				}
 			});
 		};

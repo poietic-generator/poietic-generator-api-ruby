@@ -103,6 +103,9 @@ module PoieticGen
 
 			User.transaction do
 
+				# clean-up users first
+				self.check_expired_users
+
 				board = Board.first(
 					:session_token => req.session_token,
 					:closed => false
@@ -152,9 +155,6 @@ module PoieticGen
 				rdebug "User : ", user
 
 				# FIXME: test request username
-
-				# clean-up users first
-				self.check_expired_users
 
 				# get real users
 				users_db = board.users.all(
@@ -332,10 +332,10 @@ module PoieticGen
 					# :stamp => (now - board.timestamp), # FIXME: unused by the client
 					# :idle_timeout => (user.idle_expires_at - now) # FIXME: unused by the client
 				}
-
-				rdebug "returning : %s" % result.inspect
-
 			end
+
+			rdebug "returning : %s" % result.inspect
+
 			return result
 		end
 
@@ -426,10 +426,10 @@ module PoieticGen
 					:date_range => date_range, # total time of session
 					:id => req.id
 				}
-
-				rdebug "returning : %s" % result.inspect
-
 			end
+
+			rdebug "returning : %s" % result.inspect
+
 			return result
 		end
 
@@ -541,9 +541,10 @@ module PoieticGen
 					:max_timestamp => max_timestamp,
 					:id => req.id,
 				}
-
-				rdebug "returning : %s" % result.inspect
 			end
+
+			rdebug "returning : %s" % result.inspect
+
 			return result
 		end
 
