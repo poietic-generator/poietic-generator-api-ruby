@@ -39,6 +39,7 @@ require 'poieticgen/update_request'
 require 'poieticgen/snapshot_request'
 require 'poieticgen/update_view_request'
 require 'poieticgen/join_request'
+require 'poieticgen/transaction'
 
 module PoieticGen
 
@@ -86,7 +87,7 @@ module PoieticGen
 			req = JoinRequest.parse params
 
 			is_new = true
-			result = nil
+			result = {}
 
 			# FIXME: prevent session from being stolen...
 			rdebug "requesting user_token=%s, session=%s, name=%s" \
@@ -101,7 +102,7 @@ module PoieticGen
 							 req.user_name
 						 end
 
-			User.transaction do
+			User.transaction do |t| begin
 
 				# clean-up users first
 				self.check_expired_users
@@ -186,6 +187,14 @@ module PoieticGen
 					:timeline_id => (Timeline.last_id board),
 					:msg_history => msg_history
 				}
+
+				rescue DataObjects::TransactionError => e
+					Transaction.handle_deadlock_exception e, t, "Manager.join"
+
+				rescue Exception => e
+					t.rollback
+					raise e
+				end
 			end
 
 			rdebug "result : %s" % result.inspect
@@ -274,10 +283,10 @@ module PoieticGen
 			req = UpdateRequest.parse data
 
 			# prepare empty result message
-			result = nil
+			result = {}
 			now = Time.now.to_i
 
-			User.transaction do
+			User.transaction do |t| begin
 
 				self.check_expired_users
 
@@ -305,7 +314,12 @@ module PoieticGen
 
 				user.save
 
-				board.update_data user, req.strokes
+				begin
+					board.update_data user, req.strokes
+				rescue PoieticGen::TakeSnapshotError => e
+					# Ignore error
+					STDERR.puts "Take snapshot error ignored!"
+				end
 				@chat.update_data user, req.messages
 				
 				timelines = board.timelines.all(
@@ -335,6 +349,14 @@ module PoieticGen
 					# :stamp => (now - board.timestamp), # FIXME: unused by the client
 					# :idle_timeout => (user.idle_expires_at - now) # FIXME: unused by the client
 				}
+
+				rescue DataObjects::TransactionError => e
+					Transaction.handle_deadlock_exception e, t, "Manager.update_data"
+
+				rescue Exception => e
+					t.rollback
+					raise e
+				end
 			end
 
 			rdebug "returning : %s" % result.inspect
@@ -350,9 +372,9 @@ module PoieticGen
 
 			rdebug "call with %s" % params.inspect
 			req = SnapshotRequest.parse params
-			result = nil
+			result = {}
 
-			User.transaction do
+			User.transaction do |t| begin
 
 				self.check_expired_users
 
@@ -429,6 +451,14 @@ module PoieticGen
 					:date_range => date_range, # total time of session
 					:id => req.id
 				}
+
+				rescue DataObjects::TransactionError => e
+					Transaction.handle_deadlock_exception e, t, "Manager.update_data"
+
+				rescue Exception => e
+					t.rollback
+					raise e
+				end
 			end
 
 			rdebug "returning : %s" % result.inspect
@@ -444,9 +474,9 @@ module PoieticGen
 			rdebug "call with %s" % params.inspect
 			req = UpdateViewRequest.parse params
 			now_i = Time.now.to_i
-			result = nil
+			result = {}
 
-			User.transaction do
+			User.transaction do |t| begin
 
 				self.check_expired_users
 
@@ -544,6 +574,14 @@ module PoieticGen
 					:max_timestamp => max_timestamp,
 					:id => req.id,
 				}
+
+				rescue DataObjects::TransactionError => e
+					Transaction.handle_deadlock_exception e, t, "Manager.update_data"
+
+				rescue Exception => e
+					t.rollback
+					raise e
+				end
 			end
 
 			rdebug "returning : %s" % result.inspect
@@ -574,6 +612,5 @@ module PoieticGen
 				@last_leave_check_time = now
 			end
 		end
-
 	end
 end

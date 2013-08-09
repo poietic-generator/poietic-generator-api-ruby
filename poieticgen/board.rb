@@ -25,6 +25,7 @@ require 'poieticgen/zone'
 require 'poieticgen/user'
 require 'poieticgen/timeline'
 require 'poieticgen/board_snapshot'
+require 'poieticgen/transaction'
 
 require 'poieticgen/allocation/spiral'
 require 'poieticgen/allocation/random'
@@ -32,6 +33,8 @@ require 'poieticgen/allocation/random'
 require 'monitor'
 
 module PoieticGen
+
+	class TakeSnapshotError < RuntimeError ; end
 
 	#
 	# A class that manages the global drawing
@@ -80,14 +83,24 @@ module PoieticGen
 		end
 		
 		def close
-			Board.transaction do
-				closed = true
-				end_timestamp = Time.now.to_i
-
+			Board.transaction do |t|
 				begin
-					save
-				rescue DataMapper::SaveFailureError => e
-					rdebug "Saving failure : %s" % e.resource.errors.inspect
+					closed = true
+					end_timestamp = Time.now.to_i
+
+					begin
+						save
+					rescue DataMapper::SaveFailureError => e
+						rdebug "Saving failure : %s" % e.resource.errors.inspect
+						raise e
+					end
+
+				rescue DataObjects::TransactionError => e
+					Transaction.handle_deadlock_exception e, t, "Board.close"
+					raise e
+
+				rescue Exception => e
+					t.rollback
 					raise e
 				end
 			end
@@ -99,14 +112,24 @@ module PoieticGen
 		#
 		def join user, config
 			zone = nil
-			Board.transaction do
-				allocator = ALLOCATORS[self.allocator_type].new config, self.zones
-				zone = allocator.allocate self
-				zone.user = user
-				user.zone = zone
-				zone.save
+			Board.transaction do |t|
+				begin
+					allocator = ALLOCATORS[self.allocator_type].new config, self.zones
+					zone = allocator.allocate self
+					zone.user = user
+					user.zone = zone
+					zone.save
 
-				Event.create_join user, self
+					Event.create_join user, self
+
+				rescue DataObjects::TransactionError => e
+					Transaction.handle_deadlock_exception e, t, "Board.join"
+					raise e
+
+				rescue Exception => e
+					t.rollback
+					raise e
+				end
 			end
 			return zone
 		end
@@ -116,16 +139,26 @@ module PoieticGen
 		# disconnect user from the board
 		#
 		def leave user
-			Board.transaction do
-				zone = user.zone # FIXME: verify if the user is in the board
-				unless zone.nil? then
-					zone.reset
-					zone.disable
-					zone.save
+			Board.transaction do |t|
+				begin
+					zone = user.zone # FIXME: verify if the user is in the board
+					unless zone.nil? then
+						zone.reset
+						zone.disable
+						zone.save
 
-					Event.create_leave user, self
-				else
-					#FIXME: return an error to the user?
+						Event.create_leave user, self
+					else
+						#FIXME: return an error to the user?
+					end
+
+				rescue DataObjects::TransactionError => e
+					Transaction.handle_deadlock_exception e, t, "Board.leave"
+					raise e
+
+				rescue Exception => e
+					t.rollback
+					raise e
 				end
 			end
 		end
@@ -134,20 +167,12 @@ module PoieticGen
 		def update_data user, drawing
 			return if drawing.empty?
 		
-			Board.transaction do
-				
-				# Update the zone
+			# Update the zone
 
-				zone = user.zone
-				unless zone.nil? then
-					zone.apply drawing
-				else
-					#FIXME: return an error to the user ?
-				end
-			end
+			user.zone.apply drawing
 
-			begin
-				Board.transaction do
+			Board.transaction do |t|
+				begin
 					# Save board periodically
 
 					stroke_count = self.strokes_since_last_snapshot + drawing.size
@@ -161,15 +186,21 @@ module PoieticGen
 						end
 
 						board_snap.save
-				
+
 						stroke_count = 0
 					end
 
 					self.strokes_since_last_snapshot = stroke_count
 					self.save
+
+				rescue DataObjects::TransactionError => e
+					Transaction.handle_deadlock_exception e, t, "Board.update_data"
+					raise TakeSnapshotError
+
+				rescue Exception => e
+					t.rollback
+					raise e
 				end
-			rescue Exception => e
-				STDERR.puts e.inspect, e.backtrace
 			end
 		end
 

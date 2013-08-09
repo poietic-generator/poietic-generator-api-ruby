@@ -20,6 +20,10 @@
 #                                                                            #
 ##############################################################################
 
+require 'poieticgen/board'
+require 'poieticgen/user'
+require 'poieticgen/transaction'
+
 module PoieticGen
 
 	class Zone
@@ -119,33 +123,43 @@ module PoieticGen
 			# Sort strokes by time
 			drawing = drawing.sort{ |a, b| a['diff'].to_i <=> b['diff'].to_i }
 
-			Zone.transaction do
+			Zone.transaction do |t|
+				begin
+					ref = self.user.last_update_time
 
-				ref = self.user.last_update_time
+					drawing.each do |patch|
 
-				drawing.each do |patch|
+						color = patch['color']
+						changes = patch['changes']
+						timestamp = patch['diff'].to_i + ref
 
-					color = patch['color']
-					changes = patch['changes']
-					timestamp = patch['diff'].to_i + ref
+						# add patch into database
+						Stroke.create_stroke color,
+							JSON.generate(changes).to_s,
+							timestamp,
+							self
 
-					# add patch into database
-					Stroke.create_stroke color,
-						JSON.generate(changes).to_s,
-						timestamp,
-						self
-
-					changes.each do |x,y,t_offset|
-						idx = _xy2idx(x,y)
-						if idx >= 0 and idx < self.data.length then
-							self.data[idx] = color
+						changes.each do |x,y,t_offset|
+							idx = _xy2idx(x,y)
+							if idx >= 0 and idx < self.data.length then
+								self.data[idx] = color
+							end
 						end
 					end
+
+					self.is_snapshoted = false
+
+					self.save
+
+				rescue DataObjects::TransactionError => e
+					Transaction.handle_deadlock_exception e, t, "Zone.apply"
+					raise e
+
+				rescue Exception => e
+					pp "apply.Exception"
+					t.rollback
+					raise e
 				end
-
-				self.is_snapshoted = false
-
-				self.save
 			end
 		end
 		
@@ -214,13 +228,24 @@ module PoieticGen
 		
 		def snapshot timeline
 			snap = nil
-			Zone.transaction do
-				unless self.is_snapshoted then
-					self.update(:is_snapshoted => true)
 
-					snap = ZoneSnapshot.create self, timeline
-				else
-					snap = self.zone_snapshots.first(:order => [ :timeline_id.desc ])
+			Zone.transaction do |t|
+				begin
+					unless self.is_snapshoted then
+						self.update(:is_snapshoted => true)
+
+						snap = ZoneSnapshot.create self, timeline
+					else
+						snap = self.zone_snapshots.first(:order => [ :timeline_id.desc ])
+					end
+				rescue DataObjects::TransactionError => e
+					Transaction.handle_deadlock_exception e, t, "Zone.snapshot"
+					raise e
+
+				rescue Exception => e
+					pp "snapshot.Exception"
+					t.rollback
+					raise e
 				end
 			end
 
