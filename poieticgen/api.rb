@@ -39,8 +39,6 @@ require 'pp'
 
 module PoieticGen
 
-	class SessionLostException < RuntimeError ; end
-
 	class Api < Sinatra::Base
 
 		STATUS_INFORMATION = 1
@@ -69,7 +67,7 @@ module PoieticGen
 		mime_type :eot, "application/octet-stream"
 		mime_type :otf, "application/octet-stream"
 		mime_type :woff, "application/octet-stream"
-		
+
 		register Sinatra::Flash # FIXME: doesn't work
 
 		configure :development do |c|
@@ -129,8 +127,7 @@ module PoieticGen
 			rescue PoieticGen::AdminSessionNeeded => e
 				flash[:error] = "Only admins can do that!"
 
-			rescue PoieticGen::InvalidSession,
-			       PoieticGen::SessionLostException => e
+			rescue PoieticGen::InvalidSession => e
 				flash[:error] = "Session has expired!"
 
 			rescue Exception => e
@@ -141,6 +138,7 @@ module PoieticGen
 				redirect '/'
 			end
 		end
+
 
 		get '/' do
 			@page = Page.new "index"
@@ -162,6 +160,8 @@ module PoieticGen
 			
 			haml :page_index
 		end
+
+
 		#
 		#
 		#
