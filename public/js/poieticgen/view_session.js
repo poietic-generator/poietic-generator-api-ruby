@@ -58,8 +58,7 @@
 			_view_type = REAL_TIME_VIEW,
 			_last_join_timestamp = 0,
 			_last_update_max_timestamp = -1,
-			_join_view_session_id = 0,
-			_update_view_session_id = 0,
+			_request_id = 0,
 			_session = "";
 
 		this.zone_column_count = null;
@@ -93,8 +92,7 @@
 				_session = ""; // Error
 			}
 
-			_join_view_session_id = 0;
-			_update_view_session_id = 0;
+			_request_id = 0;
 			_game = new PoieticGen.Game();
 			_slider = slider;
 			_slider.set_animation_interval(1);
@@ -123,14 +121,14 @@
 				_view_type = REAL_TIME_VIEW;
 			}
 
-			_join_view_session_id += 1;
+			_request_id += 1;
 
 			// get session info from
 			$.ajax({
 				url: "/session/" + _session + "/view/snapshot.json",
 				data: {
 					date: date,
-					id: _join_view_session_id
+					id: _request_id
 				},
 				dataType: "json",
 				type: 'GET',
@@ -144,7 +142,7 @@
 					}
 
 					// Ensure that this response is associated to the last join request
-					if (response.id !== _join_view_session_id) {
+					if (response.id !== _request_id) {
 						return;
 					}
 
@@ -229,7 +227,7 @@
 				return null;
 			}
 
-			_update_view_session_id += 1;
+			_request_id += 1;
 
 			req = {
 				timeline_after : _current_timeline_id + 1,
@@ -237,7 +235,7 @@
 
 				duration: VIEW_PLAY_UPDATE_INTERVAL * _play_speed,
 				since : _last_join_timestamp,
-				id : _update_view_session_id,
+				id : _request_id,
 				view_mode : _view_type
 			};
 
@@ -253,7 +251,7 @@
 					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
 						self.treat_status_nok(response);
 					} else {
-						if (_update_view_session_id !== response.id) {
+						if (_request_id !== response.id) {
 							return;
 						}
 
