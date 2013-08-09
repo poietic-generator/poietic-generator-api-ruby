@@ -181,6 +181,7 @@ module PoieticGen
 						board_snap = BoardSnapshot.create self
 						alive_zones = self.zones.all(:expired => false)
 
+						# FIXME: "zone.snapshot board_snap.timeline" can return nil?
 						alive_zones.each do |zone|
 							board_snap.zone_snapshots << (zone.snapshot board_snap.timeline)
 						end
