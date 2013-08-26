@@ -49,7 +49,7 @@ namespace :deploy do
 
 	task :finalize_update, :roles => [:wep, :app] do
 		run "mkdir -p #{shared_path}/config"
-		run "mkdir -p #{shared_path}/tmp/pids"
+		run "mkdir -p #{current_release}/tmp/pids"
 		run "test -e #{shared_path}/config/config.ini || cp #{current_release}/config/config.ini.example #{shared_path}/config/config.#{stage}.ini"
 		run "ln -s #{shared_path}/config/config.#{stage}.ini #{current_release}/config/config.ini"
 	end
