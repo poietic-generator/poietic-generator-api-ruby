@@ -1,0 +1,23 @@
+- # vim: set ts=2 sw=2 et:
+- @page.js << "/js/extern/jquery.cookie.js"
+- @page.js << "/js/console.js"
+- @page.js << "/js/poieticgen.js"
+- @page.js << "/js/page/admin.js"
+
+/ admin zone
+#session-zone{"data-fullscreen" => "false", "data-role" => "page"}
+  %div{"data-id" => "head", "data-position" => "fixed", "data-role" => "header"}
+    %h1 Sessions
+    %a.ui-btn-right.logout{"data-ajax" => "false", :href => "/"} Back
+    %div{"data-role" => "navbar"}
+      %ul
+        %li
+          %a.ui-btn-active.ui-state-persist{"data-transition" => "slideup", :href => "#session-list-current"} Current
+        %li
+          %a.ui-state-persist{"data-transition" => "slideup", :href => "#session-list-past"} Past
+
+  #canvas-container{"data-role" => "content"}
+    .ui-grid-a.viewer
+      %canvas#session-viewer
+    .ui-grid-a.editor
+      %canvas#session-editor

@@ -20,34 +20,38 @@
 #                                                                            #
 ##############################################################################
 
+require 'optparse'
+
 module PoieticGen
+	class UpdateRequestParseError < OptionParser::ParseError ; end
+
 	class UpdateRequest
 
 		MESSAGES = 'messages'
 		STROKES = 'strokes'
 
-		MESSAGES_AFTER = 'messages_after'
-		STROKES_AFTER = 'strokes_after'
-		EVENTS_AFTER = 'events_after'
+		TIMELINE_AFTER = 'timeline_after'
 
-		MESSAGES_BEFORE = 'messages_before'
-		STROKES_BEFORE = 'strokes_before'
-		EVENTS_BEFORE = 'events_before'
+		TIMELINE_BEFORE = 'timeline_before'
 
 		MESSAGES_DST = 'user_dst'
 		MESSAGES_CONTENT = 'content'
 		MESSAGES_STAMP = 'stamp'
 
 		UPDATE_INTERVAL = 'update_interval'
+		
+		USER_TOKEN = 'user_token'
+
+		SESSION_TOKEN = 'session_token'
+		SINATRA_SPLAT = 'splat'
+		SINATRA_CAPTURES = 'captures'
 
 		private
 
 		def initialize hash
 			@hash = hash
-			@enable_strokes = false
-			@enable_events = false
-			@enable_messages = false
-			@debug = true
+			@enable_timeline = false # FIXME: unused
+			# @debug = true
 		end
 
 		public
@@ -56,45 +60,48 @@ module PoieticGen
 			# mandatory fields firstvalidate user input first
 			hash.each do |key, val|
 				case key
-				when STROKES_AFTER then
-					@enable_strokes = true
-				when STROKES_BEFORE then
-					@enable_strokes = true
-				when MESSAGES_AFTER then
-					@enable_messages = true
-				when MESSAGES_BEFORE then
-					@enable_messages = true
-				when EVENTS_AFTER then
-					@enable_events = true
-				when EVENTS_BEFORE then
-					@enable_events = true
+				when TIMELINE_AFTER then
+					@enable_timeline = true
+				when TIMELINE_BEFORE then
+					@enable_timeline = true
 				when MESSAGES then
 					if val.length != 0 then
-					  rdebug "messages : %s" % val.inspect
-          end
+						rdebug "messages : %s" % val.inspect
+          				end
 				when STROKES then
-				  if val.length != 0 then
-					  rdebug "strokes : %s" % val.inspect
-          end
-        when UPDATE_INTERVAL then
-          begin
-            rdebug "update_interval : %d" % val.to_i
-          rescue Exception => e
-            rdebug e
-            raise ArgumentError, ("%s with invalid value : " % UPDATE_INTERVAL)
-          end
+				  	if val.length != 0 then
+						rdebug "strokes : %s" % val.inspect
+         				end
+				when UPDATE_INTERVAL then
+				  	begin
+				    		rdebug "update_interval : %d" % val.to_i
+				  	rescue Exception => e
+				    		rdebug e
+				    		raise UpdateRequestParseError, ("%s with invalid value : " % UPDATE_INTERVAL)
+					end
+				when USER_TOKEN then
+					rdebug "user_token : %s" % val.inspect
+				when SESSION_TOKEN then
+					rdebug "session_token : %s" % val.inspect
+				when SINATRA_SPLAT then
+					rdebug "sinatra splat : %s" % val.inspect
+				when SINATRA_CAPTURES then
+					rdebug "sinatra captures : %s" % val.inspect
 				else
-					raise RuntimeError, "unknow request field '%s'" % key
+					raise UpdateRequestParseError, "Unknow request field '%s'" % key
 				end
 			end
 
 			[
+				TIMELINE_AFTER,
 				STROKES,
 				MESSAGES,
-				UPDATE_INTERVAL
+				UPDATE_INTERVAL,
+				USER_TOKEN,
+				SESSION_TOKEN
 			].each do |field|
 				unless hash.include? field then
-					raise ArgumentError, ("The '%s' field is missing" % field)
+					raise UpdateRequestParseError, ("The '%s' field is missing" % field)
 				end
 			end
 			# parse per-field content
@@ -105,7 +112,7 @@ module PoieticGen
 					MESSAGES_STAMP
 				].each do |field|
 					unless msg.include? field then
-						raise ArgumentError, ("The '%s' sub-field is missing" % field)
+						raise UpdateRequestParseError, ("The '%s' sub-field is missing" % field)
 					end
 				end
 				# FIXME: msg[MESSAGES_DST].to_i
@@ -122,22 +129,21 @@ module PoieticGen
 			return @hash[MESSAGES]
 		end
 
-		def messages_after
-			return @hash[MESSAGES_AFTER].to_i
-		end
-
-		def strokes_after
-			return @hash[STROKES_AFTER].to_i
-		end
-
-		def events_after
-			return @hash[EVENTS_AFTER].to_i
+		def timeline_after
+			return @hash[TIMELINE_AFTER].to_i
 		end
 
 		def update_interval
-		  return @hash[UPDATE_INTERVAL].to_i
-    end
+			return @hash[UPDATE_INTERVAL].to_i
+    		end
 
+    		def user_token
+			return @hash[USER_TOKEN]
+		end
+
+    		def session_token
+			return @hash[SESSION_TOKEN]
+		end
 	end
 end
 

@@ -21,7 +21,7 @@ Finally, from the project directory, run the following command to install
 locally into the "vendor/bundle" directory the gems required by this project
 and all their dependencies :
 
-    bundle install --path vendor/bundle --binstubs
+    bundle install --path vendor/bundle
 
 
 Configuration
@@ -57,7 +57,7 @@ Install a reverse proxy server, like nginx :
 
     sudo apt-get install nginx
 
-In the directory "/etc/nginx/sites-enabled/", create a configuration file for 
+In the directory "/etc/nginx/sites-available/", create a configuration file for 
 a virtual host called "poietic-generator.com", with the following content :
 
     upstream poietic-generator_cluster {

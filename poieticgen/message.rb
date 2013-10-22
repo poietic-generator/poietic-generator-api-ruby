@@ -27,38 +27,37 @@ module PoieticGen
 	class Message
 		include DataMapper::Resource
 
-		@debug = true
+		# @debug = true
 
 		property :id,	Serial
 		property :user_src,	Integer, :required => true
 		property :user_dst,	Integer, :required => true
-		property :content, Text, :required => true
-		property :stamp,	Time, :required => true
+		property :content,	Text, :required => true
 
+		belongs_to :timeline, :key => true
 
 		def to_hash
 			res = {
-				:id => self.id,
+				:id => self.timeline.id,
 				:user_src => self.user_src,
 				:user_dst => self.user_dst,
 				:content => self.content,
-				:stamp => self.stamp
+				:stamp => self.timeline.timestamp
 			}
 			return res
 		end
 
-		def self.post src, dst, stamp, content
+		def self.post src, dst, content, board
 			begin
-				msg = Message.create({
+				msg = create({
 					:user_src => src,
 					:user_dst => dst,
 					:content => content,
-					:stamp => stamp
+					:timeline => (Timeline.create_now board)
 				})
-				msg.save
 				rdebug msg.inspect
 			rescue DataMapper::SaveFailureError => e
-				puts e.resource.errors.inspect
+				rdebug "Saving failure : %s" % e.resource.errors.inspect
 				raise e
 			end
 		end

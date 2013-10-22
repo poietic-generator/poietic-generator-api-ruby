@@ -15,6 +15,12 @@ port = 80
 ; file in which daemon's pid will be stored
 pidfile = tmp/poieticgen.pid
 
+; administrator's username
+admin_username = admin
+
+; administrator's password
+admin_password = foobar
+
 
 [board]
 ; name for that board, also used to access this board with the url.

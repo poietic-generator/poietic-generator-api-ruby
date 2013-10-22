@@ -21,7 +21,6 @@
 ##############################################################################
 
 require 'poieticgen/allocation/generic'
-require 'monitor'
 
 module PoieticGen ; module Allocation
 	class Spiral < Generic
@@ -79,29 +78,31 @@ module PoieticGen ; module Allocation
 		#
 		#
 		#
-		def initialize config
+		def initialize config, zone_dump = nil
 			# map index => Zone object (or nil if unallocated)
 			@debug = true
 			@zones = {}
-			@config = config
-			@monitor = Monitor.new
 
-			# FIXME : maintain boundaries for the board
-			@boundary_left = 0
-			@boundary_right = 0
-			@boundary_top = 0
-			@boundary_bottom = 0
+			unless zone_dump.nil? then
+				zone_dump.each do |zone|
+					@zones[zone.index] = zone
+				end
+			end
+
+			@config = config
 		end
 
 
+		#
+		# return the zone associated with an index
+		#
 		def [] index
 			res = if @zones.include? index then
-				@zones[index]
-			else nil
-			end
+					  @zones[index]
+				  else nil
+				  end
 			return res
 		end
-
 
 		#
 		# return index to position
@@ -153,52 +154,41 @@ module PoieticGen ; module Allocation
 		# allocates and return 
 		# a zone                
 		#
-		def allocate
-			@monitor.synchronize do
-				next_index = _next_index()
+		def allocate board
+			index = _next_index()
 
-				zone = Zone.new next_index, 
-					(self.index_to_position next_index),
-					@config.width,
-					@config.height
+			zone = Zone.new index, 
+				(self.index_to_position index),
+				@config.width,
+				@config.height,
+				board
 
-				rdebug "Spiral/allocate zone : ", zone.inspect
-				@zones[next_index] = zone
-				return zone
-			end
-		end
+			rdebug "Spiral/allocate zone : ", zone.inspect
+			@zones[index] = zone
 
-		#
-		#
-		#
-		def free zone_idx
-			@monitor.synchronize do
-				zone = @zones[zone_idx]
-				zone.user_id = nil
-				return zone
-			end
+			return zone
 		end
 
 		private
+
 		# 
 		# Find the first allocatable index
 		#
 		def _next_index 
 			result_index = nil
 
-			@monitor.synchronize do
-				# find a nil zone first
-				nil_zones = @zones.select{ |idx,zone| zone.user_id.nil? }
-				if nil_zones.size > 0 then
-					# got an unallocated zone !
-					result_index = nil_zones.first[0]
-				else
-					# try the normal method
-					result_index = @zones.size
-				end
+			# find a nil zone first
+			nil_zones = @zones.select{ |idx,zone| zone.expired }
+			if nil_zones.size > 0 then
+				# got an unallocated zone !
+				result_index = nil_zones.first[0]
+			else
+				# try the normal method
+				result_index = @zones.size
 			end
 			return result_index
 		end
 
 	end
 end ; end
+

@@ -1,0 +1,116 @@
+@font-face {
+    font-family: 'Raleway Thin';
+    src: url('/fonts/raleway/raleway_thin.eot');
+    src: local('Raleway Thin'),
+	url('/fonts/raleway/raleway_thin.otf') format('opentype');
+}
+
+body {
+	left: 0px;
+	top: 0px;
+	right: 0px;
+	padding: 0px;
+	margin: 0px;
+    background: #c0c0c0;
+}
+
+#page {
+    color: white;
+    background: black;
+    /*width: 80%;
+    margin-left: 10%;
+    margin-right: 10%;*/
+
+
+    /*
+    -moz-border-radius: 1em 1em 1em 1em;
+    -webkit-border-radius: 1em 1em 1em 1em;
+    border-radius: 1em 1em 1em 1em;
+
+    -moz-box-shadow: 0em 0em 0.6em #f50;
+    -webkit-box-shadow: 0em 0em 0.6em #f50;
+    box-shadow: 0em 0em 0.6em #f50;
+    */
+
+    font-family: "Arial", sans-serif; /* "Raleway Thin"; */
+}
+
+#header {
+    /*margin-top: 1em;*/
+    text-align: center;
+    /*padding-top: 1em;
+    padding-bottom: 1em;*/
+}
+
+#header h1 {
+    text-shadow: 0.1em 0em 0.1em red,
+		-0.1em 0em 0.1em green,
+		0em 0.2em 0.1em blue ;
+}
+
+#content {
+    border: none;
+    margin: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    /*padding: 1em;*/
+}
+
+#footer {
+    clear: both;
+    text-align: center;
+    font-size: 90%;
+    font-weight: bold;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    margin-bottom: 1em;
+}
+
+#footer a {
+    color: #0aa;
+}
+
+#footer a:visited {
+    color: #088;
+}
+
+.spacer { clear: both; width:0px; height: 0px; }
+
+.alert {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10000!important;
+    padding: 8px 35px 8px 14px;
+    margin-bottom: 18px;
+    color: #c09853;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    background-color: #fcf8e3;
+    border: 1px solid #fbeed5;
+}
+
+.alert-success {
+    color: #468847;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+}
+
+.alert-danger,
+.alert-error {
+    color: #b94a48;
+    background-color: #f2dede;
+    border-color: #eed3d7;
+}
+
+.alert-info {
+    color: #3a87ad;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}
+
+
+.ui-link {
+    text-decoration: none;
+}
+

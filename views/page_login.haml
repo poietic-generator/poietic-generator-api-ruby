@@ -1,0 +1,16 @@
+- @page.css << "/css/base.css"
+- @page.css << "/css/page_login.css"
+- @page.js << "/js/extern/jquery.cookie.js"
+
+/ admin login
+#session-zone{"data-fullscreen" => "false", "data-role" => "page"}
+  %div{"data-id" => "head", "data-position" => "fixed", "data-role" => "header"}
+    %h1.username Login
+  #page-container{"data-role" => "content"}
+    %form#credentials{:action => "/user/login", "data-ajax" => "false", :method => "post"}
+      %div.ui-field-contain.ui-body.ui-br(data-role="fieldcontain")
+        %label{:for => "username"} Username
+        %input#username(name="user_name" type="text" value="")/
+        %label{:for => "password"} Password
+        %input#password(name="user_password" type="password" value="")/
+      %button(type="submit" data-theme="b" name="submit" value="submit-value") Join

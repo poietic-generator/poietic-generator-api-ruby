@@ -1,0 +1,9 @@
+2013-07-25	Glenn Y. Rolland <glenn.rolland@gnuside.com>
+
+  * Added basic command line for managing sessions
+
+
+- on gere le jeu sur plusieurs sessions en meme temps
+=> on peut couper / relancer le serveur, on reprend là ou on en était ;-)
+
+- 

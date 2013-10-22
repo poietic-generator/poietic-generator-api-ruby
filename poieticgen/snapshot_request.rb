@@ -20,17 +20,25 @@
 #                                                                            #
 ##############################################################################
 
+require 'optparse'
+
 module PoieticGen
+	class SnapshotRequestParseError < OptionParser::ParseError ; end
+
 	class SnapshotRequest
 
 		DATE = 'date'
-		SESSION = 'session'
+		ID = 'id'
+		
+		SESSION_TOKEN = 'session_token'
+		SINATRA_SPLAT = 'splat'
+		SINATRA_CAPTURES = 'captures'
 
 		private
 
 		def initialize hash
 			@hash = hash
-			@debug = true
+			# @debug = true
 		end
 
 		public
@@ -41,33 +49,43 @@ module PoieticGen
 				case key
 				when DATE then
 					rdebug "date : %s" % val.inspect
-				when SESSION then
+				when ID then
+					rdebug "id : %s" % val.inspect
+				when SESSION_TOKEN then
 					rdebug "session : %s" % val.inspect
+				when SINATRA_SPLAT then
+					rdebug "sinatra splat : %s" % val.inspect
+				when SINATRA_CAPTURES then
+					rdebug "sinatra captures : %s" % val.inspect
 				else
-					raise RuntimeError, "unknow request field '%s'" % key
+					raise SnapshotRequestParseError, "Unknow request field '%s'" % key
 				end
 			end
 
 			[
 				DATE,
-				SESSION
+				ID,
+				SESSION_TOKEN
 			].each do |field|
 				unless hash.include? field then
-					raise ArgumentError, ("The '%s' field is missing" % field)
+					raise SnapshotRequestParseError, ("The '%s' field is missing" % field)
 				end
 			end
 			SnapshotRequest.new hash
 		end
 
 
-		def session
-			return @hash[SESSION]
-		end
-
 		def date
 			return @hash[DATE].to_i
 		end
+		
+		def id
+			return @hash[ID].to_i
+		end
 
+		def session_token
+			return @hash[SESSION_TOKEN]
+		end
 	end
 
 end

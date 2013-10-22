@@ -27,14 +27,7 @@ module PoieticGen ; module Allocation
 		#
 		# return a zone, somewhere...
 		#
-		def allocate
-			raise NotImplementedError
-		end
-
-		#
-		# free zone at given index
-		#
-		def free idx
+		def allocate board
 			raise NotImplementedError
 		end
 
