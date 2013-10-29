@@ -25,9 +25,16 @@ module PoieticGen
 				configure
 				sessions = PoieticGen::Board.all
 				sessions.each do |s|
-					puts "ID % 3d - [START %s .. STOP none]" % [ 
+					stop = if (s.end_timestamp > 0) then
+							   Time.at(s.end_timestamp).utc.iso8601
+						   else
+							   "none"
+						   end
+					pp s.end_timestamp
+					puts "ID % 3d - [START %s .. STOP %s]" % [ 
 						s.id, 
-						Time.at(s.timestamp).utc.iso8601
+						Time.at(s.timestamp).utc.iso8601,
+						stop
 					]
 				end
 
