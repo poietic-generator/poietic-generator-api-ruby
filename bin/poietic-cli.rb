@@ -120,10 +120,26 @@ module PoieticGen
 				puts "%d" % (finish - start)
 			end
 
-			option :start, :type => :numeric, :default => 0, :aliases => :s
-			option :length, :type => :numeric, :default => 0, :aliases => :l
-			option :interval, :type => :numeric, :default => 1, :aliases => :i
-			option :factor, :type => :numeric, :default => 1, :aliases => :f
+			option :start, 
+				:type => :numeric, 
+				:default => 0, 
+				:aliases => :s,
+				:desc => "Start time of sequence (in FIXME unit)"
+			option :length, 
+				:type => :numeric, 
+				:default => 0, 
+				:aliases => :l,
+				:desc => "Duraction length of sequence (in FIXME unit)"
+			option :interval, 
+				:type => :numeric, 
+				:default => 1, 
+				:aliases => :i,
+				:desc => "Interval between two snapshots in sequence (in FIXME unit)"
+			option :factor, 
+				:type => :numeric, 
+				:default => 1, 
+				:aliases => :f,
+				:desc => "Resolution factor for output images (integer)"
 			desc "sequence ID DIRECTORY", "Dump a sequence of snapshots in session ID between OFFSET_START and OFFSET_END with INTERVAL, and save it in DIRECTORY"
 			def sequence id, directory
 				configure
