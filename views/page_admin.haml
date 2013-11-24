@@ -9,7 +9,12 @@
   %div{"data-id" => "head", "data-position" => "fixed", "data-role" => "header"}
     %h1.username Administration
     - url = "/user/logout?admin_token=%s" % @params[:admin_token]
-    %a.ui-btn-right.logout{"data-ajax" => "false", :href => url} Logout
+    %a.ui-btn-left.logout{"data-ajax" => "false", :href => url} Logout
   #page-container{"data-role" => "content"}
+    %form#credentials{:action => "/user/login", "data-ajax" => "false", :method => "post"}
+      %div.ui-field-contain.ui-body.ui-br(data-role="fieldcontain")
+        %label{:for => "username"} Session name :
+        %input#session_name(name="session_name" type="text" value="")/
+      // %button(type="submit" data-theme="b" name="submit" value="submit-value") Create (fake)
     .admin-buttons
-      %a{"data-ajax" => "false", "href" => "/session/create?admin_token=%s" % @params[:admin_token], "data-role" => "button"} New session
+      %a{"data-ajax" => "false", "href" => "/session/create?admin_token=%s" % @params[:admin_token], "data-role" => "button"} Create session
