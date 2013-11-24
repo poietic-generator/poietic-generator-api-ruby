@@ -13,7 +13,7 @@ require 'rdebug/base'
 require 'pp'
 
 $:.insert 0, '.'
-require 'bin/image'
+require 'poieticgen/cli'
 require 'poieticgen/config_manager'
 require 'poieticgen/board'
 
@@ -82,6 +82,7 @@ module PoieticGen
 				board = PoieticGen::Board.first(:id => id.to_i)
 
 				if board.nil? then
+					# FIXME: exitcode must return an error
 					puts "The board %s does not exist" % id
 					return
 				end
@@ -90,6 +91,7 @@ module PoieticGen
 				end_timestamp = if board.closed then board.end_timestamp else Time.now.to_i end
 
 				if offset < 0 or timestamp > end_timestamp then
+					# FIXME: exitcode must return an error
 					puts "Offset '%d' out of bounds (%d -> %d)" %
 						[ offset, 0, (end_timestamp - board.timestamp) ]
 					return
@@ -207,11 +209,19 @@ module PoieticGen
 
 				zones.each do |index, zone|
 					zone_x, zone_y = zone.position
+
+					# Make zone position absolute (depends on the topleft of bounding box)
 					zone_x = (zone_x * zone.width) - diff_x
 					zone_y = (zone_y * zone.height) - diff_y
 
-					#pp "zone %d width=%d, height=%d, x=%d, y=%d" %
+					# Reverse the y axis of zone for image output
+					zone_y = height - zone_y - zone.height
+
+					#pp "board(width=%d, height=%d, diff_x=%d, diff_y=%d)" %
+					#	[ width, height, diff_x, diff_y ]
+					#pp "zone(index=%d, width=%d, height=%d, x=%d, y=%d)" %
 					#	[ index, zone.width, zone.height, zone_x, zone_y ]
+					#STDIN.gets
 
 					(0..(zone.height * zone.width)-1).each do |i|
 						image.draw_rect (zone_x + (i % zone.width)) * factor,
