@@ -7,7 +7,7 @@ Requirements
 First, make sure you have a proper git, ruby & rubygems installation on your system.
 If not, install them with :
 
-    sudo apt-get install git-core apt-get install ruby1.9.1 ruby1.9.1-dev  
+    sudo apt-get install git-core ruby1.9.1 ruby1.9.1-dev  
 
 Then checkout the sources from the public repository :
 
