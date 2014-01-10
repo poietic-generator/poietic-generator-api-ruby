@@ -189,7 +189,16 @@ module PoieticGen
 			haml :page_view_standalone
 		end
 
-
+		get '/session/latest/view_standalone' do
+			@page = Page.new "view-standalone"
+			haml :page_view_standalone
+		end
+		
+		get '/session/latest/view' do
+			@page = Page.new "view"
+			haml :page_view
+		end
+		
 		get '/session/:session_token/logout/:user_token' do
 			settings.manager.leave params['user_token'], params['session_token']
 			response.set_cookie('user_id', {:value => nil, :path => "/"});
