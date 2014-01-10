@@ -378,9 +378,19 @@ module PoieticGen
 
 				self.check_expired_users
 
-				board = Board.first(
-					:session_token => req.session_token
-				)
+
+                # test if session_token is defined
+                require 'pp'
+                pp req.session_token
+                # FIXME: use a constant for latest session name
+                board = if req.session_token == "latest" then
+                    # if not, use the latest session
+                    Board.first(:order => [:id.desc])
+                else
+				    Board.first(
+				    	:session_token => req.session_token
+				    )
+				end
 
 				raise InvalidSession, "Invalid session" if board.nil?
 
@@ -480,9 +490,15 @@ module PoieticGen
 
 				self.check_expired_users
 
-				board = Board.first(
-					:session_token => req.session_token
-				)
+                # test if session_token is defined
+                board = if req.session_token == "latest" then
+                    # if not, use the latest session
+                    Board.first(:order => [:id.desc])
+                else
+				    Board.first(
+				    	:session_token => req.session_token
+				    )
+				end
 
 				raise InvalidSession, "Invalid session" if board.nil?
 
