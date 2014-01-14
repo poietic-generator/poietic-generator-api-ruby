@@ -43,6 +43,7 @@ module PoieticGen
 		include DataMapper::Resource
 
 		property :id,            Serial
+		property :name,          String,  :unique => true, :required=> false
 		property :timestamp,     Integer, :required => true
 		property :session_token, String,  :required => true, :unique => true
 		property :end_timestamp, Integer, :default => 0

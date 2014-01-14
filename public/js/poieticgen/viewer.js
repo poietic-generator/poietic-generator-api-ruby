@@ -28,7 +28,8 @@
 	"use strict";
 
 	var POSITION_TYPE_DRAWING = 0,
-		POSITION_TYPE_ZONE = 0;
+		POSITION_TYPE_ZONE = 0,
+		DEFAULT_CANVAS_BACKGROUND_COLOR = '#002';
 
 	// REQUIRED FOR ZONE PREFIX
 	if (PoieticGen.Zone === undefined) {
@@ -246,7 +247,7 @@
 				w: $(window).width(),
 				h : $(window).height()
 			};
-			margin = 15;
+			margin = 0;
 
 			width   = this.fullsize ? win.h : win.h / 2;
 			height  = this.fullsize ? win.h : win.h / 2;
@@ -273,7 +274,7 @@
 
 			// console.log("viewer/update_size: column_size = " + _column_size);
 			ctx = _real_canvas.getContext("2d");
-			ctx.fillStyle = '#200';
+			ctx.fillStyle = DEFAULT_CANVAS_BACKGROUND_COLOR;
 			ctx.fillRect(0, 0, _real_canvas.width, _real_canvas.height);
 		};
 
