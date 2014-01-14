@@ -76,8 +76,16 @@ module PoieticGen
 			
 			# Create board with the configuration
 			board = Board.create @config.board
+			pp params
+			board.name = params['session_name']
+			begin
+				board.save
+			rescue DataMapper::SaveFailureError => e
+				STDERR.puts e.resource.errors.inspect
+				raise e
+			end
 
-			return board.id
+			return board
 		end
 
 		#

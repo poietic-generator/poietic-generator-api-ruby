@@ -31,7 +31,8 @@ module PoieticGen
 							   "none"
 						   end
 					pp s.end_timestamp
-					puts "ID % 3d - [START %s .. STOP %s]" % [ 
+					puts "NAME %s - ID % 3d - [START %s .. STOP %s]" % [ 
+						(s.name || "(none)"), 
 						s.id, 
 						Time.at(s.timestamp).utc.iso8601,
 						stop
@@ -51,8 +52,15 @@ module PoieticGen
 			def rename id, new_label
 				configure
 				session = PoieticGen::Board.first(:id => id.to_i)
+				session.name = new_label
 				pp session
-				puts "FIXME: Rename a session"
+
+				begin
+					session.save
+				rescue DataMapper::SaveFailureError => e
+					STDERR.puts e.resource.errors.inspect
+					raise e
+				end
 			end
 
 			desc "finish ID", "Finish a session"
@@ -209,6 +217,7 @@ module PoieticGen
 				$stdout = File.new '/dev/null', 'w' # mute STDOUT
 
 				@config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
+				DataMapper.finalize
 				DataMapper::Logger.new(STDERR, :info)
 				#DataMapper::Logger.new(STDERR, :debug)
 				hash = @config.database.get_hash
