@@ -39,15 +39,27 @@
 		console.error("PoieticGen.Viewer is not defined !");
 	}
 
-	// instead of windows.onload
+	// Load components on document ready
 	$(document).ready(function () {
+		var $overlay = $('#session-overlay'),
+			has_overlay = ($overlay.length !== 0);
+
 		slider = new PoieticGen.Slider("#history_slider");
 
 		// initialize zoness
 		session = new PoieticGen.ViewSession(function (session) {
 			//console.log("page_draw/ready: session callback ok");
 			board = new PoieticGen.Board(session);
-			viewer = new PoieticGen.Viewer(session, board, 'session-viewer', null, {fullsize: true});
+			viewer = new PoieticGen.Viewer(session, 
+				board, 
+				'session-viewer', 
+				null, 
+				{
+					fullsize: true,
+					overlay: has_overlay,
+					overlay_id: $overlay.attr('id')
+				}
+			);
 			//console.log("page_draw/ready: prepicker");
 		}, slider);
 

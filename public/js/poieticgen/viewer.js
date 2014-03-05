@@ -45,6 +45,7 @@
 			_session,
 			_board,
 			_real_canvas,
+			_real_overlay,
 			_column_size,
 			_line_size,
 			_pencil_move,
@@ -62,6 +63,8 @@
 		this.context = null;
 
 		this.fullsize = options.fullsize || false;
+		this.overlay = options.overlay || false;
+		this.overlay_id = options.overlay_id || undefined;
 
 
 		/**
@@ -94,6 +97,9 @@
 
 
 			_real_canvas = document.getElementById(p_canvas_id);
+			if (self.overlay) {
+				_real_overlay = document.getElementById(self.overlay_id);
+			}
 
 			// size of editor's big pixels
 			self.column_size = 1;
@@ -238,7 +244,7 @@
 
 
 		/**
-		*
+		* Resize canvas & various display elements
 		*/
 		this.update_size = function () {
 			var win, margin, width, height, ctx, canvas, next;
@@ -252,21 +258,27 @@
 			width   = this.fullsize ? win.h : win.h / 2;
 			height  = this.fullsize ? win.h : win.h / 2;
 
-			if (this.fullsize) {
+			if (self.fullsize) {
 				canvas = $(_real_canvas);
+				// FIXME: set the slider as optional parameter of constructor 
 				next = canvas.parent().parent().next();
 
 				// Slider height
 				// FIXME: not generic
 				if (next && next.is(':visible')) {
 					height -= next.height();
+					width -= next.height();
 				}
 			}
 
 			_real_canvas.width = Math.floor(width) - margin;
 			_real_canvas.height = Math.floor(height) - margin;
+			if (self.overlay) {
+				_real_overlay.width = Math.floor(width) - margin;
+				_real_overlay.height = Math.floor(height) - margin;
+			}
 
-			// console.log("viewer/update_size: window.width = " + [ $(window).width(), $(window).height() ]);
+			console.log("viewer/update_size: window.width = " + [ $(window).width(), $(window).height() ]);
 
 			// console.log("viewer/update_size: real_canvas.width = " + real_canvas.width);
 			_column_size = _real_canvas.width / self.column_count;
@@ -326,8 +338,11 @@
 
 		this.touchstop = function (event_obj) {
 			var canvas = _real_canvas;
+
+			// fill eventObj with fixed values (faking a mouse down)
 			event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
 			event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
+
 			self.pencil_up(event_obj);
 			event_obj.preventDefault();
 		};
@@ -344,8 +359,11 @@
 
 		this.touchstart = function (event_obj) {
 			var canvas = _real_canvas;
+			
+			// fill eventObj with fixed values (faking a mouse down)
 			event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
 			event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
+
 			self.pencil_down(event_obj);
 			event_obj.preventDefault();
 		};
@@ -406,6 +424,9 @@
 			self.draw_stroke(stk);
 		};
 
+		//FIXME: GYR: Add a function to handle user events
+		// then enable or disable the overlay, depending on board's active zones
+		
 
 		/**
 		* Draw stroke
