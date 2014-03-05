@@ -34,4 +34,5 @@ gem "extlib"
 gem "rdebug"
 gem "thin"
 gem "oily_png"
+gem "foreman"
 
