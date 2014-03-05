@@ -33,9 +33,6 @@ require 'rdebug/base'
 require 'json'
 require 'pp'
 
-# FIXME:
-# lancer un timer qui nettoie les participants déconnectés
-# toutes les 300 secondes
 
 module PoieticGen
 
