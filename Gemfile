@@ -6,7 +6,7 @@ gem "sinatra", :require => "sinatra/base"
 gem "sinatra-reloader"
 gem "async_sinatra"
 gem "sinatra-flash"
-gem "capistrano"
+gem "capistrano", "~> 2.15"
 gem "capistrano-ext"
 
 group :development do
@@ -34,4 +34,5 @@ gem "extlib"
 gem "rdebug"
 gem "thin"
 gem "oily_png"
+gem "foreman"
 
