@@ -25,6 +25,7 @@ require 'sinatra/base'
 require 'sinatra/cookies'
 require 'sinatra/flash'
 
+require 'poieticgen/version'
 require 'poieticgen/config_manager'
 require 'poieticgen/page'
 require 'poieticgen/manager'
