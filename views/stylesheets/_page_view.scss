@@ -21,3 +21,15 @@ body.view, body.view-standalone {
 		display:none;
     }
 }
+
+body.view-standalone {
+	.ui-page-fullscreen {
+		height: 100%;
+		background-color: black;
+
+		.ui-content {
+			height: 100%;
+			background-color: black;
+		}
+	}
+}

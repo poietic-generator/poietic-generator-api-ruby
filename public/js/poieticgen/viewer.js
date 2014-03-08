@@ -247,18 +247,18 @@
 		* Resize canvas & various display elements
 		*/
 		this.update_size = function () {
-			var win, margin, width, height, ctx, canvas, next;
+			var win, margin, width, height, ctx, canvas, next, minsize;
 
 			win = {
 				w: $(window).width(),
 				h : $(window).height()
 			};
 			margin = 0;
-
-			width   = this.fullsize ? win.h : win.h / 2;
-			height  = this.fullsize ? win.h : win.h / 2;
+			minsize = (win.h < win.w) ? win.h : win.w;
 
 			if (self.fullsize) {
+				width = minsize;
+				height = minsize;
 				canvas = $(_real_canvas);
 				// FIXME: set the slider as optional parameter of constructor 
 				next = canvas.parent().parent().next();
@@ -269,6 +269,9 @@
 					height -= next.height();
 					width -= next.height();
 				}
+			} else {
+				width = minsize / 2;
+				height = minsize / 2;
 			}
 
 			_real_canvas.width = Math.floor(width) - margin;
