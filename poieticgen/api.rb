@@ -89,6 +89,8 @@ module PoieticGen
 				end
 
 				set :config, config
+
+				DataMapper.finalize
 				DataMapper::Logger.new(STDERR, :info)
 				#DataMapper::Logger.new(STDERR, :debug)
 				hash = config.database.get_hash
@@ -119,10 +121,10 @@ module PoieticGen
 		#
 		# Create a new session
 		#
-		get '/session/create' do
+		post '/session/create' do
 			begin
-				session_id = settings.manager.create_session params
-				flash[:success] = "Session %d created!" % session_id
+				session = settings.manager.create_session params
+				flash[:success] = "Session %d created!" % session.id
 
 			rescue PoieticGen::AdminSessionNeeded => e
 				flash[:error] = "Only admins can do that!"
@@ -153,7 +155,11 @@ module PoieticGen
 					@selected_session = sessions.first.session_token
 				
 					sessions.each do |s|
-						@session_list[s.session_token] = "Session %d" % s.id
+						@session_list[s.session_token] = if s.name.nil? or s.name.empty? then
+															 "Session %d" % s.id
+														 else
+															 s.name
+														 end
 					end
 				end
 			end
@@ -189,7 +195,16 @@ module PoieticGen
 			haml :page_view_standalone
 		end
 
-
+		get '/session/latest/view_standalone' do
+			@page = Page.new "view-standalone"
+			haml :page_view_standalone
+		end
+		
+		get '/session/latest/view' do
+			@page = Page.new "view"
+			haml :page_view
+		end
+		
 		get '/session/:session_token/logout/:user_token' do
 			settings.manager.leave params['user_token'], params['session_token']
 			response.set_cookie('user_id', {:value => nil, :path => "/"});

@@ -25,9 +25,17 @@ module PoieticGen
 				configure
 				sessions = PoieticGen::Board.all
 				sessions.each do |s|
-					puts "ID % 3d - [START %s .. STOP none]" % [ 
+					stop = if (s.end_timestamp > 0) then
+							   Time.at(s.end_timestamp).utc.iso8601
+						   else
+							   "none"
+						   end
+					pp s.end_timestamp
+					puts "NAME %s - ID % 3d - [START %s .. STOP %s]" % [ 
+						(s.name || "(none)"), 
 						s.id, 
-						Time.at(s.timestamp).utc.iso8601
+						Time.at(s.timestamp).utc.iso8601,
+						stop
 					]
 				end
 
@@ -44,8 +52,15 @@ module PoieticGen
 			def rename id, new_label
 				configure
 				session = PoieticGen::Board.first(:id => id.to_i)
+				session.name = new_label
 				pp session
-				puts "FIXME: Rename a session"
+
+				begin
+					session.save
+				rescue DataMapper::SaveFailureError => e
+					STDERR.puts e.resource.errors.inspect
+					raise e
+				end
 			end
 
 			desc "finish ID", "Finish a session"
@@ -115,10 +130,26 @@ module PoieticGen
 				puts "%d" % (finish - start)
 			end
 
-			option :start, :type => :numeric, :default => 0, :aliases => :s
-			option :length, :type => :numeric, :default => 0, :aliases => :l
-			option :interval, :type => :numeric, :default => 1, :aliases => :i
-			option :factor, :type => :numeric, :default => 1, :aliases => :f
+			option :start, 
+				:type => :numeric, 
+				:default => 0, 
+				:aliases => :s,
+				:desc => "Start time of sequence (in FIXME unit)"
+			option :length, 
+				:type => :numeric, 
+				:default => 0, 
+				:aliases => :l,
+				:desc => "Duraction length of sequence (in FIXME unit)"
+			option :interval, 
+				:type => :numeric, 
+				:default => 1, 
+				:aliases => :i,
+				:desc => "Interval between two snapshots in sequence (in FIXME unit)"
+			option :factor, 
+				:type => :numeric, 
+				:default => 1, 
+				:aliases => :f,
+				:desc => "Resolution factor for output images (integer)"
 			desc "sequence ID DIRECTORY", "Dump a sequence of snapshots in session ID between OFFSET_START and OFFSET_END with INTERVAL, and save it in DIRECTORY"
 			def sequence id, directory
 				configure
@@ -186,6 +217,7 @@ module PoieticGen
 				$stdout = File.new '/dev/null', 'w' # mute STDOUT
 
 				@config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
+				DataMapper.finalize
 				DataMapper::Logger.new(STDERR, :info)
 				#DataMapper::Logger.new(STDERR, :debug)
 				hash = @config.database.get_hash
