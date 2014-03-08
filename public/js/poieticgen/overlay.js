@@ -27,11 +27,6 @@
 	// vim: set ts=4 sw=4 et:
 	"use strict";
 
-	// REQUIRED FOR ZONE PREFIX
-	if (PoieticGen.Zone === undefined) {
-		console.error("PoieticGen.Zone is not defined !");
-	}
-
 	function Overlay(p_session, p_board, p_canvas_id, options) {
 		//var console = { log: function() {} };
 
@@ -41,8 +36,7 @@
 			_session,
 			_board,
 			_real_canvas,
-			_real_overlay,
-			_boundaries;
+			_real_overlay;
 
 		this.name = "Overlay";
 		this.column_count = null;
@@ -57,21 +51,9 @@
 		* Constructor
 		*/
 		this.initialize = function (p_session, p_board, p_canvas_id) {
-
-			_boundaries = {
-				xmin: 0,
-				xmax: 0,
-				ymin: 0,
-				ymax: 0,
-				width: 0,
-				height: 0
-			};
-
 			_board = p_board;
 			_session = p_session;
 			_session.register(self);
-
-			self.update_boundaries();
 
 			_real_canvas = document.getElementById(p_canvas_id);
 			if (self.overlay) {
@@ -116,56 +98,7 @@
 
 			console.log("overlay/handle_event : " + JSON.stringify(ev));
 
-			self.update_boundaries();
 			self.update_size();
-		};
-
-
-		/**
-		* Update boundaries from board information
-		*/
-		this.update_boundaries = function () {
-			var console = window.noconsole,
-				zones,
-				remote_zone,
-				x,
-				y,
-				zone_idx;
-
-			zones = _board.get_zone_list();
-
-			// reset boundaries first
-			_boundaries = { xmin: 0, xmax: 0, ymin: 0, ymax: 0, width: 0, height: 0 };
-
-			for (zone_idx = 0; zone_idx < zones.length; zone_idx += 1) {
-				remote_zone = _board.get_zone(zones[zone_idx]);
-				if (remote_zone !== null) {
-					x = remote_zone.position[0];
-					y = remote_zone.position[1];
-					if (x < _boundaries.xmin) { _boundaries.xmin = x; }
-					if (x > _boundaries.xmax) { _boundaries.xmax = x; }
-					if (y < _boundaries.ymin) { _boundaries.ymin = y; }
-					if (y > _boundaries.ymax) { _boundaries.ymax = y; }
-				}
-			}
-
-			// we make a square now ^^
-			_boundaries.width = _boundaries.xmax - _boundaries.xmin;
-			_boundaries.height = _boundaries.ymax - _boundaries.ymin;
-
-			if (_boundaries.width > _boundaries.height) {
-				_boundaries.ymax = _boundaries.ymin + _boundaries.width;
-				_boundaries.width = _boundaries.width + 1;
-				_boundaries.height = _boundaries.width;
-			} else {
-				_boundaries.xmax = _boundaries.xmin + _boundaries.height;
-				_boundaries.height = _boundaries.height + 1;
-				_boundaries.width = _boundaries.height;
-			}
-
-			console.log("overlay/update_boundaries : boundaries = " + JSON.stringify(_boundaries));
-			self.column_count = _boundaries.width * _session.zone_column_count;
-			self.line_count = _boundaries.height * _session.zone_line_count;
 		};
 
 		// call constructor
