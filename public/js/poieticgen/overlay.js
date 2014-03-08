@@ -54,42 +54,49 @@
 			session.register(self);
 
 			$(window).resize(function () {
-				self.update_size();
+				self.update_visibility();
 			});
 
-			self.update_size();
+			self.update_visibility();
 		};
 
 
 		/**
 		* Resize canvas & various display elements
 		*/
-		this.update_size = function () {
-			var win, width, height;
+		this.update_visibility = function () {
+			var win, width, height, zones, zone_idx;
+			zones = board.get_zone_list();
 
 			win = {
 				w: $(window).width(),
 				h : $(window).height()
 			};
 
-			overlay.width = Math.floor(win.w);
-			overlay.height = Math.floor(win.h);
+			// manage overlay visibility depending on user count
+			if (zones.length <= 1) {
+				overlay.width = Math.floor(win.w);
+				overlay.height = Math.floor(win.h);
+				$(overlay).fadeIn('slow');
+			} else {
+				$(overlay).fadeOut('slow');
+			}
+			console.log("overlay/update_visibility : users count=" + zones.length);
 		};
-
-
-		//FIXME: GYR: Add a function to handle user events
-		// then enable or disable the overlay, depending on board's active zones
 		
 
 		/**
 		* Handle user-related (join/leave) events
 		*/
 		this.handle_event = function (ev) {
-			var console = window.noconsole;
+			//var console = window.noconsole;
 
-			console.log("overlay/handle_event : " + JSON.stringify(ev));
 
-			self.update_size();
+			if ((ev.type === 'join') || (ev.type === 'leave')) {
+				// FIXME: read/count number of users 
+				self.update_visibility();
+			}
+
 		};
 
 		// call constructor

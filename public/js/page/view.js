@@ -30,6 +30,7 @@
 	var session = null,
 		viewer = null,
 		board = null,
+		overlay = null,
 		slider = null;
 
 	if (PoieticGen.Zone === undefined) {
@@ -39,32 +40,9 @@
 		console.error("PoieticGen.Viewer is not defined !");
 	}
 
-	// Load components on document ready
-	$(document).ready(function () {
-		var $overlay = $('#session-overlay'),
-			has_overlay = ($overlay.length !== 0);
 
-		slider = new PoieticGen.Slider("#history_slider");
-
-		// initialize zoness
-		session = new PoieticGen.ViewSession(function (session) {
-			//console.log("page_draw/ready: session callback ok");
-			board = new PoieticGen.Board(session);
-			viewer = new PoieticGen.Viewer(session, 
-				board, 
-				'session-viewer', 
-				null, 
-				{
-					fullsize: true,
-					overlay: has_overlay,
-					overlay_id: $overlay.attr('id')
-				}
-			);
-			//console.log("page_draw/ready: prepicker");
-		}, slider);
-
-		slider.hide();
-
+	// Set up interface buttons
+	function setup_buttons() {
 		$("#view_start").bind("vclick", function (event) {
 			event.preventDefault();
 			$("#view_now").removeClass("ui-btn-active");
@@ -79,6 +57,43 @@
 			slider.hide();
 			session.current();
 		});
+	}
+	
+	// Set up session elements
+	function setup_session() {
+		var $overlay = $('#session-overlay'),
+			has_overlay = ($overlay.length !== 0);
+
+		slider = new PoieticGen.Slider("#history_slider");
+
+		// initialize zones
+		session = new PoieticGen.ViewSession(function (session) {
+			board = new PoieticGen.Board(session);
+			viewer = new PoieticGen.Viewer(
+				session,
+				board,
+				'session-viewer',
+				null,
+				{
+					fullsize: true
+				}
+			);
+			if (has_overlay) {
+				overlay = new PoieticGen.Overlay({
+					session: session,
+					board: board,
+					overlay_id: 'session-overlay'
+				});
+			}
+		}, slider);
+
+		slider.hide();
+	}
+
+	// Load components on document ready
+	$(document).ready(function () {
+		setup_session();
+		setup_buttons();
 	});
 
 }(PoieticGen, jQuery));
