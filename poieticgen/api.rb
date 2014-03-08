@@ -25,6 +25,7 @@ require 'sinatra/base'
 require 'sinatra/cookies'
 require 'sinatra/flash'
 
+require 'poieticgen/version'
 require 'poieticgen/config_manager'
 require 'poieticgen/page'
 require 'poieticgen/manager'
@@ -33,9 +34,6 @@ require 'rdebug/base'
 require 'json'
 require 'pp'
 
-# FIXME:
-# lancer un timer qui nettoie les participants déconnectés
-# toutes les 300 secondes
 
 module PoieticGen
 

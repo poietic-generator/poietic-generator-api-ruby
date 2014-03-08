@@ -238,35 +238,40 @@
 
 
 		/**
-		*
+		* Resize canvas & various display elements
 		*/
 		this.update_size = function () {
-			var win, margin, width, height, ctx, canvas, next;
+			var win, margin, width, height, ctx, canvas, next, minsize;
 
 			win = {
 				w: $(window).width(),
 				h : $(window).height()
 			};
 			margin = 0;
+			minsize = (win.h < win.w) ? win.h : win.w;
 
-			width   = this.fullsize ? win.h : win.h / 2;
-			height  = this.fullsize ? win.h : win.h / 2;
-
-			if (this.fullsize) {
+			if (self.fullsize) {
+				width = minsize;
+				height = minsize;
 				canvas = $(_real_canvas);
+				// FIXME: set the slider as optional parameter of constructor 
 				next = canvas.parent().parent().next();
 
 				// Slider height
 				// FIXME: not generic
 				if (next && next.is(':visible')) {
 					height -= next.height();
+					width -= next.height();
 				}
+			} else {
+				width = minsize / 2;
+				height = minsize / 2;
 			}
 
 			_real_canvas.width = Math.floor(width) - margin;
 			_real_canvas.height = Math.floor(height) - margin;
 
-			// console.log("viewer/update_size: window.width = " + [ $(window).width(), $(window).height() ]);
+			console.log("viewer/update_size: window.width = " + [ $(window).width(), $(window).height() ]);
 
 			// console.log("viewer/update_size: real_canvas.width = " + real_canvas.width);
 			_column_size = _real_canvas.width / self.column_count;
@@ -326,8 +331,11 @@
 
 		this.touchstop = function (event_obj) {
 			var canvas = _real_canvas;
+
+			// fill eventObj with fixed values (faking a mouse down)
 			event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
 			event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
+
 			self.pencil_up(event_obj);
 			event_obj.preventDefault();
 		};
@@ -344,8 +352,11 @@
 
 		this.touchstart = function (event_obj) {
 			var canvas = _real_canvas;
+			
+			// fill eventObj with fixed values (faking a mouse down)
 			event_obj.mouseX = event_obj.touches[0].pageX - canvas.offsetLeft;
 			event_obj.mouseY = event_obj.touches[0].pageY - canvas.offsetTop;
+
 			self.pencil_down(event_obj);
 			event_obj.preventDefault();
 		};

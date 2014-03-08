@@ -20,81 +20,90 @@
 /*                                                                            */
 /******************************************************************************/
 
-
-/*jslint browser: true, nomen: true, continue: true */
+/*jslint browser: true, continue: true*/
 /*global $, jQuery, document, console, PoieticGen */
 
-(function (PoieticGen, $) {
+(function (PoieticGen) {
+	// vim: set ts=4 sw=4 et:
 	"use strict";
 
-	var session = null,
-		viewer = null,
-		board = null,
-		overlay = null,
-		slider = null;
+	function Overlay(p_options) {
+		//var console = { log: function() {} };
 
-	if (PoieticGen.Zone === undefined) {
-		console.error("PoieticGen.Zone is not defined !");
-	}
-	if (PoieticGen.Viewer === undefined) {
-		console.error("PoieticGen.Viewer is not defined !");
-	}
+		this.name = "Overlay";
+
+		var self = this,
+			session,
+			board,
+			overlay_id,
+			overlay;
+
+		/**
+		* Constructor
+		*/
+		this.initialize = function (p_options) {
+			// fix options if needed
+			p_options = p_options || {};
+
+			// set variables from options
+			session = p_options.session || undefined;
+			board = p_options.board || undefined;
+			overlay_id = p_options.overlay_id || undefined;
+			overlay = document.getElementById(overlay_id);
+
+			session.register(self);
+
+			$(window).resize(function () {
+				self.update_visibility();
+			});
+
+			self.update_visibility();
+		};
 
 
-	// Set up interface buttons
-	function setup_buttons() {
-		$("#view_start").bind("vclick", function (event) {
-			event.preventDefault();
-			$("#view_now").removeClass("ui-btn-active");
-			$(this).addClass("ui-btn-active");
-			slider.show();
-			session.restart();
-		});
-		$("#view_now").bind("vclick", function (event) {
-			event.preventDefault();
-			$("#view_start").removeClass("ui-btn-active");
-			$(this).addClass("ui-btn-active");
-			slider.hide();
-			session.current();
-		});
-	}
-	
-	// Set up session elements
-	function setup_session() {
-		var $overlay = $('#session-overlay'),
-			has_overlay = ($overlay.length !== 0);
+		/**
+		* Resize canvas & various display elements
+		*/
+		this.update_visibility = function () {
+			var win, width, height, zones, zone_idx;
+			zones = board.get_zone_list();
 
-		slider = new PoieticGen.Slider("#history_slider");
+			win = {
+				w: $(window).width(),
+				h : $(window).height()
+			};
 
-		// initialize zones
-		session = new PoieticGen.ViewSession(function (session) {
-			board = new PoieticGen.Board(session);
-			viewer = new PoieticGen.Viewer(
-				session,
-				board,
-				'session-viewer',
-				null,
-				{
-					fullsize: true
-				}
-			);
-			if (has_overlay) {
-				overlay = new PoieticGen.Overlay({
-					session: session,
-					board: board,
-					overlay_id: 'session-overlay'
-				});
+			// manage overlay visibility depending on user count
+			if (zones.length <= 1) {
+				overlay.width = Math.floor(win.w);
+				overlay.height = Math.floor(win.h);
+				$(overlay).fadeIn('slow');
+			} else {
+				$(overlay).fadeOut('slow');
 			}
-		}, slider);
+			console.log("overlay/update_visibility : users count=" + zones.length);
+		};
+		
 
-		slider.hide();
+		/**
+		* Handle user-related (join/leave) events
+		*/
+		this.handle_event = function (ev) {
+			//var console = window.noconsole;
+
+
+			if ((ev.type === 'join') || (ev.type === 'leave')) {
+				// FIXME: read/count number of users 
+				self.update_visibility();
+			}
+
+		};
+
+		// call constructor
+		this.initialize(p_options);
 	}
 
-	// Load components on document ready
-	$(document).ready(function () {
-		setup_session();
-		setup_buttons();
-	});
+	PoieticGen.Overlay = Overlay;
 
-}(PoieticGen, jQuery));
+}(PoieticGen));
 
