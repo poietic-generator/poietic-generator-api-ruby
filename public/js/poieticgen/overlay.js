@@ -20,45 +20,38 @@
 /*                                                                            */
 /******************************************************************************/
 
-/*jslint browser: true, nomen: true, continue: true*/
+/*jslint browser: true, continue: true*/
 /*global $, jQuery, document, console, PoieticGen */
 
 (function (PoieticGen) {
 	// vim: set ts=4 sw=4 et:
 	"use strict";
 
-	function Overlay(p_session, p_board, p_canvas_id, options) {
+	function Overlay(p_options) {
 		//var console = { log: function() {} };
 
-		options = options || {};
+		this.name = "Overlay";
 
 		var self = this,
-			_session,
-			_board,
-			_real_canvas,
-			_real_overlay;
-
-		this.name = "Overlay";
-		this.column_count = null;
-		this.line_count = null;
-
-		this.fullsize = options.fullsize || false;
-		this.overlay = options.overlay || false;
-		this.overlay_id = options.overlay_id || undefined;
-
+			session,
+			board,
+			overlay_id,
+			overlay;
 
 		/**
 		* Constructor
 		*/
-		this.initialize = function (p_session, p_board, p_canvas_id) {
-			_board = p_board;
-			_session = p_session;
-			_session.register(self);
+		this.initialize = function (p_options) {
+			// fix options if needed
+			p_options = p_options || {};
 
-			_real_canvas = document.getElementById(p_canvas_id);
-			if (self.overlay) {
-				_real_overlay = document.getElementById(self.overlay_id);
-			}
+			// set variables from options
+			session = p_options.session || undefined;
+			board = p_options.board || undefined;
+			overlay_id = p_options.overlay_id || undefined;
+			overlay = document.getElementById(overlay_id);
+
+			session.register(self);
 
 			$(window).resize(function () {
 				self.update_size();
@@ -72,17 +65,15 @@
 		* Resize canvas & various display elements
 		*/
 		this.update_size = function () {
-			var win, width, height, ctx, canvas, next, minsize;
+			var win, width, height;
 
 			win = {
 				w: $(window).width(),
 				h : $(window).height()
 			};
 
-			_real_overlay.width = Math.floor(win.w);
-			_real_overlay.height = Math.floor(win.h);
-
-			console.log("overlay/update_size: window.width = " + [ $(window).width(), $(window).height() ]);
+			overlay.width = Math.floor(win.w);
+			overlay.height = Math.floor(win.h);
 		};
 
 
@@ -102,7 +93,7 @@
 		};
 
 		// call constructor
-		this.initialize(p_session, p_board, p_canvas_id);
+		this.initialize(p_options);
 	}
 
 	PoieticGen.Overlay = Overlay;
