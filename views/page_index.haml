@@ -9,14 +9,14 @@
   #content(data-role="content")
     #credits
       %p
-        Copyleft - 2011-2013 - 
+        Copyleft - 2011-2014 - 
         %a(href="http://www.gnuside.com") GNUSIDE
-      %p
+        %br
         %a(href="http://poietic-generator.net/") Original concept
         by Olivier Auber
-      %p
-        Version
-        %a(href="https://github.com/Gnuside/poietic-generator/releases/tag/#{PoieticGen::VERSION}-#{PoieticGen::VERSION_NAME.}") #{PoieticGen::VERSION} - #{PoieticGen::VERSION_NAME}
+        %br
+        //Version
+        //%a(href="https://github.com/Gnuside/poietic-generator/releases/tag/#{PoieticGen::VERSION}-#{PoieticGen::VERSION_NAME.downcase.gsub(/\s+/,'_')}") #{PoieticGen::VERSION} - #{PoieticGen::VERSION_NAME}
     #index-menu
       %img(src="/poietic-generator.net.gif")/
       %br/
