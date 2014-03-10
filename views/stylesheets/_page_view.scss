@@ -42,6 +42,8 @@ body.view, body.view-standalone {
 }
 
 body.view-standalone {
+	overflow-y: hidden;
+
 	.ui-page-fullscreen {
 		height: 100%;
 		background-color: black;
