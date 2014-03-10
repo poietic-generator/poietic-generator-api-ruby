@@ -27,6 +27,8 @@
 	// vim: set ts=4 sw=4 et:
 	"use strict";
 
+	var OVERLAY_USER_THRESHOLD=0;
+
 	function Overlay(p_options) {
 		//var console = { log: function() {} };
 
@@ -74,7 +76,7 @@
 			};
 
 			// manage overlay visibility depending on user count
-			if (zones.length <= 1) {
+			if (zones.length <= OVERLAY_USER_THRESHOLD) {
 				overlay.width = Math.floor(win.w);
 				overlay.height = Math.floor(win.h);
 				$(overlay).fadeIn('slow');
