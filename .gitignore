@@ -6,3 +6,4 @@ tmp
 log
 .sass-cache
 *~
+.ruby-version
