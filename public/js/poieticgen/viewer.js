@@ -241,35 +241,38 @@
 		* Resize canvas & various display elements
 		*/
 		this.update_size = function () {
-			var win, margin, width, height, ctx, canvas, next, minsize;
+			var win, margin, width, height, ctx, canvas, next, squaresize;
 
 			win = {
 				w: $(window).width(),
 				h : $(window).height()
 			};
 			margin = 0;
-			minsize = (win.h < win.w) ? win.h : win.w;
+			squaresize = (win.h < win.w) ? win.h : win.w;
+			if (squaresize > (win.h / 2)) {
+				squaresize = win.h;
+			}
 
 			if (self.fullsize) {
-				width = minsize;
-				height = minsize;
+				width = squaresize;
+				height = squaresize;
 				canvas = $(_real_canvas);
 				// FIXME: set the slider as optional parameter of constructor 
-				next = canvas.parent().parent().next();
 
 				// Slider height
 				// FIXME: not generic
+				next = canvas.parent().parent().next();
 				if (next && next.is(':visible')) {
 					height -= next.height();
 					width -= next.height();
 				}
 			} else {
-				width = minsize / 2;
-				height = minsize / 2;
+				width = squaresize / 2;
+				height = squaresize / 2;
 			}
 
-			_real_canvas.width = Math.floor(width) - margin;
-			_real_canvas.height = Math.floor(height) - margin;
+			_real_canvas.width = Math.floor(width);
+			_real_canvas.height = Math.floor(height);
 
 			console.log("viewer/update_size: window.width = " + [ $(window).width(), $(window).height() ]);
 
