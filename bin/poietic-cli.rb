@@ -30,7 +30,7 @@ module PoieticGen
 						   else
 							   "none"
 						   end
-					pp s.end_timestamp
+					#pp s.end_timestamp
 					puts "NAME %s - ID % 3d - [START %s .. STOP %s]" % [ 
 						(s.name || "(none)"), 
 						s.id, 
@@ -112,7 +112,7 @@ module PoieticGen
 					return
 				end
 
-				zones = board.load_board (board.timestamp + offset)
+				zones = board.load_board(board.timestamp + offset)
 				width, height, diff_x, diff_y = board.max_size
 
 				_take_snap zones, filename, factor.to_i, width, height, diff_x, diff_y
@@ -200,11 +200,16 @@ module PoieticGen
 			end
 			
 			option :outfps, :type => :numeric, :default => 24
+ 			option :outsize, :type => :string, :default => "320:-1"
 			desc "video DIRECTORY FILENAME [-outfps v]", "Create a video from a DIRECTORY with FPS (using FFMPEG) and save it in FILENAME"
 			def video directory, filename
 				#fixme: use option & transform to int
-				err = system("ffmpeg -r %d -i '%s/image-%%7d.png' -r %d %s" %
-					[ options[:outfps], directory, options[:outfps], filename ])
+				#err = system("ffmpeg -r %d -i '%s/image-%%7d.png' -r %d %s" %
+				#	[ options[:outfps], directory, options[:outfps], filename ])
+			    err = system(
+					"ffmpeg -r %d -i '%s/image-%%7d.png' -vf \"scale=%s\" -sws_flags neighbor+full_chroma_inp -r %d %s" %
+					[ options[:outfps], directory, options[:outsize], options[:outfps], filename ]
+				)
 				if !err then
 					puts "Error while creating video"
 				end
@@ -256,10 +261,12 @@ module PoieticGen
 					#STDIN.gets
 
 					(0..(zone.height * zone.width)-1).each do |i|
-						image.draw_rect (zone_x + (i % zone.width)) * factor,
-								(zone_y + (i / zone.width)) * factor,
-								factor, factor,
-								(PoieticGen::CLI::Color.from_hex zone.data[i])
+						image.draw_rect(
+							(zone_x + (i % zone.width)) * factor,
+							(zone_y + (i / zone.width)) * factor,
+							factor, factor,
+							(PoieticGen::CLI::Color.from_hex zone.data[i])
+						)
 					end
 				end
 
