@@ -37,6 +37,8 @@ require 'pp'
 
 module PoieticGen
 
+	class DatabaseConnectionError < RuntimeError ; end
+
 	class Api < Sinatra::Base
 
 		STATUS_INFORMATION = 1
@@ -101,6 +103,13 @@ module PoieticGen
 				DataMapper.auto_upgrade!
 				
 				set :manager, (PoieticGen::Manager.new config)
+
+			rescue DataObjects::SQLError => e
+				STDERR.puts "ERROR: Unable to connect to database."
+ 				STDERR.puts "\t Verify your settings in config.ini and try again."
+				STDERR.puts ""
+				STDERR.puts "%s" % e.message
+				exit 1
 
 			rescue PoieticGen::ConfigManager::ConfigurationError => e
 				STDERR.puts "ERROR: %s" % e.message
