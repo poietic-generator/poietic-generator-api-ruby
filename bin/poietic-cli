@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'bundler/setup'
-
 require 'dm-core'
 require 'dm-validations'
 require 'dm-migrations'
@@ -12,7 +10,6 @@ require 'thor'
 require 'rdebug/base'
 require 'pp'
 
-$:.insert 0, '.'
 require 'poieticgen/cli'
 require 'poieticgen/config_manager'
 require 'poieticgen/board'
