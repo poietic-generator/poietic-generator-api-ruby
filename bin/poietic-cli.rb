@@ -193,6 +193,7 @@ module PoieticGen
 						zones = board.apply_events timelines, zones
 					end
 
+					puts "zones at #{file_id} : #{zones.length}"
 					_take_snap zones, filename, factor, width, height, diff_x, diff_y
 
 					last_offset = offset
@@ -203,17 +204,27 @@ module PoieticGen
  			option :outsize, :type => :string, :default => "320:-1"
 			desc "video DIRECTORY FILENAME [-outfps v]", "Create a video from a DIRECTORY with FPS (using FFMPEG) and save it in FILENAME"
 			def video directory, filename
-				#fixme: use option & transform to int
-				#err = system("ffmpeg -r %d -i '%s/image-%%7d.png' -r %d %s" %
-				#	[ options[:outfps], directory, options[:outfps], filename ])
-			    err = system(
-					"ffmpeg -r %d -i '%s/image-%%7d.png' -vf \"scale=%s\" -sws_flags neighbor+full_chroma_inp -r %d %s" %
-					[ options[:outfps], directory, options[:outsize], options[:outfps], filename ]
-				)
+				ffmpeg_cmd = [
+					"ffmpeg ",
+	  				"-r %d"
+ 	  				"-i '%s/image-%%7d.png'"
+ 	  				"-vf \"scale=%s\""
+ 	  				"-sws_flags neighbor+full_chroma_inp"
+ 	  				"-r %d"
+ 	  				"%s"
+				].join(' ')
+				ffmpeg_args = [ 
+					options[:outfps], 
+					directory, 
+					options[:outsize], 
+					options[:outfps], 
+					filename 
+				]
+			    err = system( ffmpeg_cmd % ffmpeg_args)
 				if !err then
 					puts "Error while creating video"
 				end
-				
+
 				puts "Video created as '%s'" % filename
 			end
 
