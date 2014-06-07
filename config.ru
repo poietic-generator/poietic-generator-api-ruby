@@ -1,7 +1,4 @@
 
-require 'rubygems'
-require 'bundler/setup'
-
 require 'dm-core'
 require 'dm-validations'
 require 'dm-migrations'
@@ -14,8 +11,7 @@ require 'haml'
 require 'sass'
 
 $:.insert(0,".")
-require 'poieticgen/manager'
-require 'poieticgen/api'
+require 'poieticgen'
 
 #use Rack::Session::Cookie
 

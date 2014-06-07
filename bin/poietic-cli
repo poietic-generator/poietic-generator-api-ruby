@@ -10,13 +10,11 @@ require 'thor'
 require 'rdebug/base'
 require 'pp'
 
-require 'poieticgen/cli'
-require 'poieticgen/config_manager'
-require 'poieticgen/board'
+require 'poieticgen'
 
 module PoieticGen
 	module CLI
-		class Session < Thor
+		class Main < Thor
 			desc "list", "List all session"
 			def list
 				configure
@@ -203,11 +201,11 @@ module PoieticGen
 			def video directory, filename
 				ffmpeg_cmd = [
 					"ffmpeg ",
-	  				"-r %d"
- 	  				"-i '%s/image-%%7d.png'"
- 	  				"-vf \"scale=%s\""
- 	  				"-sws_flags neighbor+full_chroma_inp"
- 	  				"-r %d"
+	  				"-r %d",
+ 	  				"-i '%s/image-%%7d.png'",
+ 	  				"-vf \"scale=%s\"",
+ 	  				"-sws_flags neighbor+full_chroma_inp",
+ 	  				"-r %d",
  	  				"%s"
 				].join(' ')
 				ffmpeg_args = [ 
@@ -280,12 +278,6 @@ module PoieticGen
 
 				image.save filename
 			end
-		end
-
-
-		class Main < Thor
-			desc "session SUBCOMMAND ...ARGS", "manage sessions"
-			subcommand "session", Session
 		end
 	end
 end
