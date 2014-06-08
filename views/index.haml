@@ -1,0 +1,43 @@
+- # vim: set ts=2 sw=2 et:
+-# @page.js << "/js/extern/jquery.cookie.js"
+-# @page.js << "/js/page/index.js"
+
+%div(data-fullscreen="true" data-role="page" class="ui-page poietic-page-#{@page.title}")
+  %div(data-role="header" data-position="fixed" )
+    %h1
+      Poietic Generator
+  %div(role="main" data-role="content" class="ui-content")
+    #index-menu
+      %img(src="/poietic-generator.net.gif")/
+      -#
+        %form#credentials(action="/session/default/draw" data-ajax="false" method="post")
+          %div(data-role="fieldcontain")
+            %label(for="username") Username
+            %input#username(name="username" type="text" value="anonymous")/
+          %div(data-role="fieldcontain")
+            %label(for="session" class="select") Session
+            %select#select_session(name="session")
+              - @session_list.each do |token,name|
+                %option{"value" => token, "selected" => (token == @selected_session)}= name
+      //%a#link_choose{"data-ajax" => "false", "data-theme" => "b", "data-inline" => "true", "data-role" => "button", :href => "/page/list"} 
+      //%button(type="submit" data-theme="b" name="submit" value="submit-value")
+      //  Join a session
+    %ul(data-role="listview" data-inset="true" class="ui-listview")
+      %li
+        %a(href="/session_group/join" data-prefetch="true" ) 
+          Play
+      %li
+        %a(href="/session/list" data-prefetch="true") 
+          View
+  %div(data-role="footer"  data-position="fixed" )
+    #credits
+      %p
+        Copyleft - 2011-2014 - 
+        %a(href="http://www.gnuside.com") GNUSIDE
+        %br
+        %a(href="http://poietic-generator.net/") Original concept
+        by Olivier Auber
+        %br
+        //Version
+        //%a(href="https://github.com/Gnuside/poietic-generator/releases/tag/#{PoieticGen::VERSION}-#{PoieticGen::VERSION_NAME.downcase.gsub(/\s+/,'_')}") #{PoieticGen::VERSION} - #{PoieticGen::VERSION_NAME}
+    .spacer
