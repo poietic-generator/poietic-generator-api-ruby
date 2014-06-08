@@ -9,10 +9,11 @@ require 'dm-constraints'
 require 'compass'
 require 'haml'
 require 'sass'
+require 'pp'
 
-$:.insert(0,".")
+$:.insert(0,"lib")
+
 require 'poieticgen'
-
-#use Rack::Session::Cookie
+require 'poieticgen/api'
 
 run PoieticGen::Api
