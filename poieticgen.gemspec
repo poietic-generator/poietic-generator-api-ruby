@@ -50,6 +50,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "html2haml"
   spec.add_development_dependency "capistrano", "~> 2.15"
   spec.add_development_dependency "capistrano-ext"
+  spec.add_development_dependency "rerun"
 
   spec.add_runtime_dependency "unicorn"
   spec.add_runtime_dependency "sinatra" # :require => "sinatra/base"
