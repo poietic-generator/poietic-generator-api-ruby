@@ -6,11 +6,11 @@
     %a.ui-btn-left.logout(href="/" data-rel="back") Back
   %div(role="main" class="ui-content") 
     %ul(data-role="listview" class="ui-listview")
-      - @session_list.each do |token,name|
+      - @sessions.each do |session|
         //%option{"value" => token, "selected" => (token == @selected_session)}= name
         %li
-          %a(href="/session/#{token}/view") 
-            %h2= name
+          %a(data-ajax="false" href="/session/#{session.session_token}/view") 
+            %h2= session.name.nil? ? "Session #{session.id}" : session.name
             %p 22 players
       //%a#link_choose{"data-ajax" => "false", "data-theme" => "b", "data-inline" => "true", "data-role" => "button", :href => "/page/list"} 
       //%button(type="submit" data-theme="b" name="submit" value="submit-value")

@@ -9,16 +9,16 @@
 - @page.js << "/js/poieticgen/game.js"
 - @page.js << "/js/page/view.js"
 
-%div{"data-fullscreen" => "true", "data-role" => "page"}
-  %div{"data-id" => "head", "data-position" => "fixed", "data-role" => "header"}
+%div(data-fullscreen="true" data-role="page" class="ui-page ui-page-theme-b poietic-page-#{@page.title}")
+  %div(data-id="head" data-position="fixed" data-role="header")
     %h1.username Poietic Generator's view
-    %a.ui-btn-right.logout{"data-ajax" => "false", :href => "/"} Back
-    %div{"data-role" => "navbar"}
+    %a.ui-btn-left.logout(data-ajax="false" href="/") Back
+    %div(data-role="navbar")
       %ul
         %li
-          %a#view_start{:href => "#"} History
+          %a#view_start(href="#") History
         %li
-          %a#view_now.ui-btn-active{:href => "#"} Live
+          %a#view_now.ui-btn-active(href="#") Live
   %div{"data-role" => "content"}
     .viewer
       %canvas#session-viewer

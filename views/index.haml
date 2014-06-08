@@ -4,8 +4,7 @@
 
 %div(data-fullscreen="true" data-role="page" class="ui-page poietic-page-#{@page.title}")
   %div(data-role="header" data-position="fixed" )
-    %h1
-      Poietic Generator
+    %h1 Poietic Generator
   %div(role="main" data-role="content" class="ui-content")
     #index-menu
       %img(src="/poietic-generator.net.gif")/
@@ -24,12 +23,12 @@
       //  Join a session
     %ul(data-role="listview" data-inset="true" class="ui-listview")
       %li
-        %a(href="/session_group/join" data-prefetch="true" ) 
+        %a(href="/session_group/join" data-ajax="false") 
           Play
       %li
-        %a(href="/session/list" data-prefetch="true") 
+        %a(href="/session/list" data-ajax="false") 
           View
-  %div(data-role="footer"  data-position="fixed" )
+  %div(data-role="footer"  data-position="fixed")
     #credits
       %p
         Copyleft - 2011-2014 - 
