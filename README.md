@@ -1,17 +1,19 @@
-Poietic Generator Reloaded
-==========================
+Poietic Generator
+=================
 
 Requirements
 ------------
 
 First, make sure you have a proper git, ruby & rubygems installation on your system.
+
 If not, install them with :
 
-    sudo apt-get install git-core ruby1.9.1 ruby1.9.1-dev  
+    sudo apt-get install git-core ruby ruby-dev  
 
 Then checkout the sources from the public repository :
 
     git clone https://github.com/Gnuside/poietic-generator.git
+
 
 Installation
 ------------
@@ -22,7 +24,7 @@ If not, you can try installing bundler with:
 
     gem install bundle
 
-Then, install  headers packages required to build some gems
+Then, install  headers packages required to build some gems :
 
     sudo apt-get install make libmysqlclient-dev libsqlite3-dev g++
 
@@ -30,7 +32,7 @@ Finally, from the project directory, run the following command to install
 locally into the "vendor/bundle" directory the gems required by this project
 and all their dependencies :
 
-    bundle install --path vendor/bundle
+    bundle install
 
 
 Configuration
@@ -68,64 +70,15 @@ Generating a video
    bundle exec ./bin/poietic-cli.rb session video -outsize  tmp/vid1 tmp/vid1.mp4 -outsize 640:-1
 
 
-Deploying
----------
 
-### Configuring the web server
+Contributing
+------------
 
-Install a reverse proxy server, like nginx :
-
-
-    sudo apt-get install nginx
-
-In the directory "/etc/nginx/sites-available/", create a configuration file for 
-a virtual host called "poietic-generator.com", with the following content :
-
-    upstream poietic-generator_cluster {
-        server  unix:/var/tmp/poietic-generator.sock;
-    }
-
-    server {
-        listen          80;
-        server_name     poietic-generator.com;
-     
-        access_log      /var/log/nginx/poietic-generator.access_log;
-        error_log       /var/log/nginx/poietic-generator.error_log warn;
-    
-            root            /var/www;
-            index           index.php index.html;
-    
-            location / {
-                break;
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-Proto https;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_pass http://poietic-generator_cluster;
-    
-                # in order to support COPY and MOVE, etc
-                set  $dest  $http_destination;
-                if ($http_destination ~ "^https://(.+)") {
-                    set  $dest   http://$1;
-                }
-                proxy_set_header  Destination   $dest;
-            }
-    }
-
-
-The web server will then redirect any external request to internal unix
-socket `/var/tmp/poietic-generator.sock` .
-
-Enable the configuration :
-
-
-    ln -s /etc/nginx/sites-available/poietic-generator.com \
-        /etc/nginx/sites-enabled/poietic-generator.com
-
-Restart nginx :
-
-
-    /etc/init.d/nginx restart
+1. Fork it ( http://github.com/Gnuside/poietic-generator/fork )
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
 
 
 Credits
