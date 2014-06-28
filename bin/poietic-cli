@@ -17,34 +17,46 @@ module PoieticGen
 	module CLI
 		class Main < Thor
 			desc "list", "List all session"
+			option :all, :type => :boolean, :aliases => :a
 			def list
 				configure
-				sessions = PoieticGen::Board.all
-				sessions.each do |s|
-					stop = if (s.end_timestamp > 0) then
-							   Time.at(s.end_timestamp).utc.iso8601
-						   else
-							   "none"
-						   end
-					#pp s.end_timestamp
-					puts "NAME %s - ID % 3d - [START %s .. STOP %s]" % [ 
-						(s.name || "(none)"), 
-						s.id, 
-						Time.at(s.timestamp).utc.iso8601,
-						stop
-					]
-				end
+				board_groups = PoieticGen::BoardGroup.all
+				board_groups.each do |bg|
+					next if bg.closed and not options[:all]
 
-			end
+					puts "GROUP id %3d %20s - %s - %s" % [ 
+						bg.id, 
+						(bg.name || "(none)"), 
+						bg.token,
+						bg.closed ? "closed" : "open"
+					]
+
+					puts "      (no session)" if bg.boards.empty?
+					bg.boards.each do |b|
+						stop = if (b.end_timestamp > 0) then
+							   	   Time.at(b.end_timestamp).utc.iso8601
+						   	   else
+							   	   "none"
+						   	   end
+						#pp s.end_timestamp
+						puts "NAME %s - ID % 3d - [START %s .. STOP %s]" % [ 
+							(b.name || "(none)"), 
+							b.id, 
+							Time.at(b.timestamp).utc.iso8601,
+							stop
+						]
+					end
+				end # board groups
+			end 
 
 			desc "create", "Start a new session"
+			option :name, :type => :string, :aliases => :n
 			def create
 				configure
-				# TODO: add a session name
-				PoieticGen::Board.create @config.board
+				PoieticGen::BoardGroup.create @config.board, options[:name]
 			end
 
-			desc "rename ID NEWLABEL", "Rename a session"
+			desc "rename ID NEWLABEL", "Rename a group"
 			def rename id, new_label
 				configure
 				session = PoieticGen::Board.first(:id => id.to_i)
