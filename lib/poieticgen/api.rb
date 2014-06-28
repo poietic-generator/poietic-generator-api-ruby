@@ -253,18 +253,21 @@ module PoieticGen
 			@selected_session = ""
 			
 			Board.transaction do
-				sessions = Board.first(SESSION_MAX_LISTED_COUNT,
-					:order => [:timestamp.desc])
+				# FIXME: do not list closed groups
+				groups = BoardGroup.first(SESSION_MAX_LISTED_COUNT,
+					:order => [:id.asc])
 			
-				unless sessions.nil? or sessions.first.nil? then
-					@selected_session = sessions.first.session_token
+				unless groups.nil? or groups.first.nil? then
+					@selected_session = groups.first.token
 				
-					sessions.each do |s|
-						@session_list[s.session_token] = if s.name.nil? or s.name.empty? then
-															 "Session %d" % s.id
-														 else
-															 s.name
-														 end
+					groups.each do |s|
+						@session_list[s.token] = (
+							if s.name.nil? or s.name.empty? then
+								"Session %d" % s.id
+							else
+								s.name
+							end
+						)
 					end
 				end
 			end

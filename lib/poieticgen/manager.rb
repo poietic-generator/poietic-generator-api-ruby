@@ -119,12 +119,24 @@ module PoieticGen
 					:token => req.user_token
 				)
 
-				board = Board.first(
-					:session_token => req.session_token,
+				group = BoardGroup.first(
+					:token => req.session_token,
 					:closed => false
 				)
 
-				raise InvalidSession, "Invalid session" if board.nil?
+				raise InvalidSession, "Invalid session" if group.nil?
+
+				board = nil
+				## FIXME: get latest board or create one
+				if board.nil? then
+					board = Board.create @config.board, group
+					begin
+						board.save
+					rescue DataMapper::SaveFailureError => e
+						STDERR.puts e.resource.errors.inspect
+						raise e
+					end
+				end
 
 				if user.nil? then
 					user = User.new param_name, board, @config.user
@@ -631,7 +643,7 @@ module PoieticGen
 				)
 				rdebug "New expired list : %s" % newly_expired_users.inspect
 				newly_expired_users.each do |leaver|
-					self.leave leaver.token, leaver.board.session_token
+					self.leave leaver.token, leaver.board.board_group.token
 				end
 				@last_leave_check_time = now
 			end
