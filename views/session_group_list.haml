@@ -7,11 +7,10 @@
   %div(role="main" class="ui-content") 
     %ul(data-role="listview" class="ui-listview")
       - @session_list.each do |token,name|
-        //%option{"value" => token, "selected" => (token == @selected_session)}= name
         %li
-          %a(href="#") 
+          %a(href="/session/#{token}/draw") 
             %h2= name
-            %p 22 players
+            // %p 22 players
       //%a#link_choose{"data-ajax" => "false", "data-theme" => "b", "data-inline" => "true", "data-role" => "button", :href => "/page/list"} 
       //%button(type="submit" data-theme="b" name="submit" value="submit-value")
       //  Join a session
