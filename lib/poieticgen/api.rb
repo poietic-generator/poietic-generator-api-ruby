@@ -113,7 +113,6 @@ module PoieticGen
 					User.transaction do |t|
 						manager.check_expired_users
 					end
-					puts "Doing scheduled task !"
     			end
 
 			rescue DataObjects::SQLError => e
