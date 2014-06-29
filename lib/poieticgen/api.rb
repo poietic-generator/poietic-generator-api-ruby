@@ -22,7 +22,7 @@
 ##############################################################################
 
 require 'sinatra/base'
-#require 'sinatra/cookies'
+require 'sinatra/cookies'
 require 'sinatra/flash'
 require 'rufus-scheduler'
 
@@ -53,7 +53,7 @@ module PoieticGen
 		enable :run
 		#disable :run
 
-		#helpers Sinatra::Cookies
+		helpers Sinatra::Cookies
 
 		#set :environment, :development
 		set :root, File.expand_path(File.join(File.dirname(__FILE__),'..','..'))
