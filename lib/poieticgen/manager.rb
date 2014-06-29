@@ -104,7 +104,7 @@ module PoieticGen
 				group = BoardGroup.from_token req.session_token
 				raise InvalidSession, "Invalid session" if group.nil?
 
-				board = group.board @config.board
+				board = group.create_board @config.board
 				raise InvalidSession, "Invalid session" if board.nil?
 
 				user = User.from_token @config.user, req.user_token, param_name, board

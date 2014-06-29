@@ -10,8 +10,7 @@
         %li
           %a(href="/session/#{group.token}/draw" data-ajax="false") 
             %h2= group.canonical_name
-            - if group.live?
-              %p "Live !"
+            %p= (group.live? ? ("%d users live!" % group.user_count) : "No users")
 
       //%a#link_choose{"data-ajax" => "false", "data-theme" => "b", "data-inline" => "true", "data-role" => "button", :href => "/page/list"} 
       //%button(type="submit" data-theme="b" name="submit" value="submit-value")

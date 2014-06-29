@@ -70,11 +70,16 @@ module PoieticGen
 			return (not board.nil?)
 		end
 
+		# Get latest live board
+		def board
+			return Board.first(:closed => false)
+		end
+
 		# Get latest live board or create one
-		def board board_config
-			board = Board.first(:closed => false)
+		def create_board board_config
+			board = self.board
 			if board.nil? then
-				board = Board.create board_config, self
+				board = Board.create board_config, group
 				board.save
 			end
 			return board
@@ -90,6 +95,10 @@ module PoieticGen
 			else
 				self.name
 			end)
+		end
+
+		def user_count
+			return (self.live? ? self.board.users.all(did_expire: false).count : 0 )
 		end
 	end
 end
