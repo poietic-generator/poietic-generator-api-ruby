@@ -11,4 +11,14 @@ afficher cela dans la liste.
 
 ----
 
+La création de board live semble fonctionner. Il reste à détruire/clore ces boards de
+sessions lorsque le nombre d'utilisateurs chute en dessous de zéro.
+
+Ensuite on fera un peu de polish pour afficher le nombre d'utilisateurs live.
+
+----
+
+Je cherche un moyen de faire tourner un scheduler simple (snas avoir à gérer moi meme les threads).
+https://jkraemer.net/running-rufus-scheduler-in-a-unicorn-rails-app semble pas mal. A tester.
+
 
