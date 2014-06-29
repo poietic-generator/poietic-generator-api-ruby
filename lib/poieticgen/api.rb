@@ -257,24 +257,24 @@ module PoieticGen
 
 		# List available session for joining
 		get '/group/join' do
-			@session_list = {}
-			@selected_session = ""
-			
-			Board.transaction do
-				# FIXME: do not list closed groups
-				@group_list = BoardGroup.first(SESSION_MAX_LISTED_COUNT,
-					:order => [:id.asc]) || []
+			BoardGroup.transaction do
+				@group_list = BoardGroup.all(
+					closed: false,
+					order: [:id.asc]
+				) || []
 			end
 			@page = Page.new "session-group-list"
 			haml :"session_group_list"
 		end
 
 		get '/session/list' do
-			@page = Page.new "session-list"
-			Board.transaction do
-				@sessions = Board.first(SESSION_MAX_LISTED_COUNT,
-					:order => [:timestamp.desc])
+			BoardGroup.transaction do
+				@group_list = BoardGroup.all(
+					closed: false,
+					order: [:id.asc]
+				) || []
 			end
+			@page = Page.new "session-list"
 			haml :"session_list"
 		end
 		#

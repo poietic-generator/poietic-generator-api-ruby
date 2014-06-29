@@ -6,13 +6,14 @@
     %a.ui-btn-left.logout(href="/" data-rel="back") Back
   %div(role="main" class="ui-content") 
     %ul(data-role="listview" class="ui-listview")
-      - @sessions.each do |session|
-        //%option{"value" => token, "selected" => (token == @selected_session)}= name
-        %li
-          %a(data-ajax="false" href="/session/#{session.session_token}/view") 
-            %h2= session.name.nil? ? "Session #{session.id}" : session.name
-            %p 22 players
-      //%a#link_choose{"data-ajax" => "false", "data-theme" => "b", "data-inline" => "true", "data-role" => "button", :href => "/page/list"} 
-      //%button(type="submit" data-theme="b" name="submit" value="submit-value")
-      //  Join a session
- 
+      - @group_list.each do |group|
+        %li(data-role="list-divider")
+          = group.canonical_name
+        - group.boards.each do |board|
+          %li
+            %a(data-ajax="false" href="/session/#{board.token}/view") 
+              %h2
+                = "From %s " % Time.at(board.timestamp).utc.strftime('%F %T')
+                = "to %s" % Time.at(board.end_timestamp).utc.strftime('%F %T')
+              %p= "%d users" % board.total_users_count
+

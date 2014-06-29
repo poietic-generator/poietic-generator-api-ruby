@@ -314,6 +314,10 @@ module PoieticGen
 			return self.users.all(did_expire: false).count
 		end
 
+		def total_users_count
+			return self.users.count
+		end
+
 		private
 
 		#
