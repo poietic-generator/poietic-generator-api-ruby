@@ -84,6 +84,23 @@ module PoieticGen
 			}
 			return res
 		end
+
+		def self.from_token user_config, token, name, board
+			user = User.first(:token => token)
+			if user.nil? or user.expired? then
+				# No user matching conditions, creating new user
+				user = User.new name, board, user_config
+			end
+			return user
+		end
+
+		def self.canonical_username req_name
+			if req_name.nil? or (req_name.length == 0) then
+				return "anonymous"
+			else
+				return req_name
+			end
+		end
 	end
 
 end
