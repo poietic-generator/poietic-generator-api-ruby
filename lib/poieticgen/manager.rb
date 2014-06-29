@@ -71,21 +71,11 @@ module PoieticGen
 
 		def create_session params
 			is_admin = admin? params
-
 			raise AdminSessionNeeded, "You have not the right to do that, please login as admin." if not is_admin
 			
 			# Create board with the configuration
-			board = Board.create @config.board
-			pp params
-			board.name = params['session_name']
-			begin
-				board.save
-			rescue DataMapper::SaveFailureError => e
-				STDERR.puts e.resource.errors.inspect
-				raise e
-			end
-
-			return board
+			group = BoardGroup.create @config.board, params['session_name']
+			return group
 		end
 
 		#
@@ -104,65 +94,32 @@ module PoieticGen
 			user = nil
 			now = Time.now
 
-			param_name = if req.user_name.nil? or (req.user_name.length == 0) then
-							 "anonymous"
-						 else
-							 req.user_name
-						 end
+			param_name = User.canonical_username req.user_name
 
 			User.transaction do |t| begin
 
 				# clean-up users first
 				self.check_expired_users
 
-				user = User.first(
-					:token => req.user_token
-				)
-
-				group = BoardGroup.first(
-					:token => req.session_token,
-					:closed => false
-				)
-
+				group = BoardGroup.from_token req.session_token
 				raise InvalidSession, "Invalid session" if group.nil?
 
-				board = nil
-				## FIXME: get latest board or create one
-				if board.nil? then
-					board = Board.create @config.board, group
-					begin
-						board.save
-					rescue DataMapper::SaveFailureError => e
-						STDERR.puts e.resource.errors.inspect
-						raise e
-					end
-				end
+				board = group.board @config.board
+				raise InvalidSession, "Invalid session" if board.nil?
 
-				if user.nil? then
-					user = User.new param_name, board, @config.user
-				else
-					if user.expired? then
-						# The event will be generated elsewhere (in update_data).
-						rdebug "User session expired"
-						# create new if session expired
-						user = User.new param_name, board, @config.user
-					else
-						is_new = false
+				user = User.from_token @config.user, req.user_token, param_name, board
 
-						# update expiration time
-						user.idle_expires_at = now + @config.user.idle_timeout
-						user.alive_expires_at = now + @config.user.liveness_timeout
-						rdebug "Set expiring times at %s" % user.alive_expires_at.to_s
-
-						# reset name if requested
-						user.name = param_name
-					end
-				end
-
-				# join the board
-				if is_new then
+				# Create a zone if the user is new, or join if already exist
+				if req.user_token != user.token then
 					zone = board.join user, @config.board
 				else
+					# update expiration time
+					user.idle_expires_at = now + @config.user.idle_timeout
+					user.alive_expires_at = now + @config.user.liveness_timeout
+					rdebug "Set expiring times at %s" % user.alive_expires_at.to_s
+
+					# reset name if requested
+					user.name = param_name
 					zone = user.zone
 				end
 
@@ -174,8 +131,6 @@ module PoieticGen
 				end
 
 				rdebug "User : ", user
-
-				# FIXME: test request username
 
 				# get real users
 				users_db = board.users.all(
@@ -311,16 +266,14 @@ module PoieticGen
 				self.check_expired_users
 
 				user = User.first(:token => req.user_token)
-
 				if user.nil? or user.expired? then
 					raise InvalidSession, "Session has expired!"
 				end
 
 				board = user.board
-
 				if board.nil? or
 				   board.closed or
-				   board.session_token != req.session_token then
+				   board.token != req.session_token then
 					raise InvalidSession, "No opened session found for board %s" % req.session_token
 				end
 
@@ -366,8 +319,6 @@ module PoieticGen
 					:events => events_collection,
 					:strokes => strokes_collection,
 					:messages => messages_collection,
-					# :stamp => (now - board.timestamp), # FIXME: unused by the client
-					# :idle_timeout => (user.idle_expires_at - now) # FIXME: unused by the client
 				}
 
 				rescue DataObjects::TransactionError => e
@@ -400,7 +351,6 @@ module PoieticGen
 
 
                 # test if session_token is defined
-                require 'pp'
                 pp req.session_token
                 # FIXME: use a constant for latest session name
                 board = if req.session_token == "latest" then
@@ -458,7 +408,6 @@ module PoieticGen
 						timestamp = absolute_time - board.timestamp
 
 						# retrieve users and zones
-
 						zones = board.load_board absolute_time
 
 						users = zones.map{ |i,z| z.user.to_hash }
@@ -643,7 +592,7 @@ module PoieticGen
 				)
 				rdebug "New expired list : %s" % newly_expired_users.inspect
 				newly_expired_users.each do |leaver|
-					self.leave leaver.token, leaver.board.board_group.token
+					self.leave leaver.token, leaver.board.token
 				end
 				@last_leave_check_time = now
 			end
