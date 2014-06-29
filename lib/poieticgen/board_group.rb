@@ -53,6 +53,44 @@ module PoieticGen
 			rdebug "Saving failure : %s" % e.resource.errors.inspect
 			raise e
 		end
+
+		# if not, use the latest session
+		def self.from_token token
+			if token == "latest" then
+                BoardGroup.first(:closed => false, 
+								 :order => [:id.desc])
+            else
+				BoardGroup.first(:token => token,
+								:closed => false)
+			end
+		end
+
+		def live?
+			board = Board.first(:closed => false)
+			return (not board.nil?)
+		end
+
+		# Get latest live board or create one
+		def board board_config
+			board = Board.first(:closed => false)
+			if board.nil? then
+				board = Board.create board_config, self
+				board.save
+			end
+			return board
+
+		rescue DataMapper::SaveFailureError => e
+			STDERR.puts e.resource.errors.inspect
+			raise e
+		end
+
+		def canonical_name 
+			return (if self.name.nil? then
+				"Session %d" % self.id
+			else
+				self.name
+			end)
+		end
 	end
 end
 
