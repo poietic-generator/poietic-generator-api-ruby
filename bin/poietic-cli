@@ -20,30 +20,39 @@ module PoieticGen
 			option :all, :type => :boolean, :aliases => :a
 			def list
 				configure
-				board_groups = PoieticGen::BoardGroup.all
-				board_groups.each do |bg|
-					next if bg.closed and not options[:all]
+				groups = PoieticGen::BoardGroup.all
+				groups.each do |group|
+					next if group.closed and not options[:all]
+					group_name = group.canonical_name
+					group_openess = group.closed ? "closed" : "open"
+					group_users = 
+              			if group.live? and group.user_count > 0
+                			"%d users live!" % group.user_count
+              			else
+                			"No user connected"
+			  			end
 
-					puts "GROUP id %3d %20s - %s - %s" % [ 
-						bg.id, 
-						(bg.name || "(none)"), 
-						bg.token,
-						bg.closed ? "closed" : "open"
+					puts "GROUP id %3d %20s - %s - %s - %s" % [ 
+						group.id, 
+						group_name, 
+						group.token,
+						group_openess,
+              			group_users	
 					]
 
-					puts "      (no session)" if bg.boards.empty?
-					bg.boards.each do |b|
-						stop = if (b.end_timestamp > 0) then
-							   	   Time.at(b.end_timestamp).utc.iso8601
+					puts "      (no session)" if group.boards.empty?
+					group.boards.each do |board|
+						stop = if (board.end_timestamp > 0) then
+							   	   Time.at(board.end_timestamp).utc.iso8601
 						   	   else
 							   	   "none"
 						   	   end
 						#pp s.end_timestamp
-						puts "NAME %s - ID % 3d - [START %s .. STOP %s]" % [ 
-							(b.name || "(none)"), 
-							b.id, 
-							Time.at(b.timestamp).utc.iso8601,
-							stop
+						puts "- SESSION % 3d - USERS %s - FROM %s .. TO %s]" % [ 
+							board.id, 
+							board.users.all(did_expire: false).count,
+							Time.at(board.timestamp).utc.iso8601,
+							stop,
 						]
 					end
 				end # board groups
