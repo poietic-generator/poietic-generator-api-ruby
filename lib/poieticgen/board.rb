@@ -83,6 +83,18 @@ module PoieticGen
 			raise e
 		end
 
+        # if not, use the latest session
+		def self.from_token token
+			if token == "latest" then
+                Board.first(:order => [:id.desc])
+            else
+				Board.first(:session_token => token)
+			end
+		end
+
+		def token
+			return self.board_group.token
+		end
 		
 		def close
 			Board.transaction do |t|
