@@ -1,4 +1,4 @@
-body.draw {
+.poietic-page-draw {
 
     .editor,
     .viewer {
@@ -12,13 +12,16 @@ body.draw {
 		background-color: #000;
     }
 
-    .ui-content { 
+	
+    /*
+	.ui-content { 
 		margin:0; padding: 0; 
 	}
 
     .ui-grid-a { 
 		margin:0; padding: 0; 
 	}
+	*/
 
     #session-editor { 
 		margin:0; padding: 0; 

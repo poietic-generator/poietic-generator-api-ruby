@@ -18,8 +18,8 @@
 
 - url_logout = "/session/%s/logout" % @params[:session_token]
 / drawing zone
-#session-zone(data-fullscreen="true" data-role="page")
-  %div(data-id="head" data-position="fixed" data-role="header")
+#session-zone(data-fullscreen="true" data-role="page" class="ui-page poietic-page-#{@page.title}")
+  %div(data-id="head" data-position="fixed" data-role="header" data-fullscreen="true")
     %a#brush(data-ajax="false" href="#")
       %span#current_color> &nbsp;&nbsp;&nbsp;&nbsp;
       Color
