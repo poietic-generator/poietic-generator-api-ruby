@@ -77,4 +77,5 @@ Gem::Specification.new do |spec|
  # spec.add_runtime_dependency "thin"
   spec.add_runtime_dependency "oily_png"
   spec.add_runtime_dependency "foreman"
+  spec.add_runtime_dependency "rufus-scheduler"
 end

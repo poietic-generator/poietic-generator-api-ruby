@@ -24,6 +24,7 @@
 require 'sinatra/base'
 #require 'sinatra/cookies'
 require 'sinatra/flash'
+require 'rufus-scheduler'
 
 require 'poieticgen/version'
 require 'poieticgen/config_manager'
@@ -101,10 +102,19 @@ module PoieticGen
 
 				# raise exception on save failure (globally across all models)
 				DataMapper::Model.raise_on_save_failure = true
-
 				DataMapper.auto_upgrade!
 				
-				set :manager, (PoieticGen::Manager.new config)
+				manager = (PoieticGen::Manager.new config)
+				set :manager, manager
+
+				scheduler = Rufus::Scheduler.new
+ 				set :scheduler, scheduler
+  				scheduler.every('5s') do
+					User.transaction do |t|
+						manager.check_expired_users
+					end
+					puts "Doing scheduled task !"
+    			end
 
 			rescue DataObjects::SQLError => e
 				STDERR.puts "ERROR: Unable to connect to database."
