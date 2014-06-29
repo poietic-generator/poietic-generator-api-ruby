@@ -67,7 +67,6 @@ module PoieticGen
 
 
 		def self.check_expired_boards
-			STDERR.puts "check_expired_boards"
 			boards = Board.all(closed: false)
 			boards.each do |board|
 				if board.live_users_count == 0 then
