@@ -77,8 +77,7 @@ module PoieticGen
 		end
 
 		configure do
-
-			# Compass assets management
+			# Enable assets management via compass
 			Compass.add_project_configuration(File.join(settings.root, 'config', 'compass.rb'))
 
 			begin
@@ -246,30 +245,15 @@ module PoieticGen
 			redirect '/'
 		end
 
-
 		# List available session for joining
-		get '/session_group/join' do
+		get '/group/join' do
 			@session_list = {}
 			@selected_session = ""
 			
 			Board.transaction do
 				# FIXME: do not list closed groups
-				groups = BoardGroup.first(SESSION_MAX_LISTED_COUNT,
-					:order => [:id.asc])
-			
-				unless groups.nil? or groups.first.nil? then
-					@selected_session = groups.first.token
-				
-					groups.each do |s|
-						@session_list[s.token] = (
-							if s.name.nil? or s.name.empty? then
-								"Session %d" % s.id
-							else
-								s.name
-							end
-						)
-					end
-				end
+				@group_list = BoardGroup.first(SESSION_MAX_LISTED_COUNT,
+					:order => [:id.asc]) || []
 			end
 			@page = Page.new "session-group-list"
 			haml :"session_group_list"
