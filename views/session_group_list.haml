@@ -11,8 +11,8 @@
           %a(href="/session/#{group.token}/draw" data-ajax="false") 
             %h2= group.canonical_name
             %p 
-              - if group.live? and group.user_count > 0
-                = "%d users live!" % group.user_count
+              - if group.live? and group.live_users_count > 0
+                = "%d users live!" % group.live_users_count
               - else
                 No user connected
 

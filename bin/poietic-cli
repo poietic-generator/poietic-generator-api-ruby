@@ -26,8 +26,8 @@ module PoieticGen
 					group_name = group.canonical_name
 					group_openess = group.closed ? "closed" : "open"
 					group_users = 
-              			if group.live? and group.user_count > 0
-                			"%d users live!" % group.user_count
+              			if group.live? and group.live_users_count > 0
+                			"%d users live!" % group.live_users_count
               			else
                 			"No user connected"
 			  			end
@@ -42,6 +42,7 @@ module PoieticGen
 
 					puts "      (no session)" if group.boards.empty?
 					group.boards.each do |board|
+						next if board.closed and not options[:all]
 						stop = if (board.end_timestamp > 0) then
 							   	   Time.at(board.end_timestamp).utc.iso8601
 						   	   else

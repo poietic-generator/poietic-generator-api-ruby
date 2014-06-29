@@ -112,6 +112,7 @@ module PoieticGen
   				scheduler.every('5s') do
 					User.transaction do |t|
 						manager.check_expired_users
+						Board.check_expired_boards
 					end
     			end
 

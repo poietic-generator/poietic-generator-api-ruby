@@ -79,7 +79,7 @@ module PoieticGen
 		def create_board board_config
 			board = self.board
 			if board.nil? then
-				board = Board.create board_config, group
+				board = Board.create board_config, self
 				board.save
 			end
 			return board
@@ -97,8 +97,8 @@ module PoieticGen
 			end)
 		end
 
-		def user_count
-			return (self.live? ? self.board.users.all(did_expire: false).count : 0 )
+		def live_users_count
+			return (self.live? ? self.board.live_users_count : 0 )
 		end
 	end
 end

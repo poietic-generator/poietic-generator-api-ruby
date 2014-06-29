@@ -66,6 +66,17 @@ module PoieticGen
 		}
 
 
+		def self.check_expired_boards
+			STDERR.puts "check_expired_boards"
+			boards = Board.all(closed: false)
+			boards.each do |board|
+				if board.live_users_count == 0 then
+					STDERR.puts "board %d" % board.id
+					board.close
+				end
+			end
+		end
+
 		def self.create config, group
 			res = super({
 				# FIXME: when the token already exists, SaveFailureError is raised
@@ -97,27 +108,24 @@ module PoieticGen
 		end
 		
 		def close
-			Board.transaction do |t|
-				begin
-					closed = true
-					end_timestamp = Time.now.to_i
+			t = Board.transaction do |t|
+				self.closed = true
+				self.end_timestamp = Time.now.to_i
 
-					begin
-						save
-					rescue DataMapper::SaveFailureError => e
-						rdebug "Saving failure : %s" % e.resource.errors.inspect
-						raise e
-					end
-
-				rescue DataObjects::TransactionError => e
-					Transaction.handle_deadlock_exception e, t, "Board.close"
-					raise e
-
-				rescue Exception => e
-					t.rollback
-					raise e
-				end
+				self.save
 			end
+
+		rescue DataMapper::SaveFailureError => e
+			rdebug "Saving failure : %s" % e.resource.errors.inspect
+			raise e
+
+		rescue DataObjects::TransactionError => e
+			Transaction.handle_deadlock_exception e, t, "Board.close"
+			raise e
+
+		rescue Exception => e
+			t.rollback
+			raise e
 		end
 
 
@@ -303,6 +311,9 @@ module PoieticGen
 			return (max_right - min_left), (max_bottom - min_top), min_left, min_top
 		end
 
+		def live_users_count
+			return self.users.all(did_expire: false).count
+		end
 
 		private
 
@@ -321,6 +332,7 @@ module PoieticGen
 
 			return timeline.board_snapshot
 		end
+
 	end
 
 end

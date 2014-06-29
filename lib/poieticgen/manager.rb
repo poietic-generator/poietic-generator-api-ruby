@@ -97,7 +97,6 @@ module PoieticGen
 			param_name = User.canonical_username req.user_name
 
 			User.transaction do |t| begin
-
 				# clean-up users first
 				self.check_expired_users
 
