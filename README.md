@@ -58,18 +58,18 @@ FIXME:
 
 Simply type the following command, from the project directory :
 
-bundle exec foreman
+    bundle exec foreman start
 
+Starting a new session
+----------------------
 
-    ./devel-run.sh
+    bundle exec ./bin/poietic-cli create
 
 Generating a video
 ------------------
 
-   bundle exec ./bin/poietic-cli.rb session sequence 10 tmp/vid1
-   bundle exec ./bin/poietic-cli.rb session video -outsize  tmp/vid1 tmp/vid1.mp4 -outsize 640:-1
-
-
+    bundle exec ./bin/poietic-cli sequence 10 tmp/vid1
+    bundle exec ./bin/poietic-cli video tmp/vid1 tmp/vid1.mp4 -outsize 640:-1
 
 Contributing
 ------------
