@@ -44,6 +44,7 @@ module PoieticGen
 
 		property :id,            Serial
 		#property :name,          String,  :unique => true, :required=> false
+		property :token,         String, :required => true, :unique => true
 		property :timestamp,     Integer, :required => true
 		property :end_timestamp, Integer, :default => 0
 		
@@ -79,7 +80,7 @@ module PoieticGen
 		def self.create config, group
 			res = super({
 				# FIXME: when the token already exists, SaveFailureError is raised
-				#:token => (0...16).map{ ('a'..'z').to_a[rand(26)] }.join,
+				:token => (0...16).map{ ('a'..'z').to_a[rand(26)] }.join,
 				:timestamp => Time.now.to_i,
 				:board_group => group
 			})
@@ -99,13 +100,8 @@ module PoieticGen
 			if token == "latest" then
 				Board.first(:order => [:id.desc])
 			else
-				id = token # FIXME
-				Board.get id
+				Board.first(:token => token)
 			end
-		end
-
-		def token
-			return self.id # FIXME
 		end
 
 		def close
