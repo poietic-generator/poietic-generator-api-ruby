@@ -272,7 +272,7 @@ module PoieticGen
 				board = user.board
 				if board.nil? or
 				   board.closed or
-				   board.token != req.session_token then
+				   board.board_group.token != req.session_token then
 					raise InvalidSession, "No opened session found for board %s" % req.session_token
 				end
 
@@ -351,16 +351,8 @@ module PoieticGen
 
                 # test if session_token is defined
                 pp req.session_token
-                # FIXME: use a constant for latest session name
-                board = if req.session_token == "latest" then
-                    # if not, use the latest session
-                    Board.first(:order => [:id.desc])
-                else
-				    Board.first(
-				    	:session_token => req.session_token
-				    )
-				end
 
+				board = Board.from_token req.session_token
 				raise InvalidSession, "Invalid session" if board.nil?
 
 				# ignore session_id from the viewer point of view but use server one
@@ -459,15 +451,7 @@ module PoieticGen
 				self.check_expired_users
 
                 # test if session_token is defined
-                board = if req.session_token == "latest" then
-                    # if not, use the latest session
-                    Board.first(:order => [:id.desc])
-                else
-				    Board.first(
-				    	:session_token => req.session_token
-				    )
-				end
-
+				board = Board.from_token req.session_token
 				raise InvalidSession, "Invalid session" if board.nil?
 
 				# Get events and strokes between req.timeline_after and req.duration
@@ -591,7 +575,7 @@ module PoieticGen
 				)
 				rdebug "New expired list : %s" % newly_expired_users.inspect
 				newly_expired_users.each do |leaver|
-					self.leave leaver.token, leaver.board.token
+					self.leave leaver.token, leaver.board.board_group.token
 				end
 				@last_leave_check_time = now
 			end

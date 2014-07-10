@@ -93,19 +93,21 @@ module PoieticGen
 			raise e
 		end
 
-        # if not, use the latest session
+		# if not, use the latest session
 		def self.from_token token
+			# FIXME: use a constant for latest session name
 			if token == "latest" then
-                Board.first(:order => [:id.desc])
-            else
-				Board.first(:session_token => token)
+				Board.first(:order => [:id.desc])
+			else
+				id = token # FIXME
+				Board.get id
 			end
 		end
 
 		def token
-			return self.board_group.token
+			return self.id # FIXME
 		end
-		
+
 		def close
 			t = Board.transaction do |t|
 				self.closed = true

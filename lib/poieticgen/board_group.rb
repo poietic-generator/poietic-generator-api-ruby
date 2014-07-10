@@ -56,6 +56,7 @@ module PoieticGen
 
 		# if not, use the latest session
 		def self.from_token token
+			# FIXME: use a constant for latest session name
 			if token == "latest" then
                 BoardGroup.first(:closed => false, 
 								 :order => [:id.desc])
