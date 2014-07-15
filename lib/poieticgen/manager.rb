@@ -358,7 +358,6 @@ module PoieticGen
 				# ignore session_id from the viewer point of view but use server one
 				# to distinguish old sessions/old users
 
-				now_i = Time.now.to_i - 1
 				timeline_id = 0
 				date_range = -1
 				diffstamp = 0
@@ -378,8 +377,12 @@ module PoieticGen
 
 					rdebug "timeline_id %d" % timeline_id
 				else
+					end_session = if board.end_timestamp <= 0
+					              then Time.now.to_i - 1
+					              else board.end_timestamp
+					              end
 					# retrieve the total duration of the game
-					date_range = now_i - board.timestamp
+					date_range = end_session - board.timestamp
 
 					# retrieve stroke_max and event_max
 
@@ -389,12 +392,12 @@ module PoieticGen
 
 							absolute_time = board.timestamp + req.date
 						else
-							# get the state from now.
+							# get the state from end of session.
 
-							absolute_time = now_i + req.date + 1
+							absolute_time = end_session + req.date + 1
 						end
 
-						rdebug "abs_time %d (now %d, date %d)" % [absolute_time, now_i, req.date]
+						rdebug "abs_time %d (end_session %d, date %d)" % [absolute_time, end_session, req.date]
 						
 						timestamp = absolute_time - board.timestamp
 
@@ -417,7 +420,7 @@ module PoieticGen
 					:zone_column_count => @config.board.width,
 					:zone_line_count => @config.board.height,
 					:timeline_id => timeline_id,
-					:timestamp => timestamp, # time between the session start and the requested date
+					:timestamp => timestamp, # time between the session start and the requested date
 					:date_range => date_range, # total time of session
 					:id => req.id
 				}
@@ -497,6 +500,13 @@ module PoieticGen
 					rdebug "req.last_max_timestamp = %d, req.since = %d, req.duration = %d" %
 						[ req.last_max_timestamp, req.since, req.duration ]
 					
+					end_session = if board.end_timestamp <= 0
+					              then Time.now.to_i - 1
+					              else board.end_timestamp
+					              end
+					# retrieve the total duration of the game
+					date_range = end_session - board.timestamp
+
 					session_timelines = board.timelines
 					
 					if req.last_max_timestamp > 0 then
@@ -540,6 +550,7 @@ module PoieticGen
 					:strokes => strokes_collection,
 					:timestamp => timestamp, # relative to the start of the game session
 					:max_timestamp => max_timestamp,
+					:date_range => date_range, # total time of session
 					:id => req.id,
 				}
 
