@@ -49,8 +49,8 @@
 
 			// set variables from options
 			session = p_options.session || undefined;
-			board = p_options.board || undefined;
-			overlay_id = p_options.overlay_id || undefined;
+			board = p_options.board || undefined;
+			overlay_id = p_options.overlay_id || undefined;
 			overlay = document.getElementById(overlay_id);
 
 			session.register(self);
