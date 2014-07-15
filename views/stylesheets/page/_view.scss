@@ -39,6 +39,24 @@
 			border: none;
 			width: auto;
 		}
+
+		.message {
+			display: inline-block;
+			vertical-align: middle;
+
+			.label {
+				margin-bottom: 20px;
+			}
+		}
+
+		// Vertical-align hack
+		&:after {
+			content: '';
+			height: 100%;
+			width: 0;
+			display: inline-block;
+			vertical-align: middle;
+		}
 	}
 
     #history_slider {

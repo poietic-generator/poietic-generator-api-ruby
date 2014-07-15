@@ -3,6 +3,7 @@
 - @page.js << "/js/poieticgen.js"
 - @page.js << "/js/poieticgen/view_session.js"
 - @page.js << "/js/poieticgen/zone.js"
+- @page.js << "/js/poieticgen/overlay.js"
 - @page.js << "/js/poieticgen/viewer.js"
 - @page.js << "/js/poieticgen/slider.js"
 - @page.js << "/js/poieticgen/board.js"
@@ -13,15 +14,13 @@
   %div(data-id="head" data-position="fixed" data-role="header" data-fullscreen="true")
     %h1.username Poietic Generator's view
     %a.ui-btn-left.logout(data-ajax="false" href="/") Back
-    %div(data-role="navbar")
-      %ul
-        %li
-          %a#view_start(href="#") History
-        %li
-          %a#view_now.ui-btn-active(href="#") Live
   #canvas-container{"data-role" => "content"}
     .ui-grid-a.viewer
       %canvas#session-viewer
+    %div#session-overlay
+      .message
+        .label Session finished
+        %a.ui-btn#view_start(href="#") History
   .slider{"data-role" => "fieldcontain"}
     %input{"data-role" => "none", "type" => "range", "name" => "history_slider", "id" => "history_slider", "data-highlight" => "true"}/
 

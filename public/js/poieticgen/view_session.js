@@ -82,7 +82,7 @@
 		/**
 		 * Semi-Constructor
 		 */
-		this.initialize = function (date, slider) {
+		this.initialize = function (slider) {
 
 			var url_matches;
 
@@ -97,8 +97,6 @@
 			_game = new PoieticGen.Game();
 			_slider = slider;
 			_slider.set_animation_interval(1);
-
-			self.join_view_session(date);
 
 			_slider.mouseup(function (event) {
 				date = _slider.value();
@@ -408,7 +406,7 @@
 			self.dispatch_reset();
 		};
 
-		this.initialize(-1, p_slider);
+		this.initialize(p_slider);
 	}
 
 	// expose scope objects
