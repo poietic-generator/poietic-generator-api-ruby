@@ -10,7 +10,7 @@
 - @page.js << "/js/page/view.js"
 
 %div(data-fullscreen="true" data-role="page" class="ui-page ui-page-theme-b poietic-page-#{@page.title}")
-  %div(data-id="head" data-position="fixed" data-role="header")
+  %div(data-id="head" data-position="fixed" data-role="header" data-fullscreen="true")
     %h1.username Poietic Generator's view
     %a.ui-btn-left.logout(data-ajax="false" href="/") Back
     %div(data-role="navbar")
@@ -19,8 +19,8 @@
           %a#view_start(href="#") History
         %li
           %a#view_now.ui-btn-active(href="#") Live
-  %div{"data-role" => "content"}
-    .viewer
+  #canvas-container{"data-role" => "content"}
+    .ui-grid-a.viewer
       %canvas#session-viewer
   .slider{"data-role" => "fieldcontain"}
     %input{"data-role" => "none", "type" => "range", "name" => "history_slider", "id" => "history_slider", "data-highlight" => "true"}/

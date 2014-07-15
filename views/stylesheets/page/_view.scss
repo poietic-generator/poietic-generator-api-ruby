@@ -1,9 +1,13 @@
-body.view, body.view-standalone {
+.poietic-page-view, .poietic-page-view-standalone {
     .viewer {
 		margin:0;
 		padding:0;
-		text-align:center; 
-		background-color:#000;
+		text-align:center;
+    }
+
+    #canvas-container {
+		background-color: #000;
+		line-height: 0; // Fixing child canvas height on Gecko
     }
 
     .slider {
@@ -28,6 +32,7 @@ body.view, body.view-standalone {
 		position: absolute;
 		top: 0;
 		left: 0;
+		line-height: 0; // Fixing child canvas height on Gecko
 
 		img {
 			height: 100%;
@@ -41,17 +46,15 @@ body.view, body.view-standalone {
     }
 }
 
-body.view-standalone {
+.poietic-page-view-standalone.ui-page {
+	height: 100%;
+	background-color: black;
 	overflow-y: hidden;
 
-	.ui-page-fullscreen {
+	.ui-content {
 		height: 100%;
 		background-color: black;
-		overflow-y: hidden;
-
-		.ui-content {
-			height: 100%;
-			background-color: black;
-		}
+		padding: 0;
+		line-height: 0;
 	}
 }

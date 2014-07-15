@@ -35,6 +35,7 @@
     #session-overlay { 
 		margin:0; padding: 0; 
 		display: none;
+		line-height: 0; // Fixing child canvas height on Gecko
 	}
 
     #current_color {
