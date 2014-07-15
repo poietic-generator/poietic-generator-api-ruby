@@ -265,7 +265,9 @@
 								console.log('view_session/update real time!');
 							} */
 
-							_slider.set_maximum(response.date_range);
+							if (response.date_range !== _slider.maximum()) {
+								_slider.set_maximum(response.date_range);
+							}
 							_slider.set_value(response.max_timestamp);
 
 							_last_update_max_timestamp = response.max_timestamp;
