@@ -111,6 +111,8 @@
 
 			// plug some event handlers
 
+			_real_canvas.addEventListener('click', _canvas_event_fn, false);
+
 			_real_canvas.addEventListener('mousedown', _canvas_event_fn, false);
 			_real_canvas.addEventListener('touchstart', _canvas_event_fn, false);
 
