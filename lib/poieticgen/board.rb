@@ -43,14 +43,15 @@ module PoieticGen
 		include DataMapper::Resource
 
 		property :id,            Serial
-		property :name,          String,  :unique => true, :required=> false
+		#property :name,          String,  :unique => true, :required=> false
+		property :token,         String, :required => true, :unique => true
 		property :timestamp,     Integer, :required => true
-		property :session_token, String,  :required => true, :unique => true
 		property :end_timestamp, Integer, :default => 0
+		
 		property :closed,        Boolean, :default => false
-		property :allocator_type, String, :required => true
 		property :strokes_since_last_snapshot, Integer, :default => 0
 
+		belongs_to :board_group
 		has n, :board_snapshots
 		has n, :timelines
 		has n, :users
@@ -66,46 +67,62 @@ module PoieticGen
 		}
 
 
-		def self.create config
-			begin
-				res = super({
-					# FIXME: when the token already exists, SaveFailureError is raised
-					:session_token => (0...16).map{ ('a'..'z').to_a[rand(26)] }.join,
-					:timestamp => Time.now.to_i,
-					:allocator_type => config.allocator
-				})
-
-				@debug = true
-				rdebug "using allocator %s" % config.allocator
-				return res
-			rescue DataMapper::SaveFailureError => e
-				rdebug "Saving failure : %s" % e.resource.errors.inspect
-				raise e
-			end
-		end
-		
-		def close
-			Board.transaction do |t|
-				begin
-					closed = true
-					end_timestamp = Time.now.to_i
-
-					begin
-						save
-					rescue DataMapper::SaveFailureError => e
-						rdebug "Saving failure : %s" % e.resource.errors.inspect
-						raise e
-					end
-
-				rescue DataObjects::TransactionError => e
-					Transaction.handle_deadlock_exception e, t, "Board.close"
-					raise e
-
-				rescue Exception => e
-					t.rollback
-					raise e
+		def self.check_expired_boards
+			boards = Board.all(closed: false)
+			boards.each do |board|
+				if board.live_users_count == 0 then
+					STDERR.puts "board %d" % board.id
+					board.close
 				end
 			end
+		end
+
+		def self.create config, group
+			res = super({
+				# FIXME: when the token already exists, SaveFailureError is raised
+				:token => (0...16).map{ ('a'..'z').to_a[rand(26)] }.join,
+				:timestamp => Time.now.to_i,
+				:board_group => group
+			})
+
+			@debug = true
+			rdebug "using allocator %s" % config.allocator
+			return res
+
+		rescue DataMapper::SaveFailureError => e
+			rdebug "Saving failure : %s" % e.resource.errors.inspect
+			raise e
+		end
+
+		# if not, use the latest session
+		def self.from_token token
+			# FIXME: use a constant for latest session name
+			if token == "latest" then
+				Board.first(:order => [:id.desc])
+			else
+				Board.first(:token => token)
+			end
+		end
+
+		def close
+			t = Board.transaction do |t|
+				self.closed = true
+				self.end_timestamp = Time.now.to_i
+
+				self.save
+			end
+
+		rescue DataMapper::SaveFailureError => e
+			rdebug "Saving failure : %s" % e.resource.errors.inspect
+			raise e
+
+		rescue DataObjects::TransactionError => e
+			Transaction.handle_deadlock_exception e, t, "Board.close"
+			raise e
+
+		rescue Exception => e
+			t.rollback
+			raise e
 		end
 
 
@@ -116,7 +133,7 @@ module PoieticGen
 			zone = nil
 			Board.transaction do |t|
 				begin
-					allocator = ALLOCATORS[self.allocator_type].new config, self.zones
+					allocator = ALLOCATORS[self.board_group.allocator_type].new config, self.zones
 					zone = allocator.allocate self
 					zone.user = user
 					user.zone = zone
@@ -291,6 +308,13 @@ module PoieticGen
 			return (max_right - min_left), (max_bottom - min_top), min_left, min_top
 		end
 
+		def live_users_count
+			return self.users.all(did_expire: false).count
+		end
+
+		def total_users_count
+			return self.users.count
+		end
 
 		private
 
@@ -309,6 +333,7 @@ module PoieticGen
 
 			return timeline.board_snapshot
 		end
+
 	end
 
 end

@@ -31,7 +31,7 @@ module PoieticGen
 		attr_reader :user
 		attr_reader :board
 
-		DEFAULT_CONFIG_PATH = File.expand_path( File.join File.dirname(__FILE__), "../config/config.ini" )
+		DEFAULT_CONFIG_PATH = File.join "config", "config.ini"
 
 		class ConfigurationError < RuntimeError ; end
 

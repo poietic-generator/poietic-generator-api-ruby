@@ -24,6 +24,7 @@
 require 'sinatra/base'
 require 'sinatra/cookies'
 require 'sinatra/flash'
+require 'rufus-scheduler'
 
 require 'poieticgen/version'
 require 'poieticgen/config_manager'
@@ -55,7 +56,7 @@ module PoieticGen
 		helpers Sinatra::Cookies
 
 		#set :environment, :development
-		set :root, File.expand_path(File.join(File.dirname(__FILE__),'..'))
+		set :root, File.expand_path(File.join(File.dirname(__FILE__),'..','..'))
 		set :environment, :production
 
 		set :static, true
@@ -77,12 +78,14 @@ module PoieticGen
 		end
 
 		configure do
-
-			# Compass assets management
+			# Enable assets management via compass
 			Compass.add_project_configuration(File.join(settings.root, 'config', 'compass.rb'))
 
 			begin
-				config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
+				config = PoieticGen::ConfigManager.new(File.join(
+					settings.root,
+					PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
+				))
 				FileUtils.mkdir_p File.dirname config.server.pidfile
 				File.open config.server.pidfile, "w" do |fh|
 					fh.puts Process.pid
@@ -99,10 +102,19 @@ module PoieticGen
 
 				# raise exception on save failure (globally across all models)
 				DataMapper::Model.raise_on_save_failure = true
-
 				DataMapper.auto_upgrade!
 				
-				set :manager, (PoieticGen::Manager.new config)
+				manager = (PoieticGen::Manager.new config)
+				set :manager, manager
+
+				scheduler = Rufus::Scheduler.new
+ 				set :scheduler, scheduler
+  				scheduler.every('5s') do
+					User.transaction do |t|
+						manager.check_expired_users
+						Board.check_expired_boards
+					end
+    			end
 
 			rescue DataObjects::SQLError => e
 				STDERR.puts "ERROR: Unable to connect to database."
@@ -151,27 +163,8 @@ module PoieticGen
 
 		get '/' do
 			@page = Page.new "index"
-			@session_list = {}
-			@selected_session = ""
 			
-			Board.transaction do
-				sessions = Board.first(SESSION_MAX_LISTED_COUNT,
-					:order => [:timestamp.desc])
-			
-				unless sessions.nil? or sessions.first.nil? then
-					@selected_session = sessions.first.session_token
-				
-					sessions.each do |s|
-						@session_list[s.session_token] = if s.name.nil? or s.name.empty? then
-															 "Session %d" % s.id
-														 else
-															 s.name
-														 end
-					end
-				end
-			end
-			
-			haml :page_index
+			haml :index
 		end
 
 
@@ -180,7 +173,7 @@ module PoieticGen
 		#
 		get '/session/:session_token/draw' do
 			@page = Page.new "draw"
-			haml :page_draw
+			haml :session_draw
 		end
 
 
@@ -189,7 +182,7 @@ module PoieticGen
 		#
 		get '/session/:session_token/view' do
 			@page = Page.new "view"
-			haml :page_view
+			haml :session_view
 		end
 
 
@@ -199,17 +192,17 @@ module PoieticGen
 		# 
 		get '/session/:session_token/view_standalone' do
 			@page = Page.new "view-standalone"
-			haml :page_view_standalone
+			haml :session_view_standalone
 		end
 
 		get '/session/latest/view_standalone' do
 			@page = Page.new "view-standalone"
-			haml :page_view_standalone
+			haml :session_view_standalone
 		end
 		
 		get '/session/latest/view' do
 			@page = Page.new "view"
-			haml :page_view
+			haml :session_view
 		end
 		
 		get '/session/:session_token/logout/:user_token' do
@@ -221,7 +214,7 @@ module PoieticGen
 
 		get '/user/login' do 
 			@page = Page.new "Login"
-			haml :page_login
+			haml :user_login
 		end
 
 
@@ -250,7 +243,7 @@ module PoieticGen
 
 			if settings.manager.admin? params then
 				@page = Page.new "admin"
-				haml :page_admin
+				haml :session_admin
 			else
 				redirect '/user/login'
 			end
@@ -262,13 +255,28 @@ module PoieticGen
 			redirect '/'
 		end
 
-
-		get '/session/list' do
-			@page = Page.new "list"
-			haml :page_list
+		# List available session for joining
+		get '/group/join' do
+			BoardGroup.transaction do
+				@group_list = BoardGroup.all(
+					closed: false,
+					order: [:id.asc]
+				) || []
+			end
+			@page = Page.new "session-group-list"
+			haml :"session_group_list"
 		end
 
-
+		get '/session/list' do
+			BoardGroup.transaction do
+				@group_list = BoardGroup.all(
+					closed: false,
+					order: [:id.asc]
+				) || []
+			end
+			@page = Page.new "session-list"
+			haml :"session_list"
+		end
 		#
 		# notify server about the intention of joining the session
 		#

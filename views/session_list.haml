@@ -1,0 +1,22 @@
+- # vim: set ts=2 sw=2 et:
+
+%div(data-fullscreen="true" data-role="page" class="ui-page poietic-page-#{@page.title}")
+  %div(data-role="header" data-id="head")
+    %h1.username Choose session
+    %a.ui-btn-left.logout(href="/" data-rel="back") Back
+  %div(role="main" class="ui-content") 
+    %ul(data-role="listview" class="ui-listview")
+      - @group_list.each do |group|
+        %li(data-role="list-divider")
+          = group.canonical_name
+        - group.boards.each do |board|
+          %li
+            %a(data-ajax="false" href="/session/#{board.token}/view") 
+              %h2
+                = "From %s " % Time.at(board.timestamp).utc.strftime('%F %T')
+                - if board.end_timestamp > 0
+                  = "to %s" % Time.at(board.end_timestamp).utc.strftime('%F %T')
+                - else
+                  = "to now"
+              %p= "%d users" % board.total_users_count
+

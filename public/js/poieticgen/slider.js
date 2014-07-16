@@ -33,11 +33,7 @@
 			self = this,
 			_slider = null,
 			_animation_interval = 1,
-			_timer_animation = null,
-			_mouseup_handler = null,
-			_animate = null,
-			_cursor_moved_by_user = false,
-			_catch_mouse = null;
+			_timer_animation = null;
 
 		this.name = "Slider";
 
@@ -49,8 +45,7 @@
 			_slider = $(element).slider();
 			_animation_interval = 1;
 			_timer_animation = null;
-			_slider.attr('value', 0);
-			_catch_mouse();
+			_slider.val(0);
 		};
 
 
@@ -58,12 +53,9 @@
 		* Change slider position
 		*/
 		this.set_value = function (v) {
-			if (_cursor_moved_by_user === true) {
-				return;
-			}
 			v = Math.floor(v);
 			console.log("slider/set_value : value = " + v);
-			_slider.attr('value', v);
+			_slider.val(v);
 			_slider.slider('refresh');
 		};
 
@@ -97,15 +89,33 @@
 		};
 
 		this.minimum = function () {
-			return parseInt(_slider.attr('min'), 10);
+			var min = parseInt(_slider.attr('min'), 10);
+			if (!min) {
+				return 0;
+			}
+			return min;
 		};
 
 		this.maximum = function () {
-			return parseInt(_slider.attr('max'), 10);
+			var max = parseInt(_slider.attr('max'), 10);
+			if (!max) {
+				return 0;
+			}
+			return max;
 		};
 
 		this.set_animation_interval = function (interval) {
 			_animation_interval = interval;
+		};
+
+		function _animate(init_stamp) {
+			self.set_value(self.value() + 1);
+
+			_timer_animation = window.setTimeout(function () {
+				if (_timer_animation) {
+					_animate(init_stamp + 1000);
+				}
+			}, (_animation_interval * 1000) - ((new Date()).getTime() - init_stamp));
 		};
 
 		/**
@@ -115,16 +125,6 @@
 			self.stop_animation();
 
 			_animate((new Date()).getTime());
-		};
-
-		_animate = function (init_stamp) {
-			self.set_value(self.value() + 1);
-
-			_timer_animation = window.setTimeout(function () {
-				if (_timer_animation) {
-					_animate(init_stamp + 1000);
-				}
-			}, (_animation_interval * 1000) - ((new Date()).getTime() - init_stamp));
 		};
 
 		this.stop_animation = function () {
@@ -142,17 +142,8 @@
 			$(".slider").hide();
 		};
 
-		this.mouseup = function (callback) {
-			$(".ui-slider").bind("vmouseup", callback);
-		};
-
-		_catch_mouse = function () {
-			$(".ui-slider").bind("vmouseup", function () {
-				_cursor_moved_by_user = false;
-			});
-			$(".ui-slider").bind("vmousedown", function () {
-				_cursor_moved_by_user = true;
-			});
+		this.edited = function (callback) {
+			_slider.on('slidestop', callback);
 		};
 
 		// call constructor

@@ -31,7 +31,6 @@
 	var VIEW_SESSION_UPDATE_INTERVAL = 1000,
 		VIEW_PLAY_UPDATE_INTERVAL = VIEW_SESSION_UPDATE_INTERVAL / 1000,
 		VIEW_SESSION_JOIN_RETRY_INTERVAL = 1000,
-		VIEW_SESSION_HISTORY_PROTECTED_INTERVAL = 30, // Seconds reserved to real time
 
 		STATUS_INFORMATION = 1,
 		STATUS_SUCCESS = 2,
@@ -82,7 +81,7 @@
 		/**
 		 * Semi-Constructor
 		 */
-		this.initialize = function (date, slider) {
+		this.initialize = function (slider) {
 
 			var url_matches;
 
@@ -98,17 +97,15 @@
 			_slider = slider;
 			_slider.set_animation_interval(1);
 
-			self.join_view_session(date);
-
-			_slider.mouseup(function (event) {
-				date = _slider.value();
+			_slider.edited(function () {
+				var date = _slider.value();
 				console.log('User history change: ' + date);
 				/* if (date >= _slider.maximum()) {
 					_view_type = REAL_TIME_VIEW;
 				} else {
 					_view_type = HISTORY_VIEW;
 				} */
-				self.play(date - _slider.minimum());
+				self.play(date);
 			});
 		};
 
@@ -172,7 +169,7 @@
 					}
 
 					if (_view_type === HISTORY_VIEW) {
-						_slider.set_range(_last_join_start_time - response.date_range, _last_join_start_time - VIEW_SESSION_HISTORY_PROTECTED_INTERVAL);
+						_slider.set_range(0, response.date_range);
 					}
 
 					self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
@@ -268,8 +265,10 @@
 								console.log('view_session/update real time!');
 							} */
 
-							_slider.set_maximum(_get_current_time() - VIEW_SESSION_HISTORY_PROTECTED_INTERVAL);
-							_slider.set_value(_slider.minimum() + _last_join_timestamp + _get_elapsed_time());
+							if (response.date_range !== _slider.maximum()) {
+								_slider.set_maximum(response.date_range);
+							}
+							_slider.set_value(response.max_timestamp);
 
 							_last_update_max_timestamp = response.max_timestamp;
 						}
@@ -395,7 +394,7 @@
 		 */
 		this.restart = function () {
 			console.log("view_session/restart");
-			_slider.set_value(_slider.minimum());
+			_slider.set_value(0);
 			self.play(0);
 		};
 
@@ -408,7 +407,7 @@
 			self.dispatch_reset();
 		};
 
-		this.initialize(-1, p_slider);
+		this.initialize(p_slider);
 	}
 
 	// expose scope objects

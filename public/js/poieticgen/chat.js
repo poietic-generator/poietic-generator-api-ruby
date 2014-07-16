@@ -99,7 +99,7 @@
 
 
 			// when the messages page is shown reset unread messages count
-			$("#session-chat").live("pageshow", function () {
+			$("#session-chat").on("pageshow", function () {
 				$("span.ui-li-count").text(0);
 			});
 		};

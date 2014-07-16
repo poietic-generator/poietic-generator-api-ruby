@@ -11,39 +11,68 @@ require 'rdebug/base'
 require 'pp'
 
 require 'poieticgen'
+require 'poieticgen/cli'
 
 module PoieticGen
 	module CLI
 		class Main < Thor
 			desc "list", "List all session"
+			option :all, :type => :boolean, :aliases => :a
 			def list
 				configure
-				sessions = PoieticGen::Board.all
-				sessions.each do |s|
-					stop = if (s.end_timestamp > 0) then
-							   Time.at(s.end_timestamp).utc.iso8601
-						   else
-							   "none"
-						   end
-					#pp s.end_timestamp
-					puts "NAME %s - ID % 3d - [START %s .. STOP %s]" % [ 
-						(s.name || "(none)"), 
-						s.id, 
-						Time.at(s.timestamp).utc.iso8601,
-						stop
-					]
-				end
+				group_filter = if options[:all] then {}
+							   else { closed: false }
+							   end
+				groups = PoieticGen::BoardGroup.all(group_filter)
+				groups.each do |group|
+					group_name = group.canonical_name
+					group_openess = group.closed ? "closed" : "open"
+					group_users = 
+              			if group.live? and group.live_users_count > 0
+                			"%d users live!" % group.live_users_count
+              			else
+                			"No user connected"
+			  			end
 
-			end
+					puts "GROUP id %3d %20s - %s - %s - %s" % [ 
+						group.id, 
+						group_name, 
+						group.token,
+						group_openess,
+              			group_users	
+					]
+
+
+					board_filter = if options[:all] then {}
+							   	   else { closed: false }
+								   end
+					boards = group.boards.all(board_filter)
+					puts "      (no session)" if boards.empty?
+					boards.each do |board|
+						stop = if (board.end_timestamp > 0) then
+							   	   Time.at(board.end_timestamp).utc.iso8601
+						   	   else
+							   	   "none"
+						   	   end
+						#pp s.end_timestamp
+						puts "- SESSION % 3d - USERS %s - FROM %s .. TO %s]" % [ 
+							board.id, 
+							board.users.all(did_expire: false).count,
+							Time.at(board.timestamp).utc.iso8601,
+							stop,
+						]
+					end
+				end # board groups
+			end 
 
 			desc "create", "Start a new session"
+			option :name, :type => :string, :aliases => :n
 			def create
 				configure
-				# TODO: add a session name
-				PoieticGen::Board.create @config.board
+				PoieticGen::BoardGroup.create @config.board, options[:name]
 			end
 
-			desc "rename ID NEWLABEL", "Rename a session"
+			desc "rename ID NEWLABEL", "Rename a group"
 			def rename id, new_label
 				configure
 				session = PoieticGen::Board.first(:id => id.to_i)

@@ -6,19 +6,15 @@
     %meta{:content => "black", :name => "apple-mobile-web-app-status-bar-style"}/
     %meta{:content => "YES", :name => "apple-touch-fullscreen"}/
     %meta{:content => "user-scalable=no,height=device-height,width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0", :name => "viewport"}/
+    %link(rel="stylesheet" type="text/css" href="/extern/jquery.mobile-1.4.2/jquery.mobile-1.4.2.min.css")/
     %link(rel="stylesheet" type="text/css" href="/stylesheets/style.css")/
-    // FIXME: use requireJS or similar
-    // jquery base
-    - @page.js.insert 0, "/js/extern/jquery-1.6.1.min.js"
-    - @page.js << "/js/extern/jquery.mobile-1.0b1.min.js"
-    //# json parser/encoder for old (or mobile) browsers
+    -# jquery base
+    - @page.js.insert 0, "/js/extern/jquery-1.11.1.min.js"
+    -# json parser/encoder for old (or mobile) browsers
     - @page.js << "/js/extern/json2.js"
+    - @page.js << "/extern/jquery.mobile-1.4.2/jquery.mobile-1.4.2.min.js"
     = @page.render_js
-  %body{:class => @page.title }
-    - if flash[:success] then
-      .alert.alert-success.fade.in
-        = flash[:success]
-    - if flash[:error] then
-      .alert.alert-error.fade.in
-        = flash[:error]
+    :javascript
+      $.mobile.page.prototype.options.theme = "b";
+  %body(class="ui-mobile-viewport")
     = yield
