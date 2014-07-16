@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
 		social networks sites, various online communities, financial markets,
 		as well as in everyday conversations.
 
-		The game may be envisioned as a 100% « Game of Life », that is to say a
+		The game may be envisioned as a 100% "Game of Life", that is to say a
 		cellular automata where every single cell is manipulated by a single
 		human being. It allows everybody (10, 100, 1000 or more people, all
 		together), regardless of his/her language, culture and educational
