@@ -249,13 +249,17 @@
 			};
 			margin = 0;
 			squaresize = (win.h < win.w) ? win.h : win.w;
+
+			/* FIXME: what is the purpose of this code ?
 			if (squaresize > (win.h / 2)) {
 				squaresize = win.h;
 			}
+			*/
 
 			if (self.fullsize) {
 				width = squaresize;
 				height = squaresize;
+				
 				canvas = $(_real_canvas);
 				// FIXME: set the slider as optional parameter of constructor 
 

@@ -21,7 +21,7 @@
 /******************************************************************************/
 
 /*jslint browser: true, continue: true*/
-/*global $, jQuery, document, console, PoieticGen */
+/*global $, jQuery, document, console, PoieticGen, PoieticGen.VIEW_SESSION_TYPE_REALTIME */
 
 (function (PoieticGen) {
 	// vim: set ts=4 sw=4 et:
@@ -39,6 +39,7 @@
 			board,
 			overlay_id,
 			overlay;
+
 
 		/**
 		* Constructor
@@ -67,7 +68,7 @@
 		* Resize canvas & various display elements
 		*/
 		this.update_visibility = function () {
-			var win, width, height, zones, zone_idx;
+			var win, width, height, zones, zone_idx, overlay_enabled;
 			zones = board.get_zone_list();
 
 			win = {
@@ -75,8 +76,14 @@
 				h : $(window).height()
 			};
 
-			// manage overlay visibility depending on user count
-			if (zones.length <= OVERLAY_USER_THRESHOLD) {
+			// manage overlay visibility depending on :
+			// - user count  (no user => disable )
+			// - view type ( history=> disable)
+			overlay_enabled = (
+				(zones.length <= OVERLAY_USER_THRESHOLD) && 
+				(session.view_type() === PoieticGen.VIEW_SESSION_TYPE_REALTIME)
+			)
+			if (overlay_enabled) {
 				overlay.width = Math.floor(win.w);
 				overlay.height = Math.floor(win.h);
 				$(overlay).fadeIn('slow');
@@ -93,12 +100,11 @@
 		this.handle_event = function (ev) {
 			//var console = window.noconsole;
 
-
 			if ((ev.type === 'join') || (ev.type === 'leave')) {
+				console.log('Overlay event for ' + ev.type);
 				// FIXME: read/count number of users 
 				self.update_visibility();
 			}
-
 		};
 
 		// call constructor

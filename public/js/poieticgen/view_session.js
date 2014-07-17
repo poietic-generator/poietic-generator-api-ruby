@@ -38,12 +38,15 @@
 		STATUS_SERVER_ERROR = 4,
 		STATUS_BAD_REQUEST = 5,
 
-		REAL_TIME_VIEW = 0,
-		HISTORY_VIEW = 1;
+		VIEW_SESSION_TYPE_REALTIME = 0,
+		VIEW_SESSION_TYPE_HISTORY = 1,
+
+		DATE_INIT_REALTIME = -1,
+		DATE_INIT_HISTORY = 0;
 
 
 	function ViewSession(callback, p_slider) {
-		var console = window.noconsole,
+		var console = window.console,
 			self = this,
 			_current_timeline_id = -1,
 			_slider = null,
@@ -55,7 +58,7 @@
 			_play_speed = 1,
 			_get_elapsed_time,
 			_get_current_time,
-			_view_type = REAL_TIME_VIEW,
+			_view_type = VIEW_SESSION_TYPE_REALTIME,
 			_last_join_timestamp = 0,
 			_last_update_max_timestamp = -1,
 			_request_id = 0,
@@ -100,23 +103,22 @@
 			_slider.edited(function () {
 				var date = _slider.value();
 				console.log('User history change: ' + date);
-				/* if (date >= _slider.maximum()) {
-					_view_type = REAL_TIME_VIEW;
-				} else {
-					_view_type = HISTORY_VIEW;
-				} */
 				self.play(date);
 			});
+		};
+
+		this.view_type = function() {
+			return _view_type;
 		};
 
 		this.join_view_session = function (date) {
 
 			_game.reset(); // Observers needs to be cleared because callback reregister all
 
-			if (date !== -1) {
-				_view_type = HISTORY_VIEW;
+			if (date !== DATE_INIT_REALTIME) {
+				_view_type = VIEW_SESSION_TYPE_HISTORY;
 			} else {
-				_view_type = REAL_TIME_VIEW;
+				_view_type = VIEW_SESSION_TYPE_REALTIME;
 			}
 
 			_request_id += 1;
@@ -145,6 +147,18 @@
 					}
 
 					console.log('view_session/join response : ' + JSON.stringify(response));
+					// FIXME: auto-set history if initial snapshot is empty
+					console.log(
+						"view_session/join_response : zone.length = " + 
+						response.zones.length
+					);
+					if ((_view_type === VIEW_SESSION_TYPE_REALTIME) &&
+						(response.zones.length < 1)) 
+					{
+						_slider.show();
+						self.restart();
+						return; // trash answer and restart from history
+					}
 
 					this.zone_column_count = response.zone_column_count;
 					this.zone_line_count = response.zone_line_count;
@@ -159,6 +173,7 @@
 
 					self.other_zones = response.zones;
 
+
 					callback(self);
 
 					//console.log('view_session/join post-callback ! observers = ' + JSON.stringify( _game.observers() ));
@@ -168,7 +183,7 @@
 						self.dispatch_strokes(self.other_zones[i].content, 0);
 					}
 
-					if (_view_type === HISTORY_VIEW) {
+					if (_view_type === VIEW_SESSION_TYPE_HISTORY) {
 						_slider.set_range(0, response.date_range);
 					}
 
@@ -258,12 +273,8 @@
 
 						var last_update_timestamp = 0;
 
-						if (_view_type === HISTORY_VIEW) {
+						if (_view_type === VIEW_SESSION_TYPE_HISTORY) {
 							last_update_timestamp = parseInt(response.timestamp, 10);
-							/* if (last_update_timestamp < 0 || last_update_timestamp >= _slider.maximum() - 1) {
-								_view_type = REAL_TIME_VIEW;
-								console.log('view_session/update real time!');
-							} */
 
 							if (response.date_range !== _slider.maximum()) {
 								_slider.set_maximum(response.date_range);
@@ -293,7 +304,7 @@
 				return events;
 			}
 
-			if (_view_type === REAL_TIME_VIEW) {
+			if (_view_type === VIEW_SESSION_TYPE_REALTIME) {
 				// We want the first stroke now and the others synchronized
 				seconds = parseInt(events[0].diffstamp, 10);
 
@@ -383,23 +394,28 @@
 
 		/**
 		 * Play from current position
+		 * (play live view / current position on session)
+		 * TODO: rewrite the play function / split server API
 		 */
 		this.current = function () {
 			console.log("view_session/current");
-			self.play(-1);
+			self.play(DATE_INIT_REALTIME);
 		};
 
 		/**
 		 * Replay from beginning
+		 * (play from history)
+		 * TODO: rewrite the play function / split server API
 		 */
 		this.restart = function () {
 			console.log("view_session/restart");
 			_slider.set_value(0);
-			self.play(0);
+			self.play(DATE_INIT_HISTORY);
 		};
 
 		/**
 		 * Play with date
+		 * TODO: rewrite the play function / split server API
 		 */
 		this.play = function (date) {
 			self.clear_all_timers();
@@ -412,6 +428,8 @@
 
 	// expose scope objects
 	PoieticGen.ViewSession = ViewSession;
+	PoieticGen.VIEW_SESSION_TYPE_REALTIME = VIEW_SESSION_TYPE_REALTIME;
+	PoieticGen.VIEW_SESSION_TYPE_HISTORY = VIEW_SESSION_TYPE_HISTORY;
 
 }(PoieticGen, jQuery));
 
