@@ -18,6 +18,7 @@ PATH
       json
       oily_png
       rdebug
+      ruby-duration
       rufus-scheduler
       sass
       sinatra
@@ -29,6 +30,12 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
+    activesupport (4.1.4)
+      i18n (~> 0.6, >= 0.6.9)
+      json (~> 1.7, >= 1.7.7)
+      minitest (~> 5.1)
+      thread_safe (~> 0.1)
+      tzinfo (~> 1.1)
     addressable (2.3.6)
     async_sinatra (1.1.0)
       rack (>= 1.4.1)
@@ -121,7 +128,9 @@ GEM
       haml (>= 4.0.0.rc.1)
       hpricot (~> 0.8.6)
       ruby_parser (~> 3.1.1)
+    i18n (0.6.11)
     inifile (2.0.2)
+    iso8601 (0.5.0)
     json (1.8.1)
     json_pure (1.8.1)
     kgio (2.9.2)
@@ -130,6 +139,7 @@ GEM
       rb-fsevent (>= 0.9.3)
       rb-inotify (>= 0.9)
     method_source (0.8.2)
+    minitest (5.4.0)
     multi_json (1.10.1)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
@@ -158,6 +168,10 @@ GEM
     rdebug (0.1)
     rerun (0.10.0)
       listen (~> 2.7, >= 2.7.3)
+    ruby-duration (3.1.0)
+      activesupport (>= 3.0.0)
+      i18n
+      iso8601
     ruby_parser (3.1.3)
       sexp_processor (~> 4.1)
     rufus-scheduler (3.0.8)

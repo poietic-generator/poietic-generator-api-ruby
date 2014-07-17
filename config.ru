@@ -10,6 +10,8 @@ require 'compass'
 require 'haml'
 require 'sass'
 require 'pp'
+require 'duration'
+
 #require 'pry'
 
 $:.insert(0,"lib")

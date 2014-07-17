@@ -27,13 +27,11 @@ set :deploy_via, :remote_cache
 namespace :deploy do
 	task :start, :roles => [:web, :app] do
 		run "echo $PATH"
-		run "mkdir -p #{deploy_to}/current/log"
-		run "mkdir -p #{deploy_to}/current/tmp"
-		run "cd #{deploy_to}/current && nohup bundle exec thin -C config/#{deploy_env}/thin.yml -R config.ru start"
+		run "cd #{deploy_to}/current && nohup bundle exec foreman start"
 	end
 
 	task :stop, :roles => [:web, :app] do
-		run "cd #{deploy_to}/current && nohup bundle exec thin -C config/#{deploy_env}/thin.yml -R config.ru stop"
+		#run "cd #{deploy_to}/current && nohup bundle exec foreman startthin -C config/#{deploy_env}/thin.yml -R config.ru stop"
 	end
 
 	task :restart, :roles => [:web, :app] do
@@ -48,10 +46,13 @@ namespace :deploy do
 	end
 
 	task :finalize_update, :roles => [:wep, :app] do
+		run "ln -s #{shared_path}/.env #{current_release}/.env"
 		run "mkdir -p #{shared_path}/config"
 		run "mkdir -p #{current_release}/tmp/pids"
 		run "test -e #{shared_path}/config/config.ini || cp #{current_release}/config/config.ini.example #{shared_path}/config/config.#{stage}.ini"
 		run "ln -s #{shared_path}/config/config.#{stage}.ini #{current_release}/config/config.ini"
+		run "mkdir -p #{current_release}/log"
+		run "mkdir -p #{current_release}/tmp"
 	end
 
 end

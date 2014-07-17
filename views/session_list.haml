@@ -13,10 +13,29 @@
           %li
             %a(data-ajax="false" href="/session/#{board.token}/view") 
               %h2
-                = "From %s " % Time.at(board.timestamp).utc.strftime('%F %T')
+                = "Started on %s " % Time.at(board.timestamp).utc.strftime('%F %T')
                 - if board.end_timestamp > 0
-                  = "to %s" % Time.at(board.end_timestamp).utc.strftime('%F %T')
+                  :ruby
+                    duration = Duration.new(
+                      Time.at(board.end_timestamp) - Time.at(board.timestamp)
+                    )
+                    duration_str = 
+                      if duration.to_i > 24 * 60 * 60 # days and hours
+                        duration.format("%d %~d and %h %~h")
+                      elsif duration.to_i > 60 * 60 # hours and minutes
+                        duration.format("%h %~h and %m %~m")
+                      elsif duration.to_i > 60  # minutes and seconds
+                        duration.format("%m %~m and %s %~s")
+                      else # seconds only
+                        duration.format("%s %~s")
+                      end
                 - else
-                  = "to now"
-              %p= "%d users" % board.total_users_count
+                  = "and is live !"
+              %p
+                - if board.end_timestamp > 0
+                  = "Lasted %s " % duration_str
+                - else
+                  = "Live "
+                = "with %d users" % board.total_users_count
+
 
