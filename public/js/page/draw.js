@@ -66,6 +66,12 @@
 			KEY_B,
 			KEY_A ];
 
+		$("#usernameDialog form").bind("submit", function (event) {
+			// change username & close popup
+			$('#usernameDialog').popup('close');
+			return false;
+		});
+
 		$(".logout").bind("click", function (event) {
 			event.preventDefault();
 			if (!confirm("Leave Poietic Generator?")) {
@@ -107,7 +113,7 @@
 			}
 		);
 
-		// Bot starts with a combination of keys
+		// Bot starts with the KONAMI sequence of keys
 		$(document).bind("keydown", function bot_keydown_handle(event) {
 			if (bot_cur_key < bot_keys.length && event.keyCode === bot_keys[bot_cur_key]) {
 				bot_cur_key += 1;
