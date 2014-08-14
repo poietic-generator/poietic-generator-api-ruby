@@ -23,7 +23,10 @@
     %a#brush(data-ajax="false" href="#")
       %span#current_color> &nbsp;&nbsp;&nbsp;&nbsp;
       Color
-    %h1.username Poietic Generator
+    %h1
+      %a.username(href="#usernameDialog" data-rel="popup" data-position-to="window") 
+        Poietic Generator
+
     %a.ui-btn-right.logout{"data-ajax" => "false", :href => url_logout} Logout
     %div(data-role="navbar")
       %ul
@@ -38,6 +41,14 @@
       %canvas#session-viewer
     .ui-grid-a.editor
       %canvas#session-editor
+  #usernameDialog(data-role="popup" data-dismissible="false")
+    %form
+      %div(style="padding: 10px 20px;")
+        %h3 Enter new username
+        %label.ui-hidden-accessible(for="un") User name :
+        %input(type="text" name="user" id="un" value="" placeholder="username" )
+        %button(type="submit" data-theme="b" data-icon="check") Change username
+
 / chat zone
 #session-chat(data-role="page")
   %div{"data-id" => "head", "data-position" => "fixed", "data-role" => "header"}
@@ -60,3 +71,4 @@
           %input#send-message-form-content{:name => "send-message-form-content", :type => "text", :value => ""}/
     %hr/
     #message-contener.ui-grid-a
+
