@@ -116,7 +116,7 @@ module PoieticGen
 					end
     			end
 
-			rescue DataObjects::SQLError => e
+			rescue ::DataObjects::SQLError => e
 				STDERR.puts "ERROR: Unable to connect to database."
  				STDERR.puts "\t Verify your settings in config.ini and try again."
 				STDERR.puts ""
