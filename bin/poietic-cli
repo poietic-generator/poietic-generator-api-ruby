@@ -65,7 +65,7 @@ module PoieticGen
 				end # board groups
 			end 
 
-			desc "create", "Start a new session"
+			desc "create [-n NAME]", "Start a new session"
 			option :name, :type => :string, :aliases => :n
 			def create
 				configure
