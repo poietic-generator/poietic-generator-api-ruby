@@ -2,7 +2,7 @@ build:
 	docker build -t glenux/poietic-generator .
 
 run:
-	docker run -d --name poieticgen_lampbox glenux/lampbox
+	docker run -d --name poieticgen_lampbox glenux/lampbox || true
 	docker run --rm \
 		--name poieticgen_app \
 		--link poieticgen_lampbox:db \
@@ -14,5 +14,8 @@ test:
 	docker run -i -t glenux/poietic-generator /bin/bash
 
 clean:
-	docker rm -f poieticgen_lampbox || true
 	docker rm -f poieticgen_app || true
+
+distclean:
+	docker rm -f poieticgen_lampbox || true
+
