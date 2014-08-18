@@ -102,6 +102,7 @@
 			//var zone = _board.get_zone(_current_zone);
 
 			self.context = _real_canvas.getContext('2d');
+			//self.context.setTransform(1,0,0,1,0.5,0.5);
 
 
 			$(window).resize(function () {
@@ -244,19 +245,21 @@
 			var win, margin, width, height, ctx, canvas, next, squaresize;
 
 			win = {
-				w: $(window).width(),
+				w : $(window).width(),
 				h : $(window).height()
 			};
 			margin = 0;
-			squaresize = (win.h < win.w) ? win.h : win.w;
+			squaresize = Math.floor((win.h < win.w) ? win.h : win.w);
 
 			/* FIXME: what is the purpose of this code ?
-			if (squaresize > (win.h / 2)) {
-				squaresize = win.h;
-			}
 			*/
 
+			console.log("viewer/update_size: window.width = " + [ $(window).width(), $(window).height() ]);
+
 			if (self.fullsize) {
+				// full screen viewer
+				console.log("viewer/update_size: fullscreen viewer");
+				
 				width = squaresize;
 				height = squaresize;
 				
@@ -271,21 +274,35 @@
 					width -= next.height();
 				}
 			} else {
-				width = squaresize / 2;
-				height = squaresize / 2;
+				// normal viewer
+				console.log("viewer/update_size: normal viewer");
+					
+				// make sure both square fits the window vertically
+				if (squaresize > (win.h / 2)) {
+					squaresize = Math.floor(win.h / 2);
+				}
+				// then apply size
+				width = squaresize;
+				height = squaresize;
 			}
 
-			_real_canvas.width = Math.floor(width);
-			_real_canvas.height = Math.floor(height);
+			// make sure everything is a round value & multiple of counts 
+			_real_canvas.width = width - (width % self.column_count);
+			_real_canvas.height = height - (height % self.line_count); 
 
-			console.log("viewer/update_size: window.width = " + [ $(window).width(), $(window).height() ]);
+			console.log("viewer/update_size: real_canvas = " + 
+					[_real_canvas.width, _real_canvas.height]);
 
-			// console.log("viewer/update_size: real_canvas.width = " + real_canvas.width);
-			_column_size = _real_canvas.width / self.column_count;
-			_line_size = _real_canvas.height / self.line_count;
+			// compute size, in pixels
+			_column_size = Math.floor(_real_canvas.width / self.column_count);
+			_line_size = Math.floor(_real_canvas.height / self.line_count);
+
+			console.log("viewer/update_size: _*_size = " + 
+					[_column_size, _line_size]);
 
 			// console.log("viewer/update_size: column_size = " + _column_size);
 			ctx = _real_canvas.getContext("2d");
+			//ctx.setTransform(1,0,0,1,0.5,0.5);
 			ctx.fillStyle = DEFAULT_CANVAS_BACKGROUND_COLOR;
 			ctx.fillRect(0, 0, _real_canvas.width, _real_canvas.height);
 		};
