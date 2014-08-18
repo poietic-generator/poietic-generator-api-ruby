@@ -21,7 +21,7 @@
 /******************************************************************************/
 
 /*jslint browser: true, continue: true*/
-/*global $, jQuery, document, console, PoieticGen, PoieticGen.VIEW_SESSION_TYPE_REALTIME */
+/*global $, jQuery, document, console, PoieticGen, VIEW_SESSION_TYPE_REALTIME */
 
 (function (PoieticGen) {
 	// vim: set ts=4 sw=4 et:
@@ -82,7 +82,8 @@
 			overlay_enabled = (
 				(zones.length <= OVERLAY_USER_THRESHOLD) && 
 				(session.view_type() === PoieticGen.VIEW_SESSION_TYPE_REALTIME)
-			)
+			);
+
 			if (overlay_enabled) {
 				overlay.width = Math.floor(win.w);
 				overlay.height = Math.floor(win.h);

@@ -231,6 +231,7 @@
 				self.grid_canvas.height = _real_canvas.height;
 				canvas = self.grid_canvas;
 				grid_ctx = canvas.getContext("2d");
+				grid_ctx.translate(0.5,0.5);
 
 				//console.log("editor/draw_grid: before lines");
 
@@ -313,7 +314,7 @@
 		*
 		*/
 		this.update_size = function () {
-			var real_canvas, win, margin, ctx;
+			var real_canvas, win, margin, ctx, squaresize, width, height;
 
 			real_canvas = _real_canvas;
 			win = {
@@ -322,16 +323,32 @@
 			};
 			margin = 15;
 
-			real_canvas.width = Math.round(win.h / 2) - margin;
-			real_canvas.height = Math.round(win.h / 2) - margin;
+			squaresize = Math.floor((win.h < win.w) ? win.h : win.w);
+			console.log("editor/update_size: window.width = " + [ $(window).width(), $(window).height() ]);
 
-			// console.log("editor/update_size: window.width = " + [ $(window).width(), $(window).height() ] );
+			// make sure both square fits the window vertically
+			if (squaresize > (win.h / 2)) {
+				squaresize = Math.floor(win.h / 2);
+			}
+			// then apply size
+			width = squaresize;
+			height = squaresize;
 
-			// console.log("editor/update_size: real_canvas.width = " + real_canvas.width);
-			_column_size = real_canvas.width / (self.column_count + (self.border_column_count * 2));
-			_line_size = real_canvas.height / (self.line_count + (self.border_line_count * 2));
 
-			// console.log("editor/update_size: column_size = " + _column_size);
+			// make sure everything is a round value & multiple of counts 
+			real_canvas.width = width - (width % self.column_count);
+			real_canvas.height = height - (height % self.line_count);
+
+			console.log("editor/update_size: real_canvas = " +
+					[real_canvas.width, real_canvas.height]);
+
+
+			// compute size, in pixels
+			_column_size = Math.floor(real_canvas.width / self.column_count);
+			_line_size = Math.floor(real_canvas.height / self.line_count);
+
+			console.log("editor/update_size: _*_size = " +
+					[_column_size, _line_size]);
 
 			self.grid_canvas = null;
 
@@ -421,10 +438,10 @@
 			//console.log("editor/pixel_draw local_pos = " + local_pos.to_json() );
 			    canvas_pos = local_to_canvas_position(local_pos),
 			    rect = {
-					x : canvas_pos.x + (0.1 * _column_size),
-					y : canvas_pos.y + (0.1 * _column_size),
-					w : _column_size - (0.2 * _column_size),
-					h : _line_size - (0.2 * _column_size)
+					x : canvas_pos.x + 1,
+					y : canvas_pos.y + 1,
+					w : _column_size - 1,
+					h : _line_size - 1
 				};
 			//console.log("editor/pixel_draw rect = " + rect.to_json() );
 

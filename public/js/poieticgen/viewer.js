@@ -249,10 +249,8 @@
 				h : $(window).height()
 			};
 			margin = 0;
+			//FXME: take margin in account
 			squaresize = Math.floor((win.h < win.w) ? win.h : win.w);
-
-			/* FIXME: what is the purpose of this code ?
-			*/
 
 			console.log("viewer/update_size: window.width = " + [ $(window).width(), $(window).height() ]);
 

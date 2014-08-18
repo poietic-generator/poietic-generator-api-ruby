@@ -116,7 +116,7 @@
 					_animate(init_stamp + 1000);
 				}
 			}, (_animation_interval * 1000) - ((new Date()).getTime() - init_stamp));
-		};
+		}
 
 		/**
 		 * Animate the slider button with interval
