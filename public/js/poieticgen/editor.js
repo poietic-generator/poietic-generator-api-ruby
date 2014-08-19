@@ -336,6 +336,10 @@
 			height = squaresize - margin;
 
 			// make sure everything is a round value & multiple of counts 
+			// and fix margin
+			
+			margin += (width % self.column_count);
+
 			real_canvas.width = width - (width % self.column_count);
 			real_canvas.height = height - (height % self.line_count);
 
@@ -356,7 +360,7 @@
 			self.grid_canvas = null;
 
 			// change CSS margin
-			real_canvas.style.margin = Math.floor(margin/2) + 'px';
+			real_canvas.style.margin = Math.floor((margin - 1)/2) + 'px';
 
 			// redraw 
 			ctx = real_canvas.getContext("2d");

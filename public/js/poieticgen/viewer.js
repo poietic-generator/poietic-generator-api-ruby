@@ -289,6 +289,9 @@
 			height -= margin;
 
 			// make sure everything is a round value & multiple of counts 
+			// and fix margin
+			margin += (width % self.column_count);
+			
 			_real_canvas.width = width - (width % self.column_count);
 			_real_canvas.height = height - (height % self.line_count); 
 
@@ -303,7 +306,7 @@
 					[_column_size, _line_size]);
 
 			// change CSS margin
-			_real_canvas.style.margin = Math.floor(margin/2) + 'px';
+			_real_canvas.style.margin = Math.floor((margin - 1)/2) + 'px';
 
 			// console.log("viewer/update_size: column_size = " + _column_size);
 			ctx = _real_canvas.getContext("2d");
