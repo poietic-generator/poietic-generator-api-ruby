@@ -339,9 +339,12 @@
 			real_canvas.width = width - (width % self.column_count);
 			real_canvas.height = height - (height % self.line_count);
 
+			// add one, for the border
+			real_canvas.width += 1;
+			real_canvas.height += 1; 
+			
 			console.log("editor/update_size: real_canvas = " +
 					[real_canvas.width, real_canvas.height]);
-
 
 			// compute size, in pixels
 			_column_size = Math.floor(real_canvas.width / self.column_count);
