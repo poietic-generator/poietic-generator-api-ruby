@@ -78,7 +78,7 @@
 				return false;
 			}
 			document.location = $(this).attr("href") + "/" + session.user_token;
-			return true;
+			return false;
 		});
 
 		// initialize zones
