@@ -248,7 +248,7 @@
 				w : $(window).width(),
 				h : $(window).height()
 			};
-			margin = 0;
+			margin = 10;
 			//FXME: take margin in account
 			squaresize = Math.floor((win.h < win.w) ? win.h : win.w);
 
@@ -284,6 +284,10 @@
 				height = squaresize;
 			}
 
+			// take margin in account
+			width -= margin;
+			height -= margin;
+
 			// make sure everything is a round value & multiple of counts 
 			_real_canvas.width = width - (width % self.column_count);
 			_real_canvas.height = height - (height % self.line_count); 
@@ -297,6 +301,9 @@
 
 			console.log("viewer/update_size: _*_size = " + 
 					[_column_size, _line_size]);
+
+			// change CSS margin
+			_real_canvas.style.margin = Math.floor(margin/2) + 'px';
 
 			// console.log("viewer/update_size: column_size = " + _column_size);
 			ctx = _real_canvas.getContext("2d");

@@ -321,7 +321,7 @@
 				w: $(window).width(),
 				h : $(window).height()
 			};
-			margin = 15;
+			margin = 10;
 
 			squaresize = Math.floor((win.h < win.w) ? win.h : win.w);
 			console.log("editor/update_size: window.width = " + [ $(window).width(), $(window).height() ]);
@@ -330,10 +330,10 @@
 			if (squaresize > (win.h / 2)) {
 				squaresize = Math.floor(win.h / 2);
 			}
-			// then apply size
-			width = squaresize;
-			height = squaresize;
 
+			// then apply size and take margin in account
+			width = squaresize - margin;
+			height = squaresize - margin;
 
 			// make sure everything is a round value & multiple of counts 
 			real_canvas.width = width - (width % self.column_count);
@@ -355,6 +355,10 @@
 
 			self.grid_canvas = null;
 
+			// change CSS margin
+			real_canvas.style.margin = Math.floor(margin/2) + 'px';
+
+			// redraw 
 			ctx = real_canvas.getContext("2d");
 			ctx.fillStyle = '#000';
 			ctx.fillRect(0, 0, real_canvas.width, real_canvas.height);
