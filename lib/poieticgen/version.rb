@@ -22,7 +22,7 @@
 ##############################################################################
 
 module PoieticGen
-	VERSION = "0.6.1"
-	VERSION_NAME = "Chakeri"
+	VERSION = "0.7.0"
+	VERSION_NAME = "Pune"
 end
 
