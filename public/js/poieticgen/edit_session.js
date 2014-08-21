@@ -163,6 +163,20 @@
 			return null;
 		};
 
+		/* Change username for a given id */
+		this.set_user_name = function(id, name) {
+			var i;
+			if (id === this.user_id) {
+				this.user_name = name;
+				return;
+			}
+			for (i = 0; i < this.other_users.length; i += 1) {
+				if (id === this.other_users[i].id) {
+					this.other_users[i].name = name;
+				}
+			}
+			return;
+		};
 
 		/**
 		* Treat not ok Status (!STATUS_SUCCESS)
@@ -202,6 +216,7 @@
 
 			var strokes_updates = [],
 				messages_updates = [],
+				users_updates = [],
 				req,
 				i,
 				observers = _game.observers();
