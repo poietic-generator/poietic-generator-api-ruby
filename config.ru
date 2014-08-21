@@ -1,7 +1,4 @@
 
-require 'rubygems'
-require 'bundler/setup'
-
 require 'dm-core'
 require 'dm-validations'
 require 'dm-migrations'
@@ -12,11 +9,14 @@ require 'dm-constraints'
 require 'compass'
 require 'haml'
 require 'sass'
+require 'pp'
+require 'duration'
 
-$:.insert(0,".")
-require 'poieticgen/manager'
+#require 'pry'
+
+$:.insert(0,"lib")
+
+require 'poieticgen'
 require 'poieticgen/api'
-
-#use Rack::Session::Cookie
 
 run PoieticGen::Api

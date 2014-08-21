@@ -21,11 +21,13 @@
 /******************************************************************************/
 
 /*jslint browser: true, continue: true*/
-/*global $, jQuery, document, console, PoieticGen */
+/*global $, jQuery, document, console, PoieticGen, VIEW_SESSION_TYPE_REALTIME */
 
 (function (PoieticGen) {
 	// vim: set ts=4 sw=4 et:
 	"use strict";
+
+	var OVERLAY_USER_THRESHOLD=0;
 
 	function Overlay(p_options) {
 		//var console = { log: function() {} };
@@ -38,6 +40,7 @@
 			overlay_id,
 			overlay;
 
+
 		/**
 		* Constructor
 		*/
@@ -47,8 +50,8 @@
 
 			// set variables from options
 			session = p_options.session || undefined;
-			board = p_options.board || undefined;
-			overlay_id = p_options.overlay_id || undefined;
+			board = p_options.board || undefined;
+			overlay_id = p_options.overlay_id || undefined;
 			overlay = document.getElementById(overlay_id);
 
 			session.register(self);
@@ -65,7 +68,7 @@
 		* Resize canvas & various display elements
 		*/
 		this.update_visibility = function () {
-			var win, width, height, zones, zone_idx;
+			var win, width, height, zones, zone_idx, overlay_enabled;
 			zones = board.get_zone_list();
 
 			win = {
@@ -73,8 +76,15 @@
 				h : $(window).height()
 			};
 
-			// manage overlay visibility depending on user count
-			if (zones.length <= 1) {
+			// manage overlay visibility depending on :
+			// - user count  (no user => disable )
+			// - view type ( history=> disable)
+			overlay_enabled = (
+				(zones.length <= OVERLAY_USER_THRESHOLD) && 
+				(session.view_type() === PoieticGen.VIEW_SESSION_TYPE_REALTIME)
+			);
+
+			if (overlay_enabled) {
 				overlay.width = Math.floor(win.w);
 				overlay.height = Math.floor(win.h);
 				$(overlay).fadeIn('slow');
@@ -91,12 +101,11 @@
 		this.handle_event = function (ev) {
 			//var console = window.noconsole;
 
-
 			if ((ev.type === 'join') || (ev.type === 'leave')) {
+				console.log('Overlay event for ' + ev.type);
 				// FIXME: read/count number of users 
 				self.update_visibility();
 			}
-
 		};
 
 		// call constructor

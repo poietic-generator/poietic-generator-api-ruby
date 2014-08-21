@@ -1,0 +1,50 @@
+.poietic-page-draw {
+
+    .editor,
+    .viewer {
+		margin:0;
+		padding:0;
+		text-align:center;
+    }
+
+    #canvas-container {
+		// padding:0.4em;
+		background-color: #000;
+		line-height: 0; // Fixing child canvas height on Gecko
+    }
+
+	
+    /*
+	.ui-content { 
+		margin:0; padding: 0; 
+	}
+
+    .ui-grid-a { 
+		margin:0; padding: 0; 
+	}
+	*/
+
+    #session-editor { 
+		margin:0; padding: 0; 
+	}
+
+    #session-viewer { 
+		margin:0; padding: 0; 
+	}
+
+    #session-overlay { 
+		margin:0; padding: 0; 
+		display: none;
+		line-height: 0; // Fixing child canvas height on Gecko
+	}
+
+    #current_color {
+		border:1px solid #ffffff; 
+		margin-right: 0.5em;
+	}
+
+    .ui-li-count { 
+		right:10px; 
+	}
+}
+

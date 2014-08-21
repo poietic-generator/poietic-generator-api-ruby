@@ -102,6 +102,7 @@
 			//var zone = _board.get_zone(_current_zone);
 
 			self.context = _real_canvas.getContext('2d');
+			//self.context.setTransform(1,0,0,1,0.5,0.5);
 
 
 			$(window).resize(function () {
@@ -241,44 +242,75 @@
 		* Resize canvas & various display elements
 		*/
 		this.update_size = function () {
-			var win, margin, width, height, ctx, canvas, next, minsize;
+			var win, margin, width, height, ctx, canvas, next, squaresize;
 
 			win = {
-				w: $(window).width(),
+				w : $(window).width(),
 				h : $(window).height()
 			};
-			margin = 0;
-			minsize = (win.h < win.w) ? win.h : win.w;
+			margin = 10;
+			//FXME: take margin in account
+			squaresize = Math.floor((win.h < win.w) ? win.h : win.w);
+
+			console.log("viewer/update_size: window.width = " + [ $(window).width(), $(window).height() ]);
 
 			if (self.fullsize) {
-				width = minsize;
-				height = minsize;
+				// full screen viewer
+				console.log("viewer/update_size: fullscreen viewer");
+				
+				width = squaresize;
+				height = squaresize;
+				
 				canvas = $(_real_canvas);
 				// FIXME: set the slider as optional parameter of constructor 
-				next = canvas.parent().parent().next();
 
 				// Slider height
 				// FIXME: not generic
+				next = canvas.parent().parent().next();
 				if (next && next.is(':visible')) {
 					height -= next.height();
 					width -= next.height();
 				}
 			} else {
-				width = minsize / 2;
-				height = minsize / 2;
+				// normal viewer
+				console.log("viewer/update_size: normal viewer");
+					
+				// make sure both square fits the window vertically
+				if (squaresize > (win.h / 2)) {
+					squaresize = Math.floor(win.h / 2);
+				}
+				// then apply size
+				width = squaresize;
+				height = squaresize;
 			}
 
-			_real_canvas.width = Math.floor(width) - margin;
-			_real_canvas.height = Math.floor(height) - margin;
+			// take margin in account
+			width -= margin;
+			height -= margin;
 
-			console.log("viewer/update_size: window.width = " + [ $(window).width(), $(window).height() ]);
+			// make sure everything is a round value & multiple of counts 
+			// and fix margin
+			margin += (width % self.column_count);
+			
+			_real_canvas.width = width - (width % self.column_count);
+			_real_canvas.height = height - (height % self.line_count); 
 
-			// console.log("viewer/update_size: real_canvas.width = " + real_canvas.width);
-			_column_size = _real_canvas.width / self.column_count;
-			_line_size = _real_canvas.height / self.line_count;
+			console.log("viewer/update_size: real_canvas = " + 
+					[_real_canvas.width, _real_canvas.height]);
+
+			// compute size, in pixels
+			_column_size = Math.floor(_real_canvas.width / self.column_count);
+			_line_size = Math.floor(_real_canvas.height / self.line_count);
+
+			console.log("viewer/update_size: _*_size = " + 
+					[_column_size, _line_size]);
+
+			// change CSS margin
+			_real_canvas.style.margin = Math.floor((margin - 1)/2) + 'px';
 
 			// console.log("viewer/update_size: column_size = " + _column_size);
 			ctx = _real_canvas.getContext("2d");
+			//ctx.setTransform(1,0,0,1,0.5,0.5);
 			ctx.fillStyle = DEFAULT_CANVAS_BACKGROUND_COLOR;
 			ctx.fillRect(0, 0, _real_canvas.width, _real_canvas.height);
 		};

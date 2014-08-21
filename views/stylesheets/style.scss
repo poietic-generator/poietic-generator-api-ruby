@@ -1,14 +1,15 @@
 //@import 'compass/css3/box-sizing';
 
-@import 'common';
+//@import 'common';
 
-@import 'page_draw';
+@import 'page/draw';
 
-@import 'message';
+//@import 'message';
 
-@import 'page_index';
-@import 'page_view';
+@import 'page/index';
+@import 'page/session_list';
+@import 'page/view';
+
 //@import 'page_admin';
 
-@import 'jquery.mobile-1.0b1.min';
 @import 'colorjack';

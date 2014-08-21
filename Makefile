@@ -1,13 +1,27 @@
+build:
+	docker build -t glenux/poietic-generator .
 
+run: clean
+	docker run -d --name poieticgen_lampbox glenux/lampbox || \
+		docker start poieticgen_lampbox || \
+		true
+	docker run --rm \
+		--name poieticgen_app \
+		--link poieticgen_lampbox:db \
+		-v $$(pwd):/poieticgen \
+		-p 8000:8000 \
+		-i -t glenux/poietic-generator
 
-all:
+test: clean
+	docker run --name poieticgen_app \
+		--link poieticgen_lampbox:db \
+		-v $$(pwd):/poieticgen \
+		-p 8000:8000 \
+		-i -t glenux/poietic-generator /bin/bash
 
-headers:
-	find poieticgen -name '*.js' -or  -name '*.rb' |while read NAME ; do \
-		headache -c misc/headache.conf -h misc/header.txt $$NAME ; \
-	done
+clean:
+	docker rm -f poieticgen_app || true
 
-%.html: %.md
-	markdown $< > $@
+distclean:
+	docker rm -f poieticgen_lampbox || true
 
-doc: API.html Readme.html

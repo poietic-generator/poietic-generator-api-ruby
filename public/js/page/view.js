@@ -40,25 +40,23 @@
 		console.error("PoieticGen.Viewer is not defined !");
 	}
 
+	function history_page() {
+		slider.show();
+		session.restart();
+	}
 
-	// Set up interface buttons
+	function view_page() {
+		slider.hide();
+		session.current();
+	}
+
 	function setup_buttons() {
 		$("#view_start").bind("vclick", function (event) {
 			event.preventDefault();
-			$("#view_now").removeClass("ui-btn-active");
-			$(this).addClass("ui-btn-active");
-			slider.show();
-			session.restart();
-		});
-		$("#view_now").bind("vclick", function (event) {
-			event.preventDefault();
-			$("#view_start").removeClass("ui-btn-active");
-			$(this).addClass("ui-btn-active");
-			slider.hide();
-			session.current();
+			history_page();
 		});
 	}
-	
+
 	// Set up session elements
 	function setup_session() {
 		var $overlay = $('#session-overlay'),
@@ -87,7 +85,7 @@
 			}
 		}, slider);
 
-		slider.hide();
+		view_page();
 	}
 
 	// Load components on document ready

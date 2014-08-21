@@ -46,7 +46,7 @@
 				val : Math.floor(70 + Math.random() * 30)
 			});
 			_color_picker.el.style.display = "none";
-			$("#session-zone").live("pagehide", function (event) {
+			$("#session-zone").on("pagehide", function (event) {
 				self.hide();
 				$("#brush").removeClass("ui-btn-active");
 			});

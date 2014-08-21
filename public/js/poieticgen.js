@@ -28,6 +28,7 @@
 
 	var poieticgen = { };
 
+	// $.mobile.page.prototype.options.theme = "b";
 	window.PoieticGen = poieticgen;
 }(window, jQuery));
 
