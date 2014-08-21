@@ -140,7 +140,8 @@
 		this.handle_event = function (ev) {
 			console.log("chat/handle_event : " + JSON.stringify(ev));
 			switch (ev.type) {
-			case "join": // on both join and leave refresh users list
+			case "join": // on both join, rename, leave refresh users list
+			case "rename":
 			case "leave":
 				this.refresh_user_list();
 				break;
