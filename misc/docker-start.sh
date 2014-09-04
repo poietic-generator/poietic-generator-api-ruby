@@ -41,6 +41,14 @@ su - user -c "cd /home/user/poieticgen ;
 	bundle install --path /home/user/.bundle/ ;
 	bundle exec bin/poietic-cli create -n 'Default Session'"
 
+su - user -c "cd /home/user/poieticgen ;
+	bundle install --path /home/user/.bundle/ ;
+	bundle exec bin/poietic-cli create -n 'Test session A'"
+
+su - user -c "cd /home/user/poieticgen ;
+	bundle install --path /home/user/.bundle/ ;
+	bundle exec bin/poietic-cli create -n 'Test session B'"
+
 echo "Starting application"
 exec su - user -c 'cd /home/user/poieticgen ; bundle exec foreman start'
 
