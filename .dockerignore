@@ -1,5 +1,4 @@
 vendor/bundler
 tmp
-Gemfile.lock
 .bundle
 config/config.ini
