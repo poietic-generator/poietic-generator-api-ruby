@@ -22,7 +22,7 @@
 ##############################################################################
 
 module PoieticGen
-	VERSION = "0.7.0"
-	VERSION_NAME = "Pune"
+	VERSION = "0.8.0-dev"
+	VERSION_NAME = "Bangalore" # Bangalore for dev only
 end
 
