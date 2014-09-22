@@ -67,13 +67,15 @@ module PoieticGen
 		end
 
 		def live?
-			board = Board.first(:closed => false)
+			board = self.boards.first(:closed => false,
+							   :order => [:timestamp.desc])
 			return (not board.nil?)
 		end
 
 		# Get latest live board
 		def board
-			return Board.first(:closed => false)
+			return self.boards.first(:closed => false,
+							  :order => [:timestamp.desc])
 		end
 
 		# Get latest live board or create one
@@ -99,6 +101,7 @@ module PoieticGen
 		end
 
 		def live_users_count
+			STDERR.puts "counting live users for board #{self.id}/#{self.board.id}"
 			return (self.live? ? self.board.live_users_count : 0 )
 		end
 	end

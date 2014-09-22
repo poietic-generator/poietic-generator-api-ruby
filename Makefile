@@ -13,7 +13,8 @@ run: clean
 		-i -t glenux/poietic-generator
 
 test: clean
-	docker run --name poieticgen_app \
+	docker run --rm \
+		--name poieticgen_app \
 		--link poieticgen_lampbox:db \
 		-v $$(pwd):/poieticgen \
 		-p 8000:8000 \

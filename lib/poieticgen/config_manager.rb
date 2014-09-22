@@ -52,10 +52,16 @@ module PoieticGen
 		#
 		#
 		def self.parse_bool str, err_msg
-			case str.strip.downcase
-			when /^(yes|true)$/ then return true
-			when /^(no|false)$/ then return true
-			else raise BadFieldType, (err_msg + " must be [yes|true|no|false]")
+			STDERR.puts "parsing str [#{str}]"
+			case str
+			when FalseClass then return false
+			when TrueClass then return true
+			else
+				case str.to_s.strip.downcase
+				when /^(yes|true)$/ then return true
+				when /^(no|false)$/ then return true
+				else raise BadFieldType, (err_msg + " must be [yes|true|no|false]")
+				end
 			end
 		end
 
@@ -64,9 +70,14 @@ module PoieticGen
 		#
 		#
 		def self.parse_int str, err_msg
+			STDERR.puts "parsing str [#{str}] of #{str.class}"
 			case str
-			when /^(\d+)$/ then return $1.to_i
-			else raise BadFieldType, (err_msg + " must be an integer")
+			when Fixnum then return str
+			else
+				case str
+				when /^(\d+)$/ then return $1.to_i
+				else raise BadFieldType, (err_msg + " must be an integer")
+				end
 			end
 		end
 

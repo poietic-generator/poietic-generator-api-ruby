@@ -466,21 +466,17 @@ module PoieticGen
 				max_timestamp = -1
 
 				if req.view_mode == UpdateViewRequest::REAL_TIME_VIEW then
-					rdebug "REAL_TIME_VIEW"
-
-					rdebug "req.timeline_after = %d" % req.timeline_after
+					#rdebug "REAL_TIME_VIEW"
+					#rdebug "req.timeline_after = %d" % req.timeline_after
 				
 					timelines = board.timelines.all(
 						:id.gte => req.timeline_after
 					)
 					
 					srk_req = timelines.strokes
-
-					rdebug srk_req
-
+					#rdebug srk_req
 					evt_req = timelines.events
-
-					rdebug evt_req
+					#rdebug evt_req
 					
 					first_timeline = timelines.first(
 						:order => [ :id.asc ]
@@ -495,10 +491,9 @@ module PoieticGen
 					}
 
 				elsif req.view_mode == UpdateViewRequest::HISTORY_VIEW then
-					rdebug "HISTORY_VIEW"
-
-					rdebug "req.last_max_timestamp = %d, req.since = %d, req.duration = %d" %
-						[ req.last_max_timestamp, req.since, req.duration ]
+					#rdebug "HISTORY_VIEW"
+					# rdebug "req.last_max_timestamp = %d, req.since = %d, req.duration = %d" %
+					#	[ req.last_max_timestamp, req.since, req.duration ]
 					
 					end_session = if board.end_timestamp <= 0
 					              then Time.now.to_i - 1
@@ -523,7 +518,7 @@ module PoieticGen
 						)
 					end
 					
-					rdebug "timelines = ", timelines
+					# rdebug "timelines = ", timelines
 					
 					if not timelines.empty? then
 
@@ -531,11 +526,11 @@ module PoieticGen
 
 						strokes_collection = srk_req.map{ |s| s.to_hash (board.timestamp + req.since) }
 
-						rdebug "Strokes ", srk_req
+						# rdebug "Strokes ", srk_req
 
 						evt_req = timelines.events
 
-						rdebug "Events ", evt_req
+						# rdebug "Events ", evt_req
 
 						events_collection = evt_req.map{ |e| e.to_hash (board.timestamp + req.since) }
 
@@ -563,7 +558,7 @@ module PoieticGen
 				end
 			end
 
-			rdebug "returning : %s" % result.inspect
+			# rdebug "returning : %s" % result.inspect
 
 			return result
 		end
