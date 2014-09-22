@@ -40,6 +40,8 @@
 
 		VIEW_SESSION_TYPE_REALTIME = 0,
 		VIEW_SESSION_TYPE_HISTORY = 1,
+		
+		VIEW_SESSION_ID_LATEST = "latest",
 
 		DATE_INIT_REALTIME = -1,
 		DATE_INIT_HISTORY = 0;
@@ -62,7 +64,9 @@
 			_last_join_timestamp = 0,
 			_last_update_max_timestamp = -1,
 			_request_id = 0,
-			_session = "";
+			_session = "",
+			_handle_snapshot_success,
+			_handle_snapshot_error;
 
 		this.zone_column_count = null;
 		this.zone_line_count = null;
@@ -78,6 +82,79 @@
 
 		_get_current_time = function () {
 			return Math.floor((new Date()).getTime() / 1000);
+		};
+
+
+		/* AJAX response utilities */
+		_handle_snapshot_success = function (response) {
+			var i;
+
+			if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
+				self.treat_status_nok(response);
+				return;
+			}
+
+			// Ensure that this response is associated to the last join request
+			if (response.id !== _request_id) {
+				return;
+			}
+
+			console.log('view_session/join response : ' + JSON.stringify(response));
+			// FIXME: auto-set history if initial snapshot is empty
+			console.log(
+					"view_session/join_response : zone.length = " + 
+					response.zones.length
+					);
+
+
+			if (response.zones.length < 1) {
+				if ( _session === VIEW_SESSION_ID_LATEST ) {
+					console.log("view_session/join_response : latest session is not live ! Retry...");
+					_handle_snapshot_error();
+				} else if (_view_type === VIEW_SESSION_TYPE_REALTIME) 
+				{
+					console.log("view_session/join_response : session is not live ! Switch to history...");
+					_slider.show();
+					self.restart();
+					return; // trash answer and restart from history
+				}
+			}
+
+			this.zone_column_count = response.zone_column_count;
+			this.zone_line_count = response.zone_line_count;
+
+			_last_join_start_time = _get_current_time();
+			_last_join_timestamp = response.timestamp;
+
+			_current_timeline_id = response.timeline_id;
+			// console.log('view_session/join response mod : ' + JSON.stringify(this) );
+
+			_last_update_max_timestamp = response.timestamp;
+
+			self.other_zones = response.zones;
+
+
+			callback(self);
+
+			//console.log('view_session/join post-callback ! observers = ' + JSON.stringify( _game.observers() ));
+			// handle other zone events
+			for (i = 0; i < self.other_zones.length; i += 1) {
+				//console.log('view_session/join on zone ' + JSON.stringify(self.other_zones[i]));
+				self.dispatch_strokes(self.other_zones[i].content, 0);
+			}
+
+			if (_view_type === VIEW_SESSION_TYPE_HISTORY) {
+				_slider.set_range(0, response.date_range);
+			}
+
+			self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
+
+			console.log('view_session/join end');
+		};
+
+		_handle_snapshot_error = function (response) {
+			self.set_timer(self.join_view_session, 
+					VIEW_SESSION_JOIN_RETRY_INTERVAL);
 		};
 
 
@@ -133,67 +210,8 @@
 				dataType: "json",
 				type: 'GET',
 				context: self,
-				success: function (response) {
-					var i;
-
-					if (response.status === null || response.status[0] !== STATUS_SUCCESS) {
-						self.treat_status_nok(response);
-						return;
-					}
-
-					// Ensure that this response is associated to the last join request
-					if (response.id !== _request_id) {
-						return;
-					}
-
-					console.log('view_session/join response : ' + JSON.stringify(response));
-					// FIXME: auto-set history if initial snapshot is empty
-					console.log(
-						"view_session/join_response : zone.length = " + 
-						response.zones.length
-					);
-					if ((_view_type === VIEW_SESSION_TYPE_REALTIME) &&
-						(response.zones.length < 1)) 
-					{
-						_slider.show();
-						self.restart();
-						return; // trash answer and restart from history
-					}
-
-					this.zone_column_count = response.zone_column_count;
-					this.zone_line_count = response.zone_line_count;
-
-					_last_join_start_time = _get_current_time();
-					_last_join_timestamp = response.timestamp;
-
-					_current_timeline_id = response.timeline_id;
-					// console.log('view_session/join response mod : ' + JSON.stringify(this) );
-
-					_last_update_max_timestamp = response.timestamp;
-
-					self.other_zones = response.zones;
-
-
-					callback(self);
-
-					//console.log('view_session/join post-callback ! observers = ' + JSON.stringify( _game.observers() ));
-					// handle other zone events
-					for (i = 0; i < self.other_zones.length; i += 1) {
-						//console.log('view_session/join on zone ' + JSON.stringify(self.other_zones[i]));
-						self.dispatch_strokes(self.other_zones[i].content, 0);
-					}
-
-					if (_view_type === VIEW_SESSION_TYPE_HISTORY) {
-						_slider.set_range(0, response.date_range);
-					}
-
-					self.set_timer(self.update, VIEW_SESSION_UPDATE_INTERVAL);
-
-					console.log('view_session/join end');
-				},
-				error: function (response) {
-					self.set_timer(self.join_view_session, VIEW_SESSION_JOIN_RETRY_INTERVAL);
-				}
+				success: _handle_snapshot_success,
+				error: _handle_snapshot_error,
 			});
 		};
 
