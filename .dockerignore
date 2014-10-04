@@ -2,3 +2,4 @@ vendor/bundler
 tmp
 .bundle
 config/config.ini
+.git
