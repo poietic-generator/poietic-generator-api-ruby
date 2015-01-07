@@ -1,5 +1,7 @@
-vendor/bundler
+/vendor/bundle*
 tmp
+.sass-cache
 .bundle
 config/config.ini
-.git
+/.git
+log
