@@ -4,7 +4,7 @@ MAINTAINER Glenn Y. Rolland <glenux@glenux.net>
 # Install packages for building ruby
 RUN apt-get update
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get install -q -y ruby2.1 git ruby2.1-dev
+RUN apt-get install -q -y ruby2.1 git ruby2.1-dev build-essential
 RUN apt-get install -q -y make libmysqlclient-dev mysql-client
 
 RUN useradd -m user
