@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    poieticgen (0.7.0)
+    poieticgen (0.7.1)
       async_sinatra
       compass
       datamapper
@@ -30,7 +30,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (4.1.6)
+    activesupport (4.1.4)
       i18n (~> 0.6, >= 0.6.9)
       json (~> 1.7, >= 1.7.7)
       minitest (~> 5.1)
@@ -56,18 +56,10 @@ GEM
       timers (~> 1.1.0)
     chunky_png (1.3.1)
     coderay (1.1.0)
-    compass (1.0.1)
+    compass (0.12.6)
       chunky_png (~> 1.2)
-      compass-core (~> 1.0.1)
-      compass-import-once (~> 1.0.5)
-      rb-fsevent (>= 0.9.3)
-      rb-inotify (>= 0.9)
-      sass (>= 3.3.13, < 3.5)
-    compass-core (1.0.1)
-      multi_json (~> 1.0)
-      sass (>= 3.3.0, < 3.5)
-    compass-import-once (1.0.5)
-      sass (>= 3.2, < 3.5)
+      fssm (>= 0.2.7)
+      sass (~> 3.2.19)
     data_objects (0.10.14)
       addressable (~> 2.1)
     datamapper (1.2.0)
@@ -126,6 +118,7 @@ GEM
     foreman (0.74.0)
       dotenv (~> 0.11.1)
       thor (~> 0.19.1)
+    fssm (0.2.10)
     haml (4.1.0.beta.1)
       tilt
     highline (1.6.21)
@@ -146,7 +139,7 @@ GEM
       rb-fsevent (>= 0.9.3)
       rb-inotify (>= 0.9)
     method_source (0.8.2)
-    minitest (5.4.1)
+    minitest (5.4.0)
     multi_json (1.10.1)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
@@ -183,7 +176,7 @@ GEM
       sexp_processor (~> 4.1)
     rufus-scheduler (3.0.8)
       tzinfo
-    sass (3.4.4)
+    sass (3.2.19)
     sexp_processor (4.4.3)
     sinatra (1.4.5)
       rack (~> 1.4)
@@ -206,13 +199,13 @@ GEM
     thread_safe (0.3.4)
     tilt (1.4.1)
     timers (1.1.0)
-    tzinfo (1.2.2)
+    tzinfo (1.2.1)
       thread_safe (~> 0.1)
     unicorn (4.8.3)
       kgio (~> 2.6)
       rack
       raindrops (~> 0.7)
-    uuidtools (2.1.5)
+    uuidtools (2.1.4)
 
 PLATFORMS
   ruby
