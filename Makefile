@@ -12,13 +12,11 @@ run: clean
 		-p 8000:8000 \
 		-i -t glenux/poietic-generator
 
-test: clean
-	docker run --rm \
-		--name poieticgen_app \
-		--link poieticgen_lampbox:db \
-		-v $$(pwd):/poieticgen \
-		-p 8000:8000 \
-		-i -t glenux/poietic-generator /bin/bash
+test:
+	docker exec \
+		-i -t \
+		poieticgen_app \
+		/bin/bash
 
 clean:
 	docker rm -f poieticgen_app || true
