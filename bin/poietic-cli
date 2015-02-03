@@ -27,12 +27,12 @@ module PoieticGen
 				groups.each do |group|
 					group_name = group.canonical_name
 					group_openess = group.closed ? "closed" : "open"
-					group_users = 
-              			if group.live? and group.live_users_count > 0
+					group_users =
+              			if group.live? and (group.live_users_count > 0) then
                 			"%d users live!" % group.live_users_count
               			else
                 			"No user connected"
-			  			end
+			  			end 
 
 					puts "GROUP id %3d %20s - %s - %s - %s" % [ 
 						group.id, 
@@ -41,7 +41,6 @@ module PoieticGen
 						group_openess,
               			group_users	
 					]
-
 
 					board_filter = if options[:all] then {}
 							   	   else { closed: false }
@@ -92,7 +91,8 @@ module PoieticGen
 				configure
 				session = PoieticGen::Board.first(:id => id.to_i)
 				session.close
-				puts "FIXME: kill users and zones"
+				STDERR.puts "FIXME: kill users and zones"
+				exit 1
 			end
  
 			option :all, :type => :boolean, :aliases => :a
@@ -115,7 +115,8 @@ module PoieticGen
 				end
 			end
 
-			desc "shapshot ID OFFSET FILENAME [FACTOR]", "Dump snapshot in session ID at OFFSET and save it in FILENAME"
+			desc "shapshot ID OFFSET FILENAME [FACTOR]", 
+				"Dump snapshot in session ID at OFFSET and save it in FILENAME"
 			def snapshot id, offset, filename, factor=1
 				configure
 				board = PoieticGen::Board.first(:id => id.to_i)
@@ -127,7 +128,10 @@ module PoieticGen
 				end
 				
 				timestamp = board.timestamp + offset
-				end_timestamp = if board.closed then board.end_timestamp else Time.now.to_i end
+				end_timestamp = if board.closed then 
+									board.end_timestamp 
+								else Time.now.to_i 
+								end
 
 				if offset < 0 or timestamp > end_timestamp then
 					# FIXME: exitcode must return an error
@@ -139,7 +143,7 @@ module PoieticGen
 				zones = board.load_board(board.timestamp + offset)
 				width, height, diff_x, diff_y = board.max_size
 
-				_take_snap zones, filename, factor.to_i, width, height, diff_x, diff_y
+				_take_snap(zones, filename, factor.to_i, width, height, diff_x, diff_y)
 			end
 
 			desc "range ID", "Duration of session ID"
@@ -149,7 +153,9 @@ module PoieticGen
 
 				# FIXME: when not closed, remove ~30 seconds from finish
 				start = board.timestamp
-				finish = if board.closed then board.end_timestamp else Time.now.to_i end
+				finish = if board.closed then board.end_timestamp 
+						 else Time.now.to_i 
+						 end
 
 				puts "%d" % (finish - start)
 			end
@@ -174,7 +180,8 @@ module PoieticGen
 				:default => 1, 
 				:aliases => :f,
 				:desc => "Resolution factor for output images (integer)"
-			desc "sequence ID DIRECTORY", "Dump a sequence of snapshots in session ID between OFFSET_START and OFFSET_END with INTERVAL, and save it in DIRECTORY"
+			desc "sequence ID DIRECTORY", 
+				"Dump a sequence of snapshots in session ID between OFFSET_START and OFFSET_END with INTERVAL, and save it in DIRECTORY"
 			def sequence id, directory
 				configure
 				board = PoieticGen::Board.first(:id => id.to_i)
@@ -270,6 +277,10 @@ module PoieticGen
 				DataMapper.auto_upgrade!
 
 				$stdout = STDOUT # unmute STDOUT
+			rescue DataObjects::SQLError
+				$stdout = STDOUT # unmute STDOUT
+				STDERR.puts "ERROR: unable to connect to database. Please verify settings."
+				exit 1
 			end
 
 
