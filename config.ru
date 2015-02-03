@@ -1,4 +1,6 @@
 
+require 'active_support'
+
 require 'dm-core'
 require 'dm-validations'
 require 'dm-migrations'
