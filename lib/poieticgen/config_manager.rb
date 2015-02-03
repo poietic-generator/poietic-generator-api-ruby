@@ -52,7 +52,7 @@ module PoieticGen
 		#
 		#
 		def self.parse_bool str, err_msg
-			STDERR.puts "parsing str [#{str}]"
+			#STDERR.puts "parsing str [#{str}]"
 			case str
 			when FalseClass then return false
 			when TrueClass then return true
@@ -70,7 +70,7 @@ module PoieticGen
 		#
 		#
 		def self.parse_int str, err_msg
-			STDERR.puts "parsing str [#{str}] of #{str.class}"
+			#STDERR.puts "parsing str [#{str}] of #{str.class}"
 			case str
 			when Fixnum then return str
 			else
