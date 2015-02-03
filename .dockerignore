@@ -3,5 +3,4 @@ tmp
 .sass-cache
 .bundle
 config/config.ini
-.git
 log
