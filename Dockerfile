@@ -2,15 +2,15 @@ FROM debian:testing
 MAINTAINER Glenn Y. Rolland <glenux@glenux.net>
 
 # Install packages for building ruby
-RUN apt-get update
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get install -q -y ruby2.1 git ruby2.1-dev build-essential
-RUN apt-get install -q -y make libmysqlclient-dev mysql-client
+RUN apt-get update && \
+ 	apt-get install -q -y \
+		ruby ruby2.1 git ruby2.1-dev build-essential \
+ 		make libmysqlclient-dev mysql-client
 
 RUN useradd -m user
 RUN chown -R user:user /home/user
 RUN gem2.1 install bundler
-
 
 # TESTING
 RUN mkdir -p /home/user/.cache && cd /home/user/.cache && git init
