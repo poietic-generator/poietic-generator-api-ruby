@@ -63,13 +63,13 @@ Simply type the following command, from the project directory :
 Starting a new session
 ----------------------
 
-    bundle exec ./bin/poietic-cli create
+    bundle exec poietic-cli create
 
 Generating a video
 ------------------
 
-    bundle exec ./bin/poietic-cli sequence 10 tmp/vid1
-    bundle exec ./bin/poietic-cli video tmp/vid1 tmp/vid1.mp4 -outsize 640:-1
+    bundle exec poietic-cli sequence 10 tmp/vid1
+    bundle exec poietic-cli video tmp/vid1 tmp/vid1.mp4 -outsize 640:-1
 
 Contributing
 ------------
