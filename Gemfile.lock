@@ -221,6 +221,7 @@ DEPENDENCIES
   capistrano (~> 2.15)
   capistrano-ext
   html2haml
+  minitest
   poieticgen!
   pry
   rake
