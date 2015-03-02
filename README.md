@@ -1,8 +1,10 @@
 Poietic Generator
 =================
 
-Requirements
+Installation
 ------------
+
+### Requirements
 
 First, make sure you have a proper git, ruby & rubygems installation on your system.
 
@@ -15,8 +17,7 @@ Then checkout the sources from the public repository :
     git clone https://github.com/Gnuside/poietic-generator.git
 
 
-Installation
-------------
+### Setup
 
 We strongly recommand using a ruby environment wrapper like rbenv.
 
@@ -35,38 +36,34 @@ and all their dependencies :
     bundle install
 
 
-Configuration
--------------
+### Configuration
 
 Copy config/config.ini.example to config/config.ini then edit it to your needs.
 
 Depending on your choices, you may need to install a database system with `apache phpmyadmin mysql-server-5.5`
 
-
 Create a tmp directory locally. It will be use by the devel-script to run the service.
 
 
-Running
--------
-
-### Production mode
-
-FIXME: 
-
-
-### Development mode
+Running the server
+------------------
 
 Simply type the following command, from the project directory :
 
     bundle exec foreman start
 
-Starting a new session
+Command-line interface
 ----------------------
+
+### Listing sessions
+
+    bundle exec poietic-cli list
+
+### Starting a new session
 
     bundle exec poietic-cli create
 
-Generating a video
-------------------
+### Generating a video
 
     bundle exec poietic-cli sequence 10 tmp/vid1
     bundle exec poietic-cli video tmp/vid1 tmp/vid1.mp4 -outsize 640:-1
