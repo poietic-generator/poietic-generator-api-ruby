@@ -2,15 +2,33 @@
 
 require_relative 'spec_helper'
 
-#require 'timecost/cli'
-#
-#describe TimeCost::CLI do
-#	let(:cli) { TimeCost::CLI.new }
-#
-#	describe '.new' do
-#		it "can be created without arguments" do
-#			assert_instance_of TimeCost::CLI, cli
-#		end
-#	end
-#
-#end
+require 'poieticgen/cli'
+
+describe PoieticGen::cli do
+	let(:cli) { TimeCost::CLI.new }
+
+	describe '.list' do
+		it "can be called" do
+		end
+
+		it "accepts an argument" do
+		end
+
+		it "displays existing groups" do
+		end
+
+		it "displays existing open sessions in groups" do
+		end
+
+		it "option --all adds displays closed sessions in groups" do
+			# destroy all
+			# create group
+			# create session
+			# play in session
+			# leave
+			# create another session (keep alive?)
+			cli = PoieticGen::Cli.start(['list','--all'])
+		end
+	end
+
+end
