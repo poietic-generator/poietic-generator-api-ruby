@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # vim: set ts=2 sw=2 et:
 
 require 'oily_png'
