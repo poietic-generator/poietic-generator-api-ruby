@@ -1,4 +1,4 @@
-FROM debian:testing
+FROM debian:jessie
 MAINTAINER Glenn Y. Rolland <glenux@glenux.net>
 
 # Install packages for building ruby

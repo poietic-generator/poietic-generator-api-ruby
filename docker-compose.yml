@@ -1,0 +1,12 @@
+poieticapp:
+  build: .
+  links:
+    - "poieticdb:db"
+  ports:
+    - "8000:8000"
+poieticdb:
+  image: "glenux/lampbox"
+  ports:
+    - "8001:80"
+    - "3306:3306"
+
