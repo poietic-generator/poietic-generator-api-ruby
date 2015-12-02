@@ -80,4 +80,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "rufus-scheduler"
   spec.add_runtime_dependency "ruby-duration" #"~> 3.2.0" # forcing version fixes bug with active_support 4.x.x
   spec.add_runtime_dependency "backports", "~> 3.6.3" # forcing version fixes bug with ruby 2.1
+  spec.add_runtime_dependency "net-ssh", "< 3.0" # For Ruby 1.9
 end
