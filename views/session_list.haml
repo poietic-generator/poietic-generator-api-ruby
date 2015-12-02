@@ -10,12 +10,23 @@
         %li(data-role="list-divider")
           = group.canonical_name
         - group.boards.all(order: [:timestamp.desc]).each do |board|
+          :ruby
+            is_live = (board.end_timestamp <= 0)
+            is_solo = (board.total_users_count == 1)
+            duration = Duration.new(
+              Time.at(board.end_timestamp) - Time.at(board.timestamp)
+            )
+            is_short = duration.to_i < 500
+            # hide past solo short session
+            if not is_live and is_solo and is_short
+              next
+            end
           %li
             %a(data-ajax="false" href="/session/#{board.token}/view") 
               %h2
                 /= "Started on %s " % Time.at(board.timestamp).utc.strftime('%F %T')
                 = "Started on %s " % Time.at(board.timestamp).utc.strftime("%B %d, %Y at %H:%M")
-                - if board.end_timestamp > 0
+                - if is_live
                   :ruby
                     duration = Duration.new(
                       Time.at(board.end_timestamp) - Time.at(board.timestamp)
