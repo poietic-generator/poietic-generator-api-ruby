@@ -29,9 +29,15 @@ if [ "$mysql_db_count" -eq 0 ]; then
 	echo "FLUSH PRIVILEGES;" | $MYSQL
 fi
 
+#CPUPROFILE=/tmp/output.prof
+#CPUPROFILE_REALTIME=1
+#CPUPROFILE_FREQUENCY=1000
+#RUBYOPT="-r`gem which perftools | tail -1`"
 echo "Configuring application"
-#git clone /poieticgen /home/user/poieticgen
-echo "PORT=8000" > /home/user/poieticgen/.env
+cat > /home/user/poieticgen/.env <<MARK
+PORT=8000
+MARK 
+
 chown -R user:user /home/user/poieticgen/.env
 
 sed -e "s/^host =.*/host = ${DB_PORT_3306_TCP_ADDR}/" \
@@ -61,6 +67,4 @@ fi
 
 echo "Starting application"
 exec su - user -c 'cd /home/user/poieticgen ; bundle exec foreman start'
-
-#exec su - user -c '/bin/bash'
 
