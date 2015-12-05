@@ -22,7 +22,6 @@ module PoieticGen
 		include DataMapper::Resource
 
 		property :id,            Serial
-		#property :name,          String,  :unique => true, :required=> false
 		property :token,         String, :required => true, :unique => true
 		property :timestamp,     Integer, :required => true
 		property :end_timestamp, Integer, :default => 0
@@ -139,7 +138,8 @@ module PoieticGen
 		def leave user
 			Board.transaction do |t|
 				begin
-					zone = user.zone # FIXME: verify if the user is in the board
+					# FIXME: verify if the user is in the board
+					zone = user.zone 
 					unless zone.nil? then
 						zone.reset
 						zone.disable
@@ -147,7 +147,8 @@ module PoieticGen
 
 						Event.create_leave user, self
 					else
-						#FIXME: return an error to the user?
+						# return an error to the user?
+					  raise RuntimeError, "user zone is nil! WTF?"
 					end
 
 				rescue DataObjects::TransactionError => e
@@ -166,7 +167,6 @@ module PoieticGen
 			return if drawing.empty?
 		
 			# Update the zone
-
 			user.zone.apply drawing
 
 			Board.transaction do |t|
