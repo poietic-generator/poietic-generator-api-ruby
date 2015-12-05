@@ -14,24 +14,24 @@ module PoieticGen
 		property :id,	Serial
 
 		# the position, from center
-		property :index, Integer, :required => true
+		property :index, Integer, required: true
 
 		# position
-		property :position, Json, :required => true
-		# property :position, Csv, :required => true
+		property :position, Json, required: true
+		# property :position, Csv, required: true
 	
 		# size attributes
-		property :width, Integer, :required => true
-		property :height, Integer, :required => true
+		property :width, Integer, required: true
+		property :height, Integer, required: true
 		
-		property :data, Json, :required => true, :lazy => true
+		property :data, Json, required: true, lazy: true
 		#property :data, Object, :required => true
 
-		property :created_at, Integer, :required => true
-		property :expired_at, Integer, :required => true, :default => 0
-		property :expired, Boolean, :required => true, :default => false
+		property :created_at, Integer, required: true
+		property :expired_at, Integer, required: true, default: 0
+		property :expired, Boolean, required: true, default: false
 
-		property :is_snapshoted, Boolean, :default => false
+		property :is_snapshoted, Boolean, default: false
 
 	#	attr_reader :index, :position
 
@@ -58,14 +58,14 @@ module PoieticGen
 			# @debug = true
 
 			param_create = {
-				:index => index,
-				:position => position.map{|x| x.to_s},
-				:width => width,
-				:height => height,
-				:data => Array.new( width * height, '#000'),
-				:user => nil,
-				:created_at => Time.now.to_i,
-				:board => board
+				index: index,
+				position: position.map{|x| x.to_s},
+				width: width,
+				height: height,
+				data: Array.new( width * height, '#000'),
+				user: nil,
+				created_at: Time.now.to_i,
+				board: board
 			}
 			super param_create
 		end
@@ -166,15 +166,16 @@ module PoieticGen
 		end
 
 		def to_desc_hash type
+		  content = if type == DESCRIPTION_FULL
+                  then self.to_patches_hash
+                else [] 
+                end
 			res = {
-				:index => self.index,
-				:position => self.position,
-				:user => self.user.id,
-				:content => if type == DESCRIPTION_FULL
-                                            then self.to_patches_hash
-                                            else [] end
+				index: self.index,
+				position: self.position,
+				user: self.user.id,
+				content: content
 			}
-
 			return res
 		end
 
@@ -196,11 +197,11 @@ module PoieticGen
 			end
 			patches.each do |color, where|
 				patch = {
-					:id => nil,
-					:zone => self.index,
-					:color => color,
-					:changes => where,
-					:diffstamp => nil
+					id: nil,
+					zone: self.index,
+					color: color,
+					changes: where,
+					diffstamp: nil
 				}
 				result.push patch
 			end
@@ -214,11 +215,11 @@ module PoieticGen
 			Zone.transaction do |t|
 				begin
 					unless self.is_snapshoted then
-						self.update(:is_snapshoted => true)
+						self.update(is_snapshoted: true)
 
 						snap = ZoneSnapshot.create self, timeline
 					else
-						snap = self.zone_snapshots.first(:order => [ :timeline_id.desc ])
+						snap = self.zone_snapshots.first(order: [ :timeline_id.desc ])
 					end
 				rescue DataObjects::TransactionError => e
 					Transaction.handle_deadlock_exception e, t, "Zone.snapshot"
