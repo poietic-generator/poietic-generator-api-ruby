@@ -511,7 +511,7 @@
 			zones = _board.get_zone_list();
 
 			// reset boundaries first
-			_boundaries = { xmin: 0, xmax: 0, ymin: 0, ymax: 0, width: 0, height: 0 };
+			_boundaries = { xmin: 0, xmax: 0, ymin: 0, ymax: 0, width: 0, height: 0 };
 
 			for (zone_idx = 0; zone_idx < zones.length; zone_idx += 1) {
 				remote_zone = _board.get_zone(zones[zone_idx]);

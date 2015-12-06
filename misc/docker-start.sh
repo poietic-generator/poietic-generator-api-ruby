@@ -16,24 +16,28 @@ done
 
 set -xe
 
-echo "Configuring database and permissions"
-mysql_user_exist=$(echo "SELECT count(user) FROM mysql.user WHERE user = 'poieticgen';" | $MYSQL)
-if [ "$mysql_user_exist" -gt 0 ]; then
-	echo "DROP USER 'poieticgen'@'%';" | $MYSQL
+echo "Configuring database and permissions if none exist"
+mysql_user_count=$(echo "SELECT count(user) FROM mysql.user WHERE user = 'poieticgen';" | $MYSQL |tail -n1)
+if [ "$mysql_user_count" -eq 0 ]; then
+	echo "CREATE USER 'poieticgen'@'%' IDENTIFIED BY 'poieticgen';" | $MYSQL
 fi
-echo "CREATE USER 'poieticgen'@'%' IDENTIFIED BY 'poieticgen';" | $MYSQL
 
-mysql_db_exist=$(echo "SELECT count(SCHEMA_NAME) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'poieticgen';" | $MYSQL)
-if [ "$mysql_db_exist" -gt 0 ]; then
-	echo "DROP DATABASE poieticgen;" | $MYSQL
+mysql_db_count=$(echo "SELECT count(SCHEMA_NAME) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'poieticgen';" | $MYSQL |tail -n1)
+if [ "$mysql_db_count" -eq 0 ]; then
+	echo "CREATE DATABASE poieticgen;" | $MYSQL
+	echo "GRANT ALL ON poieticgen.* TO 'poieticgen'@'%';" | $MYSQL
+	echo "FLUSH PRIVILEGES;" | $MYSQL
 fi
-echo "CREATE DATABASE poieticgen;" | $MYSQL
-echo "GRANT ALL ON poieticgen.* TO 'poieticgen'@'%';" | $MYSQL
-echo "FLUSH PRIVILEGES;" | $MYSQL
 
+#CPUPROFILE=/tmp/output.prof
+#CPUPROFILE_REALTIME=1
+#CPUPROFILE_FREQUENCY=1000
+#RUBYOPT="-r`gem which perftools | tail -1`"
 echo "Configuring application"
-#git clone /poieticgen /home/user/poieticgen
-echo "PORT=8000" > /home/user/poieticgen/.env
+cat > /home/user/poieticgen/.env <<MARK
+PORT=8000
+MARK 
+
 chown -R user:user /home/user/poieticgen/.env
 
 sed -e "s/^host =.*/host = ${DB_PORT_3306_TCP_ADDR}/" \
@@ -46,20 +50,21 @@ sed -e "s/^host =.*/host = ${DB_PORT_3306_TCP_ADDR}/" \
 	< $SAMPLE \
 	> $CONFIG
 
-su - user -c "cd /home/user/poieticgen ; \
-	bundle install --path /home/user/.bundle/"
+# Create default sessions if database was new
+if [ "$mysql_db_count" -eq 0 ]; then
+	su - user -c "cd /home/user/poieticgen ; \
+		bundle install --path /home/user/.bundle/"
 
-su - user -c "cd /home/user/poieticgen ; \
-	bundle exec bin/poietic-cli create -n 'Default Session'"
+	su - user -c "cd /home/user/poieticgen ; \
+		bundle exec bin/poietic-cli create -n 'Default Session'"
 
-su - user -c "cd /home/user/poieticgen ;
+	su - user -c "cd /home/user/poieticgen ;
 	bundle exec bin/poietic-cli create -n 'Test session A'"
 
-su - user -c "cd /home/user/poieticgen ;
+	su - user -c "cd /home/user/poieticgen ;
 	bundle exec bin/poietic-cli create -n 'Test session B'"
+fi
 
 echo "Starting application"
 exec su - user -c 'cd /home/user/poieticgen ; bundle exec foreman start'
-
-#exec su - user -c '/bin/bash'
 

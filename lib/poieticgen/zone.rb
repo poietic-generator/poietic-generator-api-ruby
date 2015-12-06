@@ -14,26 +14,22 @@ module PoieticGen
 		property :id,	Serial
 
 		# the position, from center
-		property :index, Integer, :required => true
+		property :index, Integer, required: true
 
 		# position
-		property :position, Json, :required => true
-		# property :position, Csv, :required => true
+		property :position, Json, required: true, lazy: false
 	
 		# size attributes
-		property :width, Integer, :required => true
-		property :height, Integer, :required => true
+		property :width, Integer, required: true
+		property :height, Integer, required: true
 		
-		property :data, Json, :required => true, :lazy => true
-		#property :data, Object, :required => true
+		property :data, Json, required: true, lazy: false
 
-		property :created_at, Integer, :required => true
-		property :expired_at, Integer, :required => true, :default => 0
-		property :expired, Boolean, :required => true, :default => false
+		property :created_at, Integer, required: true
+		property :expired_at, Integer, required: true, default: 0
+		property :expired, Boolean, required: true, default: false
 
-		property :is_snapshoted, Boolean, :default => false
-
-	#	attr_reader :index, :position
+		property :is_snapshoted, Boolean, default: false
 
 		belongs_to :board
 		belongs_to :user
@@ -55,17 +51,15 @@ module PoieticGen
 		end
 
 		def initialize index, position, width, height, board
-			# @debug = true
-
 			param_create = {
-				:index => index,
-				:position => position.map{|x| x.to_s},
-				:width => width,
-				:height => height,
-				:data => Array.new( width * height, '#000'),
-				:user => nil,
-				:created_at => Time.now.to_i,
-				:board => board
+				index: index,
+				position: position.map{|x| x.to_s},
+				width: width,
+				height: height,
+				data: Array.new( width * height, '#000'),
+				user: nil,
+				created_at: Time.now.to_i,
+				board: board
 			}
 			super param_create
 		end
@@ -74,7 +68,7 @@ module PoieticGen
 			begin
 				super
 			rescue DataMapper::SaveFailureError => e
-				rdebug "Saving failure : %s" % e.resource.errors.inspect
+				STDERR.puts "Saving failure : %s" % e.resource.errors.inspect
 				raise e
 			end
 		end
@@ -88,6 +82,8 @@ module PoieticGen
 		end
 
 		def reset
+		  # binding.pry
+		  # self.attributes # call once to make sure lazy data are loaded
 			self.data = Array.new( width * height, '#000')
 		end
 
@@ -100,7 +96,7 @@ module PoieticGen
 			# save patch into database
 			return if drawing.nil? or drawing.empty?
 
-			rdebug drawing.inspect if drawing.length != 0
+			STDERR.puts drawing.inspect if drawing.length != 0
 
 			# Sort strokes by time
 			drawing = drawing.sort{ |a, b| a['diff'].to_i <=> b['diff'].to_i }
@@ -151,7 +147,7 @@ module PoieticGen
 		def apply_local drawing
 			return if drawing.nil? or drawing.empty?
 
-			rdebug drawing.inspect if drawing.length != 0
+			STDERR.puts drawing.inspect if drawing.length != 0
 
 			drawing.each do |patch|
 
@@ -166,15 +162,16 @@ module PoieticGen
 		end
 
 		def to_desc_hash type
+		  content = if type == DESCRIPTION_FULL
+                  then self.to_patches_hash
+                else [] 
+                end
 			res = {
-				:index => self.index,
-				:position => self.position,
-				:user => self.user.id,
-				:content => if type == DESCRIPTION_FULL
-                                            then self.to_patches_hash
-                                            else [] end
+				index: self.index,
+				position: self.position,
+				user: self.user.id,
+				content: content
 			}
-
 			return res
 		end
 
@@ -196,11 +193,11 @@ module PoieticGen
 			end
 			patches.each do |color, where|
 				patch = {
-					:id => nil,
-					:zone => self.index,
-					:color => color,
-					:changes => where,
-					:diffstamp => nil
+					id: nil,
+					zone: self.index,
+					color: color,
+					changes: where,
+					diffstamp: nil
 				}
 				result.push patch
 			end
@@ -214,11 +211,11 @@ module PoieticGen
 			Zone.transaction do |t|
 				begin
 					unless self.is_snapshoted then
-						self.update(:is_snapshoted => true)
+						self.update(is_snapshoted: true)
 
 						snap = ZoneSnapshot.create self, timeline
 					else
-						snap = self.zone_snapshots.first(:order => [ :timeline_id.desc ])
+						snap = self.zone_snapshots.first(order: [ :timeline_id.desc ])
 					end
 				rescue DataObjects::TransactionError => e
 					Transaction.handle_deadlock_exception e, t, "Zone.snapshot"

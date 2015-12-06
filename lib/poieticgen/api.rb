@@ -21,40 +21,30 @@ module PoieticGen
 
 	class Api < Sinatra::Base
 
-		STATUS_INFORMATION = 1
-		STATUS_SUCCESS = 2
-		STATUS_REDIRECTION = 3
+		STATUS_INFORMATION  = 1
+		STATUS_SUCCESS      = 2
+		STATUS_REDIRECTION  = 3
 		STATUS_SERVER_ERROR = 4
-		STATUS_BAD_REQUEST = 5
+		STATUS_BAD_REQUEST  = 5
 		
-		SESSION_MAX_LISTED_COUNT = 5
-
 		enable :run
-		#disable :run
 
 		helpers Sinatra::Cookies
 
-		#set :environment, :development
 		set :root, File.expand_path(File.join(File.dirname(__FILE__),'..','..'))
 		set :environment, :production
 
 		set :static, true
 		set :public_folder, 'public'
 		set :views, 'views'
-		set :protection, :except => :frame_options
+		set :protection, except: :frame_options
 
-		mime_type :ttf, "application/octet-stream"
-		mime_type :eot, "application/octet-stream"
-		mime_type :otf, "application/octet-stream"
-		mime_type :woff, "application/octet-stream"
+		mime_type :ttf, 'application/octet-stream'
+		mime_type :eot, 'application/octet-stream'
+		mime_type :otf, 'application/octet-stream'
+		mime_type :woff, 'application/octet-stream'
 
 		register Sinatra::Flash # FIXME: doesn't work
-
-		configure :development do |c|
-			require "sinatra/reloader"
-			register Sinatra::Reloader
-			#also_reload "poieticgen/**/*.rb"
-		end
 
 		configure do
 			# Enable assets management via compass
@@ -76,24 +66,23 @@ module PoieticGen
 				DataMapper::Logger.new(STDERR, :info)
 				#DataMapper::Logger.new(STDERR, :debug)
 				hash = config.database.get_hash
-				pp "db hash :", hash
 				DataMapper.setup(:default, hash)
 
 				# raise exception on save failure (globally across all models)
 				DataMapper::Model.raise_on_save_failure = true
 				DataMapper.auto_upgrade!
 				
-				manager = (PoieticGen::Manager.new config)
+				manager = PoieticGen::Manager.new(config)
 				set :manager, manager
 
 				scheduler = Rufus::Scheduler.new
- 				set :scheduler, scheduler
-  				scheduler.every('5s') do
+  			scheduler.every('5s') do
 					User.transaction do |t|
 						manager.check_expired_users
 						Board.check_expired_boards
 					end
-    			end
+    		end
+ 				set :scheduler, scheduler
 
 			rescue ::DataObjects::SQLError => e
 				STDERR.puts "ERROR: Unable to connect to database."
@@ -142,7 +131,6 @@ module PoieticGen
 
 		get '/' do
 			@page = Page.new "index"
-			
 			haml :index
 		end
 
@@ -200,7 +188,6 @@ module PoieticGen
 		post '/user/login' do 
 			begin
 				admin_token = settings.manager.admin_join params
-
 				redirect '/session/admin?admin_token=%s' % admin_token
 			
 			rescue PoieticGen::AdminSessionNeeded => e
@@ -215,7 +202,6 @@ module PoieticGen
 
 
 		get '/session/admin' do 
-
 			if params[:admin_token].nil? then
 				params[:admin_token] = cookies[:admin_token] # prevent session from being lost
 			end
@@ -266,11 +252,9 @@ module PoieticGen
 				result = settings.manager.join params
 
 			rescue PoieticGen::JoinRequestParseError => e
-				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
 
 			rescue PoieticGen::InvalidSession => e
-				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_REDIRECTION, "Session does not exist!", "/"]
 
 			rescue Exception => e

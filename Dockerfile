@@ -12,7 +12,7 @@ RUN useradd -m user
 RUN chown -R user:user /home/user
 RUN gem2.1 install bundler
 
-# TESTING
+# PRE-INSTALL DEPENDENCIES
 RUN mkdir -p /home/user/.cache && cd /home/user/.cache && git init
 ADD lib/poieticgen/version.rb /home/user/.cache/lib/poieticgen/version.rb
 ADD poieticgen.gemspec /home/user/.cache/poieticgen.gemspec
@@ -22,19 +22,12 @@ RUN chown -R user:user /home/user
 
 WORKDIR /home/user/.cache
 USER user
-RUN find .
 RUN bundle install --path /home/user/.bundle/
 
+# ADD REMAINING (MOST OF THE) CODE
 ADD . /home/user/poieticgen
 
-# WORKING
-#ADD . /home/user/poieticgen
-#RUN chown -R user:user /home/user
-#WORKDIR /home/user/poieticgen
-#USER user
-#RUN find .
-#RUN bundle install --path /home/user/.bundle/
-
+# START DOCKER
 USER root
 RUN chown -R user:user /home/user
 ADD misc/docker-start.sh /usr/local/sbin/start

@@ -288,8 +288,6 @@ module PoieticGen
       black = PoieticGen::CLI::Color.from_rgb(0, 0, 0)
       image = PoieticGen::CLI::Image.new width * factor, height * factor, black
 
-      #pp "board width=%d, height=%d, x=%d, y=%d" % [ width, height, diff_x, diff_y ]
-
       zones.each do |index, zone|
         zone_x, zone_y = zone.position
 
@@ -299,12 +297,6 @@ module PoieticGen
 
         # Reverse the y axis of zone for image output
         zone_y = height - zone_y - zone.height
-
-        #pp "board(width=%d, height=%d, diff_x=%d, diff_y=%d)" %
-        #  [ width, height, diff_x, diff_y ]
-        #pp "zone(index=%d, width=%d, height=%d, x=%d, y=%d)" %
-        #  [ index, zone.width, zone.height, zone_x, zone_y ]
-        #STDIN.gets
 
         (0..(zone.height * zone.width)-1).each do |i|
           image.draw_rect(
