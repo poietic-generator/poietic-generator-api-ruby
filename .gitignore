@@ -1,4 +1,5 @@
 profile.*
+.env
 Gemfile.lock
 config/config.ini
 .bundle
