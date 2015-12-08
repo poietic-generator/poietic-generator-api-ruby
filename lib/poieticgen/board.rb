@@ -275,7 +275,8 @@ module PoieticGen
 
 			# FIXME: store zone size in board
 			self.zones.each do |zone|
-				x, y = zone.position
+				x = zone.position_x
+				y = zone.position_y
 				x *= zone.width
 				y *= zone.height
 				min_left = x if x < min_left

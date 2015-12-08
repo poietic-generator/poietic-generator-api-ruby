@@ -289,7 +289,8 @@ module PoieticGen
       image = PoieticGen::CLI::Image.new width * factor, height * factor, black
 
       zones.each do |index, zone|
-        zone_x, zone_y = zone.position
+        zone_x = zone.position_x
+        zone_y = zone.position_y
 
         # Make zone position absolute (depends on the topleft of bounding box)
         zone_x = (zone_x * zone.width) - diff_x

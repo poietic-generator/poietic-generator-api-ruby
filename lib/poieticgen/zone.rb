@@ -17,7 +17,9 @@ module PoieticGen
 		property :index, Integer, required: true
 
 		# position
-		property :position, Json, required: true, lazy: false
+		# property :position, Json, required: true, lazy: true 
+		property :position_x, Integer, required: true
+		property :position_y, Integer, required: true
 	
 		# size attributes
 		property :width, Integer, required: true
@@ -41,11 +43,6 @@ module PoieticGen
 		#
 		# convert JSON strings to integers
 		#
-		def position
-			super.map{|x| x.to_i}
-		end
-
-
 		def color x, y
 			return self.data[_xy2idx(x,y)]
 		end
@@ -53,7 +50,8 @@ module PoieticGen
 		def initialize index, position, width, height, board
 			param_create = {
 				index: index,
-				position: position.map{|x| x.to_s},
+				position_x: position[0],
+				position_y: position[1],
 				width: width,
 				height: height,
 				data: Array.new( width * height, '#000'),
@@ -168,7 +166,7 @@ module PoieticGen
                 end
 			res = {
 				index: self.index,
-				position: self.position,
+				position: [self.position_x, self.position_y],
 				user: self.user.id,
 				content: content
 			}
