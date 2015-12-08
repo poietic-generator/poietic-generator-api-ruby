@@ -1,3 +1,4 @@
+profile.*
 Gemfile.lock
 config/config.ini
 .bundle
