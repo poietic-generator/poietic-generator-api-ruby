@@ -56,7 +56,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "unicorn"
   spec.add_runtime_dependency "sinatra" # :require => "sinatra/base"
-  spec.add_runtime_dependency "sinatra-reloader"
+  #spec.add_runtime_dependency "sinatra-reloader"
   spec.add_runtime_dependency "async_sinatra"
   spec.add_runtime_dependency "sinatra-flash"
   spec.add_runtime_dependency "thor"
@@ -64,7 +64,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "sass"
   spec.add_runtime_dependency "compass"
   spec.add_runtime_dependency "json"
-  spec.add_runtime_dependency "datamapper"
   spec.add_runtime_dependency "dm-migrations"
   spec.add_runtime_dependency "dm-transactions"
   spec.add_runtime_dependency "dm-mysql-adapter"
@@ -73,11 +72,11 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "dm-types"
   spec.add_runtime_dependency "inifile"
   spec.add_runtime_dependency "extlib"
-  spec.add_runtime_dependency "rdebug"
+ spec.add_runtime_dependency "rdebug"
  # spec.add_runtime_dependency "thin"
   spec.add_runtime_dependency "oily_png"
   spec.add_runtime_dependency "foreman"
   spec.add_runtime_dependency "rufus-scheduler"
-  spec.add_runtime_dependency "ruby-duration" #"~> 3.2.0" # forcing version fixes bug with active_support 4.x.x
-  spec.add_runtime_dependency "backports", "~> 3.6.3" # forcing version fixes bug with ruby 2.1
+  #spec.add_runtime_dependency "ruby-duration" #"~> 3.2.0" # forcing version fixes bug with active_support 4.x.x
+  #spec.add_runtime_dependency "backports", "~> 3.6.3" # forcing version fixes bug with ruby 2.1
 end
