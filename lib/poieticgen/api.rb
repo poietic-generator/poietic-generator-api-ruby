@@ -3,7 +3,6 @@
 require 'sinatra/base'
 require 'sinatra/cookies'
 require 'sinatra/flash'
-require 'rufus-scheduler'
 
 require 'poieticgen/version'
 require 'poieticgen/config_manager'
@@ -13,6 +12,7 @@ require 'poieticgen/manager'
 require 'rdebug/base'
 require 'json'
 require 'pp'
+require 'compass'
 
 
 module PoieticGen
@@ -48,7 +48,7 @@ module PoieticGen
 
 		configure do
 			# Enable assets management via compass
-			Compass.add_project_configuration(File.join(settings.root, 'config', 'compass.rb'))
+			::Compass.add_project_configuration(File.join(settings.root, 'config', 'compass.rb'))
 
 			begin
 				config = PoieticGen::ConfigManager.new(File.join(
@@ -75,14 +75,6 @@ module PoieticGen
 				manager = PoieticGen::Manager.new(config)
 				set :manager, manager
 
-				scheduler = Rufus::Scheduler.new
-  			scheduler.every('5s') do
-					User.transaction do |t|
-						manager.check_expired_users
-						Board.check_expired_boards
-					end
-    		end
- 				set :scheduler, scheduler
 
 			rescue ::DataObjects::SQLError => e
 				STDERR.puts "ERROR: Unable to connect to database."
@@ -296,7 +288,6 @@ module PoieticGen
 				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
 
 			rescue PoieticGen::InvalidSession => e
-				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_REDIRECTION, "Session has expired !", "/"]
 
 			rescue ArgumentError => e

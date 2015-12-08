@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+
+require 'poieticgen'
+require 'rufus-scheduler'
+
+module  PoieticGen ; class GarbageCollector
+  def initialize
+    $stdout = File.new '/dev/null', 'w' # mute STDOUT
+
+    @config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
+    DataMapper.finalize
+    DataMapper::Logger.new(STDERR, :info)
+    #DataMapper::Logger.new(STDERR, :debug)
+    hash = @config.database.get_hash
+    #pp "db hash :", hash
+    DataMapper.setup(:default, hash)
+
+    # raise exception on save failure (globally across all models)
+    DataMapper::Model.raise_on_save_failure = true
+
+    DataMapper.auto_upgrade!
+		@manager = PoieticGen::Manager.new(@config)
+
+    $stdout = STDOUT # unmute STDOUT
+  rescue DataObjects::SQLError
+    $stdout = STDOUT # unmute STDOUT
+    STDERR.puts "ERROR: unable to connect to database. Please verify settings."
+    exit 1
+  end
+
+  def exec
+    scheduler = Rufus::Scheduler.new
+    scheduler.every('5s') do
+	    User.transaction do |t|
+		    @manager.check_expired_users
+		    Board.check_expired_boards
+	    end
+    end
+
+    scheduler.join
+  end
+
+end ; end
+
+gc = PoieticGen::GarbageCollector.new
+gc.exec
+
+
