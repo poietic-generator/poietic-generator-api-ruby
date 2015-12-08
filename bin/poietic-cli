@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'poieticgen'
+require "poieticgen/cli"
 
 PoieticGen::Cli.start(ARGV)
 
