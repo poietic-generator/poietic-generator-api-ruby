@@ -56,6 +56,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "unicorn"
   spec.add_runtime_dependency "sinatra" # :require => "sinatra/base"
+  spec.add_runtime_dependency "sinatra-contrib" # :require => "sinatra/base"
   #spec.add_runtime_dependency "sinatra-reloader"
   spec.add_runtime_dependency "async_sinatra"
   spec.add_runtime_dependency "sinatra-flash"
@@ -69,6 +70,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "dm-mysql-adapter"
   spec.add_runtime_dependency "dm-aggregates"
   spec.add_runtime_dependency "dm-constraints"
+  spec.add_runtime_dependency "dm-validations"
   spec.add_runtime_dependency "dm-types"
   spec.add_runtime_dependency "inifile"
   spec.add_runtime_dependency "extlib"
