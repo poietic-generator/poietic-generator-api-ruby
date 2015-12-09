@@ -13,6 +13,7 @@ require 'rdebug/base'
 require 'json'
 require 'pp'
 require 'compass'
+require 'duration'
 
 
 module PoieticGen

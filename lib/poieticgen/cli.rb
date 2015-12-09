@@ -298,13 +298,14 @@ module PoieticGen
 
         # Reverse the y axis of zone for image output
         zone_y = height - zone_y - zone.height
+        zone_pixel_data = JSON.decode(zone.pixel_data)
 
         (0..(zone.height * zone.width)-1).each do |i|
           image.draw_rect(
             (zone_x + (i % zone.width)) * factor,
             (zone_y + (i / zone.width)) * factor,
             factor, factor,
-            (PoieticGen::CLI::Color.from_hex zone.data[i])
+            (PoieticGen::CLI::Color.from_hex zone_pixel_data[i])
           )
         end
       end

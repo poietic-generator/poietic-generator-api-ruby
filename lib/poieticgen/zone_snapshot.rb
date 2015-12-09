@@ -8,7 +8,7 @@ module PoieticGen
 		
 		property :id,	Serial
 		
-		property :data, Json, required: true, lazy: false
+		property :pixel_data, Text, required: true, lazy: false
 		
 		has n, :board_snapshots, through: Resource
 		belongs_to :timeline, key: true
@@ -18,9 +18,9 @@ module PoieticGen
 			# @debug = true
 			begin
 				super ({
-					:data => zone.data,
-					:zone => zone,
-					:timeline => timeline
+					pixel_data: zone.pixel_data,
+					zone: zone,
+					timeline: timeline
 				})
 			rescue DataMapper::SaveFailureError => e
 				rdebug "Saving failure : %s" % e.resource.errors.inspect

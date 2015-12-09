@@ -25,7 +25,8 @@ module PoieticGen
 		property :width, Integer, required: true
 		property :height, Integer, required: true
 		
-		property :data, Json, required: true, lazy: false
+		#property :data, Json, required: true, lazy: false
+		property :pixel_data, Text, required: true, lazy: false
 
 		property :created_at, Integer, required: true
 		property :expired_at, Integer, required: true, default: 0
@@ -43,9 +44,9 @@ module PoieticGen
 		#
 		# convert JSON strings to integers
 		#
-		def color x, y
-			return self.data[_xy2idx(x,y)]
-		end
+		# def color x, y
+		# 	return self.data[_xy2idx(x,y)]
+		# end
 
 		def initialize index, position, width, height, board
 			param_create = {
@@ -54,7 +55,7 @@ module PoieticGen
 				position_y: position[1],
 				width: width,
 				height: height,
-				data: Array.new( width * height, '#000'),
+				pixel_data: JSON.generate(Array.new( width * height, '#000')),
 				user: nil,
 				created_at: Time.now.to_i,
 				board: board
@@ -73,7 +74,7 @@ module PoieticGen
 		
 		def self.from_snapshot snapshot
 			zone = snapshot.zone
-			zone.data = snapshot.data
+			zone.pixel_data = snapshot.pixel_data
 			zone.expired = false
 			
 			return zone
@@ -82,7 +83,7 @@ module PoieticGen
 		def reset
 		  # binding.pry
 		  # self.attributes # call once to make sure lazy data are loaded
-			self.data = Array.new( width * height, '#000')
+			self.pixel_data = JSON.generate(Array.new( width * height, '#000'))
 		end
 
 		def disable
@@ -102,6 +103,7 @@ module PoieticGen
 			Zone.transaction do |t|
 				begin
 					ref = self.user.last_update_time
+					pixel_data = JSON.parse(self.pixel_data)
 
 					drawing.each do |patch|
 
@@ -117,12 +119,13 @@ module PoieticGen
 
 						changes.each do |x,y,t_offset|
 							idx = _xy2idx(x,y)
-							if idx >= 0 and idx < self.data.length then
-								self.data[idx] = color
+							if idx >= 0 and idx < pixel_data.length then
+								pixel_data[idx] = color
 							end
 						end
 					end
 
+          self.pixel_data = pixel_data
 					self.is_snapshoted = false
 
 					self.save
@@ -147,16 +150,18 @@ module PoieticGen
 
 			STDERR.puts drawing.inspect if drawing.length != 0
 
+      pixel_data = JSON.parse(self.pixel_data)
 			drawing.each do |patch|
-
 				color = patch.color
 				changes = JSON.parse(patch.changes)
 
 				changes.each do |x,y,t_offset|
 					idx = _xy2idx(x,y)
-					self.data[idx] = color
+					pixel_data[idx] = color
 				end
 			end
+			self.pixel_data = JSON.generate(pixel_data)
+
 		end
 
 		def to_desc_hash type
@@ -181,9 +186,10 @@ module PoieticGen
 			result = []
 			patches = {}
 
+      pixel_data = JSON.parse(self.pixel_data)
 			self.width.times do |w|
 				self.height.times do |h|
-					color = self.data[_xy2idx(w,h)]
+					color = pixel_data[_xy2idx(w,h)]
 					next if color.nil?
 					patches[color] = [] unless patches.include? color
 					patches[color].push [w,h,0]
