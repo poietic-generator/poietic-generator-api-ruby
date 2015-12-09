@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    poieticgen (0.8.0.pre.dev)
+    poieticgen (0.8.0.dev)
       async_sinatra
       compass
       dm-aggregates
@@ -15,6 +15,7 @@ PATH
       haml
       inifile
       json
+      net-ssh (< 3.0)
       oily_png
       rdebug
       rufus-scheduler
@@ -89,6 +90,7 @@ GEM
     method_source (0.8.2)
     minitest (5.8.3)
     multi_json (1.11.2)
+    net-ssh (2.9.2)
     oily_png (1.2.0)
       chunky_png (~> 1.3.1)
     pry (0.10.3)
@@ -137,4 +139,4 @@ DEPENDENCIES
   ruby-prof
 
 BUNDLED WITH
-   1.10.5
+   1.10.6
