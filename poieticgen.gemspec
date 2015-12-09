@@ -79,6 +79,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "oily_png"
   spec.add_runtime_dependency "foreman"
   spec.add_runtime_dependency "rufus-scheduler"
-  #spec.add_runtime_dependency "ruby-duration" #"~> 3.2.0" # forcing version fixes bug with active_support 4.x.x
+  spec.add_runtime_dependency "ruby-duration" #"~> 3.2.0" # forcing version fixes bug with active_support 4.x.x
   #spec.add_runtime_dependency "backports", "~> 3.6.3" # forcing version fixes bug with ruby 2.1
 end
