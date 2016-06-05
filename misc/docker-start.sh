@@ -4,11 +4,11 @@
 
 SAMPLE=/home/user/poieticgen/config/config.ini.example
 CONFIG=/home/user/poieticgen/config/config.ini
-MYSQL="mysql -h $DB_PORT_3306_TCP_ADDR -u root --raw --batch --silent"
+MYSQL="mysql -h $DB_PORT_3306_TCP_ADDR --user=root --password=poieticgen --raw --batch --silent"
 
 
-echo "Waiting for remote database on $DB_PORT_3306_TCP_ADDR"
 while true ; do
+	echo "Waiting for remote database on $DB_PORT_3306_TCP_ADDR"
 	sleep 1s
 	$MYSQL -e "exit"
 	if [ $? -eq 0 ]; then break; fi
@@ -34,10 +34,7 @@ fi
 #CPUPROFILE_FREQUENCY=1000
 #RUBYOPT="-r`gem which perftools | tail -1`"
 echo "Configuring application"
-cat > /home/user/poieticgen/.env <<MARK
-PORT=8000
-MARK 
-
+echo "PORT=8000" > /home/user/poieticgen/.env 
 chown -R user:user /home/user/poieticgen/.env
 
 sed -e "s/^host =.*/host = ${DB_PORT_3306_TCP_ADDR}/" \
@@ -50,11 +47,11 @@ sed -e "s/^host =.*/host = ${DB_PORT_3306_TCP_ADDR}/" \
 	< $SAMPLE \
 	> $CONFIG
 
+su - user -c "cd /home/user/poieticgen ; \
+	bundle install --path /home/user/.bundle/"
+
 # Create default sessions if database was new
 if [ "$mysql_db_count" -eq 0 ]; then
-	su - user -c "cd /home/user/poieticgen ; \
-		bundle install --path /home/user/.bundle/"
-
 	su - user -c "cd /home/user/poieticgen ; \
 		bundle exec bin/poietic-cli create -n 'Default Session'"
 

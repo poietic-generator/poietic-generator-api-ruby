@@ -69,6 +69,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "dm-mysql-adapter"
   spec.add_runtime_dependency "dm-aggregates"
   spec.add_runtime_dependency "dm-constraints"
+  spec.add_runtime_dependency "dm-validations"
   spec.add_runtime_dependency "dm-types"
   spec.add_runtime_dependency "inifile"
   spec.add_runtime_dependency "extlib"
