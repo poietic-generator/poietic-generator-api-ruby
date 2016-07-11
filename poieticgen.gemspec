@@ -73,6 +73,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "extlib"
   spec.add_runtime_dependency "oily_png"
   spec.add_runtime_dependency "foreman"
+  spec.add_runtime_dependency "rdebug"
   spec.add_runtime_dependency "rufus-scheduler"
   spec.add_runtime_dependency "activesupport", "~> 4.2.6"
 
