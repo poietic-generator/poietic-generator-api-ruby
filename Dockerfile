@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:8.5
 MAINTAINER Glenn Y. Rolland <glenux@glenux.net>
 
 # Install packages for building ruby
