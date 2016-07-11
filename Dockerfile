@@ -6,7 +6,12 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && \
  	apt-get install -q -y \
 		ruby ruby2.1 git ruby2.1-dev build-essential \
- 		make libmysqlclient-dev mysql-client
+ 		make libmysqlclient-dev mysql-client wget
+
+# Install packages for websockets
+RUN wget https://github.com/joewalnes/websocketd/releases/download/v0.2.12/websocketd-0.2.12_amd64.deb && \
+	dpkg -i *.deb && \
+	rm *.deb
 
 RUN useradd -m user
 RUN chown -R user:user /home/user
