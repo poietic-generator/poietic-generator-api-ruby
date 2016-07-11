@@ -56,7 +56,6 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "unicorn"
   spec.add_runtime_dependency "sinatra" # :require => "sinatra/base"
-  #spec.add_runtime_dependency "sinatra-reloader"
   spec.add_runtime_dependency "async_sinatra"
   spec.add_runtime_dependency "sinatra-flash"
   spec.add_runtime_dependency "thor"
@@ -73,8 +72,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "dm-types"
   spec.add_runtime_dependency "inifile"
   spec.add_runtime_dependency "extlib"
- spec.add_runtime_dependency "rdebug"
- # spec.add_runtime_dependency "thin"
   spec.add_runtime_dependency "oily_png"
   spec.add_runtime_dependency "foreman"
   spec.add_runtime_dependency "rufus-scheduler"
