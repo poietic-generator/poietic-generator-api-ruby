@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 require 'sinatra/base'
-require 'sinatra/cookies'
+require 'sinatra/contrib/all'
 require 'sinatra/flash'
 
 require 'poieticgen/version'
