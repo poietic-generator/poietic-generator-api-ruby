@@ -1,6 +1,5 @@
 
-require 'poieticgen/zone'
-require 'poieticgen/zone_snapshot'
+require 'poieticgen'
 
 module PoieticGen
 	

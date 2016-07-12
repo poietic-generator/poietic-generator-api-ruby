@@ -8,13 +8,18 @@ module PoieticGen
 
 		include DataMapper::Resource
 
-		property :id,	Serial
-		property :token, String, :required => true, :unique => true
+		# This constant is the one used to check the leaved user, and generate
+		# events. This check is made in the update_data method. It will be done
+		# at least every LEAVE_CHECK_TIME_MIN days at a user update_data request.
+		LEAVE_CHECK_TIMEOUT = 60
+
+		property :id,	Serial, index: true
+		property :token, String, :required => true, :unique => true, index: true
 		property :name,	String, :required => true
 		property :created_at, Integer, :required => true
-		property :alive_expires_at, Integer, :required => true
-		property :idle_expires_at, Integer, :required => true
-		property :did_expire, Boolean, :required => true, :default => false
+		property :alive_expires_at, Integer, :required => true, index: true
+		property :idle_expires_at, Integer, :required => true, index: true
+		property :did_expire, Boolean, :required => true, :default => false, index: true
 		property :last_update_time, Integer, :required => true
 		
 		belongs_to :board
@@ -79,6 +84,31 @@ module PoieticGen
 			else
 				return req_name
 			end
+		end
+
+		def self.check_expired_users
+			now = Time.now.to_i
+
+      User.transaction do 
+        last_check = 
+          Meta.first(name: 'user_gc_last') ||
+          Meta.create(name: 'user_gc_last', value: now.to_s) 
+
+			  # remove expired users that have not yet been declared as expired
+			  if (last_check.value.to_i + LEAVE_CHECK_TIMEOUT) < now then
+				  newly_expired_users = 
+				    User.all(did_expire: false,	:alive_expires_at.lte => now) + 
+				    User.all(did_expire: false,	:idle_expires_at.lte => now)
+
+				  newly_expired_users.each do |leaver|
+				    leaver.set_expired
+				    leaver.board.leave leaver
+				    leaver.save
+				  end
+				  last_check.value = now.to_s
+				  last_check.save
+			  end
+      end
 		end
 	end
 

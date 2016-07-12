@@ -1,17 +1,11 @@
 
-require 'dm-core'
-require 'dm-validations'
-require 'dm-types'
-require 'poieticgen/board'
-require 'poieticgen/user'
-require 'poieticgen/transaction'
+require 'poieticgen'
 
 module PoieticGen
-
 	class Zone
 		include DataMapper::Resource
 		
-		property :id,	Serial
+		property :id,	Serial, index: true
 
 		# the position, from center
 		property :index, Integer, required: true
@@ -96,48 +90,37 @@ module PoieticGen
 			# save patch into database
 			return if drawing.nil? or drawing.empty?
 
-			STDERR.puts drawing.inspect if drawing.length != 0
+			# STDERR.puts drawing.inspect if drawing.length != 0
 
 			# Sort strokes by time
 			drawing = drawing.sort{ |a, b| a['diff'].to_i <=> b['diff'].to_i }
 
-			Zone.transaction do |t|
-				begin
-					ref = self.user.last_update_time
+			ref = self.user.last_update_time
+     
+      # Then update zone
+			Zone.transaction do #NC:SMALL
+				drawing.each do |patch|
+					color = patch['color']
+					changes = patch['changes']
+					timestamp = patch['diff'].to_i + ref
 
-					drawing.each do |patch|
+		      # add stroke into database
+					Stroke.create_stroke color,
+						JSON.generate(changes).to_s,
+						timestamp,
+						self
 
-						color = patch['color']
-						changes = patch['changes']
-						timestamp = patch['diff'].to_i + ref
-
-						# add patch into database
-						Stroke.create_stroke color,
-							JSON.generate(changes).to_s,
-							timestamp,
-							self
-
-						changes.each do |x,y,t_offset|
-							idx = _xy2idx(x,y)
-							if idx >= 0 and idx < self.data.length then
-								self.data[idx] = color
-							end
+          # update local zone
+					changes.each do |x,y,t_offset|
+						idx = _xy2idx(x,y)
+						if idx >= 0 and idx < self.data.length then
+							self.data[idx] = color
 						end
 					end
-
-					self.is_snapshoted = false
-
-					self.save
-
-				rescue DataObjects::TransactionError => e
-					Transaction.handle_deadlock_exception e, t, "Zone.apply"
-					raise e
-
-				rescue Exception => e
-					pp "apply.Exception"
-					t.rollback
-					raise e
 				end
+
+				self.is_snapshoted = false
+				self.save
 			end
 		end
 		
@@ -209,22 +192,12 @@ module PoieticGen
 			snap = nil
 
 			Zone.transaction do |t|
-				begin
-					unless self.is_snapshoted then
-						self.update(is_snapshoted: true)
+				unless self.is_snapshoted then
+					self.update(is_snapshoted: true)
 
-						snap = ZoneSnapshot.create self, timeline
-					else
-						snap = self.zone_snapshots.first(order: [ :timeline_id.desc ])
-					end
-				rescue DataObjects::TransactionError => e
-					Transaction.handle_deadlock_exception e, t, "Zone.snapshot"
-					raise e
-
-				rescue Exception => e
-					pp "snapshot.Exception"
-					t.rollback
-					raise e
+					snap = ZoneSnapshot.create self, timeline
+				else
+					snap = self.zone_snapshots.first(order: [:timeline_id.desc])
 				end
 			end
 

@@ -1,19 +1,6 @@
 # -*- coding: utf-8 -*-
 
-require 'sinatra/base'
-require 'sinatra/contrib/all'
-require 'sinatra/flash'
-
-require 'poieticgen/version'
-require 'poieticgen/config_manager'
-require 'poieticgen/page'
-require 'poieticgen/manager'
-
-require 'rdebug/base'
-require 'json'
-require 'pp'
-require 'compass'
-
+require 'poieticgen'
 
 module PoieticGen
 
@@ -214,23 +201,19 @@ module PoieticGen
 
 		# List available session for joining
 		get '/group/join' do
-			BoardGroup.transaction do
-				@group_list = BoardGroup.all(
-					closed: false,
-					order: [:id.asc]
-				) || []
-			end
+			@group_list = BoardGroup.all(
+				closed: false,
+				order: [:id.asc]
+			) || []
 			@page = Page.new "session-group-list"
 			haml :"session_group_list"
 		end
 
 		get '/session/list' do
-			BoardGroup.transaction do
-				@group_list = BoardGroup.all(
-					closed: false,
-					order: [:id.asc]
-				) || []
-			end
+			@group_list = BoardGroup.all(
+				closed: false,
+				order: [:id.asc]
+			) || []
 			@page = Page.new "session-list"
 			haml :"session_list"
 		end

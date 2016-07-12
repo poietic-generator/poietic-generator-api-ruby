@@ -1,5 +1,5 @@
 
-require 'dm-core'
+require 'poieticgen'
 
 module PoieticGen
 
