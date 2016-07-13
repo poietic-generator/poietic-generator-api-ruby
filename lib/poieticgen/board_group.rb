@@ -16,6 +16,9 @@ module PoieticGen
 		has n, :boards
 
 
+    def current_board
+    end
+
 		def self.create config, name
 			res = super({
 				# FIXME: when the token already exists, SaveFailureError is raised
@@ -54,8 +57,10 @@ module PoieticGen
 
 		# Get latest live board
 		def board
-			return self.boards.first(:closed => false,
-							  :order => [:timestamp.desc])
+			return self.boards.first(
+			  :closed => false,
+				:order => [:timestamp.desc]
+			)
 		end
 
 		# Get latest live board or create one
@@ -81,7 +86,10 @@ module PoieticGen
 		end
 
 		def live_users_count
-			STDERR.puts "counting live users for board #{self.id}/#{self.board.id}"
+			STDERR.puts "counting live users for board %s/%s" % [ 
+			  self.id,
+			  (self.board ? self.board.id : '<none>')
+			]
 			return (self.live? ? self.board.live_users_count : 0 )
 		end
 	end

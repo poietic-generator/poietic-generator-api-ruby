@@ -8,7 +8,7 @@ module PoieticGen
 		
 		property :id,	Serial
 		
-		has n, :zone_snapshots, :through => Resource
+		has n, :zone_snapshots, through: Resource
 		belongs_to :timeline
 		belongs_to :board
 

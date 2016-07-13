@@ -5,7 +5,7 @@ module PoieticGen
 	class Zone
 		include DataMapper::Resource
 		
-		property :id,	Serial, index: true
+		property :id,	Serial
 
 		# the position, from center
 		property :index, Integer, required: true
@@ -19,9 +19,17 @@ module PoieticGen
 		
 		property :data, Json, required: true, lazy: false
 
-		property :created_at, Integer, required: true
-		property :expired_at, Integer, required: true, default: 0
-		property :expired, Boolean, required: true, default: false
+		property :created_at, Integer, 
+		  required: true
+
+		property :expired_at, Integer, 
+		  required: true, 
+		  default: 0
+
+		property :expired, Boolean, 
+		  required: true, 
+		  default: false,
+		  index: true
 
 		property :is_snapshoted, Boolean, default: false
 

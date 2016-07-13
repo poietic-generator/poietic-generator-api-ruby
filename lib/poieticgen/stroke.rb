@@ -1,17 +1,14 @@
 
-require 'poieticgen/zone'
-require 'poieticgen/timeline'
-
 module PoieticGen
 
 	class Stroke
 		include DataMapper::Resource
 
 		property :id,	Serial
-		property :color, String, :required => true
-		property :changes, Text, :required => true, :lazy => false
+		property :color, String, required: true
+		property :changes, Text, required: true, lazy: false
 		
-		belongs_to :timeline, :key => true
+		belongs_to :timeline, key: true
 		belongs_to :zone
 
 		def self.create_stroke color, changes, timestamp, zone

@@ -75,18 +75,14 @@ module PoieticGen
 					# update expiration time
 					user.idle_expires_at = now + @config.user.idle_timeout
 					user.alive_expires_at = now + @config.user.liveness_timeout
-					rdebug "Set expiring times at %s" % user.alive_expires_at.to_s
+					# STDERR.puts "Set expiring times at %s" % user.alive_expires_at.to_s
 
 					# reset name if requested
 					user.name = param_name
 					zone = user.zone
 				end
 
-				begin
-					user.save
-				rescue DataMapper::SaveFailureError => e
-					raise e
-				end
+				user.save
 
 				# get real users
 				users_db = board.users.all(

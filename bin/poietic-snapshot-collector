@@ -3,16 +3,14 @@
 require 'poieticgen'
 require 'rufus-scheduler'
 
-module  PoieticGen ; class GarbageCollector
+module  PoieticGen ; class SnapshotCollector
   def initialize
     $stdout = File.new '/dev/null', 'w' # mute STDOUT
 
     @config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
     DataMapper.finalize
     DataMapper::Logger.new(STDERR, :info)
-    #DataMapper::Logger.new(STDERR, :debug)
     hash = @config.database.get_hash
-    #pp "db hash :", hash
     DataMapper.setup(:default, hash)
 
     # raise exception on save failure (globally across all models)
@@ -29,12 +27,16 @@ module  PoieticGen ; class GarbageCollector
 
   def exec
     scheduler = Rufus::Scheduler.new
-    scheduler.every('15s') do
-      STDERR.puts "Cleaning expired users & boards !"
-	    User.transaction do
-		    User.check_expired_users
-		    Board.check_expired_boards
-	    end
+    scheduler.every('5s') do
+      STDERR.puts "Running snapshot collector !"
+		  groups = BoardGroup.all(closed: false, order: [:id.asc])
+		  groups.each do |group| 
+		    next unless group.live_users_count > 0 
+	      Board.transaction do
+		      board = group.boards.first(order: [:id.desc])
+		      board.snapshot
+	      end
+      end
     end
 
     scheduler.join
@@ -42,6 +44,6 @@ module  PoieticGen ; class GarbageCollector
 
 end ; end
 
-gc = PoieticGen::GarbageCollector.new
+gc = PoieticGen::SnapshotCollector.new
 gc.exec
 

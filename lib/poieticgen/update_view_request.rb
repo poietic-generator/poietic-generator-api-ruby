@@ -1,8 +1,8 @@
 
-require 'optparse'
+require 'poieticgen'
 
 module PoieticGen
-	class UpdateViewRequestParseError < OptionParser::ParseError ; end
+	class UpdateViewRequestParseError < Exception ; end 
 
 	class UpdateViewRequest
 

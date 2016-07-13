@@ -46,6 +46,7 @@ require 'poieticgen/allocation/random'
 
 require 'poieticgen/board'
 require 'poieticgen/board_group'
+require 'poieticgen/stroke'
 require 'poieticgen/config_manager'
 require 'poieticgen/page'
 require 'poieticgen/manager'

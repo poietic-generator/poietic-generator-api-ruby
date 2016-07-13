@@ -11,7 +11,7 @@ module PoieticGen
 	class Board
 		include DataMapper::Resource
 
-		property :id,            Serial
+		property :id,            Serial, index: true
 		property :token,         String, :required => true, :unique => true
 		property :timestamp,     Integer, :required => true
 		property :end_timestamp, Integer, :default => 0
@@ -47,7 +47,6 @@ module PoieticGen
 
 		def self.create config, group
 			res = super({
-				# FIXME: when the token already exists, SaveFailureError is raised
 				:token => (0...16).map{ ('a'..'z').to_a[rand(26)] }.join,
 				:timestamp => Time.now.to_i,
 				:board_group => group
@@ -73,24 +72,12 @@ module PoieticGen
 		end
 
 		def close
-			t = Board.transaction do #NC:SMALL
+			Board.transaction do #NC:SMALL
 				self.closed = true
 				self.end_timestamp = Time.now.to_i
 
 				self.save
 			end
-
-		rescue DataMapper::SaveFailureError => e
-			rdebug "Saving failure : %s" % e.resource.errors.inspect
-			raise e
-
-		rescue DataObjects::TransactionError => e
-			Transaction.handle_deadlock_exception e, t, "Board.close"
-			raise e
-
-		rescue Exception => e
-			t.rollback
-			raise e
 		end
 
 
@@ -107,9 +94,7 @@ module PoieticGen
 				zone.save
 			end
 
-			Event.transaction do #NC:SMALL
-			  Event.create_join user, self
-			end
+			Event.create_join user, self
 
 			return zone
 		end
@@ -122,36 +107,27 @@ module PoieticGen
 			Board.transaction do #NC:SMALL
 				# FIXME: verify if the user is in the board
 				zone = user.zone 
-				unless zone.nil? then
-					zone.reset
-					zone.disable
-					zone.save
-				else
-					# return an error to the user?
+				if zone.nil? then
 					raise RuntimeError, "user zone is nil! WTF?"
 				end
+				zone.reset
+				zone.disable
+				zone.save
 
-			  Event.create_leave user, self unless zone.nil?
+			  Event.create_leave user, self
 			end
 		end
 
 
-		def update_data user, drawing
-			return if drawing.empty?
-
-			# Update the zone
-			user.zone.apply drawing
-
+		# Save board content (all zones) as snapshots
+    def snapshot 
 			Board.transaction do |t| #NC:UNKNOWN
-				# Save board periodically
-				stroke_count = self.strokes_since_last_snapshot + drawing.size
 
-				if stroke_count > STROKE_COUNT_BETWEEN_QFRAMES then
-					stroke_count = 0
+				if self.strokes_since_last_snapshot > STROKE_COUNT_BETWEEN_QFRAMES then
+				  self.strokes_since_last_snapshot = 0
 					board_snap = BoardSnapshot.create self
 					alive_zones = self.zones.all(expired: false)
 
-					# FIXME: "zone.snapshot board_snap.timeline" can return nil?
 					alive_zones.each do |zone|
 						board_snap.zone_snapshots << (zone.snapshot board_snap.timeline)
 					end
@@ -159,8 +135,18 @@ module PoieticGen
 					board_snap.save
 				end
 
-				self.strokes_since_last_snapshot = stroke_count
 				self.save
+			end
+    end
+
+		def update_data user, drawing
+			return if drawing.empty?
+
+			# Update the zone
+			Board.transaction do 
+			  user.zone.apply drawing
+			  self.strokes_since_last_snapshot += drawing.size
+			  self.save
 			end
 		end
 
