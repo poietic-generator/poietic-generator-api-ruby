@@ -395,6 +395,10 @@ module PoieticGen
 
 			elsif req.view_mode == UpdateViewRequest::HISTORY_VIEW then
 			  User.transaction do #NC:SMALL
+          end_session = if board.end_timestamp <= 0
+                          then Time.now.to_i - 1
+                        else board.end_timestamp
+                        end
 				  # retrieve the total duration of the game
 				  date_range = end_session - board.timestamp
 
