@@ -30,8 +30,8 @@ module  PoieticGen ; class SnapshotCollector
     scheduler.every('5s') do
 		  groups = BoardGroup.all(closed: false, order: [:id.asc])
 		  groups.each do |group| 
-        STDERR.puts "Building board_group #{group.id} snapshots -- starting !"
 		    next unless group.live_users_count > 0 
+        STDERR.puts "Building board_group #{group.id} snapshots -- starting !"
 	      Board.transaction do
 		      board = group.boards.first(order: [:id.desc])
 		      board.snapshot
