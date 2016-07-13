@@ -86,10 +86,10 @@ module PoieticGen
 		end
 
 		def live_users_count
-			STDERR.puts "counting live users for board %s/%s" % [ 
-			  self.id,
-			  (self.board ? self.board.id : '<none>')
-			]
+			# STDERR.puts "counting live users for board %s/%s" % [ 
+			#   self.id,
+			#   (self.board ? self.board.id : '<none>')
+			# ]
 			return (self.live? ? self.board.live_users_count : 0 )
 		end
 	end
