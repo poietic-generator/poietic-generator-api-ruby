@@ -11,7 +11,7 @@ require 'rake/testtask'
 # Mark all defined tasks
 Rake::TaskManager.record_task_metadata = true
 
-# Import tasks from exteranal files
+# Import tasks from external files
 Dir.glob('tasks/*.rake').each { |r| import r }
 
 

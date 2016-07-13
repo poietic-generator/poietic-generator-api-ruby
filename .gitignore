@@ -9,3 +9,4 @@ log
 *~
 .ruby-version
 pkg
+.env

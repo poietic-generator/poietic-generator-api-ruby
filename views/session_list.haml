@@ -1,4 +1,5 @@
 - # vim: set ts=2 sw=2 et:
+- bcount = 0
 
 %div(data-fullscreen="true" data-role="page" class="ui-page poietic-page-#{@page.title}")
   %div(data-role="header" data-id="head")
@@ -9,8 +10,10 @@
       - @group_list.each do |group|
         %li(data-role="list-divider")
           = group.canonical_name
-        - group.boards.all(order: [:timestamp.desc]).each do |board|
+        - group.boards.all(order: [:timestamp.desc], limit: 1000).each do |board|
           :ruby
+            bcount += 1
+            next if bcount > 500
             is_live = (board.end_timestamp <= 0)
             is_solo = (board.total_users_count == 1)
             duration = Duration.new(
