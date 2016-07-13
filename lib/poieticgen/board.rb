@@ -1,15 +1,5 @@
 
-require 'poieticgen/update_request'
-require 'poieticgen/zone'
-require 'poieticgen/user'
-require 'poieticgen/timeline'
-require 'poieticgen/board_snapshot'
-require 'poieticgen/transaction'
-
-require 'poieticgen/allocation/spiral'
-require 'poieticgen/allocation/random'
-
-require 'monitor'
+require 'poieticgen'
 
 module PoieticGen
 
@@ -25,7 +15,7 @@ module PoieticGen
 		property :token,         String, :required => true, :unique => true
 		property :timestamp,     Integer, :required => true
 		property :end_timestamp, Integer, :default => 0
-		
+
 		property :closed,        Boolean, :default => false
 		property :strokes_since_last_snapshot, Integer, :default => 0
 
@@ -83,7 +73,7 @@ module PoieticGen
 		end
 
 		def close
-			t = Board.transaction do |t|
+			t = Board.transaction do #NC:SMALL
 				self.closed = true
 				self.end_timestamp = Time.now.to_i
 
@@ -109,25 +99,18 @@ module PoieticGen
 		#
 		def join user, config
 			zone = nil
-			Board.transaction do |t|
-				begin
-					allocator = ALLOCATORS[self.board_group.allocator_type].new config, self.zones
-					zone = allocator.allocate self
-					zone.user = user
-					user.zone = zone
-					zone.save
-
-					Event.create_join user, self
-
-				rescue DataObjects::TransactionError => e
-					Transaction.handle_deadlock_exception e, t, "Board.join"
-					raise e
-
-				rescue Exception => e
-					t.rollback
-					raise e
-				end
+			Board.transaction do #NC:SMALL
+				allocator = ALLOCATORS[self.board_group.allocator_type].new config, self.zones
+				zone = allocator.allocate self
+				zone.user = user
+				user.zone = zone
+				zone.save
 			end
+
+			Event.transaction do #NC:SMALL
+			  Event.create_join user, self
+			end
+
 			return zone
 		end
 
@@ -136,70 +119,48 @@ module PoieticGen
 		# disconnect user from the board
 		#
 		def leave user
-			Board.transaction do |t|
-				begin
-					# FIXME: verify if the user is in the board
-					zone = user.zone 
-					unless zone.nil? then
-						zone.reset
-						zone.disable
-						zone.save
-
-						Event.create_leave user, self
-					else
-						# return an error to the user?
-					  raise RuntimeError, "user zone is nil! WTF?"
-					end
-
-				rescue DataObjects::TransactionError => e
-					Transaction.handle_deadlock_exception e, t, "Board.leave"
-					raise e
-
-				rescue Exception => e
-					t.rollback
-					raise e
+			Board.transaction do #NC:SMALL
+				# FIXME: verify if the user is in the board
+				zone = user.zone 
+				unless zone.nil? then
+					zone.reset
+					zone.disable
+					zone.save
+				else
+					# return an error to the user?
+					raise RuntimeError, "user zone is nil! WTF?"
 				end
+
+			  Event.create_leave user, self unless zone.nil?
 			end
 		end
 
 
 		def update_data user, drawing
 			return if drawing.empty?
-		
+
 			# Update the zone
 			user.zone.apply drawing
 
-			Board.transaction do |t|
-				begin
-					# Save board periodically
+			Board.transaction do |t| #NC:UNKNOWN
+				# Save board periodically
+				stroke_count = self.strokes_since_last_snapshot + drawing.size
 
-					stroke_count = self.strokes_since_last_snapshot + drawing.size
+				if stroke_count > STROKE_COUNT_BETWEEN_QFRAMES then
+					stroke_count = 0
+					board_snap = BoardSnapshot.create self
+					alive_zones = self.zones.all(expired: false)
 
-					if stroke_count > STROKE_COUNT_BETWEEN_QFRAMES then
-						board_snap = BoardSnapshot.create self
-						alive_zones = self.zones.all(:expired => false)
-
-						# FIXME: "zone.snapshot board_snap.timeline" can return nil?
-						alive_zones.each do |zone|
-							board_snap.zone_snapshots << (zone.snapshot board_snap.timeline)
-						end
-
-						board_snap.save
-
-						stroke_count = 0
+					# FIXME: "zone.snapshot board_snap.timeline" can return nil?
+					alive_zones.each do |zone|
+						board_snap.zone_snapshots << (zone.snapshot board_snap.timeline)
 					end
 
-					self.strokes_since_last_snapshot = stroke_count
-					self.save
-
-				rescue DataObjects::TransactionError => e
-					Transaction.handle_deadlock_exception e, t, "Board.update_data"
-					raise TakeSnapshotError
-
-				rescue Exception => e
-					t.rollback
-					raise e
+					board_snap.save
 				end
+
+				self.strokes_since_last_snapshot = stroke_count
+				self.save
 			end
 		end
 
@@ -223,7 +184,7 @@ module PoieticGen
 					zones[zs.zone.index] = Zone.from_snapshot zs
 				end
 			end
-			
+
 			# get events since the snapshot
 			timelines = self.timelines.all(
 				:id.gt => snap_timeline,
@@ -240,7 +201,7 @@ module PoieticGen
 			timelines.events.each do |event|
 				user = event.user
 				zone = user.zone
-				
+
 				if event.type == "join" then
 					zone.reset
 					zone.expired = false
@@ -262,7 +223,7 @@ module PoieticGen
 			zones.each do |index,zone|
 				zone.apply_local strokes.select{ |s| s.zone.id == zone.id }
 			end
-			
+
 			return zones
 		end
 
@@ -305,7 +266,7 @@ module PoieticGen
 				:timestamp.lte => timestamp,
 				:order => [ :id.desc ]
 			)
-			
+
 			if timeline.nil? then
 				return nil
 			end

@@ -19,7 +19,6 @@ module  PoieticGen ; class GarbageCollector
     DataMapper::Model.raise_on_save_failure = true
 
     DataMapper.auto_upgrade!
-		@manager = PoieticGen::Manager.new(@config)
 
     $stdout = STDOUT # unmute STDOUT
   rescue DataObjects::SQLError
@@ -30,9 +29,10 @@ module  PoieticGen ; class GarbageCollector
 
   def exec
     scheduler = Rufus::Scheduler.new
-    scheduler.every('5s') do
-	    User.transaction do |t|
-		    @manager.check_expired_users
+    scheduler.every('15s') do
+      STDOUT.puts "Cleaning users & boards !"
+	    User.transaction do
+		    User.check_expired_users
 		    Board.check_expired_boards
 	    end
     end
@@ -44,5 +44,4 @@ end ; end
 
 gc = PoieticGen::GarbageCollector.new
 gc.exec
-
 

@@ -1,6 +1,6 @@
 # vim: set ts=2 sw=2 et:
 
-require 'oily_png'
+require 'poieticgen'
 
 module PoieticGen
 	# Image interface

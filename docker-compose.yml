@@ -1,12 +1,27 @@
+poieticdb:
+  image: "mysql:5.6"
+  ports:
+    - "3306:3306"
+  environment:
+    - MYSQL_USERNAME=root
+    - MYSQL_ROOT_PASSWORD=poieticgen
+
 poieticapp:
   build: .
   links:
     - "poieticdb:db"
   ports:
     - "8000:8000"
-poieticdb:
-  image: "glenux/lampbox"
-  ports:
-    - "8001:80"
-    - "3306:3306"
+  environment:
+    - MYSQL_USERNAME=root
+    - MYSQL_PASSWORD=poieticgen
 
+poieticphpadm:
+  image: "phpmyadmin/phpmyadmin"
+  links:
+    - "poieticdb:db"
+  ports:
+    - "8002:80"
+  environment:
+    - MYSQL_USERNAME=root
+    - MYSQL_PASSWORD=poieticgen

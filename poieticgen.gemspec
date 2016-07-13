@@ -47,8 +47,6 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = '>= 1.9.1'
   spec.add_development_dependency "bundler", "~> 1.5"
   spec.add_development_dependency "rake"
-  #spec.add_development_dependency "html2haml"
-  #spec.add_development_dependency "rerun"
   spec.add_development_dependency "pry"
   spec.add_development_dependency "rb-readline"
   spec.add_development_dependency "ruby-prof"
@@ -56,9 +54,9 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "unicorn"
   spec.add_runtime_dependency "sinatra" # :require => "sinatra/base"
-  #spec.add_runtime_dependency "sinatra-reloader"
-  spec.add_runtime_dependency "async_sinatra"
+  spec.add_runtime_dependency "sinatra-contrib" # :require => "sinatra/cookies"
   spec.add_runtime_dependency "sinatra-flash"
+  spec.add_runtime_dependency "async_sinatra"
   spec.add_runtime_dependency "thor"
   spec.add_runtime_dependency "haml"
   spec.add_runtime_dependency "sass"
@@ -69,14 +67,16 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "dm-mysql-adapter"
   spec.add_runtime_dependency "dm-aggregates"
   spec.add_runtime_dependency "dm-constraints"
+  spec.add_runtime_dependency "dm-validations"
   spec.add_runtime_dependency "dm-types"
   spec.add_runtime_dependency "inifile"
   spec.add_runtime_dependency "extlib"
- spec.add_runtime_dependency "rdebug"
- # spec.add_runtime_dependency "thin"
   spec.add_runtime_dependency "oily_png"
   spec.add_runtime_dependency "foreman"
+  spec.add_runtime_dependency "rdebug"
   spec.add_runtime_dependency "rufus-scheduler"
+  spec.add_runtime_dependency "activesupport", "~> 4.2.6"
+
   spec.add_runtime_dependency "ruby-duration" #"~> 3.2.0" # forcing version fixes bug with active_support 4.x.x
   spec.add_runtime_dependency "backports", "~> 3.6.3" # forcing version fixes bug with ruby 2.1
   spec.add_runtime_dependency "net-ssh", "< 3.0" # For Ruby 1.9

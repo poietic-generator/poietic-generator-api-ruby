@@ -1,17 +1,6 @@
 # vim: set ts=2 sw=2 et:
 
-require 'dm-core'
-require 'dm-validations'
-require 'dm-migrations'
-require 'dm-transactions'
-require 'dm-constraints'
-require 'dm-types'
-require 'data_objects'
-require 'thor'
-require 'rdebug/base'
-require 'pp'
-
-require 'poieticgen/image'
+require 'poieticgen'
 
 module PoieticGen
   class Cli < Thor

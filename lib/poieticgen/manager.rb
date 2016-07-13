@@ -29,15 +29,9 @@ module PoieticGen
 	#
 	class Manager
 
-		# This constant is the one used to check the leaved user, and generate
-		# events. This check is made in the update_data method. It will be done
-		# at least every LEAVE_CHECK_TIME_MIN days at a user update_data request.
-		LEAVE_CHECK_TIME_MIN = 1
-
 		def initialize config
 			@config = config
 			@chat = PoieticGen::ChatManager.new @config.chat
-			@last_leave_check_time = Time.now.to_i - LEAVE_CHECK_TIME_MIN
 		end
 
 
@@ -66,9 +60,6 @@ module PoieticGen
 			param_name = User.canonical_username req.user_name
 
 			User.transaction do |t| begin
-				# clean-up users first
-				self.check_expired_users
-
 				group = BoardGroup.from_token req.session_token
 				raise InvalidSession, "Invalid session" if group.nil?
 
@@ -160,17 +151,19 @@ module PoieticGen
 
 
 		def leave user_token, session_token
-			user = User.first(token: user_token)
+		  User.transaction do #NC:SMALL
+			  user = User.first(token: user_token)
 
-			unless user.nil? then
-				board = user.board
+			  unless user.nil? then
+				  board = user.board
 
-				user.set_expired
-				# create leave event if session is the current one
-				board.leave user
-				user.save
-			else
-				raise InvalidSession, "Cannont find any user for this request (user_token=%s)" % user_token
+				  user.set_expired
+				  # create leave event if session is the current one
+				  board.leave user
+				  user.save
+			  else
+				  raise InvalidSession, "Cannont find any user for this request (user_token=%s)" % user_token
+			  end
 			end
 		end
 
@@ -210,8 +203,6 @@ module PoieticGen
 			now = Time.now.to_i
 
 			User.transaction do |t| begin
-				self.check_expired_users
-
 				user = User.first(token: req.user_token)
 				if user.nil? or user.expired? then
 					raise InvalidSession, "Session has expired!"
@@ -284,7 +275,6 @@ module PoieticGen
 			result = {}
 
 			User.transaction do |t| begin
-				self.check_expired_users
 
         # test if session_token is defined
         # pp req.session_token
@@ -371,93 +361,81 @@ module PoieticGen
 		def update_view params
 			req = UpdateViewRequest.parse params
 			result = {}
+		  strokes_collection = []
+			events_collection = []
+			timestamp = 0
+			max_timestamp = -1
+			date_range = 0
 
-			User.transaction do |t| begin
-				self.check_expired_users
+      # test if session_token is defined
+			board = Board.from_token req.session_token
+			raise InvalidSession, "Invalid session" if board.nil?
 
-        # test if session_token is defined
-				board = Board.from_token req.session_token
-				raise InvalidSession, "Invalid session" if board.nil?
+			if req.view_mode == UpdateViewRequest::REAL_TIME_VIEW then
+			  User.transaction do #NC:SMALL
+			    # Get events and strokes between req.timeline_after and req.duration
+				  timelines = board.timelines.all(:id.gte => req.timeline_after)
 
-				# Get events and strokes between req.timeline_after and req.duration
+				  srk_req = timelines.strokes
+				  evt_req = timelines.events
 
-				strokes_collection = []
-				events_collection = []
-				timestamp = 0
-				max_timestamp = -1
+				  # Use the first element as a temporal reference
+				  first_timeline = timelines.first(order: [:id.asc])
 
-				if req.view_mode == UpdateViewRequest::REAL_TIME_VIEW then
-					timelines = board.timelines.all(
-						:id.gte => req.timeline_after
-					)
-					
-					srk_req = timelines.strokes
-					evt_req = timelines.events
-					
-					first_timeline = timelines.first(order: [ :id.asc ])
-				
-					strokes_collection = srk_req.map{ |s|
-						s.to_hash first_timeline.timestamp
-					}
-					
-					events_collection = evt_req.map{ |e|
-						e.to_hash first_timeline.timestamp
-					}
+          if first_timeline then
+				    strokes_collection = srk_req.map do |s|
+					    s.to_hash first_timeline.timestamp
+				    end
 
-				elsif req.view_mode == UpdateViewRequest::HISTORY_VIEW then
-					end_session = if board.end_timestamp <= 0
-					              then Time.now.to_i - 1
-					              else board.end_timestamp
-					              end
-					# retrieve the total duration of the game
-					date_range = end_session - board.timestamp
+				    events_collection = evt_req.map do |e|
+					    e.to_hash first_timeline.timestamp
+				    end
+				  end
+			  end
 
-					session_timelines = board.timelines
-					
-					if req.last_max_timestamp > 0 then
-						max_timestamp = req.last_max_timestamp + req.duration * 2
-						# Events between the requested timestamp and (timestamp + duration)
-						timelines = session_timelines.all(
-							:timestamp.gt => board.timestamp + req.last_max_timestamp,
-							:timestamp.lte => board.timestamp + max_timestamp
-						)
-					else
-						max_timestamp = req.duration * 2
-						timelines = session_timelines.all(
-							:timestamp.lte => board.timestamp + max_timestamp
-						)
-					end
-					
-					if not timelines.empty? then
-						srk_req = timelines.strokes
-						strokes_collection = srk_req.map{ |s| s.to_hash (board.timestamp + req.since) }
+			elsif req.view_mode == UpdateViewRequest::HISTORY_VIEW then
+			  User.transaction do #NC:SMALL
+				  # retrieve the total duration of the game
+				  date_range = end_session - board.timestamp
 
-						evt_req = timelines.events
-						events_collection = evt_req.map{ |e| e.to_hash (board.timestamp + req.since) }
+				  session_timelines = board.timelines
 
-						timestamp = timelines.first.timestamp - board.timestamp
-					end
-				else
-					raise RuntimeError, "Unknown view mode %d" % req.view_mode
+				  if req.last_max_timestamp > 0 then
+					  max_timestamp = req.last_max_timestamp + req.duration * 2
+					  # Events between the requested timestamp and (timestamp + duration)
+					  timelines = session_timelines.all(
+						  :timestamp.gt => board.timestamp + req.last_max_timestamp,
+						  :timestamp.lte => board.timestamp + max_timestamp
+					  )
+				  else
+					  max_timestamp = req.duration * 2
+					  timelines = session_timelines.all(
+						  :timestamp.lte => board.timestamp + max_timestamp
+					  )
+				  end
+
+				  if not timelines.empty? then
+					  srk_req = timelines.strokes
+					  strokes_collection = srk_req.map{ |s| s.to_hash (board.timestamp + req.since) }
+
+					  evt_req = timelines.events
+					  events_collection = evt_req.map{ |e| e.to_hash (board.timestamp + req.since) }
+
+					  timestamp = timelines.first.timestamp - board.timestamp
+				  end
 				end
-
-				result = {
-					events: events_collection,
-					strokes: strokes_collection,
-					timestamp: timestamp, # relative to the start of the game session
-					max_timestamp: max_timestamp,
-					date_range: date_range, # total time of session
-					id: req.id,
-				}
-
-				rescue DataObjects::TransactionError => e
-					Transaction.handle_deadlock_exception e, t, 'Manager.update_data'
-
-				rescue Exception => e
-					t.rollback
-					raise e
-				end
+			else
+				raise RuntimeError, "Unknown view mode %d" % req.view_mode
 			end
+
+			result = {
+				events: events_collection,
+				strokes: strokes_collection,
+				timestamp: timestamp, # relative to the start of the game session
+				max_timestamp: max_timestamp,
+				date_range: date_range, # total time of session
+				id: req.id,
+			}
 			return result
 		end
 
@@ -465,20 +443,5 @@ module PoieticGen
 		#
 		#
 		#
-		def check_expired_users
-			now = Time.now.to_i
-
-			# remove expired users that have not yet been declared as expired
-			if (@last_leave_check_time + LEAVE_CHECK_TIME_MIN) < now then
-				newly_expired_users = 
-				  User.all(did_expire: false,	:alive_expires_at.lte => now) + 
-				  User.all(did_expire: false,	:idle_expires_at.lte => now)
-
-				newly_expired_users.each do |leaver|
-					self.leave leaver.token, leaver.board.board_group.token
-				end
-				@last_leave_check_time = now
-			end
-		end
 	end
 end

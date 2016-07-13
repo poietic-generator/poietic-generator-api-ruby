@@ -20,8 +20,6 @@ module PoieticGen
 		
 		belongs_to :board
 		
-		# @debug = true
-		
 		def self.create_now board
 			create({
 				:timestamp => Time.now.to_i,
@@ -37,7 +35,7 @@ module PoieticGen
 		end
 
 		def self.last_id board
-			last_timeline = board.timelines.first(:order => [ :id.desc ])
+			last_timeline = board.timelines.first(order: [:id.desc])
 			if last_timeline.nil? then 0 else last_timeline.id end
 		end
 

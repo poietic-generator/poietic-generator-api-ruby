@@ -1,4 +1,6 @@
 
+require 'poieticgen'
+
 module PoieticGen
 
   class ChatManager
