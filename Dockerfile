@@ -6,7 +6,10 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && \
  	apt-get install -q -y \
 		ruby ruby2.1 git ruby2.1-dev build-essential \
- 		make libmysqlclient-dev mysql-client wget
+ 		make wget \
+ 		libpq-dev postgresql-client postgresql-server-dev-all
+# libmysqlclient-dev mysql-client \
+
 
 # Install packages for websockets
 RUN wget https://github.com/joewalnes/websocketd/releases/download/v0.2.12/websocketd-0.2.12_amd64.deb && \
@@ -35,7 +38,7 @@ ADD . /home/user/poieticgen
 # START DOCKER
 USER root
 RUN chown -R user:user /home/user
-ADD misc/docker-start.sh /usr/local/sbin/start
+ADD misc/docker-start-postgres.sh /usr/local/sbin/start
 RUN chmod +755 /usr/local/sbin/start
 
 EXPOSE 8000
