@@ -40,7 +40,10 @@ and all their dependencies :
 
 Copy ``config/config.ini.example`` to ``config/config.ini`` then edit it to your needs.
 
-Depending on your choices, you may need to install a database system with ``apache phpmyadmin mysql-server-5.5``
+If you intend to run the server without docker (or any other setup providing a database) you may need to install the database system locally
+
+    $ sudo apt-get install apache phpmyadmin mysql-server-5.5
+
 
 Create a tmp directory locally. It will be use by the devel-script to run the service.
 
