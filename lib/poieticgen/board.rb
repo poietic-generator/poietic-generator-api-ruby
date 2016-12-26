@@ -122,7 +122,6 @@ module PoieticGen
 		# Save board content (all zones) as snapshots
     def snapshot 
 			Board.transaction do |t| #NC:UNKNOWN
-
 				if self.strokes_since_last_snapshot > STROKE_COUNT_BETWEEN_QFRAMES then
 				  self.strokes_since_last_snapshot = 0
 					board_snap = BoardSnapshot.create self
@@ -142,9 +141,10 @@ module PoieticGen
 		def update_data user, drawing
 			return if drawing.empty?
 
+			user.zone.apply drawing
+
 			# Update the zone
 			Board.transaction do 
-			  user.zone.apply drawing
 			  self.strokes_since_last_snapshot += drawing.size
 			  self.save
 			end
