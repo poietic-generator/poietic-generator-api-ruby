@@ -42,7 +42,8 @@ su - user -c "cd /home/user/poieticgen ; \
 	bundle install --path /home/user/.bundle/"
 
 # Create default sessions if database was new
-if [ 0 -eq 0 ]; then
+if ! su - user -c "cd /home/user/poieticgen ; bundle exec bin/poietic-cli list |grep 'Test session B'" ; then
+
 	su - user -c "cd /home/user/poieticgen ; \
 		bundle exec bin/poietic-cli create -n 'Default Session'"
 
