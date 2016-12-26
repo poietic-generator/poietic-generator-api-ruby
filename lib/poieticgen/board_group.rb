@@ -6,12 +6,12 @@ module PoieticGen
 		include DataMapper::Resource
 
 		property :id,	Serial
-		property :name,          String,  :unique => true, :required=> false
-		property :token, String,  :required => true, :unique => true
-		property :closed,        Boolean, :default => false
-		property :timestamp_start,     Integer, :required => true
-		property :timestamp_stop, Integer, :default => 0
-		property :allocator_type, String, :required => true
+		property :name,          String,  unique: true, :required=> false
+		property :token, String,  required: true, unique: true
+		property :closed,        Boolean, default: false
+		property :timestamp_start,     Integer, required: true
+		property :timestamp_stop, Integer, default: 0
+		property :allocator_type, String, required: true
 
 		has n, :boards
 
@@ -22,10 +22,10 @@ module PoieticGen
 		def self.create config, name
 			res = super({
 				# FIXME: when the token already exists, SaveFailureError is raised
-				:token => (0...16).map{ ('a'..'z').to_a[rand(26)] }.join,
-				:timestamp_start => Time.now.to_i,
-				:allocator_type => config.allocator,
-				:name => name
+				token: (0...16).map{ ('a'..'z').to_a[rand(26)] }.join,
+				timestamp_start: Time.now.to_i,
+				allocator_type: config.allocator,
+				name: name
 			})
 
 			@debug = true
@@ -41,25 +41,25 @@ module PoieticGen
 		def self.from_token token
 			# FIXME: use a constant for latest session name
 			if token == "latest" then
-                BoardGroup.first(:closed => false, 
-								 :order => [:id.desc])
+                BoardGroup.first(closed: false, 
+								 order: [:id.desc])
             else
-				BoardGroup.first(:token => token,
-								:closed => false)
+				BoardGroup.first(token: token,
+								closed: false)
 			end
 		end
 
 		def live?
-			board = self.boards.first(:closed => false,
-							   :order => [:timestamp.desc])
+			board = self.boards.first(closed: false,
+							   order: [:timestamp.desc])
 			return (not board.nil?)
 		end
 
 		# Get latest live board
 		def board
 			return self.boards.first(
-			  :closed => false,
-				:order => [:timestamp.desc]
+			  closed: false,
+				order: [:timestamp.desc]
 			)
 		end
 
@@ -86,10 +86,6 @@ module PoieticGen
 		end
 
 		def live_users_count
-			# STDERR.puts "counting live users for board %s/%s" % [ 
-			#   self.id,
-			#   (self.board ? self.board.id : '<none>')
-			# ]
 			return (self.live? ? self.board.live_users_count : 0 )
 		end
 	end

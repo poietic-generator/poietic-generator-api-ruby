@@ -197,12 +197,12 @@ module PoieticGen
 				messages: [],
 			}
 			now = Time.now.to_i
+			user = User.first(token: req.user_token)
+			if user.nil? or user.expired? then
+				raise InvalidSession, "Session has expired!"
+			end
 
 			User.transaction do |t|
-			  user = User.first(token: req.user_token)
-			  if user.nil? or user.expired? then
-				  raise InvalidSession, "Session has expired!"
-			  end
 
 			  board = user.board
 			  if board.nil? or
@@ -258,11 +258,7 @@ module PoieticGen
 			req = SnapshotRequest.parse params
 			result = {}
 
-			User.transaction do |t| begin
-
-        # test if session_token is defined
-        # pp req.session_token
-
+			User.transaction do |t|
 				board = Board.from_token req.session_token
 				raise InvalidSession, "Invalid session" if board.nil?
 
@@ -272,7 +268,7 @@ module PoieticGen
 				timeline_id = 0
 				date_range = -1
 				timestamp = -1
-				
+
 				# we take a snapshot one second in the past to be sure we will get
 				# a complete second.
 				if req.date == -1 then
@@ -280,11 +276,11 @@ module PoieticGen
 					users_db = board.users.all(did_expire: false)
 					users = users_db.map{ |u| u.to_hash }
 					zones = users_db.map{ |u| u.zone.to_desc_hash Zone::DESCRIPTION_FULL }
-					
+
 					timeline_id = Timeline.last_id board
 				else
 					end_session = if board.end_timestamp <= 0
-					              then Time.now.to_i - 1
+					                then Time.now.to_i - 1
 					              else board.end_timestamp
 					              end
 					# retrieve the total duration of the game
@@ -327,13 +323,6 @@ module PoieticGen
 					id: req.id
 				}
 
-				rescue DataObjects::TransactionError => e
-					Transaction.handle_deadlock_exception e, t, "Manager.update_data"
-
-				rescue Exception => e
-					t.rollback
-					raise e
-				end
 			end
 
 			return result

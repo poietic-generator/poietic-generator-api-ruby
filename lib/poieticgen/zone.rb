@@ -199,14 +199,18 @@ module PoieticGen
 		def snapshot timeline
 			snap = nil
 
-			Zone.transaction do |t|
-				unless self.is_snapshoted then
-					self.update(is_snapshoted: true)
+      is_snap = self.is_snapshoted
 
-					snap = ZoneSnapshot.create self, timeline
-				else
-					snap = self.zone_snapshots.first(order: [:timeline_id.desc])
-				end
+      Zone.transaction do |t|
+        unless self.is_snapshoted then
+          self.update(is_snapshoted: true)
+        end
+      end
+
+			if is_snap 
+				snap = ZoneSnapshot.create self, timeline
+			else
+				snap = self.zone_snapshots.first(order: [:timeline_id.desc])
 			end
 
 			return snap
