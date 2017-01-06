@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in poieticgen.gemspec
 gem "minitest"
 
+gem 'clockwork'
 # gem "bcrypt"
 # gem "dm-types", git: 'https://github.com/datamapper/dm-types.git'
 # gem "dm-core", git: 'https://github.com/datamapper/dm-core'
