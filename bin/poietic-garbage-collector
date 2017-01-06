@@ -30,12 +30,12 @@ module  PoieticGen ; class GarbageCollector
   def exec
     scheduler = Rufus::Scheduler.new
     scheduler.every('15s') do
-      STDERR.puts "Cleaning expired users & boards -- starting !"
+      STDERR.puts "Cleaning expired users & boards -- begin"
 	    User.transaction do
 		    User.check_expired_users
 		    Board.check_expired_boards
 	    end
-      STDERR.puts "Cleaning expired users & boards -- done."
+      STDERR.puts "Cleaning expired users & boards -- end"
     end
 
     scheduler.join
