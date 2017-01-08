@@ -51,11 +51,11 @@ require 'poieticgen/config_manager'
 require 'poieticgen/page'
 require 'poieticgen/manager'
 require "poieticgen/zone"
-require "poieticgen/zone_snapshot"
+# require "poieticgen/zone_snapshot"
 require "poieticgen/user"
 require "poieticgen/meta"
-require 'poieticgen/timeline'
-require 'poieticgen/board_snapshot'
+# require 'poieticgen/timeline'
+# require 'poieticgen/board_snapshot'
 require 'poieticgen/transaction'
 require 'poieticgen/image'
 

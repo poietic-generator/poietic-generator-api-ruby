@@ -28,16 +28,16 @@ module  PoieticGen ; class SnapshotCollector
   def exec
     scheduler = Rufus::Scheduler.new
     scheduler.every('5s') do
-		  groups = BoardGroup.all(closed: false, order: [:id.asc])
-		  groups.each do |group| 
-		    next unless group.live_users_count > 0 
-        STDERR.puts "Building board_group #{group.id} snapshots -- starting !"
-	      Board.transaction do
-		      board = group.boards.first(order: [:id.desc])
-		      board.snapshot
-	      end
-        STDERR.puts "Building board_group #{group.id} snapshots -- done."
-      end
+# 		  groups = BoardGroup.all(closed: false, order: [:id.asc])
+# 		  groups.each do |group| 
+# 		    next unless group.live_users_count > 0 
+#         STDERR.puts "Building board_group #{group.id} snapshots -- starting !"
+# 	      Board.transaction do
+# 		      board = group.boards.first(order: [:id.desc])
+# 		      board.snapshot
+# 	      end
+#         STDERR.puts "Building board_group #{group.id} snapshots -- done."
+#       end
     end
 
     scheduler.join
