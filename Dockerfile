@@ -30,7 +30,7 @@ RUN chown -R user:user /home/user
 
 WORKDIR /home/user/.cache
 USER user
-RUN bundle install --path /home/user/.bundle/
+RUN echo "Installing gems ... " && bundle install --path /home/user/.bundle/
 
 # ADD REMAINING (MOST OF THE) CODE
 ADD . /home/user/poieticgen
