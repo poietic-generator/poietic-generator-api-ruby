@@ -124,10 +124,10 @@ module PoieticGen
 			user.zone.apply drawing
 
 			# Update the zone
-			Board.transaction do 
-			  self.strokes_since_last_snapshot += drawing.size
-			  self.save
-			end
+			#Board.transaction do 
+			#  self.strokes_since_last_snapshot += drawing.size
+			#  self.save
+			#end
 		end
 
 
