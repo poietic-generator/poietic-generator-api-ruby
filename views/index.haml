@@ -8,18 +8,6 @@
   %div(role="main" data-role="content" class="ui-content")
     #index-menu
       %img(src="/poietic-generator.net.gif")/
-      -#
-        %form#credentials(action="/session/default/draw" data-ajax="false" method="post")
-          %div(data-role="fieldcontain")
-            %label(for="username") Username
-            %input#username(name="username" type="text" value="anonymous")/
-          %div(data-role="fieldcontain")
-            %label(for="session" class="select") Session
-            %select#select_session(name="session")
-              - @session_list.each do |token,name|
-                %option{"value" => token, "selected" => (token == @selected_session)}= name
-      //%a#link_choose{"data-ajax" => "false", "data-theme" => "b", "data-inline" => "true", "data-role" => "button", :href => "/page/list"} 
-      //%button(type="submit" data-theme="b" name="submit" value="submit-value")
       //  Join a session
     %ul(data-role="listview" data-inset="true" class="ui-listview")
       %li
