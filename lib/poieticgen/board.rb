@@ -20,7 +20,7 @@ module PoieticGen
 		property :strokes_since_last_snapshot, Integer, :default => 0
 
 		belongs_to :board_group
-		has n, :board_snapshots
+		# has n, :board_snapshots
 		has n, :timelines
 		has n, :users
 		has n, :zones
@@ -118,36 +118,16 @@ module PoieticGen
 			end
 		end
 
-
-		# Save board content (all zones) as snapshots
-    def snapshot 
-			Board.transaction do |t| #NC:UNKNOWN
-				if self.strokes_since_last_snapshot > STROKE_COUNT_BETWEEN_QFRAMES then
-				  self.strokes_since_last_snapshot = 0
-					board_snap = BoardSnapshot.create self
-					alive_zones = self.zones.all(expired: false)
-
-					alive_zones.each do |zone|
-						board_snap.zone_snapshots << (zone.snapshot board_snap.timeline)
-					end
-
-					board_snap.save
-				end
-
-				self.save
-			end
-    end
-
 		def update_data user, drawing
 			return if drawing.empty?
 
 			user.zone.apply drawing
 
 			# Update the zone
-			Board.transaction do 
-			  self.strokes_since_last_snapshot += drawing.size
-			  self.save
-			end
+			#Board.transaction do 
+			#  self.strokes_since_last_snapshot += drawing.size
+			#  self.save
+			#end
 		end
 
 

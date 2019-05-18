@@ -1,0 +1,15 @@
+{
+  "name": "public",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsc --watch --project .",
+    "build": "tsc --project ."
+  },
+  "author": "Glenn ROLLAND",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jquery": "^3.3.29"
+  }
+}

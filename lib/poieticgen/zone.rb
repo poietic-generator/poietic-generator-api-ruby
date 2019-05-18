@@ -35,7 +35,7 @@ module PoieticGen
 
 		belongs_to :board
 		belongs_to :user
-		has n, :zone_snapshots
+		# has n, :zone_snapshots
 
 		DESCRIPTION_MINIMAL = 1
 		DESCRIPTION_FULL = 2
