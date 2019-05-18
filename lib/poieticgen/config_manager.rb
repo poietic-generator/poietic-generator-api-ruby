@@ -49,7 +49,6 @@ module PoieticGen
 		#
 		#
 		def self.parse_int str, err_msg
-			#STDERR.puts "parsing str [#{str}] of #{str.class}"
 			case str
 			when Fixnum then return str
 			else

@@ -1,21 +1,34 @@
-poieticdb:
-  image: "postgres:9.5.3"
-  ports:
-    - "5432:5432"
-  environment:
-    - POSTGRES_DB=poieticgen
-    - POSTGRES_USER=poieticgen
-    - POSTGRES_PASSWORD=poieticgen
+version: '3'
 
-poieticapp:
-  build: .
-  links:
-    - "poieticdb:db"
-  ports:
-    - "8000:8000"
-  environment:
-    - MYSQL_USER=poietic
-    - MYSQL_PASSWORD=poieticgen
+services:
+  db:
+    image: "postgres:9.6"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: poieticgen
+      POSTGRES_USER: poieticgen
+      POSTGRES_PASSWORD: poieticgen
+
+  app:
+    build: .
+    links:
+      - db
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://poieticgen:poieticgen@db/poieticgen
+
+  adminer:
+    image: adminer
+    restart: "no"
+    ports:
+      - 8080:8080
+    links:
+      - db
+
+volumes:
+  pg_data:
 
 # poieticphpadm:
 #   image: "phpmyadmin/phpmyadmin"

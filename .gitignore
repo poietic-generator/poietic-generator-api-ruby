@@ -1,5 +1,5 @@
 profile.*
-Gemfile.lock
+node_modules
 config/config.ini
 .bundle
 vendor

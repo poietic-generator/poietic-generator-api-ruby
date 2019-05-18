@@ -1,46 +1,28 @@
-FROM debian:8.5
+FROM ruby:2.5
 MAINTAINER Glenn Y. Rolland <glenux@glenux.net>
 
 # Install packages for building ruby
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update && \
- 	apt-get install -q -y \
-		ruby ruby2.1 git ruby2.1-dev build-essential \
+RUN sed -i -e '/jessie-updates/d' /etc/apt/sources.list \
+	&& apt-get update \
+	&& apt-get install -q -y \
+		git build-essential \
  		make wget \
- 		libpq-dev postgresql-client postgresql-server-dev-all
-# libmysqlclient-dev mysql-client \
+ 		libpq-dev postgresql-client postgresql-server-dev-9.6 \
+ 	&& rm -rf /var/lib/apt/lists/* \
+ 		/var/cache/apt/archives/*.deb \
+ 		/var/cache/apt/archives/partial/*.deb \
+ 		/var/cache/apt/*.bin
 
-
-# Install packages for websockets
-RUN wget https://github.com/joewalnes/websocketd/releases/download/v0.2.12/websocketd-0.2.12_amd64.deb && \
-	dpkg -i *.deb && \
-	rm *.deb
-
-RUN useradd -m user
-RUN chown -R user:user /home/user
-RUN gem2.1 install bundler
-
-# PRE-INSTALL DEPENDENCIES
-RUN mkdir -p /home/user/.cache && cd /home/user/.cache && git init
-ADD lib/poieticgen/version.rb /home/user/.cache/lib/poieticgen/version.rb
-ADD poieticgen.gemspec /home/user/.cache/poieticgen.gemspec
-ADD Gemfile.lock /home/user/.cache/Gemfile.lock
-ADD Gemfile /home/user/.cache/Gemfile
-RUN chown -R user:user /home/user
-
-WORKDIR /home/user/.cache
-USER user
-RUN echo "Installing gems ... " && bundle install --path /home/user/.bundle/
+WORKDIR /app
+ADD poieticgen.gemspec Gemfile.lock Gemfile /app/
+ADD lib/poieticgen/version.rb /app/lib/poieticgen/version.rb
+RUN gem install bundler && \
+	bundle install --path /app-cache
 
 # ADD REMAINING (MOST OF THE) CODE
-ADD . /home/user/poieticgen
+ADD . /app
 
 # START DOCKER
-USER root
-RUN chown -R user:user /home/user
-ADD misc/docker-start-postgres.sh /usr/local/sbin/start
-RUN chmod +755 /usr/local/sbin/start
-
 EXPOSE 8000
-CMD /usr/local/sbin/start
-
+CMD /app/docker/entrypoint.sh
