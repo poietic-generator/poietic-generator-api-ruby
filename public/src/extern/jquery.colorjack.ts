@@ -12,10 +12,7 @@ export class Picker {
 	public margin: number;
 	public offset: number;
 	public hueWidth: number;
-	public colorCanvas: any;
-	public colorCtx: any;
-	public plugin: any;
-	public circle: any;
+	public html : any;
 
 	constructor(props?: any) {
     	/// loading properties
@@ -31,29 +28,21 @@ export class Picker {
     	this.hueWidth = 30;
 
     	/// creating colorpicker (header)
-    	this.plugin = this.createComponentColorPicker();
 
-		var hexClose = this.createComponentHexClose();
-    	var arrows = this.createComponentArrows();
+    	this.html.plugin = {
+			hexClose: this.makeHexClose(),
+    		arrows: this.makeArrows(),
+			circle: this.makeCircleSelection(),
+			colorChooser: this.makeColorChooser()
+		}
 
-		this.circle = this.createCircleSelection();
+    	this.makeComponent();
 
-    	/// creating colorpicker sliders
-    	this.colorCanvas = document.createElement("canvas");
-    	this.colorCtx = this.colorCanvas.getContext("2d");
-    	this.colorCanvas.style.cssText = "position: absolute; top: 19px; left: " + (this.offset) + "px;";
-    	this.colorCanvas.width = this.size + this.hueWidth + this.margin;
-    	this.colorCanvas.height = this.size + this.margin;
-    	this.plugin.appendChild(this.colorCanvas);
-
-    	this.plugin.onmousemove = this.mouseManager;
-    	this.plugin.onmousedown = this.mouseManager;
+    	this.html.plugin.onmousemove = this.mouseManager;
+    	this.html.plugin.onmousedown = this.mouseManager;
 
     	// appending to element
-    	this.element.appendChild(this.plugin);
-
-    	/// helper functions
-    	this.el = this.plugin;
+    	this.element.appendChild(this.html.plugin);
 
     	// drawing color selection
     	this.drawSample();
@@ -61,19 +50,37 @@ export class Picker {
     	return this;
 	};
 
-	private createComponentHexClose = () => {
+	private makeComponent = () => {
+    	this.html.plugin.appendChild(this.html.colorChooser);
+
+    	this.html.plugin.appendChild(this.html.hexBox);
+    	this.html.plugin.appendChild(this.html.hexString);
+
+    	this.html.plugin.appendChild(this.html.hexClose);
+    	this.html.plugin.appendChild(document.createElement("br"));
+	}
+
+	private makeColorChooser = () => {
+    	/// creating colorpicker sliders
+    	var colorChooser = document.createElement("canvas");
+    	var colorCtx = colorChooser.getContext("2d");
+    	colorChooser.style.cssText = "position: absolute; top: 19px; left: " + (this.offset) + "px;";
+    	colorChooser.width = this.size + this.hueWidth + this.margin;
+    	colorChooser.height = this.size + this.margin;
+    	return colorChooser;
+	}
+
+	private makeHexClose = () => {
     	var hexClose = document.createElement("div");
     	hexClose.className = "hexClose";
     	hexClose.textContent = "X";
     	hexClose.onclick = () => { // close colorpicker
-			this.plugin.style.display = 
-				(this.plugin.style.display == "none") ? "block" : "none";
+			this.html.plugin.style.display = 
+				(this.html.plugin.style.display == "none") ? "block" : "none";
     	};
-    	this.plugin.appendChild(hexClose);
-    	this.plugin.appendChild(document.createElement("br"));
 	};
 
-	private createComponentArrows = () => {
+	private makeArrows = () => {
     	var arrows;
 		var ctx : any;
 		var width = 3;
@@ -108,7 +115,7 @@ export class Picker {
 		return arrows;
 	}
 
-	private createComponentColorPicker = () => {
+	private makeColorPicker = () => {
     	var plugin;
     	var hexBox;
     	var hexString;
@@ -118,29 +125,27 @@ export class Picker {
     	plugin.style.cssText = "height: " + (this.size + this.margin * 2) + "px";
     	plugin.style.cssText+= ";width:" + (this.size + this.margin + this.hueWidth) + "px";
 
-    	hexBox = this.createComponentHexBox();
-    	hexString = this.createComponentHexString();
+    	hexBox = this.makeHexBox();
+    	hexString = this.makeHexString();
 
-    	this.plugin.appendChild(hexBox);
-    	this.plugin.appendChild(hexString);
     	return plugin;
 	};
 
-	private createComponentHexBox = () => {
+	private makeHexBox = () => {
     	// shows current selected color as the background of this box
     	var hexBox = document.createElement("div");
     	hexBox.className = "hexBox";
     	return hexBox;
 	}
 
-	private createComponentHexString = () => {
+	private makeHexString = () => {
     	// shows current selected color as HEX string
     	var hexString = document.createElement("div");
     	hexString.className = "hexString";
     	return hexString;
 	}
 
-	private createCircleSelection = () => {
+	private makeCircleSelection = () => {
 		var circle: HTMLCanvasElement;
 		var ctx: any;
 		var x;
@@ -167,20 +172,20 @@ export class Picker {
 	private mouseManager = (e:any) => {
 		var down = (e.type == "mousedown");
 		var offset = this.margin / 2;
-		var abs = abPos(this.colorCanvas);
+		var abs = abPos(this.html.colorChooser);
 		var x0 = (e.pageX - abs.x) - offset;
 		var y0 = (e.pageY - abs.y) - offset;
-		var x = clamp(x0, 0, this.colorCanvas.width);
+		var x = clamp(x0, 0, this.html.colorChooser.width);
 		var y = clamp(y0, 0, this.size);
 		if (e.target.className == "hexString") {
-	    	this.plugin.style.cursor = "text";
+	    	this.html.plugin.style.cursor = "text";
 	    	return; // allow selection of HEX
 		} else if (x <= this.size) { // saturation-value selection
-	    	this.plugin.style.cursor = "crosshair";
+	    	this.html.plugin.style.cursor = "crosshair";
 	    	if (down) dragElement({
 				type: "relative",
 				event: e,
-				element: this.colorCanvas,
+				element: this.html.colorChooser,
 				callback: function (coords: {x: any, y: any}, state: any) {
 		    		var x = clamp(coords.x - this.offset, 0, this.size);
 		    		var y = clamp(coords.y - this.offset, 0, this.size);
@@ -190,11 +195,11 @@ export class Picker {
 				}
 	    	});
 		} else if (x > this.size + this.margin && x <= this.size + this.hueWidth) { // hue selection
-	    	this.plugin.style.cursor = "crosshair";
+	    	this.html.plugin.style.cursor = "crosshair";
 	    	if (down) dragElement({
 				type: "relative",
 				event: e,
-				element: this.colorCanvas,
+				element: this.html.colorChooser,
 				callback: function (coords: any, state: any) {
 		    		var y = clamp(coords.y - this.offset, 0, this.size);
 		    		this.hue = Math.min(1, y / this.size) * 360;
@@ -202,7 +207,7 @@ export class Picker {
 				}
 	    	});
 		} else { // margin between hue/saturation-value
-	    	this.plugin.style.cursor = "default";
+	    	this.html.plugin.style.cursor = "default";
 		}
 		return false; // prevent selection
     };
@@ -210,23 +215,24 @@ export class Picker {
     public resize = (new_size: number) => {
         this.size = new_size;
         // resize elements
-        this.plugin.style.height = (this.size + this.margin * 2) + "px";
-        this.plugin.style.width = (this.size + this.margin + this.hueWidth) + "px";
-        this.colorCanvas.width = this.size + this.hueWidth + this.margin;
-        this.colorCanvas.height = this.size + this.margin;
+        this.html.plugin.style.height = (this.size + this.margin * 2) + "px";
+        this.html.plugin.style.width = (this.size + this.margin + this.hueWidth) + "px";
+        this.colorChooser.width = this.size + this.hueWidth + this.margin;
+        this.colorChooser.height = this.size + this.margin;
         // redraw
         this.drawSample();
     };
 
     public destroy = () => {
-		document.body.removeChild(this.plugin);
+		document.body.removeChild(this.html.plugin);
 		for (var key in this) delete this[key];
     };
 
     public drawHue = () => {
 		// drawing hue selector
 		var left = this.size + this.margin + this.offset;
-		var gradient = this.colorCtx.createLinearGradient(0, 0, 0, this.size);
+    	var colorCtx = this.colorChooser.getContext("2d");
+		var gradient = colorCtx.createLinearGradient(0, 0, 0, this.size);
 		gradient.addColorStop(0, "rgba(255, 0, 0, 1)");
 		gradient.addColorStop(0.15, "rgba(255, 255, 0, 1)");
 		gradient.addColorStop(0.3, "rgba(0, 255, 0, 1)");
@@ -272,7 +278,9 @@ export class Picker {
 
     public drawSample = () => {
 		// clearing canvas
-		this.colorCtx.clearRect(0, 0, this.colorCanvas.width, this.colorCanvas.height)
+		//
+		var ctx = this.html.colorChooser.getContext("2d");
+		ctx.clearRect(0, 0, this.html.colorChooser.width, this.html.colorChooser.height)
 		this.drawSquare();
 		this.drawHue();
 		// retrieving hex-code
@@ -282,28 +290,24 @@ export class Picker {
 	    	v: this.val
 		});
 		// display hex string
-		this.hexString.textContent = hex.toUpperCase();
+		this.html.hexString.textContent = hex.toUpperCase();
 		// display background color
-		this.hexBox.style.backgroundColor = "#" + hex;
+		this.html.hexBox.style.backgroundColor = "#" + hex;
 		document.getElementById("current_color").style.backgroundColor = "#" + hex;
 		// arrow-selection
 		var y = (this.hue / 362) * this.size - 2;
-		this.colorCtx.drawImage(arrows, this.size + this.offset + 4, Math.round(y) + this.offset);
+		ctx.drawImage(this.html.arrows, this.size + this.offset + 4, Math.round(y) + this.offset);
 		// circle-selection
 		var x = this.sat / 100 * this.size;
 		var y = (1 - (this.val / 100)) * this.size;
-		x = x - this.circle.width / 2;
-		y = y - this.circle.height / 2;
+		x = x - this.html.circle.width / 2;
+		y = y - this.html.circle.height / 2;
 		this.colorCtx.drawImage(this.circle, Math.round(x) + this.offset, Math.round(y) + this.offset);
 		// run custom code
 		if (this.callback) this.callback(hex);
     };
 
-}
-
-/* GLOBALS LIBRARY */
-
-var dragElement = function(props) {
+private dragElement = (props) => {
     function mouseMove(e, state) {
 		if (typeof(state) == "undefined") state = "move";
 		var coord = XY(e);
@@ -328,14 +332,14 @@ var dragElement = function(props) {
 				break;
 		}
     };
-    function mouseUp(e) {
+    function mouseUp(e:any) {
 		//FIXME window.removeEventListener("mousemove", mouseMove, false);
 		//FIXME window.removeEventListener("mouseup", mouseUp, false);
 		mouseMove(e, "up");
     };
     // current element position
     var el = props.element;
-    var origin = abPos(el);
+    var origin = abPos(this.html.plugin);
     var oX = origin.x;
     var oY = origin.y;
     // current mouse position
@@ -349,6 +353,11 @@ var dragElement = function(props) {
     mouseMove(e, "down"); // run mouse-down
 };
 
+}
+
+/* GLOBALS LIBRARY */
+
+
 var clamp = function(n: number, min: number, max: number) {
     return (n < min) ? min : ((n > max) ? max : n);
 };
@@ -360,8 +369,8 @@ var XY = function(event: {pageX: number, pageY: number}) {
 	};
 };
 
-var abPos = function(in_o: {offsetLeft: number, offsetTop: number, offsetParent: any}) {
-    var o = typeof(in_o) == 'object' ? in_o : $(in_o);
+var abPos = function(in_o: any) {
+    var o = in_o;
     var offset = { x: 0, y: 0 };
     while(o != null) {
 		offset.x += o.offsetLeft;

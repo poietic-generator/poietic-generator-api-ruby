@@ -13,6 +13,10 @@ export interface HSVColor {
 	v: number;
 }
 
+export type HexColor = string;
+
+export type Color = HexColor | RGBColor | HSVColor;
+
 /**
  * Returns the 'str_number' string in parameter
  * left-padded with 'len' zeros.
@@ -25,14 +29,14 @@ function padString(str_number: string, len: number): string {
 	return str_number;
 };
 
-export function rgbToHex (c: RGBColor): string {
+export function RGBToHex (c: RGBColor): string {
 	return padString(c.r.toString(16), 2) +
 		padString(c.g.toString(16), 2) +
 		padString(c.b.toString(16), 2);
 };
 
-export function hsvToHex(c: HSVColor) {
-	return rgbToHex(hsvToRgb(c));
+export function HSVToHex(c: HSVColor) {
+	return RGBToHex(HSVToRGB(c));
 }
 
 
@@ -45,7 +49,7 @@ export function hsvToHex(c: HSVColor) {
  * Ported by Roshambo from the excellent java algorithm by Eugene Vishnevsky at:
  * http://www.cs.rit.edu/~ncs/color/t_convert.html
  */
-export function hsvToRgb(c: HSVColor) {
+export function HSVToRGB(c: HSVColor) {
 	var r, g, b, 
 		h, s, v,
 		i, f, p, q, t;
@@ -125,7 +129,7 @@ export function randomHex() {
 export function randomRGB() {
 	var c;
 	c = randomHSV();
-	return hsvToRgb(c);
+	return HSVToRGB(c);
 }
 
 export function randomHSV() : HSVColor {
