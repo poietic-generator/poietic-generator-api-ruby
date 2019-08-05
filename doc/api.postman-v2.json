@@ -1,0 +1,1611 @@
+{
+    "info": {
+        "name": "RESTer",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "APIv2",
+            "item": [
+                {
+                    "request": {
+                        "url": "http://localhost:9000/api/v2/board_groups",
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    },
+                    "id": "rester-2",
+                    "name": "GET Board Groups",
+                    "response": [
+                        {
+                            "id": "rester-32",
+                            "name": "2019-08-05T20:16:25.251Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            },
+                            "responseTime": 17.445000004954636,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "19"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "{\"board_groups\":[]}",
+                            "status": "OK",
+                            "code": 200
+                        },
+                        {
+                            "id": "rester-29",
+                            "name": "2019-08-05T20:10:11.532Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            },
+                            "responseTime": 14.709999987855554,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "19"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "{\"board_groups\":[]}",
+                            "status": "OK",
+                            "code": 200
+                        },
+                        {
+                            "id": "rester-28",
+                            "name": "2019-08-05T20:09:44.699Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/sessions",
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            },
+                            "responseTime": 13.874999989755452,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "15"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "{\"sessions\":[]}",
+                            "status": "OK",
+                            "code": 200
+                        },
+                        {
+                            "id": "rester-27",
+                            "name": "2019-08-05T20:08:41.486Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/sessions",
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            },
+                            "responseTime": 15.76999999769032,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "15"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "{\"sessions\":[]}",
+                            "status": "OK",
+                            "code": 200
+                        },
+                        {
+                            "id": "rester-26",
+                            "name": "2019-08-05T20:08:33.701Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            },
+                            "responseTime": 102.65000000037253,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "19"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "{\"board_groups\":[]}",
+                            "status": "OK",
+                            "code": 200
+                        },
+                        {
+                            "id": "rester-25",
+                            "name": "2019-08-05T20:06:51.904Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            },
+                            "responseTime": 33.255000001750886,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "close"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "[:board_groups, []]",
+                            "status": "OK",
+                            "code": 200
+                        },
+                        {
+                            "id": "rester-24",
+                            "name": "2019-08-05T20:05:53.271Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-23",
+                            "name": "2019-08-05T20:05:52.532Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-22",
+                            "name": "2019-08-05T20:05:45.022Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-21",
+                            "name": "2019-08-05T20:05:29.037Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-20",
+                            "name": "2019-08-05T20:05:28.817Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-19",
+                            "name": "2019-08-05T20:05:28.593Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-18",
+                            "name": "2019-08-05T20:05:28.379Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-17",
+                            "name": "2019-08-05T20:05:28.178Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-16",
+                            "name": "2019-08-05T20:05:27.954Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-15",
+                            "name": "2019-08-05T20:05:27.737Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-14",
+                            "name": "2019-08-05T20:05:27.530Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-13",
+                            "name": "2019-08-05T20:05:27.289Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-12",
+                            "name": "2019-08-05T20:05:26.599Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-11",
+                            "name": "2019-08-05T20:05:23.910Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-10",
+                            "name": "2019-08-05T20:05:23.389Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-9",
+                            "name": "2019-08-05T20:05:22.719Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-8",
+                            "name": "2019-08-05T20:05:20.541Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/board_groups",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "556"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;board_groups&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-7",
+                            "name": "2019-08-05T20:04:49.324Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/boards",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "550"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:9000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;boards&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-5",
+                            "name": "2019-08-05T19:09:30.846Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:8000/api/v2/boards",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 15.144999997573905,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "550"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:8000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;boards&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-4",
+                            "name": "2019-08-05T19:05:08.317Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:8000/api/v2/boards",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 15.144999997573905,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "550"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:8000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;boards&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        },
+                        {
+                            "id": "rester-3",
+                            "name": "2019-08-05T19:04:06.915Z GET Board Groups",
+                            "originalRequest": {
+                                "url": "http://localhost:8000/api/v2/boards",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 15.144999997573905,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "X-Cascade",
+                                    "value": "pass"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "550"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "<!DOCTYPE html>\n<html>\n<head>\n  <style type=\"text/css\">\n  body { text-align:center;font-family:helvetica,arial;font-size:22px;\n    color:#888;margin:20px}\n  #c {margin:0 auto;width:500px;text-align:left}\n  </style>\n</head>\n<body>\n  <h2>Sinatra doesn’t know this ditty.</h2>\n  <img src='http://localhost:8000/__sinatra__/404.png'>\n  <div id=\"c\">\n    Try this:\n    <pre># in lib&#x2F;poieticgen&#x2F;api.rb\nclass PoieticGen::Api\n  get &#x27;&#x2F;api&#x2F;v2&#x2F;boards&#x27; do\n    &quot;Hello World&quot;\n  end\nend\n</pre>\n  </div>\n</body>\n</html>\n",
+                            "status": "Not Found",
+                            "code": 404
+                        }
+                    ]
+                },
+                {
+                    "request": {
+                        "url": "http://localhost:9000",
+                        "method": "GET",
+                        "header": []
+                    },
+                    "id": "rester-1",
+                    "name": "GET Root",
+                    "response": [
+                        {
+                            "id": "rester-31",
+                            "name": "2019-08-05T20:16:22.009Z GET Root",
+                            "originalRequest": {
+                                "url": "http://localhost:9000",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 24.32499999180436,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "35"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "Welcome to Poietic Generator API v2",
+                            "status": "OK",
+                            "code": 200
+                        },
+                        {
+                            "id": "rester-6",
+                            "name": "2019-08-05T20:04:31.864Z GET Root",
+                            "originalRequest": {
+                                "url": "http://localhost:9000",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 12.230000006966293,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "35"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "Welcome to Poietic Generator API v2",
+                            "status": "OK",
+                            "code": 200
+                        },
+                        {
+                            "id": "rester-2",
+                            "name": "2019-08-05T18:26:41.105Z Root",
+                            "originalRequest": {
+                                "url": "http://localhost:8000",
+                                "method": "GET",
+                                "header": []
+                            },
+                            "responseTime": 15.144999997573905,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "text/html;charset=utf-8"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "35"
+                                },
+                                {
+                                    "key": "X-XSS-Protection",
+                                    "value": "1; mode=block"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "Welcome to Poietic Generator API v2",
+                            "status": "OK",
+                            "code": 200
+                        }
+                    ]
+                },
+                {
+                    "request": {
+                        "url": "http://localhost:9000/api/v2/sessions",
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    },
+                    "id": "rester-3",
+                    "name": "GET Sessions",
+                    "response": [
+                        {
+                            "id": "rester-38",
+                            "name": "2019-08-05T20:34:21.363Z GET Sessions",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/sessions",
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            },
+                            "responseTime": 41.47499999124557,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "63"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "{\"sessions\":\"\\\"#<DataMapper::Collection:0x00005616cc079138>\\\"\"}",
+                            "status": "OK",
+                            "code": 200
+                        },
+                        {
+                            "id": "rester-37",
+                            "name": "2019-08-05T20:24:00.722Z GET Sessions",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/sessions",
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            },
+                            "responseTime": 30.89999999757856,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "63"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "{\"sessions\":\"\\\"#<DataMapper::Collection:0x0000562d2c65ec30>\\\"\"}",
+                            "status": "OK",
+                            "code": 200
+                        },
+                        {
+                            "id": "rester-36",
+                            "name": "2019-08-05T20:21:59.987Z GET Sessions",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/sessions",
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            },
+                            "responseTime": 29.94500000216067,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "63"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "{\"sessions\":\"\\\"#<DataMapper::Collection:0x000055ae00c53fb0>\\\"\"}",
+                            "status": "OK",
+                            "code": 200
+                        },
+                        {
+                            "id": "rester-35",
+                            "name": "2019-08-05T20:18:15.876Z GET Sessions",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/sessions",
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            },
+                            "responseTime": 29.47500000335276,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "63"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "{\"sessions\":\"\\\"#<DataMapper::Collection:0x0000558e4ce320f8>\\\"\"}",
+                            "status": "OK",
+                            "code": 200
+                        },
+                        {
+                            "id": "rester-34",
+                            "name": "2019-08-05T20:17:13.979Z GET Sessions",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/sessions",
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            },
+                            "responseTime": 52.23000000137836,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "155"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "{\"sessions\":[\"#<PoieticGen::BoardGroup:0x000055e295a95e98>\",\"#<PoieticGen::BoardGroup:0x000055e295a88568>\",\"#<PoieticGen::BoardGroup:0x000055e295ac0f08>\"]}",
+                            "status": "OK",
+                            "code": 200
+                        },
+                        {
+                            "id": "rester-33",
+                            "name": "2019-08-05T20:16:28.043Z GET Sessions",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/sessions",
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            },
+                            "responseTime": 13.265000001527369,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "59"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "{\"sessions\":\"#<DataMapper::Collection:0x00005613da1f8030>\"}",
+                            "status": "OK",
+                            "code": 200
+                        },
+                        {
+                            "id": "rester-30",
+                            "name": "2019-08-05T20:10:14.575Z GET Sessions",
+                            "originalRequest": {
+                                "url": "http://localhost:9000/api/v2/sessions",
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            },
+                            "responseTime": 14.880000002682209,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                },
+                                {
+                                    "key": "Content-Length",
+                                    "value": "15"
+                                },
+                                {
+                                    "key": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "key": "Connection",
+                                    "value": "keep-alive"
+                                },
+                                {
+                                    "key": "Server",
+                                    "value": "thin"
+                                }
+                            ],
+                            "body": "{\"sessions\":[]}",
+                            "status": "OK",
+                            "code": 200
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
