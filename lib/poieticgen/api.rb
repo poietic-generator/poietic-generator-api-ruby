@@ -196,26 +196,22 @@ module PoieticGen
 
     namespace "/api/v2" do
 		  # List available session for joining
-		  get '/board_groups' do
-			  @group_list = BoardGroup.all(
+		  get '/spaces' do
+			  @spaces = BoardGroup.all(
 				  closed: false,
 				  order: [:id.asc]
 			  ) || []
-			  # @page = Page.new "session-group-list"
-			  # TODO: rewrite session group list as JSON
-			  #haml :"session_group_list"
-			  json({board_groups: @group_list.map(&:to_h) })
+
+			  json({spaces: @group_list.map(&:to_h) })
 		  end
 
 		  get '/sessions' do
-			  @group_list = BoardGroup.all(
+			  @sessions = Board.all(
 				  closed: false,
 				  order: [:id.asc]
 			  ) || []
-			  # @page = Page.new "session-list"
-			  # TODO: rewrite session list as JSON
-			  # haml :"session_list"
-			  json({ sessions: @group_list.map(&:to_h) })
+
+			  json({ sessions: @sessions.map(&:to_h) })
 		  end
 
 		  #

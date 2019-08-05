@@ -222,6 +222,16 @@ module PoieticGen
 			return self.users.count
 		end
 
+		def to_h
+		  {
+		    token:         self.token,
+		    timestamp_start:     self.timestamp,
+		    timestamp_stop: self.end_timestamp,
+		    closed:        self.closed,
+		    board_group: self.board_group.token
+		  }
+		end
+
 		private
 
 		#
