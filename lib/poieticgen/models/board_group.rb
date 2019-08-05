@@ -88,6 +88,17 @@ module PoieticGen
 		def live_users_count
 			return (self.live? ? self.board.live_users_count : 0 )
 		end
+
+		def to_h
+		  {
+		    name: self.name,
+		    token: self.token,
+		    closed: self.closed,
+		    timestamp_start: self.timestamp_start,
+		    timestamp_stop: self.timestamp_stop,
+		    allocator_type: self.allocator_type
+		  }
+		end
 	end
 end
 

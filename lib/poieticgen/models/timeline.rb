@@ -1,8 +1,5 @@
 
-require 'poieticgen/zone'
-require 'poieticgen/event' # needed by has_1
-require 'poieticgen/stroke' # needed by has_1
-require 'poieticgen/message' # needed by has_1
+require 'poieticgen'
 
 module PoieticGen
 

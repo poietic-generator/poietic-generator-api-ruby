@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 require 'poieticgen'
+require 'sinatra/json'
 
 module PoieticGen
 
 	class DatabaseConnectionError < RuntimeError ; end
 
 	class Api < Sinatra::Base
+	  register Sinatra::Namespace
 
 		STATUS_INFORMATION  = 1
 		STATUS_SUCCESS      = 2
@@ -16,26 +18,17 @@ module PoieticGen
 		
 		enable :run
 
-		helpers Sinatra::Cookies
-
 		set :root, File.expand_path(File.join(File.dirname(__FILE__),'..','..'))
 		set :environment, :production
 
-		set :static, true
-		set :public_folder, 'public'
-		set :views, 'views'
+		set :static, false
+		# set :public_folder, 'public'
+		# set :views, 'views'
 		set :protection, except: :frame_options
-
-		mime_type :ttf, 'application/octet-stream'
-		mime_type :eot, 'application/octet-stream'
-		mime_type :otf, 'application/octet-stream'
-		mime_type :woff, 'application/octet-stream'
-
-		register Sinatra::Flash # FIXME: doesn't work
 
 		configure do
 			# Enable assets management via compass
-			::Compass.add_project_configuration(File.join(settings.root, 'config', 'compass.rb'))
+			# ::Compass.add_project_configuration(File.join(settings.root, 'config', 'compass.rb'))
 
 			begin
 				config = PoieticGen::ConfigManager.new(File.join(
@@ -79,15 +72,15 @@ module PoieticGen
 		#
 		# Load compass-managed assets
 		#
-		get '/stylesheets/:name.css' do
-			content_type 'text/css', :charset => 'utf-8'
-			scss(:"stylesheets/#{params[:name]}" ) 
-		end
+		# get '/stylesheets/:name.css' do
+		# 	content_type 'text/css', :charset => 'utf-8'
+		# 	scss(:"stylesheets/#{params[:name]}" ) 
+		# end
 
 		#
 		# Create a new session
 		#
-		post '/session/create' do
+		post '/sessions' do
 			begin
 				session = settings.manager.create_session params
 				flash[:success] = "Session %d created!" % session.id
@@ -109,8 +102,9 @@ module PoieticGen
 
 
 		get '/' do
-			@page = Page.new "index"
-			haml :index
+			#@page = Page.new "index"
+			#haml :index
+			"Welcome to Poietic Generator API v2"
 		end
 
 
@@ -196,52 +190,62 @@ module PoieticGen
 
 		get '/user/logout' do
 			settings.manager.admin_leave params
-			redirect '/'
+			# redirect '/'
+			{ }
 		end
 
-		# List available session for joining
-		get '/group/join' do
-			@group_list = BoardGroup.all(
-				closed: false,
-				order: [:id.asc]
-			) || []
-			@page = Page.new "session-group-list"
-			haml :"session_group_list"
-		end
+    namespace "/api/v2" do
+		  # List available session for joining
+		  get '/board_groups' do
+			  @group_list = BoardGroup.all(
+				  closed: false,
+				  order: [:id.asc]
+			  ) || []
+			  # @page = Page.new "session-group-list"
+			  # TODO: rewrite session group list as JSON
+			  #haml :"session_group_list"
+			  json({board_groups: @group_list.map(&:to_h) })
+		  end
 
-		get '/session/list' do
-			@group_list = BoardGroup.all(
-				closed: false,
-				order: [:id.asc]
-			) || []
-			@page = Page.new "session-list"
-			haml :"session_list"
-		end
-		#
-		# notify server about the intention of joining the session
-		#
-		get '/session/:session_token/draw/join.json' do
-			begin
-				result = {}
-				status = [ STATUS_SUCCESS ]
-				result = settings.manager.join params
+		  get '/sessions' do
+			  @group_list = BoardGroup.all(
+				  closed: false,
+				  order: [:id.asc]
+			  ) || []
+			  # @page = Page.new "session-list"
+			  # TODO: rewrite session list as JSON
+			  # haml :"session_list"
+			  json({ sessions: @group_list.map(&:to_h) })
+		  end
 
-			rescue PoieticGen::JoinRequestParseError => e
-				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
+		  #
+		  # notify server about the intention of joining the session
+		  #
+		  get '/sessions/:session_token/join' do
+			  begin
+				  result = {}
+				  status = [ STATUS_SUCCESS ]
+				  result = settings.manager.join params
 
-			rescue PoieticGen::InvalidSession => e
-				status = [ STATUS_REDIRECTION, "Session does not exist!", "/"]
+			  rescue PoieticGen::JoinRequestParseError => e
+				  status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
 
-			rescue Exception => e
-				STDERR.puts e.inspect, e.backtrace
-				Process.exit! #FIXME: remove in prod mode ? :-)
+			  rescue PoieticGen::InvalidSession => e
+				  status = [ STATUS_REDIRECTION, "Session does not exist!", "/"]
 
-			ensure
-				# force status of result
-				result[:status] = status
-				return JSON.generate( result )
-			end
-		end
+			  rescue Exception => e
+			    # FIXME: log to file
+				  STDERR.puts e.inspect, e.backtrace
+
+			  ensure
+				  # force status of result
+				  result[:status] = status
+				  json(result)
+			  end
+		  end
+    end
+
+
 
 
 		#

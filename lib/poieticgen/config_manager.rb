@@ -50,7 +50,7 @@ module PoieticGen
 		#
 		def self.parse_int str, err_msg
 			case str
-			when Fixnum then return str
+			when Integer then return str
 			else
 				case str
 				when /^(\d+)$/ then return $1.to_i

@@ -44,18 +44,20 @@ require 'poieticgen/update_request'
 require 'poieticgen/allocation/spiral'
 require 'poieticgen/allocation/random'
 
-require 'poieticgen/board'
-require 'poieticgen/board_group'
-require 'poieticgen/stroke'
+require 'poieticgen/models/board'
+require 'poieticgen/models/board_group'
+require "poieticgen/models/zone"
+require 'poieticgen/models/stroke'
+require "poieticgen/models/user"
+require "poieticgen/models/meta"
+require 'poieticgen/models/timeline'
+require 'poieticgen/models/event'
+require 'poieticgen/models/message'
+
 require 'poieticgen/config_manager'
-require 'poieticgen/page'
 require 'poieticgen/manager'
-require "poieticgen/zone"
-# require "poieticgen/zone_snapshot"
-require "poieticgen/user"
-require "poieticgen/meta"
-# require 'poieticgen/timeline'
-# require 'poieticgen/board_snapshot'
 require 'poieticgen/transaction'
 require 'poieticgen/image'
 
+# require "poieticgen/zone_snapshot"
+# require 'poieticgen/board_snapshot'
