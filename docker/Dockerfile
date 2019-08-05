@@ -1,14 +1,17 @@
-FROM ruby:2.5
+FROM ruby:2.6
 MAINTAINER Glenn Y. Rolland <glenux@glenux.net>
 
 # Install packages for building ruby
 ENV DEBIAN_FRONTEND noninteractive
-RUN sed -i -e '/jessie-updates/d' /etc/apt/sources.list \
+RUN echo "## Setup APT sources.list" \
+	&& sed -i -e '/buster-updates/d' /etc/apt/sources.list \
+	&& echo "## Install system dependencies" \
 	&& apt-get update \
 	&& apt-get install -q -y \
 		git build-essential \
  		make wget \
- 		libpq-dev postgresql-client postgresql-server-dev-9.6 \
+ 		libpq-dev postgresql-client postgresql-server-dev-11 \
+	&& echo "## Cleaning APT files" \
  	&& rm -rf /var/lib/apt/lists/* \
  		/var/cache/apt/archives/*.deb \
  		/var/cache/apt/archives/partial/*.deb \
@@ -18,7 +21,7 @@ WORKDIR /app
 ADD poieticgen.gemspec Gemfile.lock Gemfile /app/
 ADD lib/poieticgen/version.rb /app/lib/poieticgen/version.rb
 RUN gem install bundler && \
-	bundle install --path /app-cache
+	bundle install
 
 # ADD REMAINING (MOST OF THE) CODE
 ADD . /app

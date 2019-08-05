@@ -36,7 +36,7 @@ sed -e "s/^host =.*/host = ${DB_HOST}/" \
 	< "$SAMPLE" \
 	> "$CONFIG"
 
-bundle install --path /app-cache
+bundle install
 
 # Create default sessions if database was new
 if ! bundle exec bin/poietic-cli list |grep 'Test session B' ; then
