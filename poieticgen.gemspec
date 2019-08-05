@@ -53,7 +53,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest"
 
 
-  spec.add_runtime_dependency "faye", "~> 1.2"
+  # spec.add_runtime_dependency "faye", "~> 1.2"
   spec.add_runtime_dependency "thin"
   spec.add_runtime_dependency "sinatra" # :require => "sinatra/base"
   spec.add_runtime_dependency "sinatra-contrib" # :require => "sinatra/cookies"
@@ -64,6 +64,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "sass"
   spec.add_runtime_dependency "compass"
   spec.add_runtime_dependency "json"
+  # spec.add_runtime_dependency "dm-serializer"
   spec.add_runtime_dependency "dm-migrations"
   spec.add_runtime_dependency "dm-transactions"
   spec.add_runtime_dependency "dm-postgres-adapter"
