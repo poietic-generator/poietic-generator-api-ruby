@@ -10,9 +10,6 @@
 #   printer.print(:path => ".", :profile => "profile")
 # end
 # 
-require 'tilt/haml'
-require 'tilt/sass'
-
 require 'dm-core'
 require 'dm-validations'
 require 'dm-migrations'
@@ -22,42 +19,46 @@ require 'dm-constraints'
 require 'data_objects'
 
 require 'sinatra/base'
+require 'sinatra/json'
 require 'sinatra/contrib/all'
-require 'sinatra/flash'
 
 # require 'rdebug/base'
 require 'thor'
 require 'compass'
-require 'haml'
 require 'json'
-require 'sass'
 require 'pp'
-require 'oily_png'
 require 'duration'
 
 require 'rdebug/base'
 
 
-require "poieticgen/version"
-require 'poieticgen/update_request'
+require_relative "poieticgen/version"
+require_relative 'poieticgen/update_request'
 
-require 'poieticgen/allocation/spiral'
-require 'poieticgen/allocation/random'
+require_relative 'poieticgen/allocation/spiral'
+require_relative 'poieticgen/allocation/random'
 
-require 'poieticgen/models/board'
-require 'poieticgen/models/board_group'
-require "poieticgen/models/zone"
-require 'poieticgen/models/stroke'
-require "poieticgen/models/user"
-require "poieticgen/models/meta"
-require 'poieticgen/models/timeline'
-require 'poieticgen/models/event'
-require 'poieticgen/models/message'
+require_relative 'poieticgen/models/board'
+require_relative 'poieticgen/models/board_group'
+require_relative "poieticgen/models/zone"
+require_relative 'poieticgen/models/stroke'
+require_relative "poieticgen/models/user"
+require_relative "poieticgen/models/meta"
+require_relative 'poieticgen/models/timeline'
+require_relative 'poieticgen/models/event'
+require_relative 'poieticgen/models/message'
 
-require 'poieticgen/config_manager'
-require 'poieticgen/manager'
-require 'poieticgen/transaction'
-require 'poieticgen/image'
+require_relative 'poieticgen/controllers/application_controller'
+require_relative 'poieticgen/controllers/spaces_controller'
+require_relative 'poieticgen/controllers/sessions_controller'
+require_relative 'poieticgen/controllers/authentications_controller'
+require_relative 'poieticgen/controllers/registrations_controller'
+
+require_relative 'poieticgen/config_manager'
+require_relative 'poieticgen/manager'
+require_relative 'poieticgen/transaction'
+require_relative 'poieticgen/image'
 
 # require "poieticgen/zone_snapshot"
 # require 'poieticgen/board_snapshot'
+#

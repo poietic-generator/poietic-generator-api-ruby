@@ -1,0 +1,72 @@
+
+server:
+  # host name
+  url: http://whatever.example.com
+
+  # root url
+  root: /
+ 
+  # port on which app should listen
+  port: 80
+
+  # file in which daemon's pid will be stored
+  pidfile: tmp/poieticgen.pid
+
+  # administrator's username
+  admin_username: admin
+
+  # administrator's password
+  admin_password: foobar
+
+database:
+  # the type of database ('sqlite', 'mysql')
+  adapter: sqlite
+
+  # database host
+  host: localhost
+
+  # database username
+  username: johndoe
+
+  # database password
+  password: foobar
+
+  # database name
+  database: tmp/poieticgen.sqlite3
+
+services:
+  user:
+    # maximum number of allowed clients
+    max_clients: 100
+
+    # maximum amount of time (seconds) the session is kept alive by the server 
+    # when the user stays idle (without drawing) (uint)
+    idle_timeout: 300
+
+    # maximum amount of time (seconds) the session is kept alive by the server 
+    # without network activity from a user
+    liveness_timeout: 60
+
+    # number of seconds between keepalive messages (pull messages)
+    keepalive: 5
+
+  board:
+    # name for that board, also used to access this board with the url.
+    name: "board1"
+
+    # width of a drawing zone
+    width: 20
+
+    # height of a drawing zone
+    height: 20
+
+    # zone allocation strategy ('spiral', 'random')
+    allocator: spiral
+
+    # available colors or palette ('ansi', 'truecolor')
+    colors: truecolor
+
+  chat:
+    # enable chat module
+    enable: false
+

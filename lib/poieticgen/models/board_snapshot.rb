@@ -2,7 +2,6 @@
 require 'poieticgen'
 
 module PoieticGen
-	
 	class BoardSnapshot
 		include DataMapper::Resource
 		
