@@ -204,6 +204,7 @@ DEPENDENCIES
   dm-types (~> 1.2.2)
   dm-validations
   extlib
+  ffi (>= 1.9.24)
   foreman
   inifile
   json
@@ -211,6 +212,8 @@ DEPENDENCIES
   oily_png
   poieticgen!
   pry
+  rack (>= 1.6.11)
+  rack-protection (>= 1.5.5)
   rake
   rb-readline
   rdebug

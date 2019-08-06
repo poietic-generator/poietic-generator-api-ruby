@@ -13,6 +13,8 @@ gem "sinatra" # :require => "sinatra/base"
 gem "async_sinatra"
 gem "thor"
 gem "json"
+
+
 # gem "dm-serializer"
 gem "dm-migrations"
 gem "dm-transactions"
@@ -33,6 +35,11 @@ gem "ruby-duration" #"~> 3.2.0" # forcing version fixes bug with active_support 
 gem "backports" #, "~> 3.6.3" # forcing version fixes bug with ruby 2.1
 
 gem 'compass-rails', '~> 3.1.0'
+
+# Security version lock
+gem "ffi", ">= 1.9.24"
+gem "rack-protection", ">= 1.5.5"
+gem "rack", ">= 1.6.11"
 
 group :test, :development do
   gem "bundler"
