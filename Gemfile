@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 gemspec
 
 
-gem "sinatra-contrib", "~> 2.0"
+# gem "sinatra-contrib", "~> 2.0"
 
 gem "rdiscount"
 
@@ -27,7 +27,7 @@ gem "oily_png"
 gem "foreman"
 gem "rdebug"
 gem "rufus-scheduler"
-gem "activesupport" #, "~> 4.2.6"
+gem "activesupport", "~> 4.2.6"
 
 gem "ruby-duration" #"~> 3.2.0" # forcing version fixes bug with active_support 4.x.x
 gem "backports" #, "~> 3.6.3" # forcing version fixes bug with ruby 2.1
