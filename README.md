@@ -115,3 +115,15 @@ License
 Poietic Generator Reloaded is Copyright © 2011-2013 Gnuside.
 It is free software, and may be redistributed under the terms specified in the LICENSE file.
 
+Sponsors
+--------
+
+Boldcode
+
+
+Become a Sponsor
+----------------
+
+[![become a patron](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://patreon.com/glenux)
+
+Is your company using vue-i18n or vue-cli-plugin-i18n to build awesome apps? Join the other patrons and become a sponsor to add your logo on this documentation! Supporting me on Patreon allows me to work less for a job and to work more on Free Open Source Software such as vue-i18n! Thank you!
