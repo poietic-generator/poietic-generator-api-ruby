@@ -1,15 +1,16 @@
-# coding: utf-8
-lib = File.expand_path('../lib', __FILE__)
+# frozen_string_literal: true
+
+lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'poieticgen/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "poieticgen"
+  spec.name          = 'poieticgen'
   spec.version       = PoieticGen::VERSION
-  spec.authors       = ["Glenn Y. Rolland"]
-  spec.email         = ["glenn.rolland@gnuside.com"]
-  spec.summary       = %q{Poietic Generator is a multiplayer and collaborative art experiment.}
-  spec.description   = %q{
+  spec.authors       = ['Glenn Y. Rolland']
+  spec.email         = ['glenux@glenux.net']
+  spec.summary       = 'Poietic Generator is a multiplayer and collaborative art experiment.'
+  spec.description   = <<-MARK
 		The Poietic Generator is a free social network game designed in order
 		to study crowd phenomena such as the ones happening in commercial
 		social networks sites, various online communities, financial markets,
@@ -35,14 +36,14 @@ Gem::Specification.new do |spec|
 		when the technology did not allow massive experiments. Nevertheless,
 		small scale sessions performed over the web or experimental networks
 		with various online communities have provided a good proof of concept.
-  }
-  spec.homepage      = "http://poietic-generator.net"
-  spec.license       = "AGPL"
+  MARK
+  spec.homepage      = 'https://poietic-generator.net'
+  spec.license       = 'AGPL'
 
-  spec.files         = `git ls-files`.split($/)
+  spec.files         = `git ls-files`.split($INPUT_RECORD_SEPARATOR)
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
-  spec.require_paths = ["lib"]
+  spec.require_paths = ['lib']
 
-  spec.required_ruby_version = '>= 1.9.1'
+  spec.required_ruby_version = '>= 2.3'
 end
