@@ -1,7 +1,7 @@
 all: build run
 
 build:
-	docker build -t glenux/poietic-generator .
+	docker build --file docker/Dockerfile -t glenux/poietic-generator .
 
 run: clean
 	docker run -d --name poieticgen_lampbox glenux/lampbox || \
