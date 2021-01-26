@@ -1,4 +1,5 @@
-version: '3'
+---
+version: '3.4'
 
 services:
   db:
@@ -14,12 +15,34 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
+      target: runtime
+    image: poietic-generator-api-ruby:latest
+    volumes:
+      - .:/home/user/app/
+      - app_tmp:/home/user/app/tmp/
     links:
       - db
     ports:
-      - "8000:8000"
+      - "3000:${POIETIC_SERVER_PORT:-3000}"
     environment:
-      DATABASE_URL: postgresql://poieticgen:poieticgen@db/poieticgen
+      DATABASE_URL: postgresql://poieticgen:poieticgen@db:5432/poieticgen
+      POIETIC_SERVER_SSL: "${POIETIC_SERVER_SSL:-false}"
+      POIETIC_SERVER_VIRTUALHOST: "${POIETIC_SERVER_VIRTUALHOST:-}"
+      POIETIC_SERVER_ROOT: "${POIETIC_SERVER_ROOT:-/}"
+      POIETIC_SERVER_PORT: "${POIETIC_SERVER_PORT:-3000}"
+      POIETIC_SERVER_PIDFILE: "${POIETIC_SERVER_PIDFILE:-/home/user/app/tmp/poietic.pid}"
+      POIETIC_SERVER_ADMIN_USERNAME: "${POIETIC_SERVER_ADMIN_USERNAME:-admin}"
+      POIETIC_SERVER_ADMIN_PASSWORD: "${POIETIC_SERVER_ADMIN_PASSWORD:-nimda}"
+      POIETIC_CHAT_ENABLE: "${POIETIC_CHAT_ENABLE:-false}"
+      POIETIC_BOARD_WIDTH: "${POIETIC_BOARD_WIDTH:-20}"
+      POIETIC_BOARD_HEIGHT: "${POIETIC_BOARD_HEIGHT:-20}"
+      POIETIC_BOARD_ALLOCATOR: "${POIETIC_BOARD_ALLOCATOR:-spiral}"
+      POIETIC_BOARD_COLORS: "${POIETIC_BOARD_COLORS:-truecolor}"
+      POIETIC_DB_ADAPTER: "${POIETIC_DB_ADAPTER:-postgres}"
+      POIETIC_USER_MAX_CLIENTS: "${POIETIC_USER_MAX_CLIENTS:-100}"
+      POIETIC_USER_IDLE_TIMEOUT: "${POIETIC_USER_IDLE_TIMEOUT:-300}"
+      POIETIC_USER_LIVENESS_TIMEOUT: "${POIETIC_USER_LIVENESS_TIMEOUT:-60}"
+      POIETIC_USER_KEEPALIVE: "${POIETIC_USER_KEEPALIVE:-5}"
 
   adminer:
     image: adminer
@@ -31,6 +54,7 @@ services:
 
 volumes:
   pg_data:
+  app_tmp:
 
 # poieticphpadm:
 #   image: "phpmyadmin/phpmyadmin"

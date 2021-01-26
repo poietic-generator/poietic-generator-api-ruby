@@ -1,0 +1,83 @@
+
+[server]
+; enable ssl (default: false)
+ssl = <%= ENV['POIETIC_SERVER_SSL'] %>
+
+; host name (default: localhost)
+virtualhost = <%= ENV['POIETIC_SERVER_VIRTUALHOST'] %>
+
+; root url (default: /)
+root = <%= ENV['POIETIC_SERVER_ROOT'] %>
+
+; port on which to listen (default: 3000)
+port = <%= ENV['POIETIC_SERVER_PORT'] %>
+
+; file in which daemon's pid will be stored (default: tmp/poieticgen.pid)
+pidfile = <%= ENV['POIETIC_SERVER_PIDFILE'] %>
+
+; administrator's username
+admin_username = <%= ENV['POIETIC_SERVER_ADMIN_USERNAME'] %>
+
+; administrator's password
+admin_password = <%= ENV['POIETIC_SERVER_ADMIN_PASSWORD'] %>
+
+
+
+[board]
+; FIXME: move those parameters to board data structure
+; width of a drawing zone (default: 20)
+width = <%= ENV['POIETIC_BOARD_WIDTH'] %>
+
+; height of a drawing zone (default: 20)
+height = <%= ENV['POIETIC_BOARD_HEIGHT'] %>
+
+; zone allocation strategy : 'spiral' or 'random' (default: spiral)
+allocator = <%= ENV['POIETIC_BOARD_ALLOCATOR'] %>
+
+; available colors or palette: 'ansi' or 'truecolor' (default: truecolor)
+colors = <%= ENV['POIETIC_BOARD_COLORS'] %>
+
+[fragment]
+
+[session]
+
+[database]
+; the type of database ('sqlite', 'mysql')
+adapter = <%= ENV['POIETIC_DB_ADAPTER'] %>
+
+; database host
+host = <%= ENV['POIETIC_DB_HOST'] %>
+
+; database username
+username = <%= ENV['POIETIC_DB_USER'] %>
+
+; database password
+password = <%= ENV['POIETIC_DB_PASS'] %>
+
+; database name
+database = <%= ENV['POIETIC_DB_NAME'] %>
+
+; database port
+port = <%= ENV['POIETIC_DB_PORT'] %>
+
+
+[chat]
+; enable chat module (default: false)
+enable = <%= ENV['POIETIC_DB_PORT'] %>
+
+
+[user]
+; maximum number of connected clients 
+max_clients = <%= ENV['POIETIC_USER_MAX_CLIENTS'] %>
+
+; maximum amount of time (seconds) the session is kept alive by the server 
+; when the user stays idle (without drawing) (uint)
+idle_timeout = <%= ENV['POIETIC_USER_IDLE_TIMEOUT'] %>
+
+; maximum amount of time (seconds) the session is kept alive by the server 
+; without network activity from a user
+liveness_timeout = <%= ENV['POIETIC_USER_LIVENESS_TIMEOUT'] %>
+
+; number of seconds between keepalive messages (pull messages)
+keepalive = <%= ENV['POIETIC_USER_KEEPALIVE'] %>
+
