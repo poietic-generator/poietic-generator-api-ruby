@@ -4,7 +4,6 @@ source 'https://rubygems.org'
 
 gemspec
 
-# gem "sinatra-contrib", "~> 2.0"
 
 gem 'rdiscount'
 
@@ -12,6 +11,7 @@ gem 'rdiscount'
 gem 'async_sinatra'
 gem 'json'
 gem 'sinatra' # :require => "sinatra/base"
+gem 'sinatra-contrib'
 gem 'thin'
 gem 'thor'
 
