@@ -24,6 +24,7 @@ module PoieticGen ; class ConfigManager
 
 	class ConfigServer
 		attr_reader :ssl
+		attr_reader :port
 		attr_reader :virtualhost
 		attr_reader :root_url
 		attr_reader :pidfile
@@ -39,6 +40,9 @@ module PoieticGen ; class ConfigManager
 
 			raise MissingField, "Server.root" unless hash.include? "root"
 			@root = hash["root"]
+
+			raise MissingField, "Server.port" unless hash.include? "port"
+			@port = ConfigManager.parse_int hash["port"], "Server.port"
 
 			raise MissingField, "Server.pidfile" unless hash.include? "pidfile"
 			@pidfile = hash["pidfile"]

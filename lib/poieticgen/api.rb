@@ -27,7 +27,7 @@ module PoieticGen
         config_path = File.join(settings.root,PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH)
         config = PoieticGen::ConfigManager.new(config_path)
 
-        FileUtils.mkdir_p File.dirname config.server.pidfile
+        FileUtils.mkdir_p File.dirname(config.server.pidfile)
         File.write(config.server.pidfile, Process.pid)
 
         set :config, config
@@ -45,6 +45,7 @@ module PoieticGen
         manager = PoieticGen::Manager.new(config)
         set :manager, manager
         set :controllers, {}
+        set :port, manager.config.server.port
 
       rescue ::DataObjects::SQLError => e
         STDERR.puts "ERROR: Unable to connect to database."

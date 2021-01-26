@@ -1,5 +1,6 @@
 
 require 'inifile'
+require 'erb'
 
 module PoieticGen
 
@@ -59,8 +60,6 @@ module PoieticGen
 			end
 		end
 
-
-
 		#
 		#
 		#
@@ -70,7 +69,16 @@ module PoieticGen
 				raise MissingFile, "Configuration file %s not found" % conf_file
 			end
 
-			ini_fh = IniFile.load conf_file
+			template = ERB.new(File.read(conf_file))
+			ini_data = template.result(binding)
+			# STDERR.puts "*** INI DATA", 
+			#   ini_data.split(/\n/)
+			#   .reject{|l| l =~ /^\s*$/}
+			#   .reject{|l| l =~ /^\s*;.*$/}
+			#   .join("\n")
+			ini_fh = IniFile.new
+			ini_fh.parse(ini_data)
+
 			raise MissingSection unless ini_fh.has_section? "server"
 			@server = ConfigServer.new ini_fh["server"]
 
