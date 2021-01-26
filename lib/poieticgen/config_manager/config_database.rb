@@ -35,14 +35,14 @@ module PoieticGen ; class ConfigManager
 		def initialize hash
 			raise MissingField, "database.adapter" unless hash.include? "adapter"
 			case hash["adapter"].strip.downcase
-			when "sqlite" then
+			when 'sqlite' then
 				@adapter = 'sqlite'
 				raise MissingField, "database.database" unless hash.include? "database"
 				@database = hash["database"]
 				@host = nil
 				@username = nil
 				@password = nil
-			when "postgres" then
+			when 'postgres' then
 				@adapter = 'postgres'
 				raise MissingField, "database.host" unless hash.include? "host"
 				@host = hash["host"]
@@ -52,7 +52,7 @@ module PoieticGen ; class ConfigManager
 				@password = hash["password"]
 				raise MissingField, "database.database" unless hash.include? "database"
 				@database = hash["database"]
-			when "mysql" then
+			when 'mysql' then
 				@adapter = 'mysql'
 				raise MissingField, "database.host" unless hash.include? "host"
 				@host = hash["host"]
@@ -62,7 +62,7 @@ module PoieticGen ; class ConfigManager
 				@password = hash["password"]
 				raise MissingField, "database.database" unless hash.include? "database"
 				@database = hash["database"]
-			else raise BadFieldType, "database.adapter must be [sqlite|mysql]"
+			else raise BadFieldType, "database.adapter must be [sqlite|mysql|postgres]"
 			end
 		end
 

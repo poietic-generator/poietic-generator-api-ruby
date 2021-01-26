@@ -1,16 +1,8 @@
+# frozen_string_literal: true
 
-require 'thread'
 require 'time'
 require 'pp'
 
-require 'poieticgen/palette'
-require 'poieticgen/admin'
-require 'poieticgen/chat_manager'
-require 'poieticgen/update_request'
-require 'poieticgen/snapshot_request'
-require 'poieticgen/update_view_request'
-require 'poieticgen/join_request'
-require 'poieticgen/transaction'
 
 module PoieticGen
   class InvalidSession < RuntimeError; end

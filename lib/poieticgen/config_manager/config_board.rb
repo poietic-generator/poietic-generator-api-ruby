@@ -27,7 +27,7 @@ module PoieticGen ; class ConfigManager
 	#
 	class ConfigBoard
 
-		attr_reader :name
+		# attr_reader :name
 		attr_reader :allocator
 		attr_reader :colors
 		attr_reader :width
@@ -38,8 +38,8 @@ module PoieticGen ; class ConfigManager
 		#
 		#
 		def initialize hash
-			raise MissingField, "Board.name" unless hash.include? "name"
-			@name = hash["name"]
+			# raise MissingField, "Board.name" unless hash.include? "name"
+			# @name = hash["name"]
 
 			raise MissingField, "Board.allocator" unless hash.include? "allocator"
 			case hash["allocator"].strip.downcase

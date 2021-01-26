@@ -19,7 +19,7 @@ module PoieticGen
     def current_board
     end
 
-		def self.create config, name
+		def self.create(config, name)
 			res = super({
 				# FIXME: when the token already exists, SaveFailureError is raised
 				token: (0...16).map{ ('a'..'z').to_a[rand(26)] }.join,
