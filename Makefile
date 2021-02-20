@@ -1,34 +1,16 @@
 all: build run
 
 build:
-	docker build --file docker/Dockerfile -t glenux/poietic-generator .
+	docker-compose build
 
-run: clean
-	docker run -d --name poieticgen_lampbox glenux/lampbox || \
-		docker start poieticgen_lampbox || \
-		true
-	docker run --rm \
-		--name poieticgen_app \
-		--link poieticgen_lampbox:db \
-		-v $$(pwd):/poieticgen \
-		-p 8000:8000 \
-		-i -t glenux/poietic-generator
+run:
+	docker-compose up
 
 test:
-	docker exec \
-		-i -t \
-		poieticgen_app \
-		/bin/bash || \
-	docker run \
-		--name poieticgen_app \
-		--link poieticgen_lampbox:db \
-		-v $$(pwd):/poieticgen \
-		-p 8000:8000 \
-		-i -t glenux/poietic-generator /bin/bash
+	docker-compose up -d
+	docker-compose exec app docker/entrypoint.sh rake test 
 
 clean:
-	docker rm -f poieticgen_app || true
-
-distclean:
-	docker rm -f poieticgen_lampbox || true
+	docker-compose kill
+	docker-compose rm -f
 
