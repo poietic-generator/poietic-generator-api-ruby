@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-require 'poieticgen'
+require 'sinatra/base'
+# require 'sinatra/json'
+require 'sinatra/namespace' # part of sinatra-contrib
 
 module PoieticGen
   class DatabaseConnectionError < RuntimeError ; end

@@ -1,6 +1,4 @@
 
-require 'poieticgen'
-
 module PoieticGen
 
 	class TakeSnapshotError < RuntimeError ; end

@@ -18,13 +18,9 @@ require 'dm-types'
 require 'dm-constraints'
 require 'data_objects'
 
-require 'sinatra/base'
-# require 'sinatra/json'
-require 'sinatra/namespace' # part of sinatra-contrib
 
 require 'rdebug/base'
-require 'thor'
-require 'compass'
+# require 'compass' # not needed by the API
 require 'json'
 require 'pp'
 require 'duration'

@@ -1,6 +1,6 @@
 # vim: set ts=2 sw=2 et:
 
-require 'poieticgen'
+require 'thor'
 
 module PoieticGen
   class Cli < Thor

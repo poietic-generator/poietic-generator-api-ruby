@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-require 'poieticgen'
-
 module PoieticGen
   module SessionsRoutes 
     def self.registered(app)

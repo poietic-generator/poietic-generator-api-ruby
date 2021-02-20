@@ -1,13 +1,14 @@
 # vim: set ts=2 sw=2 et:
 
 require 'poieticgen'
+require 'chunky_png'
 
 module PoieticGen
 	# Image interface
-	class Image < ChunkyPNG::Image
+	class Image < ::ChunkyPNG::Image
 		def initialize width, height, fill=nil
 			if fill == nil then
-				fill = ChunkyPNG::Color::TRANSPARENT
+				fill = ::ChunkyPNG::Color::TRANSPARENT
 			end
 
 			super width, height, fill
