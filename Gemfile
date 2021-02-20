@@ -15,6 +15,7 @@ gem 'sinatra-contrib'
 gem 'thin'
 gem 'thor'
 
+gem "chunky_png"
 # gem "dm-serializer"
 gem 'activesupport', '~> 4.2.6'
 gem 'dm-aggregates'
@@ -34,20 +35,20 @@ gem 'rufus-scheduler'
 gem 'backports' # , "~> 3.6.3" # fixes bug with ruby 2.1
 gem 'ruby-duration' # , "~> 3.2.0" # fixes bug with active_support 4.x.x
 
-gem 'compass-rails', '~> 3.1.0'
+# gem 'compass-rails' #, '~> 3.1.0'
 
 # Security version lock
 gem 'ffi', '>= 1.9.24'
-gem 'rack', '>= 1.6.11'
+gem 'rack', '>= 2.1.4'
 gem 'rack-protection', '>= 1.5.5'
 
 gem 'bundler'
-gem 'rake'
+gem 'rake', '>= 12.3.3'
 
 group :development do
   gem 'pry'
   gem 'rb-readline'
-  gem 'rerun', '~> 0.13.0'
+  # gem 'rerun', '~> 0.13.0'
 end
 
 group :test, :development do
