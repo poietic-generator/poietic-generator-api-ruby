@@ -4,7 +4,7 @@ require_relative 'spec_helper'
 
 require 'poieticgen/cli'
 
-describe PoieticGen::cli do
+describe PoieticGen::Cli do
 	let(:cli) { TimeCost::CLI.new }
 
 	describe '.list' do
