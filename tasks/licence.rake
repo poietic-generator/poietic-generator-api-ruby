@@ -1,6 +1,7 @@
 
 require 'mkmf'
 
+namespace :gem do
 desc "Update licence headers in all files."
 task :license do 
 	fail "Unable to find 'headache' binary" unless find_executable "headache"
@@ -9,4 +10,5 @@ task :license do
 		headache -c misc/headache.conf -h misc/header.txt $$NAME ; \
 	done
 	}
+end
 end

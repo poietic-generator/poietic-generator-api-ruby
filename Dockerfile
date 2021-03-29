@@ -1,18 +1,26 @@
-FROM debian:testing
+FROM debian:8.5
 MAINTAINER Glenn Y. Rolland <glenux@glenux.net>
 
 # Install packages for building ruby
-RUN apt-get update
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get install -q -y ruby2.1 git ruby2.1-dev
-RUN apt-get install -q -y make libmysqlclient-dev mysql-client
+RUN apt-get update && \
+ 	apt-get install -q -y \
+		ruby ruby2.1 git ruby2.1-dev build-essential \
+ 		make wget \
+ 		libpq-dev postgresql-client postgresql-server-dev-all
+# libmysqlclient-dev mysql-client \
+
+
+# Install packages for websockets
+RUN wget https://github.com/joewalnes/websocketd/releases/download/v0.2.12/websocketd-0.2.12_amd64.deb && \
+	dpkg -i *.deb && \
+	rm *.deb
 
 RUN useradd -m user
 RUN chown -R user:user /home/user
 RUN gem2.1 install bundler
 
-
-# TESTING
+# PRE-INSTALL DEPENDENCIES
 RUN mkdir -p /home/user/.cache && cd /home/user/.cache && git init
 ADD lib/poieticgen/version.rb /home/user/.cache/lib/poieticgen/version.rb
 ADD poieticgen.gemspec /home/user/.cache/poieticgen.gemspec
@@ -22,22 +30,15 @@ RUN chown -R user:user /home/user
 
 WORKDIR /home/user/.cache
 USER user
-RUN find .
-RUN bundle install --path /home/user/.bundle/
+RUN echo "Installing gems ... " && bundle install --path /home/user/.bundle/
 
+# ADD REMAINING (MOST OF THE) CODE
 ADD . /home/user/poieticgen
 
-# WORKING
-#ADD . /home/user/poieticgen
-#RUN chown -R user:user /home/user
-#WORKDIR /home/user/poieticgen
-#USER user
-#RUN find .
-#RUN bundle install --path /home/user/.bundle/
-
+# START DOCKER
 USER root
 RUN chown -R user:user /home/user
-ADD misc/docker-start.sh /usr/local/sbin/start
+ADD misc/docker-start-postgres.sh /usr/local/sbin/start
 RUN chmod +755 /usr/local/sbin/start
 
 EXPOSE 8000

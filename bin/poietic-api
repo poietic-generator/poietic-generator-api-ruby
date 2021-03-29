@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+require 'poieticgen'
+require 'poieticgen/api'
+
+module PoieticGen
+  class Api
+    run! port: 9000, handler_name: 'rackup'
+  end
+end
+

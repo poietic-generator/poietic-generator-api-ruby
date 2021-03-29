@@ -1,36 +1,5 @@
-##############################################################################
-#                                                                            #
-#  Poietic Generator Reloaded is a multiplayer and collaborative art         #
-#  experience.                                                               #
-#                                                                            #
-#  Copyright (C) 2011-2013 - Gnuside                                         #
-#                                                                            #
-#  This program is free software: you can redistribute it and/or modify it   #
-#  under the terms of the GNU Affero General Public License as published by  #
-#  the Free Software Foundation, either version 3 of the License, or (at     #
-#  your option) any later version.                                           #
-#                                                                            #
-#  This program is distributed in the hope that it will be useful, but       #
-#  WITHOUT ANY WARRANTY; without even the implied warranty of                #
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero  #
-#  General Public License for more details.                                  #
-#                                                                            #
-#  You should have received a copy of the GNU Affero General Public License  #
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.     #
-#                                                                            #
-##############################################################################
 
-require 'poieticgen/update_request'
-require 'poieticgen/zone'
-require 'poieticgen/user'
-require 'poieticgen/timeline'
-require 'poieticgen/board_snapshot'
-require 'poieticgen/transaction'
-
-require 'poieticgen/allocation/spiral'
-require 'poieticgen/allocation/random'
-
-require 'monitor'
+require 'poieticgen'
 
 module PoieticGen
 
@@ -42,17 +11,16 @@ module PoieticGen
 	class Board
 		include DataMapper::Resource
 
-		property :id,            Serial
-		#property :name,          String,  :unique => true, :required=> false
+		property :id,            Serial, index: true
 		property :token,         String, :required => true, :unique => true
 		property :timestamp,     Integer, :required => true
 		property :end_timestamp, Integer, :default => 0
-		
+
 		property :closed,        Boolean, :default => false
 		property :strokes_since_last_snapshot, Integer, :default => 0
 
 		belongs_to :board_group
-		has n, :board_snapshots
+		# has n, :board_snapshots
 		has n, :timelines
 		has n, :users
 		has n, :zones
@@ -79,7 +47,6 @@ module PoieticGen
 
 		def self.create config, group
 			res = super({
-				# FIXME: when the token already exists, SaveFailureError is raised
 				:token => (0...16).map{ ('a'..'z').to_a[rand(26)] }.join,
 				:timestamp => Time.now.to_i,
 				:board_group => group
@@ -105,24 +72,12 @@ module PoieticGen
 		end
 
 		def close
-			t = Board.transaction do |t|
+			Board.transaction do #NC:SMALL
 				self.closed = true
 				self.end_timestamp = Time.now.to_i
 
 				self.save
 			end
-
-		rescue DataMapper::SaveFailureError => e
-			rdebug "Saving failure : %s" % e.resource.errors.inspect
-			raise e
-
-		rescue DataObjects::TransactionError => e
-			Transaction.handle_deadlock_exception e, t, "Board.close"
-			raise e
-
-		rescue Exception => e
-			t.rollback
-			raise e
 		end
 
 
@@ -131,25 +86,16 @@ module PoieticGen
 		#
 		def join user, config
 			zone = nil
-			Board.transaction do |t|
-				begin
-					allocator = ALLOCATORS[self.board_group.allocator_type].new config, self.zones
-					zone = allocator.allocate self
-					zone.user = user
-					user.zone = zone
-					zone.save
-
-					Event.create_join user, self
-
-				rescue DataObjects::TransactionError => e
-					Transaction.handle_deadlock_exception e, t, "Board.join"
-					raise e
-
-				rescue Exception => e
-					t.rollback
-					raise e
-				end
+			Board.transaction do #NC:SMALL
+				allocator = ALLOCATORS[self.board_group.allocator_type].new config, self.zones
+				zone = allocator.allocate self
+				zone.user = user
+				user.zone = zone
+				zone.save
 			end
+
+			Event.create_join user, self
+
 			return zone
 		end
 
@@ -158,70 +104,30 @@ module PoieticGen
 		# disconnect user from the board
 		#
 		def leave user
-			Board.transaction do |t|
-				begin
-					zone = user.zone # FIXME: verify if the user is in the board
-					unless zone.nil? then
-						zone.reset
-						zone.disable
-						zone.save
-
-						Event.create_leave user, self
-					else
-						#FIXME: return an error to the user?
-					end
-
-				rescue DataObjects::TransactionError => e
-					Transaction.handle_deadlock_exception e, t, "Board.leave"
-					raise e
-
-				rescue Exception => e
-					t.rollback
-					raise e
+			Board.transaction do #NC:SMALL
+				# FIXME: verify if the user is in the board
+				zone = user.zone 
+				if zone.nil? then
+					raise RuntimeError, "user zone is nil! WTF?"
 				end
+				zone.reset
+				zone.disable
+				zone.save
+
+			  Event.create_leave user, self
 			end
 		end
 
-
 		def update_data user, drawing
 			return if drawing.empty?
-		
-			# Update the zone
 
 			user.zone.apply drawing
 
-			Board.transaction do |t|
-				begin
-					# Save board periodically
-
-					stroke_count = self.strokes_since_last_snapshot + drawing.size
-
-					if stroke_count > STROKE_COUNT_BETWEEN_QFRAMES then
-						board_snap = BoardSnapshot.create self
-						alive_zones = self.zones.all(:expired => false)
-
-						# FIXME: "zone.snapshot board_snap.timeline" can return nil?
-						alive_zones.each do |zone|
-							board_snap.zone_snapshots << (zone.snapshot board_snap.timeline)
-						end
-
-						board_snap.save
-
-						stroke_count = 0
-					end
-
-					self.strokes_since_last_snapshot = stroke_count
-					self.save
-
-				rescue DataObjects::TransactionError => e
-					Transaction.handle_deadlock_exception e, t, "Board.update_data"
-					raise TakeSnapshotError
-
-				rescue Exception => e
-					t.rollback
-					raise e
-				end
-			end
+			# Update the zone
+			#Board.transaction do 
+			#  self.strokes_since_last_snapshot += drawing.size
+			#  self.save
+			#end
 		end
 
 
@@ -244,7 +150,7 @@ module PoieticGen
 					zones[zs.zone.index] = Zone.from_snapshot zs
 				end
 			end
-			
+
 			# get events since the snapshot
 			timelines = self.timelines.all(
 				:id.gt => snap_timeline,
@@ -261,7 +167,7 @@ module PoieticGen
 			timelines.events.each do |event|
 				user = event.user
 				zone = user.zone
-				
+
 				if event.type == "join" then
 					zone.reset
 					zone.expired = false
@@ -283,7 +189,7 @@ module PoieticGen
 			zones.each do |index,zone|
 				zone.apply_local strokes.select{ |s| s.zone.id == zone.id }
 			end
-			
+
 			return zones
 		end
 
@@ -326,7 +232,7 @@ module PoieticGen
 				:timestamp.lte => timestamp,
 				:order => [ :id.desc ]
 			)
-			
+
 			if timeline.nil? then
 				return nil
 			end

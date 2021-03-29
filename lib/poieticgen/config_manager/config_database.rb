@@ -42,6 +42,16 @@ module PoieticGen ; class ConfigManager
 				@host = nil
 				@username = nil
 				@password = nil
+			when "postgres" then
+				@adapter = 'postgres'
+				raise MissingField, "database.host" unless hash.include? "host"
+				@host = hash["host"]
+				raise MissingField, "database.username" unless hash.include? "username"
+				@username = hash["username"]
+				raise MissingField, "database.password" unless hash.include? "password"
+				@password = hash["password"]
+				raise MissingField, "database.database" unless hash.include? "database"
+				@database = hash["database"]
 			when "mysql" then
 				@adapter = 'mysql'
 				raise MissingField, "database.host" unless hash.include? "host"
@@ -67,6 +77,14 @@ module PoieticGen ; class ConfigManager
 					"host"      => "",
 					"timeout" 	=> 15000
 				}
+			when 'postgres' then
+				return {
+					"adapter"   => 'postgres',
+					"database"  => @database,
+					"username"  => @username,
+					"password"  => @password,
+					"host"      => @host
+				}
 			when 'mysql' then
 				return {
 					"adapter"   => 'mysql',
@@ -86,6 +104,8 @@ module PoieticGen ; class ConfigManager
 				return "sqlite3://%s" % @database
 			when 'mysql' then
 				return "mysql://%s:%s@%s/%s" % @username, @password, @host, @database
+			when 'postgres' then
+				return "postgres://%s:%s@%s/%s" % @username, @password, @host, @database
 			else
 				raise UnknownAdapter, @adapter
 			end

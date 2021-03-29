@@ -11,7 +11,7 @@
 - @page.js << "/js/page/view.js"
 
 %div(data-fullscreen="true" data-role="page" class="poietic-page-#{@page.title}")
-  %div{"data-role" => "content"}
+  %div(data-role="content" style="overflow: hidden;")
     .viewer
       %canvas#session-viewer
       %div#session-overlay

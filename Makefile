@@ -1,3 +1,5 @@
+all: build run
+
 build:
 	docker build -t glenux/poietic-generator .
 
@@ -12,8 +14,12 @@ run: clean
 		-p 8000:8000 \
 		-i -t glenux/poietic-generator
 
-test: clean
-	docker run --rm \
+test:
+	docker exec \
+		-i -t \
+		poieticgen_app \
+		/bin/bash || \
+	docker run \
 		--name poieticgen_app \
 		--link poieticgen_lampbox:db \
 		-v $$(pwd):/poieticgen \

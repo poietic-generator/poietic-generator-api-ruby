@@ -1,0 +1,50 @@
+#!/usr/bin/env ruby
+
+require 'poieticgen'
+require 'rufus-scheduler'
+
+module  PoieticGen ; class SnapshotCollector
+  def initialize
+    $stdout = File.new '/dev/null', 'w' # mute STDOUT
+
+    @config = PoieticGen::ConfigManager.new PoieticGen::ConfigManager::DEFAULT_CONFIG_PATH
+    DataMapper.finalize
+    DataMapper::Logger.new(STDERR, :info)
+    hash = @config.database.get_hash
+    DataMapper.setup(:default, hash)
+
+    # raise exception on save failure (globally across all models)
+    DataMapper::Model.raise_on_save_failure = true
+
+    DataMapper.auto_upgrade!
+
+    $stdout = STDOUT # unmute STDOUT
+  rescue DataObjects::SQLError
+    $stdout = STDOUT # unmute STDOUT
+    STDERR.puts "ERROR: unable to connect to database. Please verify settings."
+    exit 1
+  end
+
+  def exec
+    scheduler = Rufus::Scheduler.new
+    scheduler.every('5s') do
+# 		  groups = BoardGroup.all(closed: false, order: [:id.asc])
+# 		  groups.each do |group| 
+# 		    next unless group.live_users_count > 0 
+#         STDERR.puts "Building board_group #{group.id} snapshots -- starting !"
+# 	      Board.transaction do
+# 		      board = group.boards.first(order: [:id.desc])
+# 		      board.snapshot
+# 	      end
+#         STDERR.puts "Building board_group #{group.id} snapshots -- done."
+#       end
+    end
+
+    scheduler.join
+  end
+
+end ; end
+
+gc = PoieticGen::SnapshotCollector.new
+gc.exec
+

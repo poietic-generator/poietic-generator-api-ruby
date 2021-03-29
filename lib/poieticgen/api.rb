@@ -1,40 +1,6 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#                                                                            #
-#  Poietic Generator Reloaded is a multiplayer and collaborative art         #
-#  experience.                                                               #
-#                                                                            #
-#  Copyright (C) 2011-2013 - Gnuside                                         #
-#                                                                            #
-#  This program is free software: you can redistribute it and/or modify it   #
-#  under the terms of the GNU Affero General Public License as published by  #
-#  the Free Software Foundation, either version 3 of the License, or (at     #
-#  your option) any later version.                                           #
-#                                                                            #
-#  This program is distributed in the hope that it will be useful, but       #
-#  WITHOUT ANY WARRANTY; without even the implied warranty of                #
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero  #
-#  General Public License for more details.                                  #
-#                                                                            #
-#  You should have received a copy of the GNU Affero General Public License  #
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.     #
-#                                                                            #
-##############################################################################
 
-require 'sinatra/base'
-require 'sinatra/cookies'
-require 'sinatra/flash'
-require 'rufus-scheduler'
-
-require 'poieticgen/version'
-require 'poieticgen/config_manager'
-require 'poieticgen/page'
-require 'poieticgen/manager'
-
-require 'rdebug/base'
-require 'json'
-require 'pp'
-
+require 'poieticgen'
 
 module PoieticGen
 
@@ -42,44 +8,34 @@ module PoieticGen
 
 	class Api < Sinatra::Base
 
-		STATUS_INFORMATION = 1
-		STATUS_SUCCESS = 2
-		STATUS_REDIRECTION = 3
+		STATUS_INFORMATION  = 1
+		STATUS_SUCCESS      = 2
+		STATUS_REDIRECTION  = 3
 		STATUS_SERVER_ERROR = 4
-		STATUS_BAD_REQUEST = 5
+		STATUS_BAD_REQUEST  = 5
 		
-		SESSION_MAX_LISTED_COUNT = 5
-
 		enable :run
-		#disable :run
 
 		helpers Sinatra::Cookies
 
-		#set :environment, :development
 		set :root, File.expand_path(File.join(File.dirname(__FILE__),'..','..'))
 		set :environment, :production
 
 		set :static, true
 		set :public_folder, 'public'
 		set :views, 'views'
-		set :protection, :except => :frame_options
+		set :protection, except: :frame_options
 
-		mime_type :ttf, "application/octet-stream"
-		mime_type :eot, "application/octet-stream"
-		mime_type :otf, "application/octet-stream"
-		mime_type :woff, "application/octet-stream"
+		mime_type :ttf, 'application/octet-stream'
+		mime_type :eot, 'application/octet-stream'
+		mime_type :otf, 'application/octet-stream'
+		mime_type :woff, 'application/octet-stream'
 
 		register Sinatra::Flash # FIXME: doesn't work
 
-		configure :development do |c|
-			require "sinatra/reloader"
-			register Sinatra::Reloader
-			#also_reload "poieticgen/**/*.rb"
-		end
-
 		configure do
 			# Enable assets management via compass
-			Compass.add_project_configuration(File.join(settings.root, 'config', 'compass.rb'))
+			::Compass.add_project_configuration(File.join(settings.root, 'config', 'compass.rb'))
 
 			begin
 				config = PoieticGen::ConfigManager.new(File.join(
@@ -97,24 +53,15 @@ module PoieticGen
 				DataMapper::Logger.new(STDERR, :info)
 				#DataMapper::Logger.new(STDERR, :debug)
 				hash = config.database.get_hash
-				pp "db hash :", hash
 				DataMapper.setup(:default, hash)
 
 				# raise exception on save failure (globally across all models)
 				DataMapper::Model.raise_on_save_failure = true
 				DataMapper.auto_upgrade!
 				
-				manager = (PoieticGen::Manager.new config)
+				manager = PoieticGen::Manager.new(config)
 				set :manager, manager
 
-				scheduler = Rufus::Scheduler.new
- 				set :scheduler, scheduler
-  				scheduler.every('5s') do
-					User.transaction do |t|
-						manager.check_expired_users
-						Board.check_expired_boards
-					end
-    			end
 
 			rescue ::DataObjects::SQLError => e
 				STDERR.puts "ERROR: Unable to connect to database."
@@ -163,7 +110,6 @@ module PoieticGen
 
 		get '/' do
 			@page = Page.new "index"
-			
 			haml :index
 		end
 
@@ -221,7 +167,6 @@ module PoieticGen
 		post '/user/login' do 
 			begin
 				admin_token = settings.manager.admin_join params
-
 				redirect '/session/admin?admin_token=%s' % admin_token
 			
 			rescue PoieticGen::AdminSessionNeeded => e
@@ -236,7 +181,6 @@ module PoieticGen
 
 
 		get '/session/admin' do 
-
 			if params[:admin_token].nil? then
 				params[:admin_token] = cookies[:admin_token] # prevent session from being lost
 			end
@@ -257,23 +201,19 @@ module PoieticGen
 
 		# List available session for joining
 		get '/group/join' do
-			BoardGroup.transaction do
-				@group_list = BoardGroup.all(
-					closed: false,
-					order: [:id.asc]
-				) || []
-			end
+			@group_list = BoardGroup.all(
+				closed: false,
+				order: [:id.asc]
+			) || []
 			@page = Page.new "session-group-list"
 			haml :"session_group_list"
 		end
 
 		get '/session/list' do
-			BoardGroup.transaction do
-				@group_list = BoardGroup.all(
-					closed: false,
-					order: [:id.asc]
-				) || []
-			end
+			@group_list = BoardGroup.all(
+				closed: false,
+				order: [:id.asc]
+			) || []
 			@page = Page.new "session-list"
 			haml :"session_list"
 		end
@@ -287,11 +227,9 @@ module PoieticGen
 				result = settings.manager.join params
 
 			rescue PoieticGen::JoinRequestParseError => e
-				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
 
 			rescue PoieticGen::InvalidSession => e
-				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_REDIRECTION, "Session does not exist!", "/"]
 
 			rescue Exception => e
@@ -333,7 +271,6 @@ module PoieticGen
 				status = [ STATUS_BAD_REQUEST, "Invalid content: %s" % e.message ]
 
 			rescue PoieticGen::InvalidSession => e
-				STDERR.puts e.inspect, e.backtrace
 				status = [ STATUS_REDIRECTION, "Session has expired !", "/"]
 
 			rescue ArgumentError => e

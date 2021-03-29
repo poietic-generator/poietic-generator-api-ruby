@@ -1,27 +1,5 @@
-##############################################################################
-#                                                                            #
-#  Poietic Generator Reloaded is a multiplayer and collaborative art         #
-#  experience.                                                               #
-#                                                                            #
-#  Copyright (C) 2011-2013 - Gnuside                                         #
-#                                                                            #
-#  This program is free software: you can redistribute it and/or modify it   #
-#  under the terms of the GNU Affero General Public License as published by  #
-#  the Free Software Foundation, either version 3 of the License, or (at     #
-#  your option) any later version.                                           #
-#                                                                            #
-#  This program is distributed in the hope that it will be useful, but       #
-#  WITHOUT ANY WARRANTY; without even the implied warranty of                #
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero  #
-#  General Public License for more details.                                  #
-#                                                                            #
-#  You should have received a copy of the GNU Affero General Public License  #
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.     #
-#                                                                            #
-##############################################################################
 
-require 'dm-core'
-require 'poieticgen/board'
+require 'poieticgen'
 
 module PoieticGen
 
@@ -29,32 +7,35 @@ module PoieticGen
 
 		include DataMapper::Resource
 
+		# This constant is the one used to check the leaved user, and generate
+		# events. This check is made in the update_data method. It will be done
+		# at least every LEAVE_CHECK_TIME_MIN days at a user update_data request.
+		LEAVE_CHECK_TIMEOUT = 60
+
 		property :id,	Serial
-		property :token, String, :required => true, :unique => true
-		property :name,	String, :required => true
-		property :created_at, Integer, :required => true
-		property :alive_expires_at, Integer, :required => true
-		property :idle_expires_at, Integer, :required => true
-		property :did_expire, Boolean, :required => true, :default => false
-		property :last_update_time, Integer, :required => true
+		property :token, String, required: true, unique: true, index: true
+		property :name,	String, required: true
+		property :created_at, Integer, required: true
+		property :alive_expires_at, Integer, required: true, index: true
+		property :idle_expires_at, Integer, required: true, index: true
+		property :did_expire, Boolean, required: true, default: false, index: true
+		property :last_update_time, Integer, required: true
 		
 		belongs_to :board
 		has 1, :zone
 		
-		# @debug = true
-
 		def initialize name, board, config
 			now = Time.now
 
 			super({
-				:board => board,
-				:token => (0...32).map{ ('a'..'z').to_a[rand(26)] }.join,
-				:name => name,
-				:zone => nil,
-				:created_at => now.to_i,
-				:alive_expires_at => (now + config.liveness_timeout).to_i,
-				:idle_expires_at => (now + config.idle_timeout).to_i,
-				:last_update_time => now
+				board: board,
+				token: (0...32).map{ ('a'..'z').to_a[rand(26)] }.join,
+				name: name,
+				zone: nil,
+				created_at: now.to_i,
+				alive_expires_at: (now + config.liveness_timeout).to_i,
+				idle_expires_at: (now + config.idle_timeout).to_i,
+				last_update_time: now
 			})
 		end
 
@@ -100,6 +81,31 @@ module PoieticGen
 			else
 				return req_name
 			end
+		end
+
+		def self.check_expired_users
+			now = Time.now.to_i
+
+      User.transaction do 
+        last_check = 
+          Meta.first(name: 'user_gc_last') ||
+          Meta.create(name: 'user_gc_last', value: now.to_s) 
+
+			  # remove expired users that have not yet been declared as expired
+			  if (last_check.value.to_i + LEAVE_CHECK_TIMEOUT) < now then
+				  newly_expired_users = 
+				    User.all(did_expire: false,	:alive_expires_at.lte => now) + 
+				    User.all(did_expire: false,	:idle_expires_at.lte => now)
+
+				  newly_expired_users.each do |leaver|
+				    leaver.set_expired
+				    leaver.board.leave leaver
+				    leaver.save
+				  end
+				  last_check.value = now.to_s
+				  last_check.save
+			  end
+      end
 		end
 	end
 
