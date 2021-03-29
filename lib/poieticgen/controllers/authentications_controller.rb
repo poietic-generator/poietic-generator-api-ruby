@@ -11,26 +11,26 @@ module PoieticGen
       app.post('/signup') { RegistrationController.instance(app).signup }
       app.post('/:id') { RegistrationController.instance(app).show }
 
-		  app.post '/user/login' do 
-			  begin
-				  admin_token = settings.manager.admin_join params
-				  redirect '/session/admin?admin_token=%s' % admin_token
+      app.post '/user/login' do
+        # admin_token = settings.manager.admin_join params
+        # redirect '/session/admin?admin_token=%s' % admin_token
+        # FIXME: send user token
 
-			  rescue PoieticGen::AdminSessionNeeded => e
-				  flash[:error] = "Invalid username or password"
-				  redirect '/user/login'
+      rescue PoieticGen::AdminSessionNeeded => _e
+        # FIXME: send 403 error
+        # flash[:error] = 'Invalid username or password'
+        # redirect '/user/login'
 
-			  rescue Exception => e
-				  STDERR.puts e.inspect, e.backtrace
-				  Process.exit! #FIXME: remove in prod mode ? :-)
-			  end
-		  end
+      rescue StandardError => e
+        warn e.inspect, e.backtrace
+        Process.exit! 1
+      end
 
-		  app.get '/user/logout' do
-			  settings.manager.admin_leave params
-			  # redirect '/'
-			  { }
-		  end
+      app.get '/user/logout' do
+        settings.manager.admin_leave params
+        # redirect '/'
+        {}
+      end
     end
   end
 
@@ -42,46 +42,46 @@ module PoieticGen
 
     def logout
     end
-		
-		def admin_join params
-			req_name = params[:user_name]
-			req_password = params[:user_password]
 
-			# FIXME: prevent session from being stolen...
-			STDERR.puts "requesting name=%s" % req_name
+    def admin_join params
+      req_name = params[:user_name]
+      req_password = params[:user_password]
 
-			is_admin = if req_password.nil? or req_name.nil? then false
-			           else req_password == @config.server.admin_password and
-			                req_name == @config.server.admin_username
-			           end
+      # FIXME: prevent session from being stolen...
+      warn "requesting name=%s" % req_name
 
-			raise AdminSessionNeeded, "Invalid parameters." if not is_admin
+      is_admin = if req_password.nil? or req_name.nil? then false
+                 else req_password == @config.server.admin_password and
+                   req_name == @config.server.admin_username
+                 end
 
-			admin = Admin.first(name: req_name)
-			if admin.nil? then
-				admin = Admin.create req_name, @config.user
-			else
-				admin.report_expiration @config.user
-			end
+      raise AdminSessionNeeded, "Invalid parameters." if not is_admin
 
-			return admin.token
-		end
+      admin = Admin.first(name: req_name)
+      if admin.nil?
+        admin = Admin.create req_name, @config.user
+      else
+        admin.report_expiration @config.user
+      end
 
-		def admin_leave params
-			req_token = params[:admin_token]
-			admin = Admin.first(token: req_token)
+      return admin.token
+    end
 
-			unless admin.nil? then
-				admin.set_expired
-			end
-		end
+    def admin_leave params
+      req_token = params[:admin_token]
+      admin = Admin.first(token: req_token)
 
-		def admin? params
-			req_token = params[:admin_token]
-			admin = Admin.first(token: req_token)
+      unless admin.nil?
+        admin.set_expired
+      end
+    end
 
-			return (!admin.nil? and !admin.expired?)
-		end
+    def admin? params
+      req_token = params[:admin_token]
+      admin = Admin.first(token: req_token)
+
+      return (!admin.nil? and !admin.expired?)
+    end
 
   end
 end
