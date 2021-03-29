@@ -18,7 +18,7 @@ module PoieticGen
 
     enable :run
 
-    set :root, File.expand_path(File.join(File.dirname(__FILE__),'..','..'))
+    set :root, File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
     set :environment, :production
 
     set :static, false
@@ -35,8 +35,8 @@ module PoieticGen
         set :config, config
 
         DataMapper.finalize
-        DataMapper::Logger.new(STDERR, :info)
-        # DataMapper::Logger.new(STDERR, :debug)
+        DataMapper::Logger.new($stderr, :info)
+        # DataMapper::Logger.new($stderr, :debug)
         hash = config.database.get_hash
         DataMapper.setup(:default, hash)
 
@@ -48,16 +48,14 @@ module PoieticGen
         set :manager, manager
         set :controllers, {}
         set :port, manager.config.server.port
-
       rescue ::DataObjects::SQLError => e
-        STDERR.puts "ERROR: Unable to connect to database."
-        STDERR.puts "\t Verify your settings in config.ini and try again."
-        STDERR.puts ""
-        STDERR.puts "%s" % e.message
+        warn 'ERROR: Unable to connect to database.'
+        warn "\t Verify your settings in config.ini and try again."
+        warn ''
+        warn format('%s', e.message)
         exit 1
-
       rescue PoieticGen::ConfigManager::ConfigurationError => e
-        STDERR.puts "ERROR: %s" % e.message
+        warn format('ERROR: %s', e.message)
         exit 1
       end
     end
@@ -65,14 +63,10 @@ module PoieticGen
     namespace '/user' do
       register AuthenticationsRoutes
       register RegistrationsRoutes
-
     end
 
     namespace '/spaces' do
       register SpacesRoutes
-
-      # get { SpacesController.index }
-      # post { SpacesController.create }
 
       namespace '/:space_id/sessions' do
         get { SessionsController.index }
@@ -88,7 +82,6 @@ module PoieticGen
       MARK
       text.split(/\n/).map(&:strip).join("\n")
     end
-
   end
 end
 
