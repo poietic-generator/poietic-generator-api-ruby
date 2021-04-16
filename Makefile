@@ -1,34 +1,26 @@
+DEBUG_IMAGE=ruby:3.0
+
 all: build run
 
 build:
-	docker build -t glenux/poietic-generator .
+	docker-compose build
 
 run: clean
-	docker run -d --name poieticgen_lampbox glenux/lampbox || \
-		docker start poieticgen_lampbox || \
-		true
-	docker run --rm \
-		--name poieticgen_app \
-		--link poieticgen_lampbox:db \
-		-v $$(pwd):/poieticgen \
-		-p 8000:8000 \
-		-i -t glenux/poietic-generator
+	docker-compose up -d
+	docker-compose logs
 
 test:
-	docker exec \
-		-i -t \
-		poieticgen_app \
-		/bin/bash || \
-	docker run \
-		--name poieticgen_app \
-		--link poieticgen_lampbox:db \
-		-v $$(pwd):/poieticgen \
-		-p 8000:8000 \
-		-i -t glenux/poietic-generator /bin/bash
+	docker-compose up -d
+	docker-compose exec app bundle exec rake
+
+kill:
+	docker-compose kill
 
 clean:
-	docker rm -f poieticgen_app || true
+	docker-compose rm
 
 distclean:
-	docker rm -f poieticgen_lampbox || true
+	docker-compose down
 
+debug:
+	docker run -v $$(pwd):/app -it $(DEBUG_IMAGE) bash
