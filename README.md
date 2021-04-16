@@ -100,14 +100,13 @@ Contributing
 Credits
 -------
 
-![Gnuside](http://www.gnuside.com/wp-content/themes/gnuside-ignition-0.2-1-g0d0a5ed/images/logo-whitebg-128.png)
+Got questions? Need help? Tweet at [@glenux](http://twitter.com/glenux).
 
-Got questions? Need help? Tweet at [@gnuside](http://twitter.com/gnuside).
+Contributors :
 
-Poietic Generator Reloaded is maintained by [Gnuside, inc](http://gnuside.com)
-
-Original concept & funding by [Olivier Auber](http://twitter.com/OlivierAuber)
-
+ * Original concept & funding by [Olivier Auber](http://twitter.com/OlivierAuber)
+ * Initial ruby development by [GNUSIDE SAS](http://twitter.com/gnuside)
+ * Project is now maintained by [Glenn Y. Rolland](http://github.com/glenux)
 
 License
 -------
