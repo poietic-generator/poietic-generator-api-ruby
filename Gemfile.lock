@@ -1,36 +1,3 @@
-PATH
-  remote: .
-  specs:
-    poieticgen (0.8.0.dev)
-      activesupport (~> 4.2.6)
-      async_sinatra
-      backports (~> 3.6.3)
-      compass
-      data_mapper (~> 1.2.0)
-      dm-aggregates
-      dm-constraints
-      dm-migrations
-      dm-mysql-adapter
-      dm-transactions
-      dm-types
-      dm-validations
-      extlib
-      foreman
-      haml
-      inifile
-      json
-      net-ssh (< 3.0)
-      oily_png
-      rdebug
-      ruby-duration
-      rufus-scheduler
-      sass (~> 3.4.25)
-      sinatra
-      sinatra-contrib
-      sinatra-flash
-      thor
-      unicorn
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -89,6 +56,9 @@ GEM
     dm-mysql-adapter (1.2.0)
       dm-do-adapter (~> 1.2.0)
       do_mysql (~> 0.10.6)
+    dm-postgres-adapter (1.2.0)
+      dm-do-adapter (~> 1.2.0)
+      do_postgres (~> 0.10.6)
     dm-serializer (1.2.2)
       dm-core (~> 1.2.0)
       fastercsv (~> 1.5)
@@ -110,6 +80,8 @@ GEM
     dm-validations (1.2.0)
       dm-core (~> 1.2.0)
     do_mysql (0.10.17)
+      data_objects (= 0.10.17)
+    do_postgres (0.10.17)
       data_objects (= 0.10.17)
     et-orbi (1.2.4)
       tzinfo
@@ -191,13 +163,39 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.5)
+  activesupport (~> 4.2.6)
+  async_sinatra
+  backports (~> 3.6.3)
+  compass
+  data_mapper (~> 1.2.0)
+  dm-aggregates
+  dm-constraints
+  dm-migrations
+  dm-mysql-adapter
+  dm-postgres-adapter
+  dm-transactions
+  dm-types
+  dm-validations
+  extlib
+  foreman
+  haml
+  inifile
   minitest
-  poieticgen!
+  net-ssh (< 3.0)
+  oily_png
   pry
   rake
   rb-readline
+  rdebug
+  ruby-duration
   ruby-prof
+  rufus-scheduler
+  sass (~> 3.4.25)
+  sinatra
+  sinatra-contrib
+  sinatra-flash
+  thor
+  unicorn
 
 BUNDLED WITH
-   1.17.3
+   2.2.3
