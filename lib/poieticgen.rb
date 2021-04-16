@@ -19,21 +19,25 @@ require 'dm-migrations'
 require 'dm-transactions'
 require 'dm-types'
 require 'dm-constraints'
+require 'dm-postgres-adapter'
 require 'data_objects'
+
+require 'thor'
+require 'compass'
+require 'haml'
+require 'json'
+
+# must be loaded before sinatra
+require 'sass'
+require 'pp'
+require 'oily_png'
+require 'duration'
 
 require 'sinatra/base'
 require 'sinatra/contrib/all'
 require 'sinatra/flash'
 
 # require 'rdebug/base'
-require 'thor'
-require 'compass'
-require 'haml'
-require 'json'
-require 'sass'
-require 'pp'
-require 'oily_png'
-require 'duration'
 
 require 'rdebug/base'
 

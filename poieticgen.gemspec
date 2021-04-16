@@ -59,9 +59,10 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "async_sinatra"
   spec.add_runtime_dependency "thor"
   spec.add_runtime_dependency "haml"
-  spec.add_runtime_dependency "sass"
+  spec.add_runtime_dependency "sass", "~> 3.4.25"
   spec.add_runtime_dependency "compass"
   spec.add_runtime_dependency "json"
+  spec.add_runtime_dependency "data_mapper", '~> 1.2.0'
   spec.add_runtime_dependency "dm-migrations"
   spec.add_runtime_dependency "dm-transactions"
   spec.add_runtime_dependency "dm-mysql-adapter"
