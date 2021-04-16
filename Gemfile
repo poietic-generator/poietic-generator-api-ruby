@@ -27,7 +27,7 @@ gem 'extlib'
 gem 'foreman'
 gem 'haml'
 gem 'inifile'
-# gem 'json'
+# gem "json", ">= 2.3.0"
 gem 'net-ssh', '< 3.0' # For Ruby 1.9
 gem 'oily_png'
 gem 'rdebug'
@@ -42,9 +42,8 @@ gem 'unicorn'
 
 group :development do
   gem 'minitest'
-  # gem 'bundler', '~> 1.5'
-  gem 'rake'
   gem 'pry'
+  gem 'rake'
   gem 'rb-readline'
   gem 'ruby-prof'
 end

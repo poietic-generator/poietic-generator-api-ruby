@@ -98,7 +98,7 @@ GEM
     i18n (0.9.5)
       concurrent-ruby (~> 1.0)
     inifile (3.0.0)
-    iso8601 (0.12.3)
+    iso8601 (0.13.0)
     json (1.8.6)
     json_pure (1.8.6)
     kgio (2.11.3)
@@ -129,7 +129,7 @@ GEM
       activesupport (>= 3.0.0)
       i18n
       iso8601
-    ruby-prof (0.18.0)
+    ruby-prof (1.4.3)
     ruby2_keywords (0.0.4)
     rufus-scheduler (3.7.0)
       fugit (~> 1.1, >= 1.1.6)
